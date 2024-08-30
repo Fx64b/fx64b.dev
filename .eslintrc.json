@@ -1,4 +1,14 @@
 {
-    "extends": "next/core-web-vitals"
-  }
-  
+    "plugins": ["unused-imports"],
+    "extends": "next/core-web-vitals",
+    "rules": {
+        "react-hooks/exhaustive-deps": "off",
+        "no-unused-vars": "off",
+        "unused-imports/no-unused-imports": "error",
+        "no-console": "warn",
+        "eqeqeq": "error",
+        "curly": "error",
+        "quotes": ["warn", "single"],
+        "comma-dangle": ["error", "always-multiline"]
+    }
+}
