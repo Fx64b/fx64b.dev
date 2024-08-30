@@ -1,8 +1,11 @@
+import React from 'react'
+
 import { NextUIProvider } from '@nextui-org/react'
 import type { Metadata } from 'next'
 
+import { Analytics } from '@vercel/analytics/react'
+
 import './globals.css'
-import React from 'react'
 
 export const metadata: Metadata = {
     title: 'Fx64b.dev',
@@ -17,7 +20,10 @@ export default function RootLayout({
     return (
         <html lang="en">
             <NextUIProvider>
-                <body>{children}</body>
+                <body>
+                    {children}
+                    <Analytics />
+                </body>
             </NextUIProvider>
         </html>
     )
