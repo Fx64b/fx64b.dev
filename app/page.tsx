@@ -1,4 +1,4 @@
-import { CircularProgress, Link } from '@nextui-org/react'
+import { Spinner, Link } from '@nextui-org/react'
 
 export default function Home() {
     return (
@@ -9,7 +9,7 @@ export default function Home() {
                     <Link href={'https://github.com/Fx64b'}>F_x64b</Link> is
                     working on it.{' '}
                 </b>
-                <CircularProgress size="lg" aria-label="Loading..." />
+                <Spinner size="lg" />
             </div>
         </div>
     )
