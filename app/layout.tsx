@@ -20,7 +20,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <NextUIProvider>
-                <body>
+                <body className={'min-h-fit bg-background dark'}>
                     {children}
                     <Analytics />
                 </body>
