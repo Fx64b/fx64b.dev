@@ -1,35 +1,35 @@
+import { Post } from '@/types/post'
 import fs from 'fs'
-import path from 'path'
 import matter from 'gray-matter'
-import { PostMeta } from '@/types/post'
+import path from 'path'
 
-const postsDirectory = path.join(process.cwd(), 'content');
+const postsDirectory = path.join(process.cwd(), 'content')
 
 export function getPostSlugs(): string[] {
-    return fs.readdirSync(postsDirectory).filter((file) => file.endsWith('.md'));
+    return fs.readdirSync(postsDirectory).filter((file) => file.endsWith('.md'))
 }
 
-export function getPostBySlug(slug: string): PostMeta | null {
-    const realSlug = slug.replace(/\.md$/, '');
-    const fullPath = path.join(postsDirectory, `${realSlug}.md`);
+export function getPostBySlug(slug: string): Post | null {
+    const realSlug = slug.replace(/\.md$/, '')
+    const fullPath = path.join(postsDirectory, `${realSlug}.md`)
 
     if (!fs.existsSync(fullPath)) {
-        return null;
+        return null
     }
 
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    const { data } = matter(fileContents);
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const { data } = matter(fileContents)
 
     return {
-        ...(data as PostMeta),
+        ...(data as Post),
         slug: realSlug,
-    };
+    }
 }
 
-export function getAllPosts(): PostMeta[] {
-    const slugs = getPostSlugs();
+export function getAllPosts(): Post[] {
+    const slugs = getPostSlugs()
     return slugs
         .map((slug) => getPostBySlug(slug))
-        .filter((post): post is PostMeta => post !== null)
-        .sort((a, b) => (a.date > b.date ? -1 : 1));
+        .filter((post): post is Post => post !== null)
+        .sort((a, b) => (a.date > b.date ? -1 : 1))
 }

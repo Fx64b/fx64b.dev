@@ -1,13 +1,15 @@
+import { PostMeta } from '@/types/post'
+
 import { Card, CardBody, CardFooter, CardHeader } from '@nextui-org/card'
 import { Divider } from '@nextui-org/divider'
 import { Image } from '@nextui-org/image'
 import { Link } from '@nextui-org/link'
 import { Spacer } from '@nextui-org/spacer'
-import { PostMeta } from '@/types/post'
+
 import { getAllPosts } from '@/app/lib/posts'
 
 export default function Home() {
-    const posts = getAllPosts();
+    const posts = getAllPosts()
 
     return (
         <div className="flex h-screen w-screen justify-center">
@@ -44,10 +46,10 @@ export default function Home() {
                                 <p>
                                     Lorem ipsum odor amet, consectetuer
                                     adipiscing elit. Habitasse quam venenatis
-                                    tempus hendrerit lorem.
-                                    Lorem ipsum odor amet, consectetuer
-                                    adipiscing elit. Habitasse quam venenatis
-                                    tempus hendrerit lorem.
+                                    tempus hendrerit lorem. Lorem ipsum odor
+                                    amet, consectetuer adipiscing elit.
+                                    Habitasse quam venenatis tempus hendrerit
+                                    lorem.
                                 </p>
                             </CardBody>
                             <CardFooter>
@@ -78,10 +80,10 @@ export default function Home() {
                                 <p>
                                     Lorem ipsum odor amet, consectetuer
                                     adipiscing elit. Habitasse quam venenatis
-                                    tempus hendrerit lorem.
-                                    Lorem ipsum odor amet, consectetuer
-                                    adipiscing elit. Habitasse quam venenatis
-                                    tempus hendrerit lorem.
+                                    tempus hendrerit lorem. Lorem ipsum odor
+                                    amet, consectetuer adipiscing elit.
+                                    Habitasse quam venenatis tempus hendrerit
+                                    lorem.
                                 </p>
                             </CardBody>
                             <CardFooter>
@@ -103,7 +105,9 @@ export default function Home() {
                 <ul>
                     {posts.map((post: PostMeta) => (
                         <li key={post.slug}>
-                            <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+                            <Link href={`/blog/${post.slug}`}>
+                                {post.title}
+                            </Link>
                         </li>
                     ))}
                 </ul>

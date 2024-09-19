@@ -1,3 +1,5 @@
+@import 'prism-themes/themes/prism-one-dark.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -30,4 +32,12 @@ body {
     .text-balance {
         text-wrap: balance;
     }
+}
+
+h1 {
+    @apply text-3xl font-bold;
+}
+
+h2 {
+    @apply text-2xl font-semibold;
 }
