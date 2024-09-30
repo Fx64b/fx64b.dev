@@ -25,5 +25,15 @@
     "bracketSpacing": true,
     "singleQuote": true,
     "jsxSingleQuote": false,
-    "printWidth": 80
+    "printWidth": 80,
+    "overrides": [
+        {
+            "files": "*.md",
+            "options": {
+                "plugins": [],
+                "importOrderSeparation": false,
+                "importOrderSortSpecifiers": false
+            }
+        }
+    ]
 }

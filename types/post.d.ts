@@ -3,7 +3,8 @@ export interface PostMeta {
     date: string
     description: string
     slug: string
-    read: string
+    read?: string
+    author?: string
 }
 
 export interface Post extends PostMeta {

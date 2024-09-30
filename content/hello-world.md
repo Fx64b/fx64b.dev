@@ -5,8 +5,6 @@ description: 'Learn how to create a simple Next.js application using Markdown fo
 read: '10 mins'
 ---
 
-# Hello World: Building Your First Next.js App with Markdown
-
 Welcome to my **first** blog post! In this tutorial, we'll explore how to create a simple Next.js application that uses Markdown files for content. We'll cover setting up the project, parsing Markdown, and displaying it on your site.
 
 ![Blog Post Screenshot](https://nextjs.org/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fv1723581090%2Ffront%2Fnext-conf-2024%2Ftakeover.png&w=1920&q=75)
@@ -180,20 +178,6 @@ import { ReactNode } from 'react'
 
 import { NextUIProvider } from '@nextui-org/react'
 import { Link, Navbar, Text } from '@nextui-org/react'
-
-// app/blog/[slug]/layout.tsx
-
-// app/blog/[slug]/layout.tsx
-
-// app/blog/[slug]/layout.tsx
-
-// app/blog/[slug]/layout.tsx
-
-// app/blog/[slug]/layout.tsx
-
-// app/blog/[slug]/layout.tsx
-
-// app/blog/[slug]/layout.tsx
 
 export default function BlogPostLayout({ children }: { children: ReactNode }) {
     return (
