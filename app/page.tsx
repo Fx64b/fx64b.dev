@@ -12,7 +12,7 @@ export default function Home() {
     const posts = getAllPosts()
 
     return (
-        <div className="flex h-screen w-screen justify-center">
+        <div className="flex w-screen justify-center pb-10">
             <div className="mt-10 flex flex-col items-center gap-y-4 px-6 text-center">
                 <Image
                     className={'w-48 rounded-full border-2 border-white'}

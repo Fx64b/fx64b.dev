@@ -1,3 +1,4 @@
+import { Divider } from '@nextui-org/divider'
 import { Avatar } from '@nextui-org/react'
 
 interface BlogHeaderProps {
@@ -16,10 +17,9 @@ export function BlogHeader({
     readtime,
 }: BlogHeaderProps) {
     return (
-        <div className={'my-2'}>
+        <div className={'mb-8 mt-2 flex flex-col'}>
             <h1>{title}</h1>
-            <span>Readtime: {readtime}</span>
-            <div className={'flex items-center gap-4'}>
+            <div className={'my-4 flex items-center gap-4'}>
                 <Avatar
                     isBordered
                     radius="full"
@@ -29,7 +29,13 @@ export function BlogHeader({
                 />
                 <p className={'text-lg font-semibold'}>{author}</p>
             </div>
-            <p className="text-gray-500">{date}</p>
+            {readtime && (
+                <div>
+                    <b>Readtime:</b> <span>{readtime}</span>
+                </div>
+            )}
+            <p className="my-2 text-gray-500">{date}</p>
+            <Divider />
         </div>
     )
 }
