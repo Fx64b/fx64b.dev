@@ -1,247 +1,293 @@
 ---
-title: 'Building Your First Next.js App with Markdown'
-date: '2024-09-15'
-description: 'Learn how to create a simple Next.js application using Markdown for content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
-read: '10 mins'
-author: 'F_x64b'
+title: 'Hello World!'
+date: '2024-10-16'
+description: 'The first "blog post" on this site. What I used to build this site and why.'
+read: '5 mins'
+author: 'Fx64b'
 ---
 
-Welcome to my **first** blog post! In this tutorial, we'll explore how to create a simple Next.js application that uses Markdown files for content. We'll cover setting up the project, parsing Markdown, and displaying it on your site.
+Hello World! This is the **first** "blog post" on this site.
 
-![Blog Post Screenshot](https://nextjs.org/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fv1723581090%2Ffront%2Fnext-conf-2024%2Ftakeover.png&w=1920&q=75)
+After procrastinating for close to two years, I finally found the time to replace the "Work in Progress" page with a proper site:
 
-## Introduction
+![Old WIP page](/blog/hello-world_wip-page.png)
 
-Combining **Next.js** with **Markdown** allows you to build static sites efficiently. Markdown provides a simple way to write content, and Next.js can render this content seamlessly.
+<br>
 
-## Prerequisites
+## What I used to build this site
 
--   Node.js (v14 or later)
--   Basic knowledge of React and Next.js
--   Familiarity with TypeScript is a plus
+-   **[Next.js](https://nextjs.org/)** for static and dynamic pages.
+-   **[Gray Matter](https://github.com/jonschlinkert/gray-matter)** &amp; **[React Markdown](https://github.com/remarkjs/react-markdown)** for markdown to react conversion
+-   **[Tailwind CSS](https://tailwindcss.com/)** & **[NextUI](https://nextui.org/)** for components and additional styling.
+-   **[Prism Themes](https://prismjs.com/)** & **[React Syntax Highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter)** for code syntax highlighting.
+-   **[Vercel](https://vercel.com/)** for hosting, analytics and deployment.
 
-## Setting Up the Project
+<br>
 
-First, let's create a new Next.js project with TypeScript and the App Router enabled:
+**...**
 
-```bash
-npx create-next-app@latest my-nextjs-app --typescript --use-app
-cd my-nextjs-app
-```
+<br>
 
-## Installing Dependencies
+Well you might ask yourself now, _"Why not use plain HTML and CSS and just build a static site?"_
 
-Install the necessary packages to handle Markdown and front matter:
+<br>
 
-```bash
-npm install gray-matter remark remark-html
-```
+Great question! It's almost like asking a chef why he didn't just microwave a frozen pizza for dinner.
 
--   **gray-matter**: Parses YAML front matter from Markdown files.
--   **remark** and **remark-html**: Convert Markdown content into HTML.
+Sure, it's quick and gets the job done but where is the fun in that?
 
-## Creating a Markdown File
+<br>
 
-Create a `content` directory in the root of your project and add a `hello-world.md` file:
+And nothing screams "I'm serious about web development" like having a CI/CD pipeline and automated versioning set up for a blog that I'll probably update twice a year.
 
-And here's how you can create a basic React component:
+<br>
 
-```jsx
-import React from 'react'
+**So why all this?**
 
-const HelloWorld = () => {
-    return <h1>Hello, World!</h1>
-}
+1. --Because I can.--
+2. Because, honestly, I really wanted to experiment with these technologies, but I don't really have any ideas for actual projects to use them on.
 
-export default HelloWorld
-```
+## Building the site
 
-## Adding Images
+The most interesting and _difficult_ part was definitely the `MarkdownRenderer.tsx`, specifically the codeblock and syntax highlighting part.
 
-You can include images in your Markdown content:
+After several hours of googling and getting nonsense answers from ChatGPT I ended up with this _not so clean_ solution:
 
-![Blog Post Screenshot](https://nextjs.org/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fv1723581090%2Ffront%2Fnext-conf-2024%2Ftakeover.png&w=1920&q=75)
-
-Make sure the image path is correct relative to your Markdown file.
-
-## Parsing Markdown Content
-
-We'll create utility functions to read and parse the Markdown files.
-
-```typescript
-// lib/posts.ts
-import fs from 'fs'
-import matter from 'gray-matter'
-import path from 'path'
-
-export interface PostData {
-    title: string
-    date: string
-    description: string
+```tsx
+// components/MarkdownRenderer.tsx
+// ...
+interface MarkdownRendererProps {
     content: string
-    slug: string
 }
 
-const postsDirectory = path.join(process.cwd(), 'content')
-
-export function getPostSlugs(): string[] {
-    return fs.readdirSync(postsDirectory).filter((file) => file.endsWith('.md'))
+interface CodeBlockProps {
+    inline?: boolean
+    className?: string
+    children?: React.ReactNode
+    [key: string]: any
 }
 
-export function getPostBySlug(slug: string): PostData {
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+    const CodeBlock: React.FC<CodeBlockProps> = ({
+        inline,
+        className,
+        children,
+        ...props
+    }) => {
+        const [isCopied, setIsCopied] = useState(false)
+        const match = /language-(\w+)/.exec(className || '')
+        const language = match?.[1]
+
+        const code = String(children).replace(/\n$/, '')
+
+        return !inline && language ? (
+            <div style={{ position: 'relative' }}>
+                <CopyToClipboard
+                    text={code}
+                    onCopy={() => {
+                        setIsCopied(true)
+                        setTimeout(() => setIsCopied(false), 2000) // Reset after 2 seconds
+                    }}
+                >
+                    <button
+                        style={{
+                            position: 'absolute',
+                            top: '1.1rem',
+                            right: '1rem',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: isCopied ? '#006fee' : '#fff',
+                        }}
+                        aria-label="Copy code to clipboard"
+                    >
+                        {isCopied ? (
+                            <CheckIcon
+                                style={{ width: '1.25rem', height: '1.25rem' }}
+                            />
+                        ) : (
+                            <ClipboardIcon
+                                style={{ width: '1.25rem', height: '1.25rem' }}
+                            />
+                        )}
+                    </button>
+                </CopyToClipboard>
+                <SyntaxHighlighter
+                    style={oneDark}
+                    language={language}
+                    PreTag="div"
+                    {...props}
+                >
+                    {code}
+                </SyntaxHighlighter>
+            </div>
+        ) : (
+            <span {...props}>{children}</span>
+        )
+    }
+
+    return (
+        <ReactMarkdown
+            rehypePlugins={[rehypeRaw]}
+            components={{
+                code: CodeBlock as any,
+                hr: () => <Divider />,
+                a: ({ href, children }) => (
+                    <Link href={href!} isExternal>
+                        {children}
+                    </Link>
+                ),
+            }}
+        >
+            {content}
+        </ReactMarkdown>
+    )
+}
+```
+
+<br>
+
+### Here is how it works
+
+1. **`CodeBlock` Subcomponent**
+
+```tsx
+// components/MarkdownRenderer.tsx
+const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, children, ...props }) => {
+    const [isCopied, setIsCopied] = useState(false)
+    const match = /language-(\w+)/.exec(className || '')
+    const language = match?.[1]
+
+    const code = String(children).replace(/\n$/, '');
+    ...
+```
+
+-   We start of by setting the `useState()` for the copy button.
+-   Then we extract the language. During the markdown processing a class that looks like this is added to the codeblock to later identify the correct language: `language-tsx`
+-   Then the children prop (which contains all the code) is converted into a string and all trailing newline (`\n`)
+
+The Copy button isn't too interesting, I just use the `react-copy-to-clipboard` package.
+
+Syntax highlighting is done by the `<SyntaxHighlighter>` component from `react-syntax-highlighter` with this relatively simple code block:
+
+```tsx
+// components/MarkdownRenderer.tsx
+<SyntaxHighlighter style={oneDark} language={language} PreTag="div" {...props}>
+    {code}
+</SyntaxHighlighter>
+```
+
+<br>
+
+If the code is inline (for example an `npm install` command) we just use a basic span element which results in a clean look:
+
+```tsx
+// components/MarkdownRenderer.tsx
+) : (
+    <span {...props}>{children}</span>
+)
+```
+
+and looks like this:
+
+```bash
+pnpm install is-odd@latest
+```
+
+<br>
+
+2. **Hot-gluing it all together**
+
+Now we take these two components and patch them together like this:
+
+```tsx
+// components/MarkdownRenderer.tsx
+return (
+    <ReactMarkdown
+        rehypePlugins={[rehypeRaw]}
+        components={{
+            code: CodeBlock as any,
+            hr: () => <Divider />,
+            a: ({ href, children }) => (
+                <Link href={href!} isExternal>
+                    {children}
+                </Link>
+            ),
+        }}
+    >
+        {content}
+    </ReactMarkdown>
+)
+```
+
+-   `rehypeRaw` is used that stuff like `<br>` tags are not rendered as text and that the whole content looks halfway decent
+-   In the `components` attribute I specified the html elements I want to override with my own elements, specifically the `CodeBlock` component
+
+<br>
+<br>
+
+### Handling of Markdown files
+
+Posts are stored as simple markdown files in the `/content` directory.
+
+The filename also acts as the slug in the url `/content/hello-world.md` -> `/blog/hello-world`
+
+Here is how postdata and content is fetched:
+
+```ts
+// app/lib/posts.ts
+export function getPostBySlug(slug: string): Post | null {
     const realSlug = slug.replace(/\.md$/, '')
     const fullPath = path.join(postsDirectory, `${realSlug}.md`)
-    const fileContents = fs.readFileSync(fullPath, 'utf8')
 
-    const { data, content } = matter(fileContents)
+    if (!fs.existsSync(fullPath)) {
+        return null
+    }
+
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const { data } = matter(fileContents)
 
     return {
-        ...(data as Omit<PostData, 'content' | 'slug'>),
-        content,
+        ...(data as Post),
         slug: realSlug,
     }
 }
 ```
 
-## Rendering Markdown in Next.js
+This function additionally has a replace for `.md` in case the function is called by a function that gets all filenames from the content directory like this:
 
-In your `[slug]/page.tsx`, use the `remark` library to convert Markdown content to HTML.
-
-```tsx
-// app/blog/[slug]/page.tsx
-import { remark } from 'remark'
-import html from 'remark-html'
-
-import { getPostBySlug, getPostSlugs } from '../../lib/posts'
-
-interface Props {
-    params: {
-        slug: string
-    }
-}
-
-export async function generateStaticParams() {
-    const slugs = getPostSlugs().map((slug) => slug.replace(/\.md$/, ''))
-    return slugs.map((slug) => ({
-        slug,
-    }))
-}
-
-export default async function PostPage({ params }: Props) {
-    const { slug } = params
-    const post = getPostBySlug(slug)
-
-    const processedContent = await remark().use(html).process(post.content)
-    const contentHtml = processedContent.toString()
-
-    return (
-        <article className="prose mx-auto">
-            <h1>{post.title}</h1>
-            <p className="text-gray-500">{post.date}</p>
-            <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
-        </article>
-    )
+```ts
+// app/lib/posts.ts
+export function getPostSlugs(): string[] {
+    return fs.readdirSync(postsDirectory).filter((file) => file.endsWith('.md'))
 }
 ```
 
-## Styling with Tailwind CSS
+and then:
 
-Ensure Tailwind CSS is set up in your project. Use the `prose` class from the Tailwind CSS Typography plugin to style your content.
-
-```bash
-npm install @tailwindcss/typography
-```
-
-Update your `tailwind.config.js`:
-
-```javascript
-module.exports = {
-    content: [
-        './app/**/*.{js,ts,jsx,tsx}',
-        './components/**/*.{js,ts,jsx,tsx}',
-    ],
-    theme: {
-        extend: {},
-    },
-    plugins: [require('@tailwindcss/typography')],
+```ts
+// app/lib/posts.ts
+export function getAllPosts(): Post[] {
+    const slugs = getPostSlugs()
+    return slugs
+        .map((slug) => getPostBySlug(slug))
+        .filter((post): post is Post => post !== null)
+        .sort((a, b) => (a.date > b.date ? -1 : 1))
 }
 ```
 
-## Adding a Layout
-
-Create a `layout.tsx` in the `/blog/[slug]` directory to provide a consistent layout for your blog posts.
-
-```tsx
-// app/blog/[slug]/layout.tsx
-'use client'
-
-import { ReactNode } from 'react'
-
-import { NextUIProvider } from '@nextui-org/react'
-import { Link, Navbar, Text } from '@nextui-org/react'
-
-export default function BlogPostLayout({ children }: { children: ReactNode }) {
-    return (
-        <NextUIProvider>
-            <div className="flex min-h-screen flex-col">
-                {/* Header */}
-                <Navbar isBordered variant="sticky">
-                    <Navbar.Brand>
-                        <Link href="/">
-                            <Text b color="inherit" hideIn="xs">
-                                My Blog
-                            </Text>
-                        </Link>
-                    </Navbar.Brand>
-                    <Navbar.Content>
-                        <Navbar.Link href="/blog">Blog</Navbar.Link>
-                        <Navbar.Link href="/about">About</Navbar.Link>
-                    </Navbar.Content>
-                </Navbar>
-
-                {/* Main Content */}
-                <main className="container mx-auto flex-grow px-4 py-8">
-                    {children}
-                </main>
-
-                {/* Footer */}
-                <footer className="bg-gray-100 py-4">
-                    <div className="container mx-auto text-center">
-                        <Text size={14} color="gray">
-                            &copy; {new Date().getFullYear()} My Blog. All
-                            rights reserved.
-                        </Text>
-                    </div>
-                </footer>
-            </div>
-        </NextUIProvider>
-    )
-}
-```
-
-## Running the Application
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-Visit `http://localhost:3000/blog/hello-world` to see your blog post rendered with the new layout.
-
-![Blog Post Screenshot](https://nextjs.org/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fv1723581090%2Ffront%2Fnext-conf-2024%2Ftakeover.png&w=1920&q=75)
+<br>
+<br>
 
 ## Conclusion
 
-You've successfully built a simple Next.js application that renders Markdown content. This setup is scalable and can be extended to create a full-featured blog or documentation site.
+There is much more code I could cover here, but I'm not gonna do that.
+Check out the code yourself if you want to: [Fx64b/fx64b.dev](https://github.com/Fx64b/fx64b.dev).
 
-## Next Steps
+<br>
 
--   **Enhance Styling**: Customize the design using Tailwind CSS and NextUI components.
--   **Add Features**: Implement pagination, search functionality, or categories.
--   **SEO Optimization**: Use `next/head` to add meta tags for better SEO.
--   **Deploy**: Consider deploying your app to platforms like Vercel.
+If you have some spare time to waist you can help me clean up the code by creating a pull request.
 
----
+<br>
 
-Feel free to modify and expand upon this example to suit your specific needs!
+Feel free to copy the code from this site. If you for some reason decide to copy content from my blog posts and publish them yourself, please add a reference to the original post.
