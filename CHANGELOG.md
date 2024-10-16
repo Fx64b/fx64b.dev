@@ -1,0 +1,24 @@
+# 1.0.0 (2024-10-16)
+
+
+### Bug Fixes
+
+* **blog:** content ([e3752de](https://github.com/Fx64b/fx64b.dev/commit/e3752dee04621352b7d9bb42fd9247f60f713e1f))
+* **blog:** span elements not correctly style in lists ([6dd92a3](https://github.com/Fx64b/fx64b.dev/commit/6dd92a31acab80d5fb15f020db74be2f029d56a6))
+* release-url ([96aff8a](https://github.com/Fx64b/fx64b.dev/commit/96aff8a93ffe8ef847099a512b986baae7b5c5c2))
+* title ([1400513](https://github.com/Fx64b/fx64b.dev/commit/140051325f191da56513665fb2333958c01f123a))
+
+
+### Features
+
+* add backgroundcolor, logo and basic content ([9ffb92c](https://github.com/Fx64b/fx64b.dev/commit/9ffb92cd46fa39dc723dfbd8496d3e9015714a61))
+* add footer, styling and layout improvements ([5d7f931](https://github.com/Fx64b/fx64b.dev/commit/5d7f931afec2934d67bd68ac45c9b5d71e092f5a))
+* **blog:** add image and content for hell-world post ([53fc256](https://github.com/Fx64b/fx64b.dev/commit/53fc256b4c5e81b9d5276c988653c053e3d2a21d))
+* **blog:** add simple way to render markdown files for my blog ([97df2e1](https://github.com/Fx64b/fx64b.dev/commit/97df2e14c10dd5bdeb41d84a1c6b4e6d92da3e2d))
+* **blog:** Improve rendering, add code block and blog header ([ccae7bc](https://github.com/Fx64b/fx64b.dev/commit/ccae7bc9c895f911ab8e0a91751d0140bbfce2ee))
+* **blog:** layout improvements ([24b9d65](https://github.com/Fx64b/fx64b.dev/commit/24b9d6564919233880f2c5eed8f4048fc2df6e8f))
+* create next-app with tailwind and add basic work in progress site ([c1d47f8](https://github.com/Fx64b/fx64b.dev/commit/c1d47f86ed5f580d1a4f07d6b1ae5ffc2784621e))
+* improve projects card and blog post page ([0c475a9](https://github.com/Fx64b/fx64b.dev/commit/0c475a9b081f6fda4e63d48b6b3d843c8dec9610))
+* **projects:** improve projects display ([67fd74c](https://github.com/Fx64b/fx64b.dev/commit/67fd74c197dd99d755d2a0e099a5ecce874c030a))
+* update favicon ([cb2d6b4](https://github.com/Fx64b/fx64b.dev/commit/cb2d6b4e19127558d18585719c222d7490d49308))
+* update to next 14 and app router ([37c1088](https://github.com/Fx64b/fx64b.dev/commit/37c1088bcb67b3a5d864184916f7c2aa14c0cc00))
