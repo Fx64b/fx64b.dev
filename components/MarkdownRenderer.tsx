@@ -9,6 +9,8 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
+import { Divider } from '@nextui-org/divider'
+
 interface MarkdownRendererProps {
     content: string
 }
@@ -84,6 +86,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             rehypePlugins={[rehypeRaw]}
             components={{
                 code: CodeBlock as any,
+                hr: () => <Divider />,
             }}
         >
             {content}

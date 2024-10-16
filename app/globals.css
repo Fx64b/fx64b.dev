@@ -5,17 +5,9 @@
 @tailwind utilities;
 
 :root {
-    --foreground-rgb: 0, 0, 0;
-    --background-start-rgb: 214, 219, 220;
-    --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --foreground-rgb: 255, 255, 255;
-        --background-start-rgb: 0, 0, 0;
-        --background-end-rgb: 0, 0, 0;
-    }
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
 }
 
 body {
@@ -34,10 +26,33 @@ body {
     }
 }
 
-h1 {
+.blog h1,
+.blog h2 {
+    @apply mt-10;
+}
+
+.blog h3,
+.blog img:not([alt='avatar']),
+.blog pre {
+    @apply mb-2 mt-6;
+}
+
+.blog h1 {
     @apply text-3xl font-bold;
 }
 
-h2 {
+.blog h2 {
     @apply text-2xl font-semibold;
+}
+
+.blog h3 {
+    @apply text-xl;
+}
+
+.blog hr {
+    @apply my-6;
+}
+
+.blog ul {
+    @apply ml-5 list-disc;
 }

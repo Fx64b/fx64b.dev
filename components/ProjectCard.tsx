@@ -10,6 +10,8 @@ import {
 } from '@nextui-org/react'
 import Image from 'next/image'
 
+import { Badge } from '@/components/Badge'
+
 interface ProjectCardProps {
     project: Project
 }
@@ -27,10 +29,13 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                         height={40}
                     />
                     <p className={'text-md'}>{project.title}</p>
+                    <Badge status={project.status} />
                 </CardHeader>
                 <Divider />
                 <CardBody className={'flex gap-4'}>
-                    <p>{project.description}</p>
+                    <p className={'whitespace-pre-wrap'}>
+                        {project.description}
+                    </p>
                 </CardBody>
                 <CardFooter>
                     <Link isExternal showAnchorIcon href={project.githubLink}>

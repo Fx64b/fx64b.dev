@@ -1,20 +1,14 @@
 import projectData from '@/data/projectData'
-import { PostMeta } from '@/types/post'
 
 import { Image } from '@nextui-org/image'
-import { Link } from '@nextui-org/link'
 import { Spacer } from '@nextui-org/spacer'
-
-import { getAllPosts } from '@/app/lib/posts'
 
 import ProjectCard from '@/components/ProjectCard'
 
 export default function Home() {
-    const posts = getAllPosts()
-
     return (
         <div className="flex w-screen justify-center pb-10">
-            <div className="mt-10 flex flex-col items-center gap-y-4 px-6 text-center">
+            <div className="mt-10 flex flex-col items-center gap-y-3 px-6 text-center">
                 <Image
                     className={'w-48 rounded-full border-2 border-white'}
                     src="/logo.svg"
@@ -24,7 +18,13 @@ export default function Home() {
                 />
                 <h1 className={'text-2xl font-bold'}>Fx64b</h1>
                 <p>
-                    Hey! I&apos;m F_x64b, a software engineer from Switzerland.
+                    Hey! I&apos;m Fabio aka Fx64b, a software engineer from Switzerland.
+                </p>
+                <p>
+                    I like working with React / Next.js, TypeScript, Tailwind, Java and Angular.
+                </p>
+                <p>
+                    I&apos;m currently learning Go and Cybersecurity fundamentals.
                 </p>
                 <Spacer y={2} />
 
@@ -34,19 +34,6 @@ export default function Home() {
                         <ProjectCard key={index} project={project} />
                     ))}
                 </div>
-
-                <Spacer y={2} />
-
-                <h2 className={'self-start text-xl'}>Blog</h2>
-                <ul>
-                    {posts.map((post: PostMeta) => (
-                        <li key={post.slug}>
-                            <Link href={`/blog/${post.slug}`}>
-                                {post.title}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
             </div>
         </div>
     )

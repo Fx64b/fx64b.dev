@@ -1,8 +1,9 @@
 ---
-title: 'Hello World: Building Your First Next.js App with Markdown'
+title: 'Building Your First Next.js App with Markdown'
 date: '2024-09-15'
-description: 'Learn how to create a simple Next.js application using Markdown for content.'
+description: 'Learn how to create a simple Next.js application using Markdown for content. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 read: '10 mins'
+author: 'F_x64b'
 ---
 
 Welcome to my **first** blog post! In this tutorial, we'll explore how to create a simple Next.js application that uses Markdown files for content. We'll cover setting up the project, parsing Markdown, and displaying it on your site.

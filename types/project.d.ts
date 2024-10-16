@@ -4,4 +4,5 @@ export interface Project {
     logo: string
     link: string
     githubLink: string
+    status: 'Finished' | 'In Progress' | 'Planned' | 'Abandoned' | 'On Hold'
 }
