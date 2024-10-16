@@ -17,7 +17,7 @@ export function BlogHeader({
     readtime,
 }: BlogHeaderProps) {
     return (
-        <div className={'mb-4 mt-2 flex flex-col'}>
+        <div className={'mb-4 mt-2 flex flex-col md:items-center'}>
             <h1>{title}</h1>
             <div className={'my-4 flex items-center gap-4'}>
                 <Avatar

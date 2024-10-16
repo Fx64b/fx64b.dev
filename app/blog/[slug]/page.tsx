@@ -34,7 +34,7 @@ export default async function PostPage({ params }: Props) {
     const { content } = matter(fileContents)
 
     return (
-        <article className="prose mx-auto">
+        <article className="prose mx-auto md:max-w-screen-lg">
             <BlogHeader
                 author={'F_x64b'}
                 readtime={post.read}

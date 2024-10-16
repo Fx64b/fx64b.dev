@@ -9,7 +9,7 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-import { Divider } from '@nextui-org/divider'
+import { Divider, Link } from '@nextui-org/react'
 
 interface MarkdownRendererProps {
     content: string
@@ -87,6 +87,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             components={{
                 code: CodeBlock as any,
                 hr: () => <Divider />,
+                a: ({ href, children }) => (
+                    <Link href={href!} isExternal>
+                        {children}
+                    </Link>
+                ),
             }}
         >
             {content}
