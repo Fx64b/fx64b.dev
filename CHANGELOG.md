@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/Fx64b/fx64b.dev/compare/v1.3.0...v1.3.1) (2024-10-17)
+
+
+### Bug Fixes
+
+* **metadata:** incorrectly fetching slug from params ([a5f199f](https://github.com/Fx64b/fx64b.dev/commit/a5f199f86559d411ace260abde1d48aaa95801c3))
+
 # [1.3.0](https://github.com/Fx64b/fx64b.dev/compare/v1.2.0...v1.3.0) (2024-10-17)
 
 
