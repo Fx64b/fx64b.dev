@@ -3,6 +3,8 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import path from 'path'
 
+import { Metadata } from 'next'
+
 import { BlogHeader } from '@/components/BlogHeader'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 
@@ -11,6 +13,40 @@ import { getPostBySlug, getPostSlugs } from '../../lib/posts'
 interface Props {
     params: {
         slug: string
+    }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const slug: string = params.slug[0]
+    const post = getPostBySlug(slug)
+
+    if (!post) {
+        return {
+            title: 'Post not found',
+            description: 'The requested Post could not be found.',
+        }
+    }
+
+    return {
+        title: `${post.title} - by ${post.author}`,
+        description: post.description,
+        openGraph: {
+            title: post.title,
+            description: post.description,
+            images: [
+                {
+                    url: 'https://fx64b.dev/logo.svg',
+                    alt: post.title,
+                },
+            ],
+            type: 'article',
+        },
+        twitter: {
+            card: 'summary',
+            title: post.title,
+            description: post.description,
+            images: ['https://fx64b.dev/logo.svg'],
+        },
     }
 }
 
