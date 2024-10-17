@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Fx64b/fx64b.dev/compare/v1.1.0...v1.2.0) (2024-10-17)
+
+
+### Features
+
+* **Footer:** display current project version ([993d70b](https://github.com/Fx64b/fx64b.dev/commit/993d70bfbb9eeb8b2443bb6e9889f2df4e507acf))
+
 # [1.1.0](https://github.com/Fx64b/fx64b.dev/compare/v1.0.1...v1.1.0) (2024-10-17)
 
 
