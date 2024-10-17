@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/Fx64b/fx64b.dev/compare/v1.0.0...v1.0.1) (2024-10-17)
+
+
+### Bug Fixes
+
+* cleanup project and configs ([0e5fee0](https://github.com/Fx64b/fx64b.dev/commit/0e5fee0dd6c0e847f5be9ae7e19ebf2d12649769))
+
 # 1.0.0 (2024-10-16)
 
 
