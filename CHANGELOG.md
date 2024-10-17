@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Fx64b/fx64b.dev/compare/v1.0.1...v1.1.0) (2024-10-17)
+
+
+### Features
+
+* Update README.md ([0a77725](https://github.com/Fx64b/fx64b.dev/commit/0a7772558aa7a04d79124ac8a383ad0af23b2c94))
+
 ## [1.0.1](https://github.com/Fx64b/fx64b.dev/compare/v1.0.0...v1.0.1) (2024-10-17)
 
 
