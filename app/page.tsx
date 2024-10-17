@@ -2,8 +2,43 @@ import projectData from '@/data/projectData'
 
 import { Image } from '@nextui-org/image'
 import { Spacer } from '@nextui-org/spacer'
+import { Metadata } from 'next'
 
 import ProjectCard from '@/components/ProjectCard'
+
+export async function generateMetadata(): Promise<Metadata> {
+    return {
+        title: 'Fx64b.dev',
+        description:
+            'Personal website of Fx64b where you can find information about my latest projects and blog posts.',
+        openGraph: {
+            title: 'Fx64b.dev',
+            description:
+                'Personal website of Fx64b where you can find information about my latest projects and blog posts.',
+            url: 'https://fx64b.dev',
+            images: [
+                {
+                    url: 'https://fx64b.dev/logo.svg',
+                    width: 200,
+                    height: 200,
+                    alt: 'Fx64b.dev Logo',
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary',
+            title: 'Fx64b.dev',
+            description:
+                'Personal website of Fx64b where you can find information about my latest projects and blog posts.',
+            images: [
+                {
+                    url: 'https://fx64b.dev/logo.svg',
+                    alt: 'Fx64b.dev Logo',
+                },
+            ],
+        },
+    }
+}
 
 export default function Home() {
     return (
