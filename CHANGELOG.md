@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Fx64b/fx64b.dev/compare/v1.2.0...v1.3.0) (2024-10-17)
+
+
+### Features
+
+* **metadata:** add metadata and opengraph ([e753a99](https://github.com/Fx64b/fx64b.dev/commit/e753a99ec3b52a806b3dce2ddbc9bb3803fca6a4))
+
 # [1.2.0](https://github.com/Fx64b/fx64b.dev/compare/v1.1.0...v1.2.0) (2024-10-17)
 
 
