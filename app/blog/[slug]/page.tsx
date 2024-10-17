@@ -17,7 +17,7 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const slug: string = params.slug[0]
+    const slug: string = params.slug
     const post = getPostBySlug(slug)
 
     if (!post) {
