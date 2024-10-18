@@ -17,7 +17,7 @@ const projectData: Project[] = [
         logo: '/skool-focus-logo.png',
         link: 'https://chromewebstore.google.com/detail/skool-focus/nchfffdkbhafombnfcpladflclakmdmo',
         githubLink: 'https://github.com/fx64b/skool-focus-extension',
-        status: 'On Hold',
+        status: 'Finished',
     },
 ]
 
