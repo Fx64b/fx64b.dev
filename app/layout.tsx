@@ -23,7 +23,9 @@ export default function RootLayout({
     return (
         <html lang="en">
             <NextUIProvider>
-                <body className={'min-h-fit bg-background dark'}>
+                <body
+                    className={'min-h-fit overflow-x-hidden bg-background dark'}
+                >
                     <Header />
                     {children}
                     <Footer />
