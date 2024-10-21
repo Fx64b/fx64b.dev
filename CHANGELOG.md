@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/Fx64b/fx64b.dev/compare/v1.3.2...v1.3.3) (2024-10-21)
+
+
+### Bug Fixes
+
+* spelling ([d8ade57](https://github.com/Fx64b/fx64b.dev/commit/d8ade570f9fc9b3a2e1c1f163168ea7762bd1878))
+
 ## [1.3.2](https://github.com/Fx64b/fx64b.dev/compare/v1.3.1...v1.3.2) (2024-10-21)
 
 
