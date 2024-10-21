@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/Fx64b/fx64b.dev/compare/v1.3.1...v1.3.2) (2024-10-21)
+
+
+### Bug Fixes
+
+* overflow issue in chromium based browsers on desktop ([64d5917](https://github.com/Fx64b/fx64b.dev/commit/64d5917a0776423f605aac3f037f096e1cc7fb52))
+
 ## [1.3.1](https://github.com/Fx64b/fx64b.dev/compare/v1.3.0...v1.3.1) (2024-10-17)
 
 
