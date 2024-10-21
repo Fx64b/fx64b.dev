@@ -162,7 +162,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, children, ...p
     ...
 ```
 
--   We start of by setting the `useState()` for the copy button.
+-   We start off by setting the `useState()` for the copy button.
 -   Then we extract the language. During the markdown processing a class that looks like this is added to the codeblock to later identify the correct language: `language-tsx`
 -   Then the children prop (which contains all the code) is converted into a string and all trailing newline (`\n`)
 
@@ -220,7 +220,7 @@ return (
 )
 ```
 
--   `rehypeRaw` is used that stuff like `<br>` tags are not rendered as text and that the whole content looks halfway decent
+-   `rehypeRaw` is used that things like `<br>` tags are not rendered as text so that the content renders halfway decently.
 -   In the `components` attribute I specified the html elements I want to override with my own elements, specifically the `CodeBlock` component
 
 <br>
@@ -286,7 +286,7 @@ Check out the code yourself if you want to: [Fx64b/fx64b.dev](https://github.com
 
 <br>
 
-If you have some spare time to waist you can help me clean up the code by creating a pull request.
+If you have some spare time to waste you can help me clean up the code by creating a pull request.
 
 <br>
 
