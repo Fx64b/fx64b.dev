@@ -11,12 +11,13 @@ import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { getPostBySlug, getPostSlugs } from '../../lib/posts'
 
 interface Props {
-    params: {
+    params: Promise<{
         slug: string
-    }
+    }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+    const params = await props.params
     const slug: string = params.slug
     const post = getPostBySlug(slug)
 
@@ -57,7 +58,8 @@ export async function generateStaticParams() {
     }))
 }
 
-export default async function PostPage({ params }: Props) {
+export default async function PostPage(props: Props) {
+    const params = await props.params
     const { slug } = params
     const post: Post | null = getPostBySlug(slug)
 
