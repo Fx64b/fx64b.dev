@@ -2,13 +2,22 @@ import { Project } from '@/types/project'
 
 const projectData: Project[] = [
     {
+        title: 'video-archiver',
+        description:
+            'A YouTube video downloader and archiver with various tools to manage, categorize, convert and manipulate videos..',
+        logo: '/va-logo.png',
+        link: 'https://github.com/Fx64b/video-archiver',
+        githubLink: 'https://github.com/Fx64b/video-archiver',
+        status: 'In Progress',
+    },
+    {
         title: 'This Portfolio',
         description:
             'Yes, it is open source! \nYou can find the source code on GitHub. This portfolio is built using Next.js, Tailwind CSS, and NextUI.',
         logo: '/logo.svg',
         link: 'https://github.com/Fx64b/fx64b.dev',
         githubLink: 'https://github.com/Fx64b/fx64b.dev',
-        status: 'In Progress',
+        status: 'Finished',
     },
     {
         title: 'Skool Focus',
