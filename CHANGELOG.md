@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/Fx64b/fx64b.dev/compare/v1.3.3...v2.0.0) (2024-11-10)
+
+
+### Features
+
+* v2.0 release ([f972c4f](https://github.com/Fx64b/fx64b.dev/commit/f972c4fab0d2435f70f6a98a35612d13bca62635))
+
+
+### BREAKING CHANGES
+
+* updated to next 15 (I have no clue how to trigger a major release)
+
 ## [1.3.3](https://github.com/Fx64b/fx64b.dev/compare/v1.3.2...v1.3.3) (2024-10-21)
 
 
