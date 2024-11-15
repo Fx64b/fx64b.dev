@@ -16,7 +16,7 @@
     "@nextui-org/react": "^2.4.8",
     "@vercel/analytics": "^1.4.0",
     "@vercel/speed-insights": "^1.1.0",
-    "framer-motion": "^11.11.15",
+    "framer-motion": "^11.11.17",
     "gray-matter": "^4.0.3",
     "next": "15.0.1",
     "prism-themes": "^1.9.0",
