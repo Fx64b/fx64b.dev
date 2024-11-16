@@ -10,7 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.15.0",
     "@heroicons/react": "^2.1.5",
     "@nextui-org/react": "^2.4.8",
