@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/Fx64b/fx64b.dev/compare/v2.0.0...v2.1.0) (2024-11-10)
+
+
+### Features
+
+* **projects:** add video-archiver project ([b765b94](https://github.com/Fx64b/fx64b.dev/commit/b765b9458ac77d420a5554c1f3738973bbf7ee3c))
+
 # [2.0.0](https://github.com/Fx64b/fx64b.dev/compare/v1.3.3...v2.0.0) (2024-11-10)
 
 
