@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/Fx64b/fx64b.dev/compare/v2.1.0...v2.2.0) (2024-12-02)
+
+
+### Features
+
+* add sitemap generation ([534080f](https://github.com/Fx64b/fx64b.dev/commit/534080fc077ea7492d53e47492bc89f396416a42))
+
 # [2.1.0](https://github.com/Fx64b/fx64b.dev/compare/v2.0.0...v2.1.0) (2024-11-10)
 
 
