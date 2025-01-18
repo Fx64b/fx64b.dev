@@ -6,7 +6,7 @@ import { Character, Position, Room } from './types'
 
 
 export const FOOTSTEP_FADE_DURATION = 3000
-export const FOOTSTEP_SPACING = 30
+export const FOOTSTEP_SPACING = 300
 export const FOOTPRINT_SCALE = 0.02;
 
 export const SVG_PATHS = {
@@ -21,35 +21,33 @@ export const TIME_SCALE = 0.25  // hours per second of real time
 export const STEP_SIZE = 1
 export const GRID_SIZE = 10
 export const WANDER_RADIUS = 30
-export const PATH_RECALC_THRESHOLD = 50 // Distance threshold for path recalculation
-export const ARRIVAL_THRESHOLD = 5 // Distance considered "arrived" at target
 
 export const ROOMS: Room[] = [
     {
         id: 'great_hall',
         name: 'Great Hall',
-        position: { x: 300, y: 300 },
+        position: { x: 80, y: 340 },
         width: 200,
         height: 150,
     },
     {
         id: 'gryffindor',
         name: 'Gryffindor Tower',
-        position: { x: 100, y: 100 },
+        position: { x: 140, y: 20 },
         width: 150,
         height: 150,
     },
     {
         id: 'transfiguration',
         name: 'Transfiguration',
-        position: { x: 500, y: 200 },
+        position: { x: 610, y: 320 },
         width: 150,
         height: 100,
     },
     {
         id: 'potions',
         name: 'Potions',
-        position: { x: 500, y: 450 },
+        position: { x: 500, y: 500 },
         width: 150,
         height: 100,
     },
@@ -80,7 +78,7 @@ export const INITIAL_CHARACTERS: Character[] = [
         path: [],
         pathIndex: 0,
     },
-/*    {
+    {
         id: '2',
         name: 'Ron Weasley',
         type: 'STUDENT',
@@ -111,7 +109,7 @@ export const INITIAL_CHARACTERS: Character[] = [
         mode: 'SLEEP',
         path: [],
         pathIndex: 0,
-    },*/
+    },
     {
         id: '4',
         name: 'Minerva McGonagall',
@@ -128,7 +126,7 @@ export const INITIAL_CHARACTERS: Character[] = [
         path: [],
         pathIndex: 0,
     },
-/*    {
+    {
         id: '5',
         name: 'Severus Snape',
         type: 'TEACHER',
@@ -143,7 +141,7 @@ export const INITIAL_CHARACTERS: Character[] = [
         mode: 'SLEEP',
         path: [],
         pathIndex: 0,
-    },*/
+    },
 ]
 
 export interface Corridor {
@@ -157,43 +155,43 @@ export const CORRIDORS: Corridor[] = [
     // Main horizontal corridor
     {
         id: 'main_corridor',
-        start: { x: 100, y: 250 },
-        end: { x: 700, y: 250 },
+        start: { x: 175, y: 250 },
+        end: { x: 605, y: 250 },
         width: 30
     },
     // Vertical corridor connecting Great Hall
     {
         id: 'great_hall_corridor',
-        start: { x: 400, y: 250 },
-        end: { x: 400, y: 375 },
+        start: { x: 250, y: 280 },
+        end: { x: 250, y: 325 },
         width: 30
     },
     // Gryffindor tower corridor
     {
         id: 'gryffindor_corridor',
-        start: { x: 175, y: 175 },
-        end: { x: 175, y: 250 },
+        start: { x: 175, y: 185 },
+        end: { x: 175, y: 220 },
         width: 30
     },
     // Transfiguration corridor
     {
         id: 'transfiguration_corridor',
-        start: { x: 575, y: 250 },
-        end: { x: 575, y: 200 },
+        start: { x: 635, y: 250 },
+        end: { x: 635, y: 305 },
         width: 30
     },
     // Potions corridor
     {
         id: 'potions_corridor',
-        start: { x: 575, y: 250 },
-        end: { x: 575, y: 450 },
+        start: { x: 545, y: 280 },
+        end: { x: 545, y: 485 },
         width: 30
     },
     // Teachers room corridor
     {
         id: 'teachers_corridor',
-        start: { x: 375, y: 250 },
-        end: { x: 375, y: 500 },
+        start: { x: 375, y: 280 },
+        end: { x: 375, y: 485 },
         width: 30
     }
 ]

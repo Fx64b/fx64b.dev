@@ -1,5 +1,5 @@
 import { Position } from './types'
-import { ROOMS, GRID_SIZE, Corridor } from './constants'
+import { ROOMS, GRID_SIZE, Corridor, CORRIDORS } from './constants'
 
 interface Node {
     x: number
@@ -14,51 +14,60 @@ const createGrid = (width: number, height: number): boolean[][] => {
     const gridWidth = Math.ceil(width / GRID_SIZE)
     const gridHeight = Math.ceil(height / GRID_SIZE)
 
-    // Initialize grid with all walkable spaces
+    // Initialize grid with all unwalkable spaces
     const grid: boolean[][] = Array(gridHeight).fill(null).map(() =>
-        Array(gridWidth).fill(true)
+        Array(gridWidth).fill(false)
     )
 
-    // Mark rooms while keeping their interiors walkable
+    // Mark corridors as walkable
+    CORRIDORS.forEach((corridor) => {
+        for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+                if (isInCorridor(x, y, corridor)) {
+                    grid[y][x] = true
+                }
+            }
+        }
+    })
+
+    // Process rooms and their entrances
     ROOMS.forEach((room) => {
         const startX = Math.max(0, Math.floor(room.position.x / GRID_SIZE))
         const startY = Math.max(0, Math.floor(room.position.y / GRID_SIZE))
         const endX = Math.min(gridWidth - 1, Math.floor((room.position.x + room.width) / GRID_SIZE))
         const endY = Math.min(gridHeight - 1, Math.floor((room.position.y + room.height) / GRID_SIZE))
 
-        // Only mark the walls as unwalkable
+        // Process room
         for (let y = startY; y <= endY; y++) {
             for (let x = startX; x <= endX; x++) {
                 if (y < 0 || y >= gridHeight || x < 0 || x >= gridWidth) continue
 
-                // Mark only the walls as unwalkable
                 const isWall = x === startX || x === endX || y === startY || y === endY
-
-                // Create doors at the center of each wall
                 const centerX = Math.floor((startX + endX) / 2)
                 const centerY = Math.floor((startY + endY) / 2)
 
-                const isDoor = (
-                    (isWall && x === centerX) || // Horizontal doors
-                    (isWall && y === centerY)    // Vertical doors
+                // Create doors where corridors meet room walls
+                const isAtCorridor = CORRIDORS.some(corridor =>
+                    isInCorridor(x, y, corridor)
                 )
 
-                // Set cell walkability
-                if (isWall && !isDoor) {
-                    grid[y][x] = false // Wall is unwalkable
+                if (isWall) {
+                    // Make the cell walkable if it's a door (intersection with corridor)
+                    grid[y][x] = isAtCorridor
                 } else {
-                    grid[y][x] = true  // Interior and doors are walkable
+                    // Interior of room is walkable
+                    grid[y][x] = true
                 }
             }
         }
     })
 
-    // Add debug logging for grid
+    // Debug logging
     console.log('Grid created with dimensions:', {
         width: gridWidth,
         height: gridHeight,
         walkableCells: grid.flat().filter(cell => cell).length
-    });
+    })
 
     return grid
 }

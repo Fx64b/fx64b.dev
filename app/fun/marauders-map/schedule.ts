@@ -50,15 +50,18 @@ const moveTowards = (current: Position, target: Position, speed: number): Positi
     }
 }
 
-const createFootstep = (position: Position, isLeft: boolean, angle: number): FootstepInstance => ({
-    id: Math.random().toString(),
-    position,
-    isLeft,
-    opacity: 1,
-    rotation: angle,
-    timestamp: Date.now(),
-})
-// schedule.ts - key changes only, rest remains the same
+const createFootstep = (position: Position, isLeft: boolean, angle: number): FootstepInstance => {
+    const footstep = {
+        id: Math.random().toString(),
+        position,
+        isLeft,
+        opacity: 1,
+        rotation: angle,
+        timestamp: Date.now(),
+    };
+    console.log('Created footstep:', footstep);
+    return footstep;
+};
 
 const handleWalking = (
     character: Character,
@@ -73,7 +76,6 @@ const handleWalking = (
     // If no path or path completed, calculate new path
     if (!character.path.length || character.pathIndex >= character.path.length) {
         const newPath = findPath(character.position, roomCenter, grid)
-        console.log(`New path calculated for ${character.name}:`, newPath.length)
         return {
             position: character.position,
             path: newPath,
@@ -186,7 +188,6 @@ const updateCharacter = (
                 x: targetRoom.position.x + targetRoom.width / 2,
                 y: targetRoom.position.y + targetRoom.height / 2,
             }
-            // Use pathfinding for sleep movement too
             if (!isCharacterInRoom(character, targetRoom)) {
                 newState = handleWalking(character, targetRoom, grid)
             } else {
@@ -198,10 +199,11 @@ const updateCharacter = (
     // Calculate distance moved
     const distanceMoved = getDistance(character.position, newState.position)
 
-    // Create footstep if moved significantly (increased threshold)
-    if (distanceMoved > STEP_SIZE * 5 && // Increased movement threshold
-        currentTime - (character.lastFootstepTime || 0) > FOOTSTEP_SPACING * 3 && // Increased time spacing
+    // Create footstep if character is moving and enough time has passed since last footstep
+    if (distanceMoved > 0.01 && // Tiny threshold to account for floating point errors
+        currentTime - (character.lastFootstepTime || 0) > FOOTSTEP_SPACING &&
         setFootstepsRef) {
+
         const angle = Math.atan2(
             newState.position.y - character.position.y,
             newState.position.x - character.position.x
@@ -212,14 +214,22 @@ const updateCharacter = (
             !character.lastFootstepWasLeft,
             angle + (character.lastFootstepWasLeft ? -5 : 5)
         )])
+
+        // Update footstep timing and alternation
+        return {
+            ...character,
+            ...newState,
+            mode: schedule.mode,
+            lastFootstepTime: currentTime,
+            lastFootstepWasLeft: !character.lastFootstepWasLeft,
+        }
     }
 
+    // Return updated character without updating footstep info if no footstep was created
     return {
         ...character,
         ...newState,
         mode: schedule.mode,
-        lastFootstepTime: distanceMoved > STEP_SIZE * 5 ? currentTime : character.lastFootstepTime,
-        lastFootstepWasLeft: distanceMoved > STEP_SIZE * 5 ? !character.lastFootstepWasLeft : character.lastFootstepWasLeft,
     }
 }
 

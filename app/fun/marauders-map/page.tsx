@@ -6,7 +6,8 @@ import {
     TIME_SCALE,
     GRID_SIZE,
     ROOMS,
-    INITIAL_CHARACTERS,
+    CORRIDORS,
+    INITIAL_CHARACTERS, SVG_PATHS, FOOTPRINT_SCALE, FOOTSTEP_FADE_DURATION,
 } from './constants'
 import { createGrid } from './pathfinding';
 import { initializeSchedule, updateCharacter } from './schedule'
@@ -20,7 +21,8 @@ const MaraudersMap = () => {
     const [showDebug, setShowDebug] = useState(false);
     const gridRef = useRef<boolean[][]>([]);
     const lastUpdateRef = useRef<number>(Date.now());
-    const animationFrameRef = useRef<number>(0);
+    const animationFrameRef = useRef<number | undefined>(0);
+    const updateGameRef = useRef<() => void>(()=>{});
 
     // Initialize grid and schedule
     useEffect(() => {
@@ -34,26 +36,23 @@ const MaraudersMap = () => {
         const deltaTime = currentTime - lastUpdateRef.current;
         lastUpdateRef.current = currentTime;
 
-        // Update game time (6 minutes real time = 24 hours game time)
         setGameTime(prevTime => {
             const newTime = prevTime + (deltaTime / 1000) * TIME_SCALE;
             return newTime >= 24 ? newTime - 24 : newTime;
         });
 
-        // Update characters
         setCharacters(prevCharacters =>
             prevCharacters.map(char =>
                 updateCharacter(char, currentTime, gameTime, gridRef.current)
             )
         );
 
-        // Update footsteps opacity and cleanup
         setFootsteps(prevFootsteps =>
             prevFootsteps
-                .filter(step => currentTime - step.timestamp < 3000)
+                .filter(step => currentTime - step.timestamp < FOOTSTEP_FADE_DURATION)
                 .map(step => ({
                     ...step,
-                    opacity: 1 - (currentTime - step.timestamp) / 3000,
+                    opacity: 1 - (currentTime - step.timestamp) / FOOTSTEP_FADE_DURATION,
                 }))
         );
 
@@ -62,6 +61,7 @@ const MaraudersMap = () => {
 
     // Start/stop game loop
     useEffect(() => {
+        updateGameRef.current = updateGame;
         animationFrameRef.current = requestAnimationFrame(updateGame);
         return () => {
             if (animationFrameRef.current) {
@@ -70,7 +70,6 @@ const MaraudersMap = () => {
         };
     }, [updateGame]);
 
-    // Wait for grid initialization
     if (gridRef.current.length === 0) {
         return null;
     }
@@ -80,7 +79,6 @@ const MaraudersMap = () => {
 
     return (
         <div className="relative h-full w-full">
-            {/* Debug toggle */}
             <button
                 className="absolute right-2 top-2 rounded px-4 py-2 z-10"
                 onClick={() => setShowDebug(!showDebug)}
@@ -88,19 +86,16 @@ const MaraudersMap = () => {
                 Toggle Debug
             </button>
 
-            {/* Game time display */}
             <div className="absolute left-2 top-2 rounded bg-black text-white px-4 py-2 z-10">
                 Time: {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
             </div>
 
-            {/* Current schedule display */}
             {showDebug && (
                 <div className="absolute left-2 bottom-2 rounded bg-black text-white px-4 py-2 z-10">
                     Time Block: {getCurrentTimeBlock(gameTime)}
                 </div>
             )}
 
-            {/* Main map */}
             <svg width="800" height="600" className="bg-white">
                 {/* Debug grid */}
                 {showDebug && gridRef.current.map((row, y) =>
@@ -116,6 +111,27 @@ const MaraudersMap = () => {
                         />
                     ))
                 )}
+
+                {/* Corridors */}
+                {CORRIDORS.map((corridor) => {
+                    // Calculate the corridor's bounding box
+                    const x = Math.min(corridor.start.x, corridor.end.x) - corridor.width / 2;
+                    const y = Math.min(corridor.start.y, corridor.end.y) - corridor.width / 2;
+                    const width = Math.abs(corridor.end.x - corridor.start.x) + corridor.width;
+                    const height = Math.abs(corridor.end.y - corridor.start.y) + corridor.width;
+
+                    return (
+                        <rect
+                            key={corridor.id}
+                            x={x}
+                            y={y}
+                            width={width}
+                            height={height}
+                            fill="rgba(200,200,200,0.2)"
+                            stroke="rgba(0,0,0,0.1)"
+                        />
+                    );
+                })}
 
                 {/* Debug paths */}
                 {showDebug && characters.map((char) => (
@@ -166,15 +182,13 @@ const MaraudersMap = () => {
                 {footsteps.map((step) => (
                     <g
                         key={step.id}
-                        transform={`translate(${step.position.x},${step.position.y}) rotate(${step.rotation}) scale(0.02)`}
-                        opacity={step.opacity}
+                        transform={`translate(${step.position.x},${step.position.y})`}
                     >
                         <path
-                            d={step.isLeft
-                                ? 'M75.071,37.994c-85.775,27.432-91.109,189.36-50.785,282.24l136.988-10.244c0,0,18.469-81.1,17.828-160.524 C178.753,106.136,154.083,12.727,75.071,37.994z M29.257,356.393c0,0-4.604,131.482,87.014,121.318c81.18-9.006,49.805-135.703,49.805-135.703L29.257,356.393z'
-                                : 'M436.927,37.994c-79.01-25.268-103.68,68.142-104.03,111.472c-0.642,79.425,17.828,160.524,17.828,160.524l136.986,10.244C528.038,227.354,522.704,65.426,436.927,37.994z M345.925,342.008c0,0-31.375,126.697,49.803,135.703c91.619,10.164,87.016-121.318,87.016-121.318L345.925,342.008z'
-                            }
-                            fill="black"
+                            d={step.isLeft ? SVG_PATHS.leftFoot : SVG_PATHS.rightFoot}
+                            fill="rgba(0,0,0,0.5)"
+                            transform={`rotate(${step.rotation}) scale(${FOOTPRINT_SCALE})`}
+                            style={{ opacity: step.opacity }}
                         />
                     </g>
                 ))}
