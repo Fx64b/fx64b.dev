@@ -40,7 +40,7 @@ const moveTowards = (current: Position, target: Position, speed: number): Positi
     const distance = Math.sqrt(dx * dx + dy * dy)
 
     // Return target position if we're close enough
-    if (distance <= speed) return target
+    if (distance <= speed) {return target}
 
     // Calculate movement
     const ratio = speed / distance
@@ -59,7 +59,6 @@ const createFootstep = (position: Position, isLeft: boolean, angle: number): Foo
         rotation: angle,
         timestamp: Date.now(),
     };
-    console.log('Created footstep:', footstep);
     return footstep;
 };
 
@@ -79,7 +78,7 @@ const handleWalking = (
         return {
             position: character.position,
             path: newPath,
-            pathIndex: 0
+            pathIndex: 0,
         }
     }
 
@@ -95,7 +94,7 @@ const handleWalking = (
             return {
                 position: moveTowards(character.position, nextTarget, STEP_SIZE),
                 path: character.path,
-                pathIndex: newPathIndex
+                pathIndex: newPathIndex,
             }
         }
         // Keep the final position and clear path only when we've reached the room
@@ -103,7 +102,7 @@ const handleWalking = (
             return {
                 position: character.position,
                 path: [],
-                pathIndex: 0
+                pathIndex: 0,
             }
         }
         // If not in room yet, recalculate path
@@ -111,7 +110,7 @@ const handleWalking = (
         return {
             position: character.position,
             path: newPath,
-            pathIndex: 0
+            pathIndex: 0,
         }
     }
 
@@ -119,7 +118,7 @@ const handleWalking = (
     return {
         position: moveTowards(character.position, currentTarget, STEP_SIZE),
         path: character.path,
-        pathIndex: character.pathIndex
+        pathIndex: character.pathIndex,
     }
 }
 
@@ -127,7 +126,7 @@ const handleWandering = (
     character: Character,
     room: Room,
     currentTime: number,
-    grid: boolean[][]
+    grid: boolean[][],
 ): {position: Position; path: Position[]; pathIndex: number} => {
     if (!isCharacterInRoom(character, room)) {
         // If not in room, use pathfinding to get there
@@ -141,7 +140,7 @@ const handleWandering = (
             return {
                 position: character.position,
                 path: newPath,
-                pathIndex: 0
+                pathIndex: 0,
             }
         }
 
@@ -160,7 +159,7 @@ const handleWandering = (
     return {
         position: moveTowards(character.position, target, STEP_SIZE),
         path: [],
-        pathIndex: 0
+        pathIndex: 0,
     }
 }
 
@@ -172,7 +171,7 @@ const updateCharacter = (
 ): Character => {
     const schedule = getCurrentSchedule(character, gameTime)
     const targetRoom = ROOMS.find((r) => r.id === schedule.room)
-    if (!targetRoom) return character
+    if (!targetRoom) {return character}
 
     let newState = { position: character.position, path: character.path, pathIndex: character.pathIndex }
 
@@ -206,13 +205,13 @@ const updateCharacter = (
 
         const angle = Math.atan2(
             newState.position.y - character.position.y,
-            newState.position.x - character.position.x
+            newState.position.x - character.position.x,
         ) * (180 / Math.PI) + 90
 
         setFootstepsRef(prev => [...prev, createFootstep(
             character.position,
             !character.lastFootstepWasLeft,
-            angle + (character.lastFootstepWasLeft ? -5 : 5)
+            angle + (character.lastFootstepWasLeft ? -5 : 5),
         )])
 
         // Update footstep timing and alternation

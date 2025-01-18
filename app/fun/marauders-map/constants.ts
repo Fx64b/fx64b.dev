@@ -68,11 +68,11 @@ export const INITIAL_CHARACTERS: Character[] = [
         type: 'STUDENT',
         position: {
             x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 75,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75
+            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
         },
         targetPosition: {
             x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 75,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75
+            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
         },
         mode: 'SLEEP',
         path: [],
@@ -84,11 +84,11 @@ export const INITIAL_CHARACTERS: Character[] = [
         type: 'STUDENT',
         position: {
             x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75
+            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
         },
         targetPosition: {
             x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75
+            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
         },
         mode: 'SLEEP',
         path: [],
@@ -100,11 +100,11 @@ export const INITIAL_CHARACTERS: Character[] = [
         type: 'STUDENT',
         position: {
             x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75
+            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
         },
         targetPosition: {
             x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75
+            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
         },
         mode: 'SLEEP',
         path: [],
@@ -116,11 +116,11 @@ export const INITIAL_CHARACTERS: Character[] = [
         type: 'TEACHER',
         position: {
             x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50
+            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
         },
         targetPosition: {
             x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50
+            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
         },
         mode: 'SLEEP',
         path: [],
@@ -132,11 +132,11 @@ export const INITIAL_CHARACTERS: Character[] = [
         type: 'TEACHER',
         position: {
             x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50
+            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
         },
         targetPosition: {
             x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50
+            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
         },
         mode: 'SLEEP',
         path: [],
@@ -157,41 +157,41 @@ export const CORRIDORS: Corridor[] = [
         id: 'main_corridor',
         start: { x: 175, y: 250 },
         end: { x: 605, y: 250 },
-        width: 30
+        width: 30,
     },
     // Vertical corridor connecting Great Hall
     {
         id: 'great_hall_corridor',
         start: { x: 250, y: 280 },
         end: { x: 250, y: 325 },
-        width: 30
+        width: 30,
     },
     // Gryffindor tower corridor
     {
         id: 'gryffindor_corridor',
         start: { x: 175, y: 185 },
         end: { x: 175, y: 220 },
-        width: 30
+        width: 30,
     },
     // Transfiguration corridor
     {
         id: 'transfiguration_corridor',
         start: { x: 635, y: 250 },
         end: { x: 635, y: 305 },
-        width: 30
+        width: 30,
     },
     // Potions corridor
     {
         id: 'potions_corridor',
         start: { x: 545, y: 280 },
         end: { x: 545, y: 485 },
-        width: 30
+        width: 30,
     },
     // Teachers room corridor
     {
         id: 'teachers_corridor',
         start: { x: 375, y: 280 },
         end: { x: 375, y: 485 },
-        width: 30
-    }
+        width: 30,
+    },
 ]

@@ -16,7 +16,7 @@ const createGrid = (width: number, height: number): boolean[][] => {
 
     // Initialize grid with all unwalkable spaces
     const grid: boolean[][] = Array(gridHeight).fill(null).map(() =>
-        Array(gridWidth).fill(false)
+        Array(gridWidth).fill(false),
     )
 
     // Mark corridors as walkable
@@ -40,7 +40,7 @@ const createGrid = (width: number, height: number): boolean[][] => {
         // Process room
         for (let y = startY; y <= endY; y++) {
             for (let x = startX; x <= endX; x++) {
-                if (y < 0 || y >= gridHeight || x < 0 || x >= gridWidth) continue
+                if (y < 0 || y >= gridHeight || x < 0 || x >= gridWidth) {continue}
 
                 const isWall = x === startX || x === endX || y === startY || y === endY
                 const centerX = Math.floor((startX + endX) / 2)
@@ -48,7 +48,7 @@ const createGrid = (width: number, height: number): boolean[][] => {
 
                 // Create doors where corridors meet room walls
                 const isAtCorridor = CORRIDORS.some(corridor =>
-                    isInCorridor(x, y, corridor)
+                    isInCorridor(x, y, corridor),
                 )
 
                 if (isWall) {
@@ -60,13 +60,6 @@ const createGrid = (width: number, height: number): boolean[][] => {
                 }
             }
         }
-    })
-
-    // Debug logging
-    console.log('Grid created with dimensions:', {
-        width: gridWidth,
-        height: gridHeight,
-        walkableCells: grid.flat().filter(cell => cell).length
     })
 
     return grid
@@ -139,16 +132,11 @@ const findPath = (
     if (startGridX < 0 || startGridY < 0 || endGridX < 0 || endGridY < 0 ||
         startGridX >= grid[0].length || startGridY >= grid.length ||
         endGridX >= grid[0].length || endGridY >= grid.length) {
-        console.error('Invalid grid coordinates', { start, end, grid: { w: grid[0].length, h: grid.length } })
         return []
     }
 
     // Check if start or end is in unwalkable cell
     if (!grid[startGridY][startGridX] || !grid[endGridY][endGridX]) {
-        console.error('Start or end position is unwalkable', {
-            start: grid[startGridY][startGridX],
-            end: grid[endGridY][endGridX]
-        })
         return []
     }
 
@@ -217,7 +205,7 @@ const findPath = (
             )
 
             const existingNeighbor = openSet.find(
-                node => node.x === neighbor.x && node.y === neighbor.y
+                node => node.x === neighbor.x && node.y === neighbor.y,
             )
 
             if (!existingNeighbor) {
@@ -225,7 +213,7 @@ const findPath = (
                 neighbor.g = tentativeG
                 neighbor.h = manhattanDistance(
                     { x: neighbor.x, y: neighbor.y },
-                    { x: endNode.x, y: endNode.y }
+                    { x: endNode.x, y: endNode.y },
                 )
                 neighbor.f = neighbor.g + neighbor.h
                 neighbor.parent = currentNode
@@ -239,7 +227,6 @@ const findPath = (
         }
     }
 
-    console.error('No path found', { start, end })
     return [] // No path found
 }
 

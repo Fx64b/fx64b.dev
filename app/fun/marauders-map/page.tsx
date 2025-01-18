@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-    GAME_SPEED,
     TIME_SCALE,
     GRID_SIZE,
     ROOMS,
@@ -43,8 +42,8 @@ const MaraudersMap = () => {
 
         setCharacters(prevCharacters =>
             prevCharacters.map(char =>
-                updateCharacter(char, currentTime, gameTime, gridRef.current)
-            )
+                updateCharacter(char, currentTime, gameTime, gridRef.current),
+            ),
         );
 
         setFootsteps(prevFootsteps =>
@@ -53,7 +52,7 @@ const MaraudersMap = () => {
                 .map(step => ({
                     ...step,
                     opacity: 1 - (currentTime - step.timestamp) / FOOTSTEP_FADE_DURATION,
-                }))
+                })),
         );
 
         animationFrameRef.current = requestAnimationFrame(updateGame);
@@ -109,7 +108,7 @@ const MaraudersMap = () => {
                             fill={walkable ? 'transparent' : 'rgba(255,0,0,0.2)'}
                             stroke="rgba(0,0,0,0.1)"
                         />
-                    ))
+                    )),
                 )}
 
                 {/* Corridors */}
