@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.17.0",
+    "@eslint/js": "^9.19.0",
     "@heroicons/react": "^2.2.0",
     "@nextui-org/react": "^2.6.10",
     "@vercel/analytics": "^1.4.1",
