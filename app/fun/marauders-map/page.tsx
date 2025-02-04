@@ -14,7 +14,7 @@ import { Character, FootstepInstance } from './types';
 import { getCurrentTimeBlock } from './time'
 
 const MaraudersMap = () => {
-    const [gameTime, setGameTime] = useState<number>(0);
+    const [gameTime, setGameTime] = useState<number>(5.5);
     const [characters, setCharacters] = useState<Character[]>(INITIAL_CHARACTERS);
     const [footsteps, setFootsteps] = useState<FootstepInstance[]>([]);
     const [showDebug, setShowDebug] = useState(false);
