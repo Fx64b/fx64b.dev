@@ -50,6 +50,24 @@ const moveTowards = (current: Position, target: Position, speed: number): Positi
     }
 }
 
+const generateRandomPositionInRoom = (room: Room): Position => {
+    // Add padding to keep characters away from walls
+    const padding = 10;
+    return {
+        x: room.position.x + padding + Math.random() * (room.width - 2 * padding),
+        y: room.position.y + padding + Math.random() * (room.height - 2 * padding)
+    };
+}
+
+const isPositionInRoom = (position: Position, room: Room): boolean => {
+    return (
+        position.x >= room.position.x &&
+        position.x <= room.position.x + room.width &&
+        position.y >= room.position.y &&
+        position.y <= room.position.y + room.height
+    );
+}
+
 const createFootstep = (position: Position, isLeft: boolean, angle: number): FootstepInstance => {
     const footstep = {
         id: Math.random().toString(),
@@ -72,9 +90,13 @@ const handleWalking = (
         y: targetRoom.position.y + targetRoom.height / 2,
     }
 
+    if (!character.targetPosition || !isPositionInRoom(character.targetPosition, targetRoom)) {
+        character.targetPosition = generateRandomPositionInRoom(targetRoom);
+    }
+
     // If no path or path completed, calculate new path
     if (!character.path.length || character.pathIndex >= character.path.length) {
-        const newPath = findPath(character.position, roomCenter, grid)
+        const newPath = findPath(character.position, character.targetPosition, grid)
         return {
             position: character.position,
             path: newPath,
@@ -173,7 +195,11 @@ const updateCharacter = (
     const targetRoom = ROOMS.find((r) => r.id === schedule.room)
     if (!targetRoom) {return character}
 
-    let newState = { position: character.position, path: character.path, pathIndex: character.pathIndex }
+    let newState = {
+        position: character.position,
+        path: character.path,
+        pathIndex: character.pathIndex,
+    }
 
     switch (schedule.mode) {
         case 'WALK':
@@ -183,10 +209,12 @@ const updateCharacter = (
             newState = handleWandering(character, targetRoom, currentTime, grid)
             break
         case 'SLEEP':
+            // For sleep mode, use room center
             const sleepPosition = {
                 x: targetRoom.position.x + targetRoom.width / 2,
                 y: targetRoom.position.y + targetRoom.height / 2,
             }
+            character.targetPosition = sleepPosition
             if (!isCharacterInRoom(character, targetRoom)) {
                 newState = handleWalking(character, targetRoom, grid)
             } else {
