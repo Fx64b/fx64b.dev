@@ -210,6 +210,7 @@ const updateCharacter = (
             break
         case 'SLEEP':
             // For sleep mode, use room center
+            // TODO: make random instead of center
             const sleepPosition = {
                 x: targetRoom.position.x + targetRoom.width / 2,
                 y: targetRoom.position.y + targetRoom.height / 2,
