@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/Fx64b/fx64b.dev/compare/v2.2.0...v2.2.1) (2025-03-04)
+
+
+### Bug Fixes
+
+* **actions:** only run release on workflow_dispatch ([417dca5](https://github.com/Fx64b/fx64b.dev/commit/417dca5b4bc7291eb318d1e5ab84987f28a82de6))
+
 # [2.2.0](https://github.com/Fx64b/fx64b.dev/compare/v2.1.0...v2.2.0) (2024-12-02)
 
 
