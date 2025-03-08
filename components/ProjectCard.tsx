@@ -1,5 +1,4 @@
 import { Project } from '@/types/project'
-
 import {
     Card,
     CardBody,
@@ -7,7 +6,8 @@ import {
     CardHeader,
     Divider,
     Link,
-} from "@heroui/react"
+} from '@heroui/react'
+
 import Image from 'next/image'
 
 import { Badge } from '@/components/Badge'

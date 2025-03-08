@@ -4,7 +4,7 @@ import {
     NavbarBrand,
     NavbarContent,
     NavbarItem,
-} from "@heroui/react"
+} from '@heroui/react'
 
 export function Header() {
     return (

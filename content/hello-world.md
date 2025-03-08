@@ -16,11 +16,11 @@ After procrastinating for close to two years, I finally found the time to replac
 
 ## What I used to build this site
 
--   **[Next.js](https://nextjs.org/)** for static and dynamic pages.
--   **[Gray Matter](https://github.com/jonschlinkert/gray-matter)** &amp; **[React Markdown](https://github.com/remarkjs/react-markdown)** for markdown to react conversion
--   **[Tailwind CSS](https://tailwindcss.com/)** & **[NextUI](https://nextui.org/)** for components and additional styling.
--   **[Prism Themes](https://prismjs.com/)** & **[React Syntax Highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter)** for code syntax highlighting.
--   **[Vercel](https://vercel.com/)** for hosting, analytics and deployment.
+- **[Next.js](https://nextjs.org/)** for static and dynamic pages.
+- **[Gray Matter](https://github.com/jonschlinkert/gray-matter)** &amp; **[React Markdown](https://github.com/remarkjs/react-markdown)** for markdown to react conversion
+- **[Tailwind CSS](https://tailwindcss.com/)** & **[NextUI](https://nextui.org/)** for components and additional styling.
+- **[Prism Themes](https://prismjs.com/)** & **[React Syntax Highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter)** for code syntax highlighting.
+- **[Vercel](https://vercel.com/)** for hosting, analytics and deployment.
 
 <br>
 
@@ -162,9 +162,9 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, children, ...p
     ...
 ```
 
--   We start off by setting the `useState()` for the copy button.
--   Then we extract the language. During the markdown processing a class that looks like this is added to the codeblock to later identify the correct language: `language-tsx`
--   Then the children prop (which contains all the code) is converted into a string and all trailing newline (`\n`)
+- We start off by setting the `useState()` for the copy button.
+- Then we extract the language. During the markdown processing a class that looks like this is added to the codeblock to later identify the correct language: `language-tsx`
+- Then the children prop (which contains all the code) is converted into a string and all trailing newline (`\n`)
 
 The Copy button isn't too interesting, I just use the `react-copy-to-clipboard` package.
 
@@ -220,8 +220,8 @@ return (
 )
 ```
 
--   `rehypeRaw` is used that things like `<br>` tags are not rendered as text so that the content renders halfway decently.
--   In the `components` attribute I specified the html elements I want to override with my own elements, specifically the `CodeBlock` component
+- `rehypeRaw` is used that things like `<br>` tags are not rendered as text so that the content renders halfway decently.
+- In the `components` attribute I specified the html elements I want to override with my own elements, specifically the `CodeBlock` component
 
 <br>
 <br>

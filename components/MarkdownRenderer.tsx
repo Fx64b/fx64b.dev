@@ -1,6 +1,7 @@
 'use client'
 
 import { CheckIcon, ClipboardIcon } from '@heroicons/react/24/outline'
+import { Divider, Link } from '@heroui/react'
 import rehypeRaw from 'rehype-raw'
 
 import React, { useState } from 'react'
@@ -8,8 +9,6 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
-
-import { Divider, Link } from "@heroui/react"
 
 interface MarkdownRendererProps {
     content: string

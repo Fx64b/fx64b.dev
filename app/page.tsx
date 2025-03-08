@@ -1,7 +1,7 @@
 import projectData from '@/data/projectData'
+import { Image } from '@heroui/image'
+import { Spacer } from '@heroui/spacer'
 
-import { Image } from "@heroui/image"
-import { Spacer } from "@heroui/spacer"
 import { Metadata } from 'next'
 
 import ProjectCard from '@/components/ProjectCard'
