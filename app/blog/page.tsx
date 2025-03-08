@@ -1,5 +1,5 @@
-import { Card, CardBody, CardHeader, Link } from '@nextui-org/react'
-import { Spacer } from '@nextui-org/spacer'
+import { Card, CardBody, CardHeader, Link } from "@heroui/react"
+import { Spacer } from "@heroui/spacer"
 
 import { getAllPosts } from '@/app/lib/posts'
 

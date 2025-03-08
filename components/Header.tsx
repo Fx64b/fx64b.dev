@@ -4,7 +4,7 @@ import {
     NavbarBrand,
     NavbarContent,
     NavbarItem,
-} from '@nextui-org/react'
+} from "@heroui/react"
 
 export function Header() {
     return (

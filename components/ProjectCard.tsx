@@ -7,7 +7,7 @@ import {
     CardHeader,
     Divider,
     Link,
-} from '@nextui-org/react'
+} from "@heroui/react"
 import Image from 'next/image'
 
 import { Badge } from '@/components/Badge'
