@@ -1,4 +1,4 @@
-import { Image, Link } from '@nextui-org/react'
+import { Image, Link } from '@heroui/react'
 
 import { getVersion } from '@/app/lib/version'
 
@@ -15,7 +15,7 @@ export function Footer() {
                     alt={'GitHub logo'}
                 />
             </Link>
-            &copy; 2024 Fx64b - v{version}
+            &copy; 2025 Fx64b - v{version}
         </div>
     )
 }

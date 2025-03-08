@@ -72,7 +72,7 @@ export default async function PostPage(props: Props) {
     const { content } = matter(fileContents)
 
     return (
-        <article className="prose mx-auto md:max-w-screen-lg">
+        <article className="prose mx-auto md:max-w-(--breakpoint-lg)">
             <BlogHeader
                 author={'F_x64b'}
                 readtime={post.read}

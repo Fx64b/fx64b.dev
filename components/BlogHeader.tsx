@@ -1,5 +1,5 @@
-import { Divider } from '@nextui-org/divider'
-import { Avatar } from '@nextui-org/react'
+import { Divider } from '@heroui/divider'
+import { Avatar } from '@heroui/react'
 
 interface BlogHeaderProps {
     author: string
@@ -17,7 +17,7 @@ export function BlogHeader({
     readtime,
 }: BlogHeaderProps) {
     return (
-        <div className={'mb-4 mt-2 flex flex-col md:items-center'}>
+        <div className={'mt-2 mb-4 flex flex-col md:items-center'}>
             <h1>{title}</h1>
             <div className={'my-4 flex items-center gap-4'}>
                 <Avatar

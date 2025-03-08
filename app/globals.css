@@ -1,28 +1,54 @@
-@import 'prism-themes/themes/prism-one-dark.css';
+@import 'prism-themes/themes/prism-one-dark.css' layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-:root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+@source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --color-background-light: #030709;
+    --color-background-dark: #030709;
+    --color-background: #030709;
 }
 
-body {
-    color: rgb(var(--foreground-rgb));
-    background: linear-gradient(
-            to bottom,
-            transparent,
-            rgb(var(--background-end-rgb))
-        )
-        rgb(var(--background-start-rgb));
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+@utility text-balance {
+    text-wrap: balance;
 }
 
 @layer utilities {
-    .text-balance {
-        text-wrap: balance;
+    :root {
+        --foreground-rgb: 255, 255, 255;
+        --background-start-rgb: 0, 0, 0;
+        --background-end-rgb: 0, 0, 0;
+    }
+
+    body {
+        color: rgb(var(--foreground-rgb));
+        background: linear-gradient(
+                to bottom,
+                transparent,
+                rgb(var(--background-end-rgb))
+            )
+            rgb(var(--background-start-rgb));
     }
 }
 
@@ -34,7 +60,7 @@ body {
 .blog h3,
 .blog img:not([alt='avatar']),
 .blog pre {
-    @apply mb-2 mt-6;
+    @apply mt-6 mb-2;
 }
 
 .blog h1 {
@@ -64,5 +90,5 @@ body {
 .blog p > span,
 .blog strong > span,
 .blog li > span {
-    @apply self-baseline rounded bg-[#131417] px-2 pb-[0.25rem] font-mono;
+    @apply self-baseline rounded-sm bg-[#131417] px-2 pb-[0.25rem] font-mono;
 }

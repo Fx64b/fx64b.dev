@@ -10,20 +10,20 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.21.0",
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.22.0",
     "@heroicons/react": "^2.2.0",
-    "@nextui-org/react": "^2.6.10",
-    "@vercel/analytics": "^1.4.1",
-    "@vercel/speed-insights": "^1.1.0",
-    "framer-motion": "^12.4.2",
+    "@heroui/react": "2.7.4",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
+    "framer-motion": "^12.4.10",
     "gray-matter": "^4.0.3",
-    "next": "15.1.7",
+    "next": "15.2.1",
     "prism-themes": "^1.9.0",
-    "react": "19.0.0-rc-69d4b800-20241021",
+    "react": "19.0.0",
     "react-copy-to-clipboard": "^5.1.0",
-    "react-dom": "19.0.0-rc-69d4b800-20241021",
-    "react-markdown": "^9.0.1",
+    "react-dom": "19.0.0",
+    "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.1",
     "rehype-raw": "^7.0.0"
   },
@@ -34,26 +34,31 @@
     "@semantic-release/github": "^11.0.1",
     "@semantic-release/npm": "^12.0.1",
     "@semantic-release/release-notes-generator": "^14.0.3",
+    "@tailwindcss/postcss": "^4.0.12",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.10",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/react-syntax-highlighter": "^15.5.13",
-    "eslint": "^9",
-    "eslint-config-next": "15.2.0",
+    "eslint": "^9.22.0",
+    "eslint-config-next": "15.2.1",
     "eslint-plugin-unused-imports": "^4.1.4",
-    "postcss": "^8.5.1",
+    "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "semantic-release": "^24.2.3",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.3"
+    "tailwindcss": "^4.0.12",
+    "typescript": "^5.8.2"
   },
   "pnpm": {
     "overrides": {
       "@types/react": "npm:types-react@19.0.0-rc.1",
       "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@heroui/shared-utils",
+      "@vercel/speed-insights"
+    ]
   }
 }

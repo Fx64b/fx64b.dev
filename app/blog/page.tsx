@@ -1,5 +1,5 @@
-import { Card, CardBody, CardHeader, Link } from '@nextui-org/react'
-import { Spacer } from '@nextui-org/spacer'
+import { Card, CardBody, CardHeader, Link } from '@heroui/react'
+import { Spacer } from '@heroui/spacer'
 
 import { getAllPosts } from '@/app/lib/posts'
 
@@ -8,7 +8,7 @@ export default async function Blog() {
 
     return (
         <div className={'w-full'}>
-            <div className={'md:mx-auto md:max-w-screen-lg'}>
+            <div className={'md:mx-auto md:max-w-(--breakpoint-lg)'}>
                 <h1>Blog</h1>
                 <Spacer y={6} />
                 {posts.map((post, index) => (

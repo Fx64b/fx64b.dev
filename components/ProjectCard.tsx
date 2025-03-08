@@ -1,5 +1,4 @@
 import { Project } from '@/types/project'
-
 import {
     Card,
     CardBody,
@@ -7,7 +6,8 @@ import {
     CardHeader,
     Divider,
     Link,
-} from '@nextui-org/react'
+} from '@heroui/react'
+
 import Image from 'next/image'
 
 import { Badge } from '@/components/Badge'
@@ -21,7 +21,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         <Link
             href={project.link}
             isExternal
-            className={'md:mx-auto md:max-w-screen-md'}
+            className={'md:mx-auto md:max-w-(--breakpoint-md)'}
         >
             <Card>
                 <CardHeader className={'flex gap-4'}>
