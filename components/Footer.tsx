@@ -15,7 +15,7 @@ export function Footer() {
                     alt={'GitHub logo'}
                 />
             </Link>
-            &copy; 2024 Fx64b - v{version}
+            &copy; 2025 Fx64b - v{version}
         </div>
     )
 }

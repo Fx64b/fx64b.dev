@@ -8,7 +8,7 @@ export default async function Blog() {
 
     return (
         <div className={'w-full'}>
-            <div className={'md:mx-auto md:max-w-screen-lg'}>
+            <div className={'md:mx-auto md:max-w-(--breakpoint-lg)'}>
                 <h1>Blog</h1>
                 <Spacer y={6} />
                 {posts.map((post, index) => (

@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function Home() {
     return (
         <div className="flex h-fit min-h-screen w-screen justify-center pb-10">
-            <div className="mt-10 flex max-w-screen-lg flex-col items-center gap-y-3 px-6 text-center">
+            <div className="mt-10 flex max-w-(--breakpoint-lg) flex-col items-center gap-y-3 px-6 text-center">
                 <Image
                     className={'w-48 rounded-full border-2 border-white'}
                     src="/logo.svg"
