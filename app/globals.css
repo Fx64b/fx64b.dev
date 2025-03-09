@@ -52,6 +52,15 @@
     }
 }
 
+
+/* TODO: temporary workaround because tailwind v4 migration caused styling problems */
+.blog a,
+.subpixel-antialiased > a {
+    color: #3b82f6;
+}
+
+/* Blog specific CSS */
+
 .blog h1,
 .blog h2 {
     @apply mt-10;

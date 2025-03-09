@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={'bg-background dark min-h-fit overflow-x-hidden'}>
+            <body className={'bg-background text-foreground dark min-h-fit overflow-x-hidden'}>
                 <HeroUIProvider>
                     <Header />
                     {children}
