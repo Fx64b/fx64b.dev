@@ -1,3 +1,10 @@
+## [2.2.2](https://github.com/Fx64b/fx64b.dev/compare/v2.2.1...v2.2.2) (2025-03-09)
+
+
+### Bug Fixes
+
+* issues from tailwind v4 upgrade ([4c0c693](https://github.com/Fx64b/fx64b.dev/commit/4c0c693118a534870f0a25f4815f52cc569b18c6))
+
 ## [2.2.1](https://github.com/Fx64b/fx64b.dev/compare/v2.2.0...v2.2.1) (2025-03-04)
 
 
