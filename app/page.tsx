@@ -71,7 +71,11 @@ export default function Home() {
                 <h2 className={'self-start text-xl'}>Projects</h2>
                 <div className={'flex w-full flex-col gap-y-6'}>
                     {projectData.map((project, index) => (
+                        <>
                         <ProjectCard key={index} project={project} />
+                            {/*TODO: remove hr tag, this is a temporary fix until heroui has tailwind 4 support*/}
+                        <hr/>
+                        </>
                     ))}
                 </div>
             </div>
