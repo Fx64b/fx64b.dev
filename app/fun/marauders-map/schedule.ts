@@ -55,7 +55,7 @@ const generateRandomPositionInRoom = (room: Room): Position => {
     const padding = 10;
     return {
         x: room.position.x + padding + Math.random() * (room.width - 2 * padding),
-        y: room.position.y + padding + Math.random() * (room.height - 2 * padding)
+        y: room.position.y + padding + Math.random() * (room.height - 2 * padding),
     };
 }
 
