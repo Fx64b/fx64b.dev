@@ -1,11 +1,11 @@
 import { getToolsByCategory } from '@/data/toolsData'
+import { Tool } from '@/types/tool'
 
 import { Metadata } from 'next'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Tool } from '@/types/tool'
 
 export const metadata: Metadata = {
     title: 'Online Tools - Fx64b.dev',
@@ -30,8 +30,8 @@ export default function ToolsPage() {
             <h1 className="mb-6 text-2xl font-bold">Online Tools</h1>
 
             <p className="mb-6">
-                A collection of tools for developers that I need in my day to day work.
-                All tools work directly in your browser.
+                A collection of tools for developers that I need in my day to
+                day work. All tools work directly in your browser.
             </p>
 
             <Separator className="my-6" />

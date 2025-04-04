@@ -1,21 +1,11 @@
-import { getAllTools, getToolBySlug } from '@/data/toolsData';
+import { getAllTools, getToolBySlug } from '@/data/toolsData'
 
+import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
+import DynamicToolLoader from '@/app/tools/components/DynamicToolLoader'
 
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-
-
-
-import DynamicToolLoader from '@/app/tools/components/DynamicToolLoader';
-
-
-
-import { Separator } from '@/components/ui/separator';
-
-
-
-
+import { Separator } from '@/components/ui/separator'
 
 interface ToolPageProps {
     params: Promise<{
@@ -29,7 +19,9 @@ interface GenerateMetadataProps {
     }>
 }
 
-export async function generateMetadata(props: GenerateMetadataProps): Promise<Metadata> {
+export async function generateMetadata(
+    props: GenerateMetadataProps
+): Promise<Metadata> {
     const params = await props.params
     const slug: string = params.slug
     const tool = getToolBySlug(slug)
@@ -78,7 +70,7 @@ export default async function ToolPage(props: ToolPageProps) {
     return (
         <div className="mx-auto max-w-(--breakpoint-lg)">
             <h1 className="mb-2 text-2xl font-bold">{tool.title}</h1>
-            <p className="mb-6 text-muted-foreground">{tool.description}</p>
+            <p className="text-muted-foreground mb-6">{tool.description}</p>
 
             <Separator className="my-6" />
 
@@ -98,7 +90,7 @@ export default async function ToolPage(props: ToolPageProps) {
                             {tool.tags.map((tag) => (
                                 <span
                                     key={tag}
-                                    className="rounded-full bg-secondary px-3 py-1 text-sm"
+                                    className="bg-secondary rounded-full px-3 py-1 text-sm"
                                 >
                                     {tag}
                                 </span>

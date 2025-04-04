@@ -34,7 +34,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
             <Card className="cursor-pointer transition-all hover:shadow-md md:mx-auto md:max-w-[768px]">
                 <CardHeader className="flex flex-row items-center space-y-0">
                     <Image
-                        className="rounded-md mr-2"
+                        className="mr-2 rounded-md"
                         src={project.logo || '/placeholder.svg'}
                         alt={project.title + ' logo'}
                         width={40}

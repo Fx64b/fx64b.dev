@@ -35,11 +35,12 @@ const toolsData: Tool[] = [
     {
         slug: 'character-word-counter',
         title: 'Character & Word Counter',
-        description: 'Count characters, words, sentences and calculate reading time',
+        description:
+            'Count characters, words, sentences and calculate reading time',
         category: 'utilities',
         tags: ['text', 'count', 'words', 'characters', 'content'],
         popular: true,
-    }
+    },
 ]
 
 export default toolsData

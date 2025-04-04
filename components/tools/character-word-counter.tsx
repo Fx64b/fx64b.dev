@@ -1,15 +1,20 @@
-"use client"
+'use client'
 
-import type React from "react"
+import { Check, Copy } from 'lucide-react'
 
-import { useEffect, useState, useRef } from "react"
-import { Check, Copy } from "lucide-react"
+import type React from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Separator } from "@/components/ui/separator"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface StatCardProps {
     title: string
@@ -21,16 +26,16 @@ function StatCard({ title, value, icon }: StatCardProps) {
     return (
         <Card>
             <CardContent className="flex flex-col items-center p-4 text-center">
-                <span className="text-2xl mb-2">{icon}</span>
-                <h3 className="font-medium text-sm mb-1">{title}</h3>
-                <p className="text-lg font-mono">{value}</p>
+                <span className="mb-2 text-2xl">{icon}</span>
+                <h3 className="mb-1 text-sm font-medium">{title}</h3>
+                <p className="font-mono text-lg">{value}</p>
             </CardContent>
         </Card>
     )
 }
 
 export default function CharacterWordCounter() {
-    const [text, setText] = useState<string>("")
+    const [text, setText] = useState<string>('')
     const [stats, setStats] = useState({
         characters: 0,
         charactersNoSpaces: 0,
@@ -38,8 +43,8 @@ export default function CharacterWordCounter() {
         sentences: 0,
         paragraphs: 0,
         lines: 0,
-        readingTime: "0 seconds",
-        speakingTime: "0 seconds"
+        readingTime: '0 seconds',
+        speakingTime: '0 seconds',
     })
     const [copied, setCopied] = useState<boolean>(false)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -75,31 +80,39 @@ export default function CharacterWordCounter() {
         const characters = text.length
 
         // Characters (without spaces)
-        const charactersNoSpaces = text.replace(/\s/g, "").length
+        const charactersNoSpaces = text.replace(/\s/g, '').length
 
         // Words
-        const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length
+        const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
 
         // Sentences (split by . ! ?)
-        const sentences = text === "" ? 0 : text.split(/[.!?]+/).filter(s => s.trim().length > 0).length
+        const sentences =
+            text === ''
+                ? 0
+                : text.split(/[.!?]+/).filter((s) => s.trim().length > 0).length
 
         // Paragraphs (split by newlines)
-        const paragraphs = text === "" ? 0 : text.split(/\n+/).filter(p => p.trim().length > 0).length
+        const paragraphs =
+            text === ''
+                ? 0
+                : text.split(/\n+/).filter((p) => p.trim().length > 0).length
 
         // Lines
-        const lines = text === "" ? 0 : text.split("\n").length
+        const lines = text === '' ? 0 : text.split('\n').length
 
         // Reading time (average 225 words per minute)
         const readingTimeMinutes = words / 225
-        const readingTime = readingTimeMinutes < 1 ?
-            Math.ceil(readingTimeMinutes * 60) + " seconds" :
-            Math.ceil(readingTimeMinutes) + " minutes"
+        const readingTime =
+            readingTimeMinutes < 1
+                ? Math.ceil(readingTimeMinutes * 60) + ' seconds'
+                : Math.ceil(readingTimeMinutes) + ' minutes'
 
         // Speaking time (average 150 words per minute)
         const speakingTimeMinutes = words / 150
-        const speakingTime = speakingTimeMinutes < 1 ?
-            Math.ceil(speakingTimeMinutes * 60) + " seconds" :
-            Math.ceil(speakingTimeMinutes) + " minutes"
+        const speakingTime =
+            speakingTimeMinutes < 1
+                ? Math.ceil(speakingTimeMinutes * 60) + ' seconds'
+                : Math.ceil(speakingTimeMinutes) + ' minutes'
 
         setStats({
             characters,
@@ -109,7 +122,7 @@ export default function CharacterWordCounter() {
             paragraphs,
             lines,
             readingTime,
-            speakingTime
+            speakingTime,
         })
     }
 
@@ -121,15 +134,17 @@ export default function CharacterWordCounter() {
     }
 
     const clearText = () => {
-        setText("")
+        setText('')
         if (textareaRef.current) {
             textareaRef.current.focus()
         }
     }
 
     return (
-        <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-center mb-4">Character & Word Counter</h1>
+        <div className="mx-auto max-w-3xl">
+            <h1 className="mb-4 text-center text-2xl font-bold">
+                Character & Word Counter
+            </h1>
 
             <Card className="mb-4">
                 <CardContent className="pt-6">
@@ -137,7 +152,7 @@ export default function CharacterWordCounter() {
                         <Textarea
                             ref={textareaRef}
                             placeholder="Type or paste your text here..."
-                            className="min-h-[200px] text-base resize-y"
+                            className="min-h-[200px] resize-y text-base"
                             value={text}
                             onChange={handleTextChange}
                         />
@@ -152,8 +167,12 @@ export default function CharacterWordCounter() {
                                             onClick={copyText}
                                             disabled={!text}
                                         >
-                                            {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
-                                            {copied ? "Copied" : "Copy"}
+                                            {copied ? (
+                                                <Check className="mr-1 h-4 w-4" />
+                                            ) : (
+                                                <Copy className="mr-1 h-4 w-4" />
+                                            )}
+                                            {copied ? 'Copied' : 'Copy'}
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -175,42 +194,85 @@ export default function CharacterWordCounter() {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-                <StatCard title="Characters" value={stats.characters.toString()} icon="📝" />
-                <StatCard title="Characters (no spaces)" value={stats.charactersNoSpaces.toString()} icon="🔤" />
-                <StatCard title="Words" value={stats.words.toString()} icon="📚" />
-                <StatCard title="Sentences" value={stats.sentences.toString()} icon="📃" />
-                <StatCard title="Paragraphs" value={stats.paragraphs.toString()} icon="📄" />
-                <StatCard title="Lines" value={stats.lines.toString()} icon="📑" />
-                <StatCard title="Reading Time" value={stats.readingTime} icon="👁️" />
-                <StatCard title="Speaking Time" value={stats.speakingTime} icon="🗣️" />
+            <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+                <StatCard
+                    title="Characters"
+                    value={stats.characters.toString()}
+                    icon="📝"
+                />
+                <StatCard
+                    title="Characters (no spaces)"
+                    value={stats.charactersNoSpaces.toString()}
+                    icon="🔤"
+                />
+                <StatCard
+                    title="Words"
+                    value={stats.words.toString()}
+                    icon="📚"
+                />
+                <StatCard
+                    title="Sentences"
+                    value={stats.sentences.toString()}
+                    icon="📃"
+                />
+                <StatCard
+                    title="Paragraphs"
+                    value={stats.paragraphs.toString()}
+                    icon="📄"
+                />
+                <StatCard
+                    title="Lines"
+                    value={stats.lines.toString()}
+                    icon="📑"
+                />
+                <StatCard
+                    title="Reading Time"
+                    value={stats.readingTime}
+                    icon="👁️"
+                />
+                <StatCard
+                    title="Speaking Time"
+                    value={stats.speakingTime}
+                    icon="🗣️"
+                />
             </div>
 
             <div className="mt-8 mb-4">
-                <h2 className="text-xl font-semibold mb-4">About the Counter</h2>
+                <h2 className="mb-4 text-xl font-semibold">
+                    About the Counter
+                </h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="font-medium mb-2">How Words Are Counted</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Words are counted by splitting the text at spaces, tabs, and line breaks.
-                                Multiple spaces between words are treated as a single separator.
+                            <h3 className="mb-2 font-medium">
+                                How Words Are Counted
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                                Words are counted by splitting the text at
+                                spaces, tabs, and line breaks. Multiple spaces
+                                between words are treated as a single separator.
                             </p>
-                            <p className="text-sm text-muted-foreground mt-2">
-                                Example: &#34;Hello  world!&#34; contains 2 words.
+                            <p className="text-muted-foreground mt-2 text-sm">
+                                Example: &#34;Hello world!&#34; contains 2
+                                words.
                             </p>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="font-medium mb-2">Reading & Speaking Times</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Reading time is calculated based on an average reading speed of 225 words per minute.
-                                Speaking time uses 150 words per minute.
+                            <h3 className="mb-2 font-medium">
+                                Reading & Speaking Times
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                                Reading time is calculated based on an average
+                                reading speed of 225 words per minute. Speaking
+                                time uses 150 words per minute.
                             </p>
-                            <p className="text-sm text-muted-foreground mt-2">
-                                These are averages and actual times may vary based on complexity and individual reading/speaking rates.
+                            <p className="text-muted-foreground mt-2 text-sm">
+                                These are averages and actual times may vary
+                                based on complexity and individual
+                                reading/speaking rates.
                             </p>
                         </CardContent>
                     </Card>
@@ -220,31 +282,42 @@ export default function CharacterWordCounter() {
             <Separator className="my-6" />
 
             <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">Use Cases</h2>
+                <h2 className="mb-4 text-xl font-semibold">Use Cases</h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="font-medium mb-2">Content Creation</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Track word counts for articles, blog posts, and social media content to meet platform requirements.
+                            <h3 className="mb-2 font-medium">
+                                Content Creation
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                                Track word counts for articles, blog posts, and
+                                social media content to meet platform
+                                requirements.
                             </p>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="font-medium mb-2">SEO Optimization</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Monitor content length for SEO best practices and ensure meta descriptions fit within character limits.
+                            <h3 className="mb-2 font-medium">
+                                SEO Optimization
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                                Monitor content length for SEO best practices
+                                and ensure meta descriptions fit within
+                                character limits.
                             </p>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="font-medium mb-2">Academic Writing</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Check if essays and papers meet the required word count for assignments and publications.
+                            <h3 className="mb-2 font-medium">
+                                Academic Writing
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                                Check if essays and papers meet the required
+                                word count for assignments and publications.
                             </p>
                         </CardContent>
                     </Card>

@@ -1,12 +1,14 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import Link from 'next/link'
+
+import { Button } from '@/components/ui/button'
 
 export default function ToolNotFound() {
     return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-            <h1 className="text-4xl font-bold mb-4">Tool Not Found</h1>
-            <p className="text-xl text-muted-foreground mb-8">
-                The tool you&#39;re looking for doesn&#39;t exist or may have been moved.
+            <h1 className="mb-4 text-4xl font-bold">Tool Not Found</h1>
+            <p className="text-muted-foreground mb-8 text-xl">
+                The tool you&#39;re looking for doesn&#39;t exist or may have
+                been moved.
             </p>
             <div className="flex gap-4">
                 <Button asChild>
@@ -17,5 +19,5 @@ export default function ToolNotFound() {
                 </Button>
             </div>
         </div>
-    );
+    )
 }
