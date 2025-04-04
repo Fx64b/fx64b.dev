@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage --reporter=json --reporter=lcov"
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.1",
