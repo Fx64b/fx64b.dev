@@ -1,30 +1,26 @@
-import {
-    Link,
-    Navbar,
-    NavbarBrand,
-    NavbarContent,
-    NavbarItem,
-} from '@heroui/react'
+import Link from 'next/link'
 
 export function Header() {
     return (
-        <Navbar>
-            <NavbarBrand>
-                <Link
-                    color="foreground"
-                    href="/"
-                    className={'text-lg font-semibold'}
-                >
-                    Fx64b.dev
-                </Link>
-            </NavbarBrand>
-            <NavbarContent justify={'end'}>
-                <NavbarItem>
-                    <Link color="foreground" href="/blog" className={'text-lg'}>
+        <header className="bg-background sticky top-0 z-40 w-full border-b">
+            <div className="container mx-auto flex h-16 items-center justify-between">
+                <div className="ml-2 flex items-center">
+                    <Link
+                        href="/"
+                        className="text-foreground hover:text-primary text-lg font-semibold transition-colors"
+                    >
+                        Fx64b.dev
+                    </Link>
+                </div>
+                <nav className="mr-2 flex items-center space-x-4">
+                    <Link
+                        href="/blog"
+                        className="text-foreground hover:text-primary text-lg transition-colors"
+                    >
                         Blog
                     </Link>
-                </NavbarItem>
-            </NavbarContent>
-        </Navbar>
+                </nav>
+            </div>
+        </header>
     )
 }

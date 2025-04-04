@@ -4,7 +4,7 @@ const projectData: Project[] = [
     {
         title: 'video-archiver',
         description:
-            'A YouTube video downloader and archiver with various tools to manage, categorize, convert and manipulate videos..',
+            'A YouTube video downloader and archiver with various tools to download, manage, categorize, convert, stream and manipulate videos.',
         logo: '/va-logo.png',
         link: 'https://github.com/Fx64b/video-archiver',
         githubLink: 'https://github.com/Fx64b/video-archiver',

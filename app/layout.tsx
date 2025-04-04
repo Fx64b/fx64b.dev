@@ -1,5 +1,3 @@
-import { HeroUIProvider } from '@heroui/react'
-
 import React from 'react'
 
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -24,12 +22,14 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={'bg-background text-foreground dark min-h-fit overflow-x-hidden'}>
-                <HeroUIProvider>
-                    <Header />
-                    {children}
-                    <Footer />
-                </HeroUIProvider>
+            <body
+                className={
+                    'bg-background text-foreground dark min-h-fit overflow-x-hidden'
+                }
+            >
+                <Header />
+                {children}
+                <Footer />
                 <Analytics />
                 <SpeedInsights />
             </body>
