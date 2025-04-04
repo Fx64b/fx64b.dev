@@ -1,3 +1,19 @@
+# [3.1.0](https://github.com/Fx64b/fx64b.dev/compare/v3.0.0...v3.1.0) (2025-04-04)
+
+
+### Bug Fixes
+
+* **test:** failing test because of missing util function after refactoring ([099ceff](https://github.com/Fx64b/fx64b.dev/commit/099ceff330f87a1b9d96395e8c06188fa7785b29))
+* **tool/byte-converter:** copilot review suggestion ([9bb91fe](https://github.com/Fx64b/fx64b.dev/commit/9bb91fe7b486b5f5d59e874c1d14b9d570db7ecf))
+
+
+### Features
+
+* **build:** enhance CI workflow with coverage reporting and improved test commands ([064d042](https://github.com/Fx64b/fx64b.dev/commit/064d042f80ecf889d1c46faf4919db5ad05d7bbc))
+* **ci:** improve coverage reporting and update test command ([73ae966](https://github.com/Fx64b/fx64b.dev/commit/73ae96656585d78d37e38a9ca7ebc92883e1059a))
+* **sitemap:** add tools to sitemap ([368db2a](https://github.com/Fx64b/fx64b.dev/commit/368db2a1e0ee9a24bb3766f7c249ee5a477f5803))
+* **tools:** add several tools ([d48910a](https://github.com/Fx64b/fx64b.dev/commit/d48910ad267e602be38b64f6f238be615dcd2902))
+
 # [3.0.0](https://github.com/Fx64b/fx64b.dev/compare/v2.2.2...v3.0.0) (2025-04-04)
 
 
