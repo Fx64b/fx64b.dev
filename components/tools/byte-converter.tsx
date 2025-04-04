@@ -1,6 +1,5 @@
 'use client'
 
-import { Separator } from '@radix-ui/react-select'
 import { ArrowDown, Check, Copy } from 'lucide-react'
 
 import type React from 'react'
@@ -16,6 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import {
     Tooltip,
     TooltipContent,
