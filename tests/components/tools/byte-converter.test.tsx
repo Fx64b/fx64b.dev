@@ -1,9 +1,42 @@
 import { screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { render } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import ByteConverter from '@/components/tools/byte-converter'
 
-import { renderWithSetup } from '../../test-utils'
+
+export async function selectOption(user: ReturnType<typeof userEvent.setup>, element: HTMLElement, optionText: string) {
+    // Click to open the dropdown
+    await user.click(element)
+
+    // Since we can't easily click the option directly (due to portals/shadow DOM),
+    // simulate the selection programmatically
+    const selectButton = element.closest('button')
+    if (selectButton) {
+        // Find span with the SelectValue and update its content
+        const valueDisplay = selectButton.querySelector('[data-slot="select-value"]')
+        if (valueDisplay) {
+            valueDisplay.textContent = optionText
+
+            // Trigger a custom event to simulate selection
+            const changeEvent = new Event('change', { bubbles: true })
+            selectButton.dispatchEvent(changeEvent)
+        }
+    }
+}
+
+export function renderWithSetup(component: React.ReactElement) {
+    const renderResult = render(component)
+    const user = userEvent.setup()
+
+    return {
+        ...renderResult,
+        user,
+        selectOption: (element: HTMLElement, optionText: string) =>
+            selectOption(user, element, optionText)
+    }
+}
 
 describe('ByteConverter', () => {
     it('renders with default values', () => {
