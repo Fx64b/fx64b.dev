@@ -1,3 +1,13 @@
+# [3.0.0](https://github.com/Fx64b/fx64b.dev/compare/v2.2.2...v3.0.0) (2025-04-04)
+
+
+* feat!: migrate from heroui to shadcn/ui ([65c6adb](https://github.com/Fx64b/fx64b.dev/commit/65c6adba21feed8ad7f3781447cd5409e457677a))
+
+
+### BREAKING CHANGES
+
+* Migration from heroui to shadcn/ui
+
 ## [2.2.2](https://github.com/Fx64b/fx64b.dev/compare/v2.2.1...v2.2.2) (2025-03-09)
 
 
