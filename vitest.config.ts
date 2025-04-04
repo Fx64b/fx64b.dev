@@ -11,6 +11,7 @@ export default defineConfig({
         css: false,
         coverage: {
             provider: 'v8',
+            reporter: ['text', 'json', 'lcov'],
             include: ['components/tools/**'],
         },
     },
