@@ -1,45 +1,44 @@
-import { Card, CardBody, CardHeader, Link } from '@heroui/react'
-import { Spacer } from '@heroui/spacer'
+import Link from 'next/link'
 
 import { getAllPosts } from '@/app/lib/posts'
+
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 export default async function Blog() {
     const posts = getAllPosts()
 
     return (
-        <div className={'w-full'}>
-            <div className={'md:mx-auto md:max-w-(--breakpoint-lg)'}>
+        <div className="w-full">
+            <div className="md:mx-auto md:max-w-[1024px]">
                 <h1>Blog</h1>
-                <Spacer y={6} />
-                {posts.map((post, index) => (
-                    <>
-                        <Link
-                            href={'/blog/' + post.slug}
-                            key={index}
-                            className="block"
-                        >
-                            <Card className="overflow-hidden">
-                                <CardHeader className="rounded-t-lg border-b p-4">
-                                    <p className="text-xl font-semibold text-gray-100">
-                                        {post.title}
-                                    </p>
-                                </CardHeader>
-                                <CardBody className="flex flex-col space-y-2 p-4">
-                                    <div className="text-sm text-gray-500">
-                                        <p>
-                                            By {post.author}, &nbsp; {post.read}{' '}
-                                            read, &nbsp; {post.date}
+                <div className="space-y-6">
+                    {posts.map((post, index) => (
+                        <div key={index} className="my-6">
+                            <Link
+                                href={'/blog/' + post.slug}
+                                className="block transition-colors hover:no-underline"
+                            >
+                                <Card className="hover:bg-muted/50 overflow-hidden">
+                                    <CardHeader className="rounded-t-lg border-b">
+                                        <p className="text-xl font-semibold">
+                                            {post.title}
                                         </p>
-                                    </div>
-                                    <p className="mt-2 text-gray-300">
-                                        {post.description}
-                                    </p>
-                                </CardBody>
-                            </Card>
-                        </Link>
-                        <Spacer y={6} />
-                    </>
-                ))}
+                                    </CardHeader>
+                                    <CardContent className="flex flex-col space-y-2">
+                                        <div className="text-muted-foreground text-sm">
+                                            <p>
+                                                By {post.author}, &nbsp;{' '}
+                                                {post.read} read, &nbsp;{' '}
+                                                {post.date}
+                                            </p>
+                                        </div>
+                                        <p>{post.description}</p>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )

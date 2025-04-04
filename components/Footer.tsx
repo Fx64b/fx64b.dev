@@ -1,4 +1,5 @@
-import { Image, Link } from '@heroui/react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 import { getVersion } from '@/app/lib/version'
 
@@ -7,7 +8,7 @@ export function Footer() {
 
     return (
         <div className={'flex flex-col items-center gap-y-4 p-4'}>
-            <Link isExternal href={'https://github.com/Fx64b'}>
+            <Link href={'https://github.com/Fx64b'} target={'_blank'}>
                 <Image
                     src={'/github-mark-white.svg'}
                     width={40}

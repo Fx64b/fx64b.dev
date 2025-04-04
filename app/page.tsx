@@ -1,10 +1,10 @@
 import projectData from '@/data/projectData'
-import { Image } from '@heroui/image'
-import { Spacer } from '@heroui/spacer'
 
 import { Metadata } from 'next'
+import Image from 'next/image'
 
 import ProjectCard from '@/components/ProjectCard'
+import { Separator } from '@/components/ui/separator'
 
 export async function generateMetadata(): Promise<Metadata> {
     return {
@@ -47,12 +47,14 @@ export default function Home() {
                 <Image
                     className={'w-48 rounded-full border-2 border-white'}
                     src="/logo.svg"
+                    width={200}
+                    height={200}
                     alt={
                         'Fx64b profile picture displaying the letter F in a serif font'
                     }
                 />
                 <h1 className={'text-2xl font-bold'}>Fx64b</h1>
-                <Spacer y={4} />
+                <div className={'mx-0 my-4 w-full'} />
                 <h2 className={'text-xl font-semibold'}>About Me</h2>
                 <p>
                     Hey! I&apos;m Fabio aka Fx64b, a software engineer from
@@ -60,22 +62,21 @@ export default function Home() {
                 </p>
                 <p>
                     I like working with React / Next.js, TypeScript, Tailwind,
-                    Java and Angular.
+                    Java, GO and Angular.
                 </p>
                 <p>
                     I&apos;m currently learning Go and Cybersecurity
                     fundamentals.
                 </p>
-                <Spacer y={2} />
+
+                <div className={'mx-0 my-2 w-full'} />
+                <Separator />
+                <div className={'mx-0 my-2 w-full'} />
 
                 <h2 className={'self-start text-xl'}>Projects</h2>
                 <div className={'flex w-full flex-col gap-y-6'}>
                     {projectData.map((project, index) => (
-                        <>
                         <ProjectCard key={index} project={project} />
-                            {/*TODO: remove hr tag, this is a temporary fix until heroui has tailwind 4 support*/}
-                        <hr/>
-                        </>
                     ))}
                 </div>
             </div>
