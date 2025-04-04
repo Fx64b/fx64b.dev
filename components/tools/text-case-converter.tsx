@@ -213,15 +213,22 @@ export default function TextCaseConverter() {
                             <TooltipTrigger asChild>
                                 <Button
                                     variant="outline"
+                                    data-testid="copy-button"
                                     size="icon"
                                     onClick={handleCopy}
                                     disabled={!outputText}
                                     className="absolute top-4 right-4 h-8 w-8"
                                 >
                                     {copied ? (
-                                        <Check className="h-4 w-4" />
+                                        <Check
+                                            data-testid="check-icon"
+                                            className="h-4 w-4"
+                                        />
                                     ) : (
-                                        <Copy className="h-4 w-4" />
+                                        <Copy
+                                            data-testid="copy-icon"
+                                            className="h-4 w-4"
+                                        />
                                     )}
                                     <span className="sr-only">
                                         Copy to clipboard

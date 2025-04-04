@@ -296,6 +296,7 @@ export default function ColorConverter() {
 
                         <div
                             style={getColorPreviewStyle()}
+                            data-testid="color-display"
                             className="border"
                         />
 
@@ -324,6 +325,7 @@ export default function ColorConverter() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
+                                                    data-testid="copy-button"
                                                     className="absolute top-2 right-2 h-6 w-6"
                                                     onClick={() =>
                                                         copyToClipboard(
@@ -332,9 +334,15 @@ export default function ColorConverter() {
                                                     }
                                                 >
                                                     {copied === format ? (
-                                                        <Check className="h-3.5 w-3.5" />
+                                                        <Check
+                                                            data-testid="check-icon"
+                                                            className="h-3.5 w-3.5"
+                                                        />
                                                     ) : (
-                                                        <Copy className="h-3.5 w-3.5" />
+                                                        <Copy
+                                                            data-testid="copy-icon"
+                                                            className="h-3.5 w-3.5"
+                                                        />
                                                     )}
                                                     <span className="sr-only">
                                                         Copy value

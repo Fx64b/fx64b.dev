@@ -166,11 +166,18 @@ export default function CharacterWordCounter() {
                                             size="sm"
                                             onClick={copyText}
                                             disabled={!text}
+                                            data-testid="copy-button"
                                         >
                                             {copied ? (
-                                                <Check className="mr-1 h-4 w-4" />
+                                                <Check
+                                                    data-testid="check-icon"
+                                                    className="mr-1 h-4 w-4"
+                                                />
                                             ) : (
-                                                <Copy className="mr-1 h-4 w-4" />
+                                                <Copy
+                                                    data-testid="copy-icon"
+                                                    className="mr-1 h-4 w-4"
+                                                />
                                             )}
                                             {copied ? 'Copied' : 'Copy'}
                                         </Button>

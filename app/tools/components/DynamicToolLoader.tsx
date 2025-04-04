@@ -16,7 +16,6 @@ export default function DynamicToolLoader({ slug }: DynamicToolLoaderProps) {
                 const component = await import(`@/components/tools/${slug}`)
                 setComponent(() => component.default)
             } catch (err) {
-                console.error(`Error loading tool: ${slug}`, err)
                 setError(true)
             }
         }

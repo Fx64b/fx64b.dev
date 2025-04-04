@@ -191,15 +191,22 @@ export default function ByteConverter() {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="absolute top-2 right-2 h-6 w-6"
+                                                    data-testid="copy-button"
                                                     onClick={() =>
                                                         copyToClipboard(unit)
                                                     }
                                                     disabled={!results[unit]}
                                                 >
                                                     {copiedUnit === unit ? (
-                                                        <Check className="h-3.5 w-3.5" />
+                                                        <Check
+                                                            data-testid="check-icon"
+                                                            className="h-3.5 w-3.5"
+                                                        />
                                                     ) : (
-                                                        <Copy className="h-3.5 w-3.5" />
+                                                        <Copy
+                                                            data-testid="copy-icon"
+                                                            className="h-3.5 w-3.5"
+                                                        />
                                                     )}
                                                     <span className="sr-only">
                                                         Copy value
