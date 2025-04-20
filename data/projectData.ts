@@ -4,11 +4,20 @@ const projectData: Project[] = [
     {
         title: 'video-archiver',
         description:
-            'A YouTube video downloader and archiver with various tools to download, manage, categorize, convert, stream and manipulate videos.',
+            'A YouTube video downloader and archiver with various tools to download, manage, categorize, convert, stream and manipulate videos. The project is still in early development stage.',
         logo: '/va-logo.png',
         link: 'https://github.com/Fx64b/video-archiver',
         githubLink: 'https://github.com/Fx64b/video-archiver',
         status: 'In Progress',
+    },
+    {
+        title: 'skool-loom-dl',
+        description:
+            'Skool-Loom-Downloader is a lightweight Go utility that automatically scrapes and downloads Loom videos from Skool.com classrooms. It supports both cookie-based and email/password authentication, handles JSON and Netscape cookie formats, and comes with Docker support for easy deployment.',
+        logo: '/sld.webp',
+        link: 'https://github.com/Fx64b/skool-loom-dl',
+        githubLink: 'https://github.com/Fx64b/skool-loom-dl',
+        status: 'Finished',
     },
     {
         title: 'This Portfolio',
