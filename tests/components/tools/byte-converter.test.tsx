@@ -1,12 +1,15 @@
 import { screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 
 import ByteConverter from '@/components/tools/byte-converter'
 
-
-export async function selectOption(user: ReturnType<typeof userEvent.setup>, element: HTMLElement, optionText: string) {
+export async function selectOption(
+    user: ReturnType<typeof userEvent.setup>,
+    element: HTMLElement,
+    optionText: string
+) {
     // Click to open the dropdown
     await user.click(element)
 
@@ -15,7 +18,9 @@ export async function selectOption(user: ReturnType<typeof userEvent.setup>, ele
     const selectButton = element.closest('button')
     if (selectButton) {
         // Find span with the SelectValue and update its content
-        const valueDisplay = selectButton.querySelector('[data-slot="select-value"]')
+        const valueDisplay = selectButton.querySelector(
+            '[data-slot="select-value"]'
+        )
         if (valueDisplay) {
             valueDisplay.textContent = optionText
 
@@ -34,7 +39,7 @@ export function renderWithSetup(component: React.ReactElement) {
         ...renderResult,
         user,
         selectOption: (element: HTMLElement, optionText: string) =>
-            selectOption(user, element, optionText)
+            selectOption(user, element, optionText),
     }
 }
 

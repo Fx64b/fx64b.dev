@@ -3,6 +3,8 @@ import Link from 'next/link'
 
 import { getVersion } from '@/app/lib/version'
 
+import { Cross } from '@/components/Cross'
+
 export function Footer() {
     const version = getVersion()
 
@@ -16,7 +18,8 @@ export function Footer() {
                     alt={'GitHub logo'}
                 />
             </Link>
-            &copy; 2025 Fx64b - v{version}
+            <Cross />
+            2025 Fx64b - v{version}
         </div>
     )
 }
