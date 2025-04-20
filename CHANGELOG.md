@@ -1,3 +1,15 @@
+# [3.2.0](https://github.com/Fx64b/fx64b.dev/compare/v3.1.0...v3.2.0) (2025-04-20)
+
+
+### Bug Fixes
+
+* remove styles that partly broke light mode ([97c404e](https://github.com/Fx64b/fx64b.dev/commit/97c404ed1a277a4b40dec821cb81197f6b47a9de))
+
+
+### Features
+
+* add new project 'skool-loom-dl' and update description for 'video-archiver' ([9954433](https://github.com/Fx64b/fx64b.dev/commit/9954433aa6aff161922dc0dfc469955044e54ef3))
+
 # [3.1.0](https://github.com/Fx64b/fx64b.dev/compare/v3.0.0...v3.1.0) (2025-04-04)
 
 
