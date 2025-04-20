@@ -58,7 +58,11 @@ export default function Home() {
                 <h2 className={'text-xl font-semibold'}>About Me</h2>
                 <p>
                     Hey! I&apos;m Fabio aka Fx64b, a software engineer from
-                    Switzerland.
+                    Switzerland{' '}
+                    <span className="relative ml-1 inline-block h-[1.2em] w-[1.2em] rounded bg-red-600 align-middle">
+                        <span className="absolute top-1/12 right-[37%] bottom-1/12 left-[37%] bg-white"></span>
+                        <span className="absolute top-[37%] right-1/12 bottom-[37%] left-1/12 bg-white"></span>
+                    </span>
                 </p>
                 <p>
                     I like working with React / Next.js, TypeScript, Tailwind,

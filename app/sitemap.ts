@@ -1,7 +1,8 @@
+import { getAllTools } from '@/data/toolsData'
+
 import { MetadataRoute } from 'next'
 
 import { getPostBySlug, getPostSlugs } from '@/app/lib/posts'
-import { getAllTools } from '@/data/toolsData'
 
 export async function generateSitemaps() {
     const slugs = getPostSlugs()
@@ -14,8 +15,8 @@ export async function generateSitemaps() {
 }
 
 export default async function sitemap({
-                                          id,
-                                      }: {
+    id,
+}: {
     id: number
 }): Promise<MetadataRoute.Sitemap> {
     const BASE_URL = 'https://fx64b.dev'
@@ -25,16 +26,16 @@ export default async function sitemap({
 
     // Combine both blog posts and tools
     const allItems = [
-        ...slugs.map(slug => ({
+        ...slugs.map((slug) => ({
             type: 'blog',
-            slug: slug.replace(/\.md$/, '')
+            slug: slug.replace(/\.md$/, ''),
         })),
-        ...tools.map(tool => ({
+        ...tools.map((tool) => ({
             type: 'tool',
             slug: tool.slug,
-            lastModified: new Date().toISOString()
-        }))
-    ];
+            lastModified: new Date().toISOString(),
+        })),
+    ]
 
     const start = id * itemsPerSitemap
     const end = start + itemsPerSitemap
