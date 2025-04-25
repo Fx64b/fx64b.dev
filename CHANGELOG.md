@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/Fx64b/fx64b.dev/compare/v3.2.0...v3.2.1) (2025-04-25)
+
+
+### Bug Fixes
+
+* **hours-to-decimal:** improve decimal rounding in HourToDecimalConverter and add corresponding tests ([3ea8c81](https://github.com/Fx64b/fx64b.dev/commit/3ea8c81c836c3c68191e8ce572fbd579f1af7957))
+
 # [3.2.0](https://github.com/Fx64b/fx64b.dev/compare/v3.1.0...v3.2.0) (2025-04-20)
 
 
