@@ -62,7 +62,7 @@
     "eslint-config-next": "15.2.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-unused-imports": "^4.1.4",
-    "happy-dom": "^17.4.4",
+    "happy-dom": "^17.4.6",
     "jsdom": "^26.1.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
