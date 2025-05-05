@@ -1,3 +1,10 @@
+## [3.2.2](https://github.com/Fx64b/fx64b.dev/compare/v3.2.1...v3.2.2) (2025-05-05)
+
+
+### Bug Fixes
+
+* **projectData:** update logo path in project metadata ([0633aa6](https://github.com/Fx64b/fx64b.dev/commit/0633aa65d9e1805ecfb36396b7a3a0569de01f1e))
+
 ## [3.2.1](https://github.com/Fx64b/fx64b.dev/compare/v3.2.0...v3.2.1) (2025-04-25)
 
 
