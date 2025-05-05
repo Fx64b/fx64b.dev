@@ -14,7 +14,7 @@ const projectData: Project[] = [
         title: 'Flashcard Learning App',
         description:
             'A modern flashcard application for effective learning using the Spaced Repetition System (SRS). Features email authentication, study time tracking, progress analytics, and bulk card import. Built with Next.js 15, TypeScript, and Turso database. Currently in early development.',
-        logo: '/logo.svg',
+        logo: '/learn-logo.png',
         link: 'https://learn.fx64b.dev',
         githubLink: 'https://github.com/Fx64b/learn',
         status: 'In Progress',
