@@ -11,6 +11,15 @@ const projectData: Project[] = [
         status: 'In Progress',
     },
     {
+        title: 'Flashcard Learning App',
+        description:
+            'A modern flashcard application for effective learning using the Spaced Repetition System (SRS). Features email authentication, study time tracking, progress analytics, and bulk card import. Built with Next.js 15, TypeScript, and Turso database. Currently in early development.',
+        logo: '/logo.svg',
+        link: 'https://learn.fx64b.dev',
+        githubLink: 'https://github.com/Fx64b/learn',
+        status: 'In Progress',
+    },
+    {
         title: 'skool-loom-dl',
         description:
             'Skool-Loom-Downloader is a lightweight Go utility that automatically scrapes and downloads Loom videos from Skool.com classrooms. It supports both cookie-based and email/password authentication, handles JSON and Netscape cookie formats, and comes with Docker support for easy deployment.',
