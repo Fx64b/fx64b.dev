@@ -1,26 +1,10 @@
-import { Position, Room, Character, FootstepInstance, Schedule } from './types'
+import { Position, Room, Character, FootstepInstance, Schedule, PathfindingResult } from './types'
 import { ROOMS, STEP_SIZE, WANDER_RADIUS, FOOTSTEP_SPACING } from './constants'
 import { findPath } from './pathfinding'
 import { getCurrentTimeBlock } from './time'
 import React from 'react'
+import { BASE_SCHEDULE, TEACHER_SCHEDULE, SLYTHERIN_SCHEDULE, RAVENCLAW_SCHEDULE, HEADMASTER_SCHEDULE } from './constants'
 
-const BASE_SCHEDULE: Schedule[] = [
-    { timeBlock: 'NIGHT1', activity: 'Sleep', room: 'gryffindor', mode: 'SLEEP' },
-    { timeBlock: 'NIGHT2', activity: 'Sleep', room: 'gryffindor', mode: 'SLEEP' },
-    { timeBlock: 'MORNING', activity: 'Breakfast', room: 'great_hall', mode: 'WALK' },
-    { timeBlock: 'NOON', activity: 'Class', room: 'transfiguration', mode: 'WALK' },
-    { timeBlock: 'AFTERNOON', activity: 'Class', room: 'potions', mode: 'WALK' },
-    { timeBlock: 'EVENING', activity: 'Free Time', room: 'gryffindor', mode: 'WANDER' },
-]
-
-const TEACHER_SCHEDULE: Schedule[] = [
-    { timeBlock: 'NIGHT1', activity: 'Sleep', room: 'teachers_room', mode: 'SLEEP' },
-    { timeBlock: 'NIGHT2', activity: 'Sleep', room: 'teachers_room', mode: 'SLEEP' },
-    { timeBlock: 'MORNING', activity: 'Breakfast', room: 'great_hall', mode: 'WALK' },
-    { timeBlock: 'NOON', activity: 'Teach', room: 'transfiguration', mode: 'WANDER' },
-    { timeBlock: 'AFTERNOON', activity: 'Teach', room: 'potions', mode: 'WANDER' },
-    { timeBlock: 'EVENING', activity: 'Rest', room: 'teachers_room', mode: 'WANDER' },
-]
 
 let setFootstepsRef: React.Dispatch<React.SetStateAction<FootstepInstance[]>> | null = null;
 
@@ -80,6 +64,7 @@ const createFootstep = (position: Position, isLeft: boolean, angle: number): Foo
     return footstep;
 };
 
+
 const handleWalking = (
     character: Character,
     targetRoom: Room,
@@ -96,10 +81,30 @@ const handleWalking = (
 
     // If no path or path completed, calculate new path
     if (!character.path.length || character.pathIndex >= character.path.length) {
-        const newPath = findPath(character.position, character.targetPosition, grid)
+        const pathResult: PathfindingResult = findPath(character.position, character.targetPosition, grid)
+
+        // If pathfinding failed but we have an approximate path, use it
+        if (!pathResult.success && pathResult.path.length > 0) {
+            console.log(`Pathfinding issue for ${character.name}: ${pathResult.message}`);
+            return {
+                position: character.position,
+                path: pathResult.path,
+                pathIndex: 0,
+            }
+        }
+        // If pathfinding completely failed, stay in place
+        else if (!pathResult.success) {
+            console.log(`Pathfinding failed for ${character.name}: ${pathResult.message}`);
+            return {
+                position: character.position,
+                path: [],
+                pathIndex: 0,
+            }
+        }
+
         return {
             position: character.position,
-            path: newPath,
+            path: pathResult.path,
             pathIndex: 0,
         }
     }
@@ -128,10 +133,10 @@ const handleWalking = (
             }
         }
         // If not in room yet, recalculate path
-        const newPath = findPath(character.position, roomCenter, grid)
+        const pathResult = findPath(character.position, roomCenter, grid)
         return {
             position: character.position,
-            path: newPath,
+            path: pathResult.success ? pathResult.path : (pathResult.path.length > 0 ? pathResult.path : []),
             pathIndex: 0,
         }
     }
@@ -161,7 +166,7 @@ const handleWandering = (
             const newPath = findPath(character.position, roomCenter, grid)
             return {
                 position: character.position,
-                path: newPath,
+                path: newPath.path,
                 pathIndex: 0,
             }
         }
@@ -261,9 +266,31 @@ const updateCharacter = (
     }
 }
 
+
 const getCurrentSchedule = (character: Character, gameTime: number): Schedule => {
     const timeBlock = getCurrentTimeBlock(gameTime)
-    const scheduleList = character.type === 'STUDENT' ? BASE_SCHEDULE : TEACHER_SCHEDULE
+
+    let scheduleList;
+    switch(character.type) {
+        case 'STUDENT':
+            scheduleList = BASE_SCHEDULE;
+            break;
+        case 'TEACHER':
+            scheduleList = TEACHER_SCHEDULE;
+            break;
+        case 'SLYTHERIN':
+            scheduleList = SLYTHERIN_SCHEDULE;
+            break;
+        case 'RAVENCLAW':
+            scheduleList = RAVENCLAW_SCHEDULE;
+            break;
+        case 'HEADMASTER':
+            scheduleList = HEADMASTER_SCHEDULE;
+            break;
+        default:
+            scheduleList = BASE_SCHEDULE;
+    }
+
     return scheduleList.find((s) => s.timeBlock === timeBlock) || scheduleList[0]
 }
 

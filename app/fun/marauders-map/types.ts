@@ -14,6 +14,9 @@ export type CharacterMode =
 export type CharacterType =
     | 'STUDENT'
     | 'TEACHER'
+    | 'SLYTHERIN'
+    | 'RAVENCLAW'
+    | 'HEADMASTER'
 
 export interface Position {
     x: number
@@ -81,12 +84,6 @@ export interface MovementState {
     targetPosition?: Position
 }
 
-export interface PathfindingResult {
-    success: boolean
-    path: Position[]
-    message?: string
-}
-
 export interface GridCell {
     x: number
     y: number
@@ -99,4 +96,10 @@ export interface GridCell {
 export interface Vector2D {
     x: number
     y: number
+}
+
+export interface PathfindingResult {
+    success: boolean;
+    path: Position[];
+    message?: string;
 }
