@@ -1,12 +1,9 @@
 import { Character, Position, Room, Schedule } from './types'
 
-
-
-
-export const PATHFINDING_TIMEOUT = 1000;
+export const PATHFINDING_TIMEOUT = 1000
 export const FOOTSTEP_FADE_DURATION = 3000
 export const FOOTSTEP_SPACING = 300
-export const FOOTPRINT_SCALE = 0.02;
+export const FOOTPRINT_SCALE = 0.02
 
 export const SVG_PATHS = {
     leftFoot:
@@ -15,7 +12,7 @@ export const SVG_PATHS = {
         'M436.927,37.994c-79.01-25.268-103.68,68.142-104.03,111.472c-0.642,79.425,17.828,160.524,17.828,160.524l136.986,10.244C528.038,227.354,522.704,65.426,436.927,37.994z M345.925,342.008c0,0-31.375,126.697,49.803,135.703c91.619,10.164,87.016-121.318,87.016-121.318L345.925,342.008z',
 }
 export const GAME_SPEED = 6 * 60 * 1000
-export const TIME_SCALE = 0.25  // hours per second of real time
+export const TIME_SCALE = 0.25 // hours per second of real time
 
 export const STEP_SIZE = 1
 export const GRID_SIZE = 10
@@ -59,19 +56,18 @@ export const ROOMS: Room[] = [
     },
 ]
 
-
 export const INITIAL_CHARACTERS: Character[] = [
     {
         id: '1',
         name: 'Harry Potter',
         type: 'STUDENT',
         position: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 75,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 75,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 75,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 75,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 75,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 75,
         },
         mode: 'SLEEP',
         path: [],
@@ -82,12 +78,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Ron Weasley',
         type: 'STUDENT',
         position: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 50,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 75,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 50,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 75,
         },
         mode: 'SLEEP',
         path: [],
@@ -98,12 +94,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Hermione Granger',
         type: 'STUDENT',
         position: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 100,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 75,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 75,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 100,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 75,
         },
         mode: 'SLEEP',
         path: [],
@@ -114,12 +110,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Minerva McGonagall',
         type: 'TEACHER',
         position: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 50,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 50,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 50,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 50,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 50,
         },
         mode: 'SLEEP',
         path: [],
@@ -130,12 +126,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Severus Snape',
         type: 'TEACHER',
         position: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 100,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 50,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 100,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 50,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 100,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 50,
         },
         mode: 'SLEEP',
         path: [],
@@ -146,12 +142,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Draco Malfoy',
         type: 'SLYTHERIN',
         position: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 30,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 80,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 30,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 80,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 30,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 80,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 30,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 80,
         },
         mode: 'SLEEP',
         path: [],
@@ -162,12 +158,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Pansy Parkinson',
         type: 'SLYTHERIN',
         position: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 70,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 80,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 70,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 80,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 70,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 80,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 70,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 80,
         },
         mode: 'SLEEP',
         path: [],
@@ -178,12 +174,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Luna Lovegood',
         type: 'RAVENCLAW',
         position: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 25,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 100,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 25,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 100,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 25,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 100,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 25,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 100,
         },
         mode: 'SLEEP',
         path: [],
@@ -194,12 +190,12 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Cho Chang',
         type: 'RAVENCLAW',
         position: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 125,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 100,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 125,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 100,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'gryffindor')!.position.x + 125,
-            y: ROOMS.find(r => r.id === 'gryffindor')!.position.y + 100,
+            x: ROOMS.find((r) => r.id === 'gryffindor')!.position.x + 125,
+            y: ROOMS.find((r) => r.id === 'gryffindor')!.position.y + 100,
         },
         mode: 'SLEEP',
         path: [],
@@ -210,17 +206,17 @@ export const INITIAL_CHARACTERS: Character[] = [
         name: 'Albus Dumbledore',
         type: 'HEADMASTER',
         position: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 75,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 25,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 75,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 25,
         },
         targetPosition: {
-            x: ROOMS.find(r => r.id === 'teachers_room')!.position.x + 75,
-            y: ROOMS.find(r => r.id === 'teachers_room')!.position.y + 25,
+            x: ROOMS.find((r) => r.id === 'teachers_room')!.position.x + 75,
+            y: ROOMS.find((r) => r.id === 'teachers_room')!.position.y + 25,
         },
         mode: 'WANDER', // Dumbledore starts awake
         path: [],
         pathIndex: 0,
-    }
+    },
 ]
 
 export interface Corridor {
@@ -276,51 +272,194 @@ export const CORRIDORS: Corridor[] = [
 ]
 
 export const BASE_SCHEDULE: Schedule[] = [
-    { timeBlock: 'NIGHT1', activity: 'Sleep', room: 'gryffindor', mode: 'SLEEP' },
-    { timeBlock: 'NIGHT2', activity: 'Sleep', room: 'gryffindor', mode: 'SLEEP' },
-    { timeBlock: 'MORNING', activity: 'Breakfast', room: 'great_hall', mode: 'WALK' },
-    { timeBlock: 'NOON', activity: 'Class', room: 'transfiguration', mode: 'WALK' },
-    { timeBlock: 'AFTERNOON', activity: 'Class', room: 'potions', mode: 'WALK' },
-    { timeBlock: 'EVENING', activity: 'Free Time', room: 'gryffindor', mode: 'WANDER' },
+    {
+        timeBlock: 'NIGHT1',
+        activity: 'Sleep',
+        room: 'gryffindor',
+        mode: 'SLEEP',
+    },
+    {
+        timeBlock: 'NIGHT2',
+        activity: 'Sleep',
+        room: 'gryffindor',
+        mode: 'SLEEP',
+    },
+    {
+        timeBlock: 'MORNING',
+        activity: 'Breakfast',
+        room: 'great_hall',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'NOON',
+        activity: 'Class',
+        room: 'transfiguration',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'AFTERNOON',
+        activity: 'Class',
+        room: 'potions',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'EVENING',
+        activity: 'Free Time',
+        room: 'gryffindor',
+        mode: 'WANDER',
+    },
 ]
 
 export const TEACHER_SCHEDULE: Schedule[] = [
-    { timeBlock: 'NIGHT1', activity: 'Sleep', room: 'teachers_room', mode: 'SLEEP' },
-    { timeBlock: 'NIGHT2', activity: 'Sleep', room: 'teachers_room', mode: 'SLEEP' },
-    { timeBlock: 'MORNING', activity: 'Breakfast', room: 'great_hall', mode: 'WALK' },
-    { timeBlock: 'NOON', activity: 'Teach', room: 'transfiguration', mode: 'WANDER' },
-    { timeBlock: 'AFTERNOON', activity: 'Teach', room: 'potions', mode: 'WANDER' },
-    { timeBlock: 'EVENING', activity: 'Rest', room: 'teachers_room', mode: 'WANDER' },
+    {
+        timeBlock: 'NIGHT1',
+        activity: 'Sleep',
+        room: 'teachers_room',
+        mode: 'SLEEP',
+    },
+    {
+        timeBlock: 'NIGHT2',
+        activity: 'Sleep',
+        room: 'teachers_room',
+        mode: 'SLEEP',
+    },
+    {
+        timeBlock: 'MORNING',
+        activity: 'Breakfast',
+        room: 'great_hall',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'NOON',
+        activity: 'Teach',
+        room: 'transfiguration',
+        mode: 'WANDER',
+    },
+    {
+        timeBlock: 'AFTERNOON',
+        activity: 'Teach',
+        room: 'potions',
+        mode: 'WANDER',
+    },
+    {
+        timeBlock: 'EVENING',
+        activity: 'Rest',
+        room: 'teachers_room',
+        mode: 'WANDER',
+    },
 ]
-
 
 // Slytherin Schedule
 export const SLYTHERIN_SCHEDULE: Schedule[] = [
-    { timeBlock: 'NIGHT1', activity: 'Sleep', room: 'teachers_room', mode: 'SLEEP' }, // Using teachers room as slytherin dorm temporarily
-    { timeBlock: 'NIGHT2', activity: 'Sleep', room: 'teachers_room', mode: 'SLEEP' },
-    { timeBlock: 'MORNING', activity: 'Breakfast', room: 'great_hall', mode: 'WALK' },
-    { timeBlock: 'NOON', activity: 'Class', room: 'potions', mode: 'WALK' },  // Slytherins prefer potions
-    { timeBlock: 'AFTERNOON', activity: 'Class', room: 'transfiguration', mode: 'WALK' },
-    { timeBlock: 'EVENING', activity: 'Meeting', room: 'teachers_room', mode: 'WANDER' },
+    {
+        timeBlock: 'NIGHT1',
+        activity: 'Sleep',
+        room: 'teachers_room',
+        mode: 'SLEEP',
+    }, // Using teachers room as slytherin dorm temporarily
+    {
+        timeBlock: 'NIGHT2',
+        activity: 'Sleep',
+        room: 'teachers_room',
+        mode: 'SLEEP',
+    },
+    {
+        timeBlock: 'MORNING',
+        activity: 'Breakfast',
+        room: 'great_hall',
+        mode: 'WALK',
+    },
+    { timeBlock: 'NOON', activity: 'Class', room: 'potions', mode: 'WALK' }, // Slytherins prefer potions
+    {
+        timeBlock: 'AFTERNOON',
+        activity: 'Class',
+        room: 'transfiguration',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'EVENING',
+        activity: 'Meeting',
+        room: 'teachers_room',
+        mode: 'WANDER',
+    },
 ]
 
 // Ravenclaw Schedule
 export const RAVENCLAW_SCHEDULE: Schedule[] = [
-    { timeBlock: 'NIGHT1', activity: 'Sleep', room: 'gryffindor', mode: 'SLEEP' }, // Using gryffindor as ravenclaw dorm temporarily
-    { timeBlock: 'NIGHT2', activity: 'Study', room: 'gryffindor', mode: 'WANDER' }, // Ravenclaws study late
-    { timeBlock: 'MORNING', activity: 'Breakfast', room: 'great_hall', mode: 'WALK' },
-    { timeBlock: 'NOON', activity: 'Class', room: 'transfiguration', mode: 'WALK' },
-    { timeBlock: 'AFTERNOON', activity: 'Study', room: 'great_hall', mode: 'WANDER' }, // Study in Great Hall
-    { timeBlock: 'EVENING', activity: 'Free Time', room: 'gryffindor', mode: 'WANDER' },
+    {
+        timeBlock: 'NIGHT1',
+        activity: 'Sleep',
+        room: 'gryffindor',
+        mode: 'SLEEP',
+    }, // Using gryffindor as ravenclaw dorm temporarily
+    {
+        timeBlock: 'NIGHT2',
+        activity: 'Study',
+        room: 'gryffindor',
+        mode: 'WANDER',
+    }, // Ravenclaws study late
+    {
+        timeBlock: 'MORNING',
+        activity: 'Breakfast',
+        room: 'great_hall',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'NOON',
+        activity: 'Class',
+        room: 'transfiguration',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'AFTERNOON',
+        activity: 'Study',
+        room: 'great_hall',
+        mode: 'WANDER',
+    }, // Study in Great Hall
+    {
+        timeBlock: 'EVENING',
+        activity: 'Free Time',
+        room: 'gryffindor',
+        mode: 'WANDER',
+    },
 ]
 
 // Headmaster Schedule
 export const HEADMASTER_SCHEDULE: Schedule[] = [
-    { timeBlock: 'NIGHT1', activity: 'Work', room: 'teachers_room', mode: 'WANDER' }, // Headmasters work late
-    { timeBlock: 'NIGHT2', activity: 'Sleep', room: 'teachers_room', mode: 'SLEEP' },
-    { timeBlock: 'MORNING', activity: 'Breakfast', room: 'great_hall', mode: 'WALK' },
-    { timeBlock: 'NOON', activity: 'Meeting', room: 'teachers_room', mode: 'WANDER' },
-    { timeBlock: 'AFTERNOON', activity: 'Observe', room: 'transfiguration', mode: 'WALK' },
-    { timeBlock: 'EVENING', activity: 'Dinner', room: 'great_hall', mode: 'WALK' },
+    {
+        timeBlock: 'NIGHT1',
+        activity: 'Work',
+        room: 'teachers_room',
+        mode: 'WANDER',
+    }, // Headmasters work late
+    {
+        timeBlock: 'NIGHT2',
+        activity: 'Sleep',
+        room: 'teachers_room',
+        mode: 'SLEEP',
+    },
+    {
+        timeBlock: 'MORNING',
+        activity: 'Breakfast',
+        room: 'great_hall',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'NOON',
+        activity: 'Meeting',
+        room: 'teachers_room',
+        mode: 'WANDER',
+    },
+    {
+        timeBlock: 'AFTERNOON',
+        activity: 'Observe',
+        room: 'transfiguration',
+        mode: 'WALK',
+    },
+    {
+        timeBlock: 'EVENING',
+        activity: 'Dinner',
+        room: 'great_hall',
+        mode: 'WALK',
+    },
 ]
-

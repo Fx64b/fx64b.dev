@@ -1,15 +1,15 @@
 export type TimeBlock =
-    | 'NIGHT1'    // 22:00 - 06:00
-    | 'NIGHT2'    // 22:00 - 06:00
-    | 'MORNING'   // 06:00 - 10:00
-    | 'NOON'      // 10:00 - 14:00
+    | 'NIGHT1' // 22:00 - 06:00
+    | 'NIGHT2' // 22:00 - 06:00
+    | 'MORNING' // 06:00 - 10:00
+    | 'NOON' // 10:00 - 14:00
     | 'AFTERNOON' // 14:00 - 18:00
-    | 'EVENING'   // 18:00 - 22:00
+    | 'EVENING' // 18:00 - 22:00
 
 export type CharacterMode =
-    | 'WALK'   // Moving between rooms
+    | 'WALK' // Moving between rooms
     | 'WANDER' // Free movement within a room
-    | 'SLEEP'  // Stationary in room
+    | 'SLEEP' // Stationary in room
 
 export type CharacterType =
     | 'STUDENT'
@@ -99,7 +99,7 @@ export interface Vector2D {
 }
 
 export interface PathfindingResult {
-    success: boolean;
-    path: Position[];
-    message?: string;
+    success: boolean
+    path: Position[]
+    message?: string
 }

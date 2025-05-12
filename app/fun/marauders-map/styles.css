@@ -51,12 +51,13 @@
     font-weight: bold;
 }
 
-
 .map-wrapper {
     transform-origin: center;
     transform: scale(0.1);
     opacity: 0;
-    transition: transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 1s ease-in;
+    transition:
+        transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 1s ease-in;
 }
 
 .map-wrapper.unfolded {
@@ -74,7 +75,8 @@
     gap: 5px;
 }
 
-.control-button, .toggle-button {
+.control-button,
+.toggle-button {
     background-color: rgba(139, 69, 19, 0.7);
     color: #f5e8cb;
     border: 1px solid #5c3a21;
@@ -86,7 +88,8 @@
     transition: background-color 0.3s;
 }
 
-.control-button:hover, .toggle-button:hover {
+.control-button:hover,
+.toggle-button:hover {
     background-color: rgba(139, 69, 19, 0.9);
 }
 

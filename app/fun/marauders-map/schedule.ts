@@ -1,16 +1,33 @@
-import { Position, Room, Character, FootstepInstance, Schedule, PathfindingResult } from './types'
-import { ROOMS, STEP_SIZE, WANDER_RADIUS, FOOTSTEP_SPACING } from './constants'
+import React from 'react'
+
+import { FOOTSTEP_SPACING, ROOMS, STEP_SIZE, WANDER_RADIUS } from './constants'
+import {
+    BASE_SCHEDULE,
+    HEADMASTER_SCHEDULE,
+    RAVENCLAW_SCHEDULE,
+    SLYTHERIN_SCHEDULE,
+    TEACHER_SCHEDULE,
+} from './constants'
 import { findPath } from './pathfinding'
 import { getCurrentTimeBlock } from './time'
-import React from 'react'
-import { BASE_SCHEDULE, TEACHER_SCHEDULE, SLYTHERIN_SCHEDULE, RAVENCLAW_SCHEDULE, HEADMASTER_SCHEDULE } from './constants'
+import {
+    Character,
+    FootstepInstance,
+    PathfindingResult,
+    Position,
+    Room,
+    Schedule,
+} from './types'
 
+let setFootstepsRef: React.Dispatch<
+    React.SetStateAction<FootstepInstance[]>
+> | null = null
 
-let setFootstepsRef: React.Dispatch<React.SetStateAction<FootstepInstance[]>> | null = null;
-
-export const initializeSchedule = (setFootsteps: React.Dispatch<React.SetStateAction<FootstepInstance[]>>) => {
-    setFootstepsRef = setFootsteps;
-};
+export const initializeSchedule = (
+    setFootsteps: React.Dispatch<React.SetStateAction<FootstepInstance[]>>
+) => {
+    setFootstepsRef = setFootsteps
+}
 
 const getDistance = (p1: Position, p2: Position): number => {
     const dx = p2.x - p1.x
@@ -18,13 +35,19 @@ const getDistance = (p1: Position, p2: Position): number => {
     return Math.sqrt(dx * dx + dy * dy)
 }
 
-const moveTowards = (current: Position, target: Position, speed: number): Position => {
+const moveTowards = (
+    current: Position,
+    target: Position,
+    speed: number
+): Position => {
     const dx = target.x - current.x
     const dy = target.y - current.y
     const distance = Math.sqrt(dx * dx + dy * dy)
 
     // Return target position if we're close enough
-    if (distance <= speed) {return target}
+    if (distance <= speed) {
+        return target
+    }
 
     // Calculate movement
     const ratio = speed / distance
@@ -36,11 +59,17 @@ const moveTowards = (current: Position, target: Position, speed: number): Positi
 
 const generateRandomPositionInRoom = (room: Room): Position => {
     // Add padding to keep characters away from walls
-    const padding = 10;
+    const padding = 10
     return {
-        x: room.position.x + padding + Math.random() * (room.width - 2 * padding),
-        y: room.position.y + padding + Math.random() * (room.height - 2 * padding),
-    };
+        x:
+            room.position.x +
+            padding +
+            Math.random() * (room.width - 2 * padding),
+        y:
+            room.position.y +
+            padding +
+            Math.random() * (room.height - 2 * padding),
+    }
 }
 
 const isPositionInRoom = (position: Position, room: Room): boolean => {
@@ -49,10 +78,14 @@ const isPositionInRoom = (position: Position, room: Room): boolean => {
         position.x <= room.position.x + room.width &&
         position.y >= room.position.y &&
         position.y <= room.position.y + room.height
-    );
+    )
 }
 
-const createFootstep = (position: Position, isLeft: boolean, angle: number): FootstepInstance => {
+const createFootstep = (
+    position: Position,
+    isLeft: boolean,
+    angle: number
+): FootstepInstance => {
     const footstep = {
         id: Math.random().toString(),
         position,
@@ -60,32 +93,43 @@ const createFootstep = (position: Position, isLeft: boolean, angle: number): Foo
         opacity: 1,
         rotation: angle,
         timestamp: Date.now(),
-    };
-    return footstep;
-};
-
+    }
+    return footstep
+}
 
 const handleWalking = (
     character: Character,
     targetRoom: Room,
-    grid: boolean[][],
-): {position: Position; path: Position[]; pathIndex: number} => {
+    grid: boolean[][]
+): { position: Position; path: Position[]; pathIndex: number } => {
     const roomCenter = {
         x: targetRoom.position.x + targetRoom.width / 2,
         y: targetRoom.position.y + targetRoom.height / 2,
     }
 
-    if (!character.targetPosition || !isPositionInRoom(character.targetPosition, targetRoom)) {
-        character.targetPosition = generateRandomPositionInRoom(targetRoom);
+    if (
+        !character.targetPosition ||
+        !isPositionInRoom(character.targetPosition, targetRoom)
+    ) {
+        character.targetPosition = generateRandomPositionInRoom(targetRoom)
     }
 
     // If no path or path completed, calculate new path
-    if (!character.path.length || character.pathIndex >= character.path.length) {
-        const pathResult: PathfindingResult = findPath(character.position, character.targetPosition, grid)
+    if (
+        !character.path.length ||
+        character.pathIndex >= character.path.length
+    ) {
+        const pathResult: PathfindingResult = findPath(
+            character.position,
+            character.targetPosition,
+            grid
+        )
 
         // If pathfinding failed but we have an approximate path, use it
         if (!pathResult.success && pathResult.path.length > 0) {
-            console.log(`Pathfinding issue for ${character.name}: ${pathResult.message}`);
+            console.log(
+                `Pathfinding issue for ${character.name}: ${pathResult.message}`
+            )
             return {
                 position: character.position,
                 path: pathResult.path,
@@ -94,7 +138,9 @@ const handleWalking = (
         }
         // If pathfinding completely failed, stay in place
         else if (!pathResult.success) {
-            console.log(`Pathfinding failed for ${character.name}: ${pathResult.message}`);
+            console.log(
+                `Pathfinding failed for ${character.name}: ${pathResult.message}`
+            )
             return {
                 position: character.position,
                 path: [],
@@ -119,7 +165,11 @@ const handleWalking = (
         if (newPathIndex < character.path.length) {
             const nextTarget = character.path[newPathIndex]
             return {
-                position: moveTowards(character.position, nextTarget, STEP_SIZE),
+                position: moveTowards(
+                    character.position,
+                    nextTarget,
+                    STEP_SIZE
+                ),
                 path: character.path,
                 pathIndex: newPathIndex,
             }
@@ -136,7 +186,11 @@ const handleWalking = (
         const pathResult = findPath(character.position, roomCenter, grid)
         return {
             position: character.position,
-            path: pathResult.success ? pathResult.path : (pathResult.path.length > 0 ? pathResult.path : []),
+            path: pathResult.success
+                ? pathResult.path
+                : pathResult.path.length > 0
+                  ? pathResult.path
+                  : [],
             pathIndex: 0,
         }
     }
@@ -153,8 +207,8 @@ const handleWandering = (
     character: Character,
     room: Room,
     currentTime: number,
-    grid: boolean[][],
-): {position: Position; path: Position[]; pathIndex: number} => {
+    grid: boolean[][]
+): { position: Position; path: Position[]; pathIndex: number } => {
     if (!isCharacterInRoom(character, room)) {
         // If not in room, use pathfinding to get there
         const roomCenter = {
@@ -162,7 +216,10 @@ const handleWandering = (
             y: room.position.y + room.height / 2,
         }
 
-        if (!character.path.length || character.pathIndex >= character.path.length) {
+        if (
+            !character.path.length ||
+            character.pathIndex >= character.path.length
+        ) {
             const newPath = findPath(character.position, roomCenter, grid)
             return {
                 position: character.position,
@@ -194,11 +251,13 @@ const updateCharacter = (
     character: Character,
     currentTime: number,
     gameTime: number,
-    grid: boolean[][],
+    grid: boolean[][]
 ): Character => {
     const schedule = getCurrentSchedule(character, gameTime)
     const targetRoom = ROOMS.find((r) => r.id === schedule.room)
-    if (!targetRoom) {return character}
+    if (!targetRoom) {
+        return character
+    }
 
     let newState = {
         position: character.position,
@@ -224,7 +283,11 @@ const updateCharacter = (
             if (!isCharacterInRoom(character, targetRoom)) {
                 newState = handleWalking(character, targetRoom, grid)
             } else {
-                newState.position = moveTowards(character.position, sleepPosition, STEP_SIZE)
+                newState.position = moveTowards(
+                    character.position,
+                    sleepPosition,
+                    STEP_SIZE
+                )
             }
             break
     }
@@ -233,20 +296,27 @@ const updateCharacter = (
     const distanceMoved = getDistance(character.position, newState.position)
 
     // Create footstep if character is moving and enough time has passed since last footstep
-    if (distanceMoved > 0.01 && // Tiny threshold to account for floating point errors
+    if (
+        distanceMoved > 0.01 && // Tiny threshold to account for floating point errors
         currentTime - (character.lastFootstepTime || 0) > FOOTSTEP_SPACING &&
-        setFootstepsRef) {
+        setFootstepsRef
+    ) {
+        const angle =
+            Math.atan2(
+                newState.position.y - character.position.y,
+                newState.position.x - character.position.x
+            ) *
+                (180 / Math.PI) +
+            90
 
-        const angle = Math.atan2(
-            newState.position.y - character.position.y,
-            newState.position.x - character.position.x,
-        ) * (180 / Math.PI) + 90
-
-        setFootstepsRef(prev => [...prev, createFootstep(
-            character.position,
-            !character.lastFootstepWasLeft,
-            angle + (character.lastFootstepWasLeft ? -5 : 5),
-        )])
+        setFootstepsRef((prev) => [
+            ...prev,
+            createFootstep(
+                character.position,
+                !character.lastFootstepWasLeft,
+                angle + (character.lastFootstepWasLeft ? -5 : 5)
+            ),
+        ])
 
         // Update footstep timing and alternation
         return {
@@ -266,32 +336,36 @@ const updateCharacter = (
     }
 }
 
-
-const getCurrentSchedule = (character: Character, gameTime: number): Schedule => {
+const getCurrentSchedule = (
+    character: Character,
+    gameTime: number
+): Schedule => {
     const timeBlock = getCurrentTimeBlock(gameTime)
 
-    let scheduleList;
-    switch(character.type) {
+    let scheduleList
+    switch (character.type) {
         case 'STUDENT':
-            scheduleList = BASE_SCHEDULE;
-            break;
+            scheduleList = BASE_SCHEDULE
+            break
         case 'TEACHER':
-            scheduleList = TEACHER_SCHEDULE;
-            break;
+            scheduleList = TEACHER_SCHEDULE
+            break
         case 'SLYTHERIN':
-            scheduleList = SLYTHERIN_SCHEDULE;
-            break;
+            scheduleList = SLYTHERIN_SCHEDULE
+            break
         case 'RAVENCLAW':
-            scheduleList = RAVENCLAW_SCHEDULE;
-            break;
+            scheduleList = RAVENCLAW_SCHEDULE
+            break
         case 'HEADMASTER':
-            scheduleList = HEADMASTER_SCHEDULE;
-            break;
+            scheduleList = HEADMASTER_SCHEDULE
+            break
         default:
-            scheduleList = BASE_SCHEDULE;
+            scheduleList = BASE_SCHEDULE
     }
 
-    return scheduleList.find((s) => s.timeBlock === timeBlock) || scheduleList[0]
+    return (
+        scheduleList.find((s) => s.timeBlock === timeBlock) || scheduleList[0]
+    )
 }
 
 const isCharacterInRoom = (character: Character, room: Room): boolean => {

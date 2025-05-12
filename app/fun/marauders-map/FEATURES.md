@@ -5,6 +5,7 @@ List of possible features, suggested by ai.
 # Harry Potter Marauder's Map Analysis
 
 Based on my review of your code, you have a promising start to a Marauder's Map implementation with:
+
 - Basic map layout with rooms and corridors
 - Character movement with pathfinding
 - Time simulation and schedules
@@ -24,6 +25,7 @@ Let me suggest some improvements and new features to enhance this project:
 6. **More Characters**: Add more Hogwarts characters with unique schedules
 
 7. **Interactive Elements**: Allow users to:
+
     - Click on characters to see their info/schedule
     - Toggle visibility of different character types
     - Zoom and pan the map

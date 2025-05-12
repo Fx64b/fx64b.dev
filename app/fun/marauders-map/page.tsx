@@ -1,75 +1,86 @@
-'use client';
+'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+
 import {
-    TIME_SCALE,
-    GRID_SIZE,
-    ROOMS,
     CORRIDORS,
-    INITIAL_CHARACTERS, SVG_PATHS, FOOTPRINT_SCALE, FOOTSTEP_FADE_DURATION,
-} from './constants';
-import { createGrid } from './pathfinding';
-import { initializeSchedule, updateCharacter } from './schedule';
-import { Character, FootstepInstance } from './types';
-import { getCurrentTimeBlock } from './time';
-import './styles.css';
+    FOOTPRINT_SCALE,
+    FOOTSTEP_FADE_DURATION,
+    GRID_SIZE,
+    INITIAL_CHARACTERS,
+    ROOMS,
+    SVG_PATHS,
+    TIME_SCALE,
+} from './constants'
+import { createGrid } from './pathfinding'
+import { initializeSchedule, updateCharacter } from './schedule'
+import './styles.css'
+import { Character, FootstepInstance } from './types'
 
 // Add a custom hook for pan and zoom functionality
-const usePanZoom = (initialViewBox = '0 0 800 600', minZoom = 0.5, maxZoom = 2) => {
-    const [viewBox, setViewBox] = useState(initialViewBox);
-    const [isPanning, setIsPanning] = useState(false);
-    const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-    const [zoom, setZoom] = useState(1);
-    const svgRef = useRef<SVGSVGElement>(null);
+const usePanZoom = (
+    initialViewBox = '0 0 800 600',
+    minZoom = 0.5,
+    maxZoom = 2
+) => {
+    const [viewBox, setViewBox] = useState(initialViewBox)
+    const [isPanning, setIsPanning] = useState(false)
+    const [startPoint, setStartPoint] = useState({ x: 0, y: 0 })
+    const [zoom, setZoom] = useState(1)
+    const svgRef = useRef<SVGSVGElement>(null)
 
     // Parse the current viewBox
     const parseViewBox = () => {
-        const [x, y, width, height] = viewBox.split(' ').map(Number);
-        return { x, y, width, height };
-    };
+        const [x, y, width, height] = viewBox.split(' ').map(Number)
+        return { x, y, width, height }
+    }
 
     // Handle mouse down to start panning
     const handleMouseDown = (e: React.MouseEvent) => {
-        setIsPanning(true);
-        setStartPoint({ x: e.clientX, y: e.clientY });
-    };
+        setIsPanning(true)
+        setStartPoint({ x: e.clientX, y: e.clientY })
+    }
 
     // Handle mouse move for panning
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (!isPanning) return;
+        if (!isPanning) {
+            return
+        }
 
-        const { x, y, width, height } = parseViewBox();
-        const dx = (e.clientX - startPoint.x) * (width / svgRef.current!.clientWidth);
-        const dy = (e.clientY - startPoint.y) * (height / svgRef.current!.clientHeight);
+        const { x, y, width, height } = parseViewBox()
+        const dx =
+            (e.clientX - startPoint.x) * (width / svgRef.current!.clientWidth)
+        const dy =
+            (e.clientY - startPoint.y) * (height / svgRef.current!.clientHeight)
 
-        setViewBox(`${x - dx} ${y - dy} ${width} ${height}`);
-        setStartPoint({ x: e.clientX, y: e.clientY });
-    };
+        setViewBox(`${x - dx} ${y - dy} ${width} ${height}`)
+        setStartPoint({ x: e.clientX, y: e.clientY })
+    }
 
     // Handle mouse up to stop panning
     const handleMouseUp = () => {
-        setIsPanning(false);
-    };
+        setIsPanning(false)
+    }
 
     // Handle zoom in/out
     const handleZoom = (factor: number) => {
-        const { x, y, width, height } = parseViewBox();
-        const newZoom = Math.min(Math.max(zoom * factor, minZoom), maxZoom);
-        const zoomFactor = newZoom / zoom;
+        const { x, y, width, height } = parseViewBox()
+        const newZoom = Math.min(Math.max(zoom * factor, minZoom), maxZoom)
+        const zoomFactor = newZoom / zoom
 
-        const newWidth = width / zoomFactor;
-        const newHeight = height / zoomFactor;
+        const newWidth = width / zoomFactor
+        const newHeight = height / zoomFactor
 
         // Adjust center point to zoom towards center
-        const centerX = x + width / 2;
-        const centerY = y + height / 2;
+        const centerX = x + width / 2
+        const centerY = y + height / 2
 
-        const newX = centerX - newWidth / 2;
-        const newY = centerY - newHeight / 2;
+        const newX = centerX - newWidth / 2
+        const newY = centerY - newHeight / 2
 
-        setViewBox(`${newX} ${newY} ${newWidth} ${newHeight}`);
-        setZoom(newZoom);
-    };
+        setViewBox(`${newX} ${newY} ${newWidth} ${newHeight}`)
+        setZoom(newZoom)
+    }
 
     return {
         viewBox,
@@ -77,20 +88,21 @@ const usePanZoom = (initialViewBox = '0 0 800 600', minZoom = 0.5, maxZoom = 2) 
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
-        handleZoom
-    };
-};
+        handleZoom,
+    }
+}
 
 const MaraudersMap = () => {
-    const [gameTime, setGameTime] = useState<number>(5.5);
-    const [characters, setCharacters] = useState<Character[]>(INITIAL_CHARACTERS);
-    const [footsteps, setFootsteps] = useState<FootstepInstance[]>([]);
-    const [showDebug, setShowDebug] = useState(false);
-    const [mapRevealed, setMapRevealed] = useState(false);
-    const [charactersRevealed, setCharactersRevealed] = useState(false);
-    const gridRef = useRef<boolean[][]>([]);
-    const lastUpdateRef = useRef<number>(Date.now());
-    const animationFrameRef = useRef<number | undefined>(0);
+    const [gameTime, setGameTime] = useState<number>(5.5)
+    const [characters, setCharacters] =
+        useState<Character[]>(INITIAL_CHARACTERS)
+    const [footsteps, setFootsteps] = useState<FootstepInstance[]>([])
+    const [showDebug, setShowDebug] = useState(false)
+    const [mapRevealed, setMapRevealed] = useState(false)
+    const [charactersRevealed, setCharactersRevealed] = useState(false)
+    const gridRef = useRef<boolean[][]>([])
+    const lastUpdateRef = useRef<number>(Date.now())
+    const animationFrameRef = useRef<number | undefined>(0)
 
     // Use our custom pan/zoom hook
     const {
@@ -99,70 +111,75 @@ const MaraudersMap = () => {
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
-        handleZoom
-    } = usePanZoom();
+        handleZoom,
+    } = usePanZoom()
 
     // Initialize grid and schedule
     useEffect(() => {
-        gridRef.current = createGrid(800, 600);
-        initializeSchedule(setFootsteps);
+        gridRef.current = createGrid(800, 600)
+        initializeSchedule(setFootsteps)
 
         // Start the map reveal animation after a short delay
         setTimeout(() => {
-            setMapRevealed(true);
+            setMapRevealed(true)
 
             // Start revealing characters after the map unfolds
             setTimeout(() => {
-                setCharactersRevealed(true);
-            }, 1500);
-        }, 500);
-    }, []);
+                setCharactersRevealed(true)
+            }, 1500)
+        }, 500)
+    }, [])
 
     // Game update logic
     const updateGame = useCallback(() => {
-        const currentTime = Date.now();
-        const deltaTime = currentTime - lastUpdateRef.current;
-        lastUpdateRef.current = currentTime;
+        const currentTime = Date.now()
+        const deltaTime = currentTime - lastUpdateRef.current
+        lastUpdateRef.current = currentTime
 
-        setGameTime(prevTime => {
-            const newTime = prevTime + (deltaTime / 1000) * TIME_SCALE;
-            return newTime >= 24 ? newTime - 24 : newTime;
-        });
+        setGameTime((prevTime) => {
+            const newTime = prevTime + (deltaTime / 1000) * TIME_SCALE
+            return newTime >= 24 ? newTime - 24 : newTime
+        })
 
-        setCharacters(prevCharacters =>
-            prevCharacters.map(char =>
-                updateCharacter(char, currentTime, gameTime, gridRef.current),
-            ),
-        );
+        setCharacters((prevCharacters) =>
+            prevCharacters.map((char) =>
+                updateCharacter(char, currentTime, gameTime, gridRef.current)
+            )
+        )
 
-        setFootsteps(prevFootsteps =>
+        setFootsteps((prevFootsteps) =>
             prevFootsteps
-                .filter(step => currentTime - step.timestamp < FOOTSTEP_FADE_DURATION)
-                .map(step => ({
+                .filter(
+                    (step) =>
+                        currentTime - step.timestamp < FOOTSTEP_FADE_DURATION
+                )
+                .map((step) => ({
                     ...step,
-                    opacity: 1 - (currentTime - step.timestamp) / FOOTSTEP_FADE_DURATION,
-                })),
-        );
+                    opacity:
+                        1 -
+                        (currentTime - step.timestamp) / FOOTSTEP_FADE_DURATION,
+                }))
+        )
 
-        animationFrameRef.current = requestAnimationFrame(updateGame);
-    }, [gameTime]);
+        animationFrameRef.current = requestAnimationFrame(updateGame)
+    }, [gameTime])
 
     // Start/stop game loop
     useEffect(() => {
-        animationFrameRef.current = requestAnimationFrame(updateGame);
+        animationFrameRef.current = requestAnimationFrame(updateGame)
         return () => {
             if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
+                cancelAnimationFrame(animationFrameRef.current)
             }
-        };
-    }, [updateGame]);
+        }
+    }, [updateGame])
 
     if (gridRef.current.length === 0) {
-        return null;
+        return null
     }
 
-    const hours = Math.floor(gameTime);
-    const minutes = Math.floor((gameTime % 1) * 60);
+    const hours = Math.floor(gameTime)
+    const minutes = Math.floor((gameTime % 1) * 60)
 
     return (
         <div className="marauders-map-container">
@@ -187,12 +204,13 @@ const MaraudersMap = () => {
                     className="toggle-button"
                     onClick={() => setShowDebug(!showDebug)}
                 >
-                    {showDebug ? "Hide Debug" : "Show Debug"}
+                    {showDebug ? 'Hide Debug' : 'Show Debug'}
                 </button>
             </div>
 
             <div className="time-display">
-                {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
+                {hours.toString().padStart(2, '0')}:
+                {minutes.toString().padStart(2, '0')}
             </div>
 
             {/* The map with unfolding animation */}
@@ -209,27 +227,40 @@ const MaraudersMap = () => {
                     onMouseLeave={handleMouseUp}
                 >
                     {/* Debug grid */}
-                    {showDebug && gridRef.current.map((row, y) =>
-                        row.map((walkable, x) => (
-                            <rect
-                                key={`${x}-${y}`}
-                                x={x * GRID_SIZE}
-                                y={y * GRID_SIZE}
-                                width={GRID_SIZE}
-                                height={GRID_SIZE}
-                                fill={walkable ? 'transparent' : 'rgba(255,0,0,0.2)'}
-                                stroke="rgba(0,0,0,0.1)"
-                            />
-                        )),
-                    )}
+                    {showDebug &&
+                        gridRef.current.map((row, y) =>
+                            row.map((walkable, x) => (
+                                <rect
+                                    key={`${x}-${y}`}
+                                    x={x * GRID_SIZE}
+                                    y={y * GRID_SIZE}
+                                    width={GRID_SIZE}
+                                    height={GRID_SIZE}
+                                    fill={
+                                        walkable
+                                            ? 'transparent'
+                                            : 'rgba(255,0,0,0.2)'
+                                    }
+                                    stroke="rgba(0,0,0,0.1)"
+                                />
+                            ))
+                        )}
 
                     {/* Corridors with ink style */}
                     {CORRIDORS.map((corridor) => {
                         // Calculate the corridor's bounding box
-                        const x = Math.min(corridor.start.x, corridor.end.x) - corridor.width / 2;
-                        const y = Math.min(corridor.start.y, corridor.end.y) - corridor.width / 2;
-                        const width = Math.abs(corridor.end.x - corridor.start.x) + corridor.width;
-                        const height = Math.abs(corridor.end.y - corridor.start.y) + corridor.width;
+                        const x =
+                            Math.min(corridor.start.x, corridor.end.x) -
+                            corridor.width / 2
+                        const y =
+                            Math.min(corridor.start.y, corridor.end.y) -
+                            corridor.width / 2
+                        const width =
+                            Math.abs(corridor.end.x - corridor.start.x) +
+                            corridor.width
+                        const height =
+                            Math.abs(corridor.end.y - corridor.start.y) +
+                            corridor.width
 
                         return (
                             <rect
@@ -242,32 +273,33 @@ const MaraudersMap = () => {
                                 style={{
                                     // Apply ink-spreading animation to corridors
                                     opacity: mapRevealed ? 1 : 0,
-                                    transition: `opacity 1.5s ease-in ${Math.random() * 0.5 + 0.5}s`
+                                    transition: `opacity 1.5s ease-in ${Math.random() * 0.5 + 0.5}s`,
                                 }}
                             />
-                        );
+                        )
                     })}
 
                     {/* Debug paths */}
-                    {showDebug && characters.map((char) => (
-                        <g key={`debug-${char.id}`}>
-                            <path
-                                d={`M ${char.path.map((p) => `${p.x},${p.y}`).join(' L ')}`}
-                                stroke="blue"
-                                strokeWidth="1"
-                                fill="none"
-                                opacity="0.5"
-                            />
-                            {char.targetPosition && (
-                                <circle
-                                    cx={char.targetPosition.x}
-                                    cy={char.targetPosition.y}
-                                    r={3}
-                                    fill="red"
+                    {showDebug &&
+                        characters.map((char) => (
+                            <g key={`debug-${char.id}`}>
+                                <path
+                                    d={`M ${char.path.map((p) => `${p.x},${p.y}`).join(' L ')}`}
+                                    stroke="blue"
+                                    strokeWidth="1"
+                                    fill="none"
+                                    opacity="0.5"
                                 />
-                            )}
-                        </g>
-                    ))}
+                                {char.targetPosition && (
+                                    <circle
+                                        cx={char.targetPosition.x}
+                                        cy={char.targetPosition.y}
+                                        r={3}
+                                        fill="red"
+                                    />
+                                )}
+                            </g>
+                        ))}
 
                     {/* Rooms with ink-style borders */}
                     {ROOMS.map((room) => (
@@ -281,7 +313,7 @@ const MaraudersMap = () => {
                                 style={{
                                     // Apply ink-spreading animation to rooms
                                     opacity: mapRevealed ? 1 : 0,
-                                    transition: `opacity 1.2s ease-in ${Math.random() * 0.3 + 0.2}s`
+                                    transition: `opacity 1.2s ease-in ${Math.random() * 0.3 + 0.2}s`,
                                 }}
                             />
                             <text
@@ -292,7 +324,7 @@ const MaraudersMap = () => {
                                 className="map-text"
                                 style={{
                                     opacity: mapRevealed ? 1 : 0,
-                                    transition: `opacity 1.5s ease-in ${Math.random() * 0.5 + 0.8}s`
+                                    transition: `opacity 1.5s ease-in ${Math.random() * 0.5 + 0.8}s`,
                                 }}
                             >
                                 {room.name}
@@ -307,12 +339,18 @@ const MaraudersMap = () => {
                             transform={`translate(${step.position.x},${step.position.y})`}
                         >
                             <path
-                                d={step.isLeft ? SVG_PATHS.leftFoot : SVG_PATHS.rightFoot}
+                                d={
+                                    step.isLeft
+                                        ? SVG_PATHS.leftFoot
+                                        : SVG_PATHS.rightFoot
+                                }
                                 className="footprint"
                                 transform={`rotate(${step.rotation}) scale(${FOOTPRINT_SCALE})`}
                                 style={{
-                                    opacity: step.opacity * (charactersRevealed ? 1 : 0),
-                                    transition: 'opacity 0.3s ease-in'
+                                    opacity:
+                                        step.opacity *
+                                        (charactersRevealed ? 1 : 0),
+                                    transition: 'opacity 0.3s ease-in',
                                 }}
                             />
                         </g>
@@ -321,23 +359,23 @@ const MaraudersMap = () => {
                     {/* Characters with ink spreading effect */}
                     {characters.map((char) => {
                         // Set color based on character type
-                        let dotColor = '#493829'; // Default brown
-                        switch(char.type) {
+                        let dotColor = '#493829' // Default brown
+                        switch (char.type) {
                             case 'STUDENT':
-                                dotColor = '#8B0000'; // Gryffindor red
-                                break;
+                                dotColor = '#8B0000' // Gryffindor red
+                                break
                             case 'TEACHER':
-                                dotColor = '#2d1e14'; // Dark brown
-                                break;
+                                dotColor = '#2d1e14' // Dark brown
+                                break
                             case 'SLYTHERIN':
-                                dotColor = '#1A472A'; // Slytherin green
-                                break;
+                                dotColor = '#1A472A' // Slytherin green
+                                break
                             case 'RAVENCLAW':
-                                dotColor = '#0E1A40'; // Ravenclaw blue
-                                break;
+                                dotColor = '#0E1A40' // Ravenclaw blue
+                                break
                             case 'HEADMASTER':
-                                dotColor = '#702963'; // Purple for Dumbledore
-                                break;
+                                dotColor = '#702963' // Purple for Dumbledore
+                                break
                         }
 
                         return (
@@ -346,7 +384,8 @@ const MaraudersMap = () => {
                                 style={{
                                     opacity: charactersRevealed ? 1 : 0,
                                     transform: `translate(${char.position.x}px, ${char.position.y}px)`,
-                                    transition: 'opacity 1s ease-in, transform 0.5s ease-out'
+                                    transition:
+                                        'opacity 1s ease-in, transform 0.5s ease-out',
                                 }}
                             >
                                 <circle
@@ -368,22 +407,45 @@ const MaraudersMap = () => {
                                     {char.name}
                                 </text>
                             </g>
-                        );
+                        )
                     })}
 
                     {/* SVG filters for ink effects */}
                     <defs>
-                        <filter id="ink-filter" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" result="blur" />
-                            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
-                            <feDisplacementMap in="blur" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+                        <filter
+                            id="ink-filter"
+                            x="-50%"
+                            y="-50%"
+                            width="200%"
+                            height="200%"
+                        >
+                            <feGaussianBlur
+                                in="SourceGraphic"
+                                stdDeviation="0.5"
+                                result="blur"
+                            />
+                            <feTurbulence
+                                type="fractalNoise"
+                                baseFrequency="0.05"
+                                numOctaves="2"
+                                result="noise"
+                            />
+                            <feDisplacementMap
+                                in="blur"
+                                in2="noise"
+                                scale="3"
+                                xChannelSelector="R"
+                                yChannelSelector="G"
+                            />
                         </filter>
                     </defs>
                 </svg>
             </div>
 
             {/* Map activation UI */}
-            <div className={`activation-overlay ${mapRevealed ? 'hidden' : ''}`}>
+            <div
+                className={`activation-overlay ${mapRevealed ? 'hidden' : ''}`}
+            >
                 <button
                     className="activation-button"
                     onClick={() => setMapRevealed(true)}
@@ -392,7 +454,7 @@ const MaraudersMap = () => {
                 </button>
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default MaraudersMap;
+export default MaraudersMap
