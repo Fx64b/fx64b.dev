@@ -1,105 +1,106 @@
+// types.ts
 export type TimeBlock =
-    | 'NIGHT1' // 22:00 - 06:00
-    | 'NIGHT2' // 22:00 - 06:00
-    | 'MORNING' // 06:00 - 10:00
-    | 'NOON' // 10:00 - 14:00
+    | 'NIGHT1'    // 22:00 - 06:00
+    | 'NIGHT2'    // 22:00 - 06:00
+    | 'MORNING'   // 06:00 - 10:00
+    | 'NOON'      // 10:00 - 14:00
     | 'AFTERNOON' // 14:00 - 18:00
-    | 'EVENING' // 18:00 - 22:00
+    | 'EVENING'   // 18:00 - 22:00
 
 export type CharacterMode =
-    | 'WALK' // Moving between rooms
+    | 'WALK'   // Moving between rooms
     | 'WANDER' // Free movement within a room
-    | 'SLEEP' // Stationary in room
+    | 'SLEEP'  // Stationary in room
+    | 'CLIMB'  // Moving between floors
 
 export type CharacterType =
-    | 'STUDENT'
-    | 'TEACHER'
+    | 'GRYFFINDOR'
     | 'SLYTHERIN'
     | 'RAVENCLAW'
+    | 'HUFFLEPUFF'
+    | 'TEACHER'
     | 'HEADMASTER'
+    | 'STAFF'
+    | 'GHOST'
 
 export interface Position {
-    x: number
-    y: number
+    x: number;
+    y: number;
+}
+
+export interface Floor {
+    id: string;
+    name: string;
+    level: number;
+    position: Position;
+    width: number;
+    height: number;
+    visible: boolean;
 }
 
 export interface Room {
-    id: string
-    name: string
-    position: Position
-    width: number
-    height: number
+    id: string;
+    name: string;
+    floorId: string;
+    position: Position;
+    width: number;
+    height: number;
+}
+
+export interface StaircaseConnection {
+    id: string;
+    name: string;
+    startFloorId: string;
+    endFloorId: string;
+    startPosition: Position;
+    endPosition: Position;
+    width: number;
+    isSecret?: boolean;
+    isMoving?: boolean;
 }
 
 export interface Character {
-    // Core properties
-    id: string
-    name: string
-    type: CharacterType
-
-    // Movement state
-    position: Position
-    targetPosition: Position
-    mode: CharacterMode
-
-    // Pathfinding state
-    path: Position[]
-    pathIndex: number
-
-    // Room tracking
-    currentRoom?: Room
-
-    // Animation state
-    lastFootstepTime?: number
-    lastFootstepWasLeft?: boolean
-
-    // Optional debug info
+    id: string;
+    name: string;
+    type: CharacterType;
+    position: Position;
+    targetPosition: Position;
+    mode: CharacterMode;
+    path: Position[];
+    pathIndex: number;
+    currentFloorId: string;
+    currentRoom?: string;
+    lastFootstepTime?: number;
+    lastFootstepWasLeft?: boolean;
     debugInfo?: {
-        lastPathCalculation: number
-        pathAttempts: number
-        stuckCount: number
-    }
+        lastPathCalculation: number;
+        pathAttempts: number;
+        stuckCount: number;
+    };
 }
 
 export interface FootstepInstance {
-    id: string
-    position: Position
-    isLeft: boolean
-    opacity: number
-    rotation: number
-    timestamp: number
+    id: string;
+    position: Position;
+    floorId: string;
+    isLeft: boolean;
+    opacity: number;
+    rotation: number;
+    timestamp: number;
 }
 
 export interface Schedule {
-    timeBlock: TimeBlock
-    activity: string
-    room: string
-    mode: CharacterMode
-}
-
-export interface MovementState {
-    position: Position
-    path: Position[]
-    pathIndex: number
-    targetPosition?: Position
-}
-
-export interface GridCell {
-    x: number
-    y: number
-    walkable: boolean
-    cost: number
-    type?: 'room' | 'door' | 'corridor'
-}
-
-// For type safety in movement calculations
-export interface Vector2D {
-    x: number
-    y: number
+    timeBlock: TimeBlock;
+    activity: string;
+    room: string;
+    mode: CharacterMode;
+    floorId: string;
 }
 
 export interface PathfindingResult {
-    success: boolean
-    path: Position[]
-    message?: string
+    success: boolean;
+    path: Position[];
+    message?: string;
+    targetFloorId?: string;
+    needsStaircase?: boolean;
 }

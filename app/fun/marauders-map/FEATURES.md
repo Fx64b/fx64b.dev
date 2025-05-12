@@ -20,10 +20,6 @@ Let me suggest some improvements and new features to enhance this project:
 
 ## Functional Improvements
 
-5. **Robust Pathfinding**: Fix edge cases in your current pathfinding algorithm
-
-6. **More Characters**: Add more Hogwarts characters with unique schedules
-
 7. **Interactive Elements**: Allow users to:
 
     - Click on characters to see their info/schedule
