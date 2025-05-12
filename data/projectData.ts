@@ -2,15 +2,6 @@ import { Project } from '@/types/project'
 
 const projectData: Project[] = [
     {
-        title: 'video-archiver',
-        description:
-            'A YouTube video downloader and archiver with various tools to download, manage, categorize, convert, stream and manipulate videos. The project is still in early development stage.',
-        logo: '/va-logo.png',
-        link: 'https://github.com/Fx64b/video-archiver',
-        githubLink: 'https://github.com/Fx64b/video-archiver',
-        status: 'In Progress',
-    },
-    {
         title: 'Flashcard Learning App',
         description:
             'A modern flashcard application for effective learning using the Spaced Repetition System (SRS). Features email authentication, study time tracking, progress analytics, and bulk card import. Built with Next.js 15, TypeScript, and Turso database. Currently in early development.',
@@ -18,6 +9,15 @@ const projectData: Project[] = [
         link: 'https://learn.fx64b.dev',
         githubLink: 'https://github.com/Fx64b/learn',
         status: 'In Progress',
+    },
+    {
+        title: 'video-archiver',
+        description:
+            'A YouTube video downloader and archiver with various tools to download, manage, categorize, convert, stream and manipulate videos. The project is still in early development stage.',
+        logo: '/va-logo.png',
+        link: 'https://github.com/Fx64b/video-archiver',
+        githubLink: 'https://github.com/Fx64b/video-archiver',
+        status: 'On Hold',
     },
     {
         title: 'skool-loom-dl',
