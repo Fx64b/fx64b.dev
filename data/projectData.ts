@@ -2,7 +2,7 @@ import { Project } from '@/types/project'
 
 const projectData: Project[] = [
     {
-        title: 'Flashcard Learning App',
+        title: 'Flashcard App',
         description:
             'A modern flashcard application for effective learning using the Spaced Repetition System (SRS). Features email authentication, study time tracking, progress analytics, and bulk card import. Built with Next.js 15, TypeScript, and Turso database. Currently in early development.',
         logo: '/learn-logo.png',
