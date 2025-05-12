@@ -1,3 +1,69 @@
+## [3.2.2](https://github.com/Fx64b/fx64b.dev/compare/v3.2.1...v3.2.2) (2025-05-05)
+
+
+### Bug Fixes
+
+* **projectData:** update logo path in project metadata ([0633aa6](https://github.com/Fx64b/fx64b.dev/commit/0633aa65d9e1805ecfb36396b7a3a0569de01f1e))
+
+## [3.2.1](https://github.com/Fx64b/fx64b.dev/compare/v3.2.0...v3.2.1) (2025-04-25)
+
+
+### Bug Fixes
+
+* **hours-to-decimal:** improve decimal rounding in HourToDecimalConverter and add corresponding tests ([3ea8c81](https://github.com/Fx64b/fx64b.dev/commit/3ea8c81c836c3c68191e8ce572fbd579f1af7957))
+
+# [3.2.0](https://github.com/Fx64b/fx64b.dev/compare/v3.1.0...v3.2.0) (2025-04-20)
+
+
+### Bug Fixes
+
+* remove styles that partly broke light mode ([97c404e](https://github.com/Fx64b/fx64b.dev/commit/97c404ed1a277a4b40dec821cb81197f6b47a9de))
+
+
+### Features
+
+* add new project 'skool-loom-dl' and update description for 'video-archiver' ([9954433](https://github.com/Fx64b/fx64b.dev/commit/9954433aa6aff161922dc0dfc469955044e54ef3))
+
+# [3.1.0](https://github.com/Fx64b/fx64b.dev/compare/v3.0.0...v3.1.0) (2025-04-04)
+
+
+### Bug Fixes
+
+* **test:** failing test because of missing util function after refactoring ([099ceff](https://github.com/Fx64b/fx64b.dev/commit/099ceff330f87a1b9d96395e8c06188fa7785b29))
+* **tool/byte-converter:** copilot review suggestion ([9bb91fe](https://github.com/Fx64b/fx64b.dev/commit/9bb91fe7b486b5f5d59e874c1d14b9d570db7ecf))
+
+
+### Features
+
+* **build:** enhance CI workflow with coverage reporting and improved test commands ([064d042](https://github.com/Fx64b/fx64b.dev/commit/064d042f80ecf889d1c46faf4919db5ad05d7bbc))
+* **ci:** improve coverage reporting and update test command ([73ae966](https://github.com/Fx64b/fx64b.dev/commit/73ae96656585d78d37e38a9ca7ebc92883e1059a))
+* **sitemap:** add tools to sitemap ([368db2a](https://github.com/Fx64b/fx64b.dev/commit/368db2a1e0ee9a24bb3766f7c249ee5a477f5803))
+* **tools:** add several tools ([d48910a](https://github.com/Fx64b/fx64b.dev/commit/d48910ad267e602be38b64f6f238be615dcd2902))
+
+# [3.0.0](https://github.com/Fx64b/fx64b.dev/compare/v2.2.2...v3.0.0) (2025-04-04)
+
+
+* feat!: migrate from heroui to shadcn/ui ([65c6adb](https://github.com/Fx64b/fx64b.dev/commit/65c6adba21feed8ad7f3781447cd5409e457677a))
+
+
+### BREAKING CHANGES
+
+* Migration from heroui to shadcn/ui
+
+## [2.2.2](https://github.com/Fx64b/fx64b.dev/compare/v2.2.1...v2.2.2) (2025-03-09)
+
+
+### Bug Fixes
+
+* issues from tailwind v4 upgrade ([4c0c693](https://github.com/Fx64b/fx64b.dev/commit/4c0c693118a534870f0a25f4815f52cc569b18c6))
+
+## [2.2.1](https://github.com/Fx64b/fx64b.dev/compare/v2.2.0...v2.2.1) (2025-03-04)
+
+
+### Bug Fixes
+
+* **actions:** only run release on workflow_dispatch ([417dca5](https://github.com/Fx64b/fx64b.dev/commit/417dca5b4bc7291eb318d1e5ab84987f28a82de6))
+
 # [2.2.0](https://github.com/Fx64b/fx64b.dev/compare/v2.1.0...v2.2.0) (2024-12-02)
 
 

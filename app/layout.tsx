@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { NextUIProvider } from '@nextui-org/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
 
@@ -23,12 +22,14 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={'min-h-fit overflow-x-hidden bg-background dark'}>
-                <NextUIProvider>
-                    <Header />
-                    {children}
-                    <Footer />
-                </NextUIProvider>
+            <body
+                className={
+                    'bg-background text-foreground dark min-h-fit overflow-x-hidden'
+                }
+            >
+                <Header />
+                {children}
+                <Footer />
                 <Analytics />
                 <SpeedInsights />
             </body>

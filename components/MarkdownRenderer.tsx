@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckIcon, ClipboardIcon } from '@heroicons/react/24/outline'
+import { CheckIcon, ClipboardIcon } from 'lucide-react'
 import rehypeRaw from 'rehype-raw'
 
 import React, { useState } from 'react'
@@ -9,7 +9,9 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-import { Divider, Link } from '@nextui-org/react'
+import Link from 'next/link'
+
+import { Separator } from '@/components/ui/separator'
 
 interface MarkdownRendererProps {
     content: string
@@ -86,9 +88,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             rehypePlugins={[rehypeRaw]}
             components={{
                 code: CodeBlock as any,
-                hr: () => <Divider />,
+                hr: () => <Separator />,
                 a: ({ href, children }) => (
-                    <Link href={href!} isExternal>
+                    <Link href={href!} target={'_blank'}>
                         {children}
                     </Link>
                 ),

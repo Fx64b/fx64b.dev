@@ -29,8 +29,7 @@ export default [
             'no-console': 'warn',
             eqeqeq: 'error',
             curly: 'error',
-            quotes: ['warn', 'single'],
-            'comma-dangle': ['error', 'always-multiline'],
+            'comma-dangle': 'off',
         },
     },
 ]

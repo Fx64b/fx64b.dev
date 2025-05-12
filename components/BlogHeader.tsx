@@ -1,5 +1,6 @@
-import { Divider } from '@nextui-org/divider'
-import { Avatar } from '@nextui-org/react'
+import Image from 'next/image'
+
+import { Separator } from '@/components/ui/separator'
 
 interface BlogHeaderProps {
     author: string
@@ -17,17 +18,18 @@ export function BlogHeader({
     readtime,
 }: BlogHeaderProps) {
     return (
-        <div className={'mb-4 mt-2 flex flex-col md:items-center'}>
+        <div className="mt-2 mb-4 flex flex-col md:items-center">
             <h1>{title}</h1>
-            <div className={'my-4 flex items-center gap-4'}>
-                <Avatar
-                    isBordered
-                    radius="full"
-                    color={'primary'}
-                    size={'lg'}
+            <div className="my-4 flex items-center gap-x-4">
+                {/*NOTE: there seems to be an issue with the shadcn/ui avatar so the default next/image is used here*/}
+                <Image
                     src={avatar || '/logo.svg'}
+                    alt={author}
+                    width={65}
+                    height={65}
+                    className="my-0 rounded-full border-2"
                 />
-                <p className={'text-lg font-semibold'}>{author}</p>
+                <p className="text-lg font-semibold">{author}</p>
             </div>
             {readtime && (
                 <div>
@@ -35,7 +37,7 @@ export function BlogHeader({
                 </div>
             )}
             <p className="my-2 text-gray-500">{date}</p>
-            <Divider />
+            <Separator />
         </div>
     )
 }
