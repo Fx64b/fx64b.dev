@@ -55,15 +55,18 @@ export default function HourToDecimalConverter() {
     }
 
     const calculateDecimal = () => {
-        const hoursNum = hours === '' ? 0 : parseInt(hours);
-        const minutesNum = minutes === '' ? 0 : parseInt(minutes);
+        const hoursNum = hours === '' ? 0 : parseInt(hours)
+        const minutesNum = minutes === '' ? 0 : parseInt(minutes)
 
-        const decimalHours = hoursNum + minutesNum / 60;
+        const decimalHours = hoursNum + minutesNum / 60
 
         // Round to two decimal points
-        const formatted = decimalHours.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+        const formatted = decimalHours
+            .toFixed(2)
+            .replace(/\.00$/, '')
+            .replace(/(\.\d)0$/, '$1')
 
-        setResult(formatted);
+        setResult(formatted)
     }
 
     const copyToClipboard = () => {

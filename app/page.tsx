@@ -1,9 +1,12 @@
-import projectData from '@/data/projectData'
+import projects from '@/data/projectData'
 
 import { Metadata } from 'next'
-import Image from 'next/image'
+import Link from 'next/link'
 
-import ProjectCard from '@/components/ProjectCard'
+import { BackgroundGrid } from '@/components/background-grid'
+import { HeroSection } from '@/components/hero-section'
+import { ModernProjectCard } from '@/components/modern-project-card'
+import { Section } from '@/components/section'
 import { Separator } from '@/components/ui/separator'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,48 +45,60 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function Home() {
     return (
-        <div className="flex h-fit min-h-screen w-screen justify-center pb-10">
-            <div className="mt-10 flex max-w-(--breakpoint-lg) flex-col items-center gap-y-3 px-6 text-center">
-                <Image
-                    className={'w-48 rounded-full border-2 border-white'}
-                    src="/logo.svg"
-                    width={200}
-                    height={200}
-                    alt={
-                        'Fx64b profile picture displaying the letter F in a serif font'
-                    }
-                />
-                <h1 className={'text-2xl font-bold'}>Fx64b</h1>
-                <div className={'mx-0 my-4 w-full'} />
-                <h2 className={'text-xl font-semibold'}>About Me</h2>
-                <p>
-                    Hey! I&apos;m Fabio aka Fx64b, a software engineer from
-                    Switzerland{' '}
-                    <span className="relative ml-1 inline-block h-[1.2em] w-[1.2em] rounded bg-red-600 align-middle">
-                        <span className="absolute top-1/12 right-[37%] bottom-1/12 left-[37%] bg-white"></span>
-                        <span className="absolute top-[37%] right-1/12 bottom-[37%] left-1/12 bg-white"></span>
-                    </span>
-                </p>
-                <p>
-                    I like working with React / Next.js, TypeScript, Tailwind,
-                    Java, GO and Angular.
-                </p>
-                <p>
-                    I&apos;m currently learning Go and Cybersecurity
-                    fundamentals.
-                </p>
+        <>
+            <BackgroundGrid />
 
-                <div className={'mx-0 my-2 w-full'} />
-                <Separator />
-                <div className={'mx-0 my-2 w-full'} />
+            <main className="relative">
+                <HeroSection />
 
-                <h2 className={'self-start text-xl'}>Projects</h2>
-                <div className={'flex w-full flex-col gap-y-6'}>
-                    {projectData.map((project, index) => (
-                        <ProjectCard key={index} project={project} />
-                    ))}
-                </div>
-            </div>
-        </div>
+                <Section>
+                    <div className="mb-12 text-center">
+                        <h2 className="mb-4 text-3xl font-bold tracking-tight">
+                            Featured Projects
+                        </h2>
+                        <p className="text-foreground/70 mx-auto max-w-2xl text-lg">
+                            A selection of projects I&#39;ve worked on, ranging
+                            from full-stack web applications to browser
+                            extensions and CLI tools.
+                        </p>
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {projects.map((project, index) => (
+                            <ModernProjectCard key={index} project={project} />
+                        ))}
+                    </div>
+                </Section>
+
+                <Separator className="my-16" />
+
+                <Section>
+                    <div className="text-center">
+                        <h2 className="mb-4 text-3xl font-bold tracking-tight">
+                            Let&#39;s Work Together
+                        </h2>
+                        <p className="text-foreground/70 mx-auto mb-8 max-w-2xl text-lg">
+                            I&#39;m always interested in new opportunities and
+                            collaborations. Feel free to reach out if you&#39;d like
+                            to discuss a project, give me feedback or just say hello.
+                        </p>
+                        <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                            <a
+                                href="mailto:contact@fx64b.dev"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-medium transition-colors"
+                            >
+                                Get In Touch
+                            </a>
+                            <Link
+                                href="/blog"
+                                className="border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md border px-6 py-3 text-sm font-medium transition-colors"
+                            >
+                                Read My Blog
+                            </Link>
+                        </div>
+                    </div>
+                </Section>
+            </main>
+        </>
     )
 }

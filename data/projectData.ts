@@ -9,6 +9,7 @@ const projectData: Project[] = [
         link: 'https://learn.fx64b.dev',
         githubLink: 'https://github.com/Fx64b/learn',
         status: 'In Progress',
+        tags: ['TODO', 'Next.js', 'TypeScript', 'Stripe', 'PostgreSQL'],
     },
     {
         title: 'video-archiver',
@@ -18,6 +19,7 @@ const projectData: Project[] = [
         link: 'https://github.com/Fx64b/video-archiver',
         githubLink: 'https://github.com/Fx64b/video-archiver',
         status: 'On Hold',
+        tags: ['TODO', 'Next.js', 'TypeScript', 'Stripe', 'PostgreSQL'],
     },
     {
         title: 'skool-loom-dl',
@@ -27,6 +29,7 @@ const projectData: Project[] = [
         link: 'https://github.com/Fx64b/skool-loom-dl',
         githubLink: 'https://github.com/Fx64b/skool-loom-dl',
         status: 'Finished',
+        tags: ['TODO', 'Next.js', 'TypeScript', 'Stripe', 'PostgreSQL'],
     },
     {
         title: 'This Portfolio',
@@ -36,6 +39,7 @@ const projectData: Project[] = [
         link: 'https://github.com/Fx64b/fx64b.dev',
         githubLink: 'https://github.com/Fx64b/fx64b.dev',
         status: 'Finished',
+        tags: ['TODO', 'Next.js', 'TypeScript', 'Stripe', 'PostgreSQL'],
     },
     {
         title: 'Skool Focus',
@@ -45,6 +49,7 @@ const projectData: Project[] = [
         link: 'https://chromewebstore.google.com/detail/skool-focus/nchfffdkbhafombnfcpladflclakmdmo',
         githubLink: 'https://github.com/fx64b/skool-focus-extension',
         status: 'Finished',
+        tags: ['TODO', 'Next.js', 'TypeScript', 'Stripe', 'PostgreSQL'],
     },
 ]
 
