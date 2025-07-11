@@ -18,7 +18,32 @@
     text-wrap: balance;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 /* Blog specific CSS */
+
+/* Offset for fixed header when jumping to sections */
+:target {
+    scroll-margin-top: 100px;
+}
+
+.prose {
+    --tw-prose-body: theme('colors.foreground');
+    --tw-prose-headings: theme('colors.foreground');
+    --tw-prose-bold: theme('colors.foreground');
+    --tw-prose-counters: theme('colors.muted-foreground');
+    --tw-prose-bullets: theme('colors.muted-foreground');
+    --tw-prose-hr: theme('colors.border');
+    --tw-prose-quote-borders: theme('colors.border');
+    --tw-prose-captions: theme('colors.muted-foreground');
+    --tw-prose-code: theme('colors.foreground');
+    --tw-prose-pre-code: theme('colors.foreground');
+    --tw-prose-pre-bg: rgb(30, 30, 30);
+    --tw-prose-th-borders: theme('colors.border');
+    --tw-prose-td-borders: theme('colors.border');
+}
 
 .blog h1,
 .blog h2 {
