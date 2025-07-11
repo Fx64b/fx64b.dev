@@ -79,8 +79,9 @@ export default function Home() {
                         </h2>
                         <p className="text-foreground/70 mx-auto mb-8 max-w-2xl text-lg">
                             I&#39;m always interested in new opportunities and
-                            collaborations. Feel free to reach out if you&#39;d like
-                            to discuss a project, give me feedback or just say hello.
+                            collaborations. Feel free to reach out if you&#39;d
+                            like to discuss a project, give me feedback or just
+                            say hello.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <a

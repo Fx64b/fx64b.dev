@@ -41,7 +41,7 @@ export function Header() {
                 <nav className="flex items-center space-x-1">
                     <Link
                         href="/"
-                        className={`hover:text-foreground px-4 py-2 text-sm font-medium transition-colors ${
+                        className={`hover:text-foreground hidden px-4 py-2 text-sm font-medium transition-colors sm:flex ${
                             isActive('/')
                                 ? 'text-foreground'
                                 : 'text-foreground/60'

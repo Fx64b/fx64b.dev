@@ -4,7 +4,7 @@ export function BackgroundGrid() {
     return (
         <div className="fixed inset-0 -z-10 overflow-hidden">
             <div
-                className="absolute inset-0 opacity-50"
+                className="absolute inset-0 opacity-60"
                 style={{
                     backgroundImage: `
             linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
