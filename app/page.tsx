@@ -1,12 +1,13 @@
 import projects from '@/data/projectData'
 
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { BackgroundGrid } from '@/components/background-grid'
 import { HeroSection } from '@/components/hero-section'
 import { ModernProjectCard } from '@/components/modern-project-card'
 import { Section } from '@/components/section'
+import { TechStackSection } from '@/components/tech-stack-section'
 import { Separator } from '@/components/ui/separator'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -47,9 +48,14 @@ export default function Home() {
     return (
         <>
             <BackgroundGrid />
-
             <main className="relative">
                 <HeroSection />
+
+                <Separator className="my-8" />
+
+                <TechStackSection />
+
+                <Separator className="my-8" />
 
                 <Section>
                     <div className="mb-12 text-center">
@@ -62,7 +68,6 @@ export default function Home() {
                             extensions and CLI tools.
                         </p>
                     </div>
-
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {projects.map((project) => (
                             <ModernProjectCard
