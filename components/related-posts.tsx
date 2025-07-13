@@ -48,7 +48,7 @@ export function RelatedPosts({ currentSlug, tags = [] }: RelatedPostsProps) {
     return (
         <div className="mt-16">
             <h2 className="mb-6 text-2xl font-bold">Related Posts</h2>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {relatedPosts.map((post) => (
                     <Link
                         key={post.slug}

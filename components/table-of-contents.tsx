@@ -32,11 +32,12 @@ export function TableOfContents({
 
         while ((match = headingRegex.exec(content)) !== null) {
             const level = match[1].length
-            const text = match[2]
+            const text = match[2].replace(/\*\*/g, '')
             const id = text
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '')
+                .replace(/\*\*/g, '')
 
             extractedHeadings.push({ id, text, level })
         }
@@ -97,33 +98,77 @@ export function TableOfContents({
         return null
     }
 
+    // Filter headings if there are too many
+    const displayHeadings =
+        headings.length >= 10
+            ? headings.filter((heading) => heading.level <= 2) // Only show H1 and H2 for large TOCs
+            : headings
+
+    const getEffectiveActiveId = () => {
+        if (displayHeadings.find((h) => h.id === activeId)) {
+            return activeId
+        }
+
+        const activeIndex = headings.findIndex((h) => h.id === activeId)
+        if (activeIndex === -1) {
+            return ''
+        }
+
+        for (let i = activeIndex; i >= 0; i--) {
+            const heading = headings[i]
+            if (displayHeadings.find((h) => h.id === heading.id)) {
+                return heading.id
+            }
+        }
+
+        for (let i = activeIndex + 1; i < headings.length; i++) {
+            const heading = headings[i]
+            if (displayHeadings.find((h) => h.id === heading.id)) {
+                return heading.id
+            }
+        }
+
+        return ''
+    }
+
+    const effectiveActiveId = getEffectiveActiveId()
+
     // Desktop variant - sticky sidebar
     if (variant === 'desktop') {
         return (
             <nav className="sticky top-24">
                 <h4 className="mb-4 text-sm font-semibold">On this page</h4>
-                <ul className="space-y-2 text-sm">
-                    {headings.map((heading) => (
-                        <li
-                            key={heading.id}
-                            style={{
-                                paddingLeft: `${(heading.level - 1) * 12}px`,
-                            }}
-                        >
-                            <button
-                                onClick={() => scrollToHeading(heading.id)}
-                                className={cn(
-                                    'hover:text-primary w-full text-left transition-colors duration-200',
-                                    activeId === heading.id
-                                        ? 'text-primary font-medium'
-                                        : 'text-muted-foreground'
-                                )}
+                <div className="relative">
+                    <ul className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[calc(100vh-200px)] space-y-2 overflow-y-auto pr-2 text-sm">
+                        {displayHeadings.map((heading) => (
+                            <li
+                                key={heading.id}
+                                style={{
+                                    paddingLeft: `${(heading.level - 1) * 12}px`,
+                                }}
                             >
-                                {heading.text}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                                <button
+                                    onClick={() => scrollToHeading(heading.id)}
+                                    className={cn(
+                                        'hover:text-primary w-full text-left transition-colors duration-200',
+                                        effectiveActiveId === heading.id
+                                            ? 'text-primary font-medium'
+                                            : 'text-muted-foreground'
+                                    )}
+                                >
+                                    {heading.text}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                    {/* Fade effect for scrollable content */}
+                    {displayHeadings.length > 8 && (
+                        <>
+                            <div className="from-background pointer-events-none absolute top-[-2] right-0 left-0 h-4 bg-gradient-to-b to-transparent" />
+                            <div className="from-background pointer-events-none absolute right-0 bottom-[-2] left-0 h-4 bg-gradient-to-t to-transparent" />
+                        </>
+                    )}
+                </div>
             </nav>
         )
     }
@@ -135,8 +180,9 @@ export function TableOfContents({
                 <h4 className="mb-4 text-sm font-semibold">
                     Table of Contents
                 </h4>
-                <ul className="space-y-2 text-sm">
-                    {headings.map((heading) => (
+
+                <ul className="max-h-64 space-y-2 overflow-y-auto pr-2 text-sm">
+                    {displayHeadings.map((heading) => (
                         <li
                             key={heading.id}
                             style={{
@@ -147,7 +193,7 @@ export function TableOfContents({
                                 onClick={() => scrollToHeading(heading.id)}
                                 className={cn(
                                     'hover:text-primary w-full text-left transition-colors duration-200',
-                                    activeId === heading.id
+                                    effectiveActiveId === heading.id
                                         ? 'text-primary font-medium'
                                         : 'text-muted-foreground'
                                 )}

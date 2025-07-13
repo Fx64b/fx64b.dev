@@ -48,6 +48,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
 
         const code = String(children).replace(/\n$/, '')
 
+        const isSingleLine = code.split('\n').length === 1
+
         const languageNames: Record<string, string> = {
             javascript: 'JavaScript',
             typescript: 'TypeScript',
@@ -113,7 +115,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         style={oneDark}
                         language={language}
                         PreTag="div"
-                        showLineNumbers
+                        showLineNumbers={!isSingleLine}
                         customStyle={{
                             margin: 0,
                             borderRadius: 0,

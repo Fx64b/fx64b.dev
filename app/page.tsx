@@ -65,7 +65,10 @@ export default function Home() {
 
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {projects.map((project) => (
-                            <ModernProjectCard key={project.title} project={project} />
+                            <ModernProjectCard
+                                key={project.title}
+                                project={project}
+                            />
                         ))}
                     </div>
                 </Section>
