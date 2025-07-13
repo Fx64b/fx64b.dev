@@ -42,8 +42,7 @@ export default async function Blog() {
                                             <span>{post.date}</span>
                                             {post.read && (
                                                 <>
-                                                    <span>•</span>
-                                                    <Clock className="h-4 w-4" />
+                                                    <Clock className="ml-auto h-4 w-4" />
                                                     <span>{post.read}</span>
                                                 </>
                                             )}
@@ -52,11 +51,13 @@ export default async function Blog() {
                                             {post.title}
                                         </h2>
                                     </CardHeader>
-                                    <CardContent>
+                                    <CardContent
+                                        className={'flex h-full flex-col'}
+                                    >
                                         <p className="text-foreground/70 mb-4 line-clamp-3 text-sm leading-relaxed">
                                             {post.description}
                                         </p>
-                                        <div className="flex items-center justify-between">
+                                        <div className="mt-auto flex items-center justify-between">
                                             <Badge
                                                 variant="secondary"
                                                 className="text-xs"

@@ -3,6 +3,7 @@
 import { ArrowRight, Calendar, MapPin } from 'lucide-react'
 
 import Image from 'next/image'
+import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -41,10 +42,16 @@ export function HeroSection() {
 
                     {/* Description */}
                     <p className="text-foreground/70 mb-8 max-w-2xl text-lg sm:text-xl">
-                        Hey! I&#39;m Fabio, a software engineer from Switzerland
-                        building modern web applications with React, Next.js,
-                        TypeScript, and Go. Currently exploring cybersecurity
-                        fundamentals.
+                        Hey! I&#39;m{' '}
+                        <Link
+                            href={'https://fabio-maffucci.ch'}
+                            className={'text-primary underline'}
+                        >
+                            Fabio
+                        </Link>
+                        , a software engineer from Switzerland building modern
+                        web applications with React, Next.js, TypeScript, and
+                        Go. Currently exploring cybersecurity fundamentals.
                     </p>
 
                     {/* Location and experience */}

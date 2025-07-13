@@ -35,7 +35,7 @@ const statusColors = {
     'On Hold': 'bg-gray-500/10 text-gray-500',
 }
 
-export function ModernProjectCard({ project }: ModernProjectCardProps) {
+export function ProjectCard({ project }: ModernProjectCardProps) {
     const handleGithubClick = (e: React.MouseEvent) => {
         e.stopPropagation()
         e.preventDefault()

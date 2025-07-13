@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 import { BackgroundGrid } from '@/components/background-grid'
 import { HeroSection } from '@/components/hero-section'
-import { ModernProjectCard } from '@/components/modern-project-card'
+import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
 import { TechStackSection } from '@/components/tech-stack-section'
 import { Separator } from '@/components/ui/separator'
@@ -70,7 +70,7 @@ export default function Home() {
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {projects.map((project) => (
-                            <ModernProjectCard
+                            <ProjectCard
                                 key={project.title}
                                 project={project}
                             />
