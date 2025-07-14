@@ -46,7 +46,7 @@ export function AuthorBio({
                                 <Github className="h-4 w-4" />
                                 <span className="sr-only">GitHub</span>
                             </Link>
-                            {/*TODO*/}
+                            {/*TODO
                             <Link
                                 href="https://twitter.com/fx64b"
                                 target="_blank"
@@ -55,10 +55,10 @@ export function AuthorBio({
                             >
                                 <Twitter className="h-4 w-4" />
                                 <span className="sr-only">Twitter</span>
-                            </Link>
+                            </Link>*/}
                             {/*TODO*/}
                             <Link
-                                href="https://linkedin.com/in/fx64b"
+                                href="https://www.linkedin.com/in/fabio-maffucci-23515b328/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-8 w-8 items-center justify-center rounded-md border"

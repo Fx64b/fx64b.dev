@@ -1,4 +1,4 @@
-import { Github, Mail } from 'lucide-react'
+import { Github, Linkedin, Mail } from 'lucide-react'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -78,6 +78,12 @@ export function Footer() {
                                 <Link href="mailto:contact@fx64b.dev">
                                     <Mail className="h-4 w-4" />
                                     <span className="sr-only">Email</span>
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="icon" asChild>
+                                <Link href="https://www.linkedin.com/in/fabio-maffucci-23515b328/">
+                                    <Linkedin className="h-4 w-4" />
+                                    <span className="sr-only">Linkedin</span>
                                 </Link>
                             </Button>
                         </div>
