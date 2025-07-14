@@ -13,7 +13,7 @@ interface TechItem {
 }
 
 const techCategories = {
-    languages: ['javascript', 'typescript', 'go'],
+    languages: ['javascript', 'typescript', 'go', 'openjdk'],
     frontend: ['react', 'next.js', 'tailwindcss', 'radix-ui', 'angular'],
     backend: ['postgresql', 'mongodb', 'sqlite', 'apachekafka', 'quarkus'],
     tools: [
@@ -50,7 +50,7 @@ const techStack: TechItem[] = [
 ]
 
 const generateBadgeUrl = (tech: string): string => {
-    return `https://img.shields.io/badge/${tech.replace('-', ' ')}-%23252525.svg?style=for-the-badge&logo=${tech}&logoColor=white`
+    return `https://img.shields.io/badge/${tech.replace('-', ' ').replace('openjdk', 'java')}-%23252525.svg?style=for-the-badge&logo=${tech}&logoColor=white`
 }
 
 export function TechStackSection() {
@@ -81,8 +81,8 @@ export function TechStackSection() {
     }, [])
 
     const getRandomDuration = useCallback((): number => {
-        // Random duration between 2000ms (2s) and 4000ms (4s)
-        return Math.floor(Math.random() * 2000) + 2000
+        // Random duration between 2000ms (2s) and 3000ms (3s)
+        return Math.floor(Math.random() * 2000) + 3000
     }, [])
 
     const animateRandomBadges = useCallback(() => {
