@@ -23,7 +23,7 @@ interface Project {
     tags?: string[]
 }
 
-interface ModernProjectCardProps {
+interface ProjectCardProps {
     project: Project
 }
 
@@ -35,7 +35,7 @@ const statusColors = {
     'On Hold': 'bg-gray-500/10 text-gray-500',
 }
 
-export function ProjectCard({ project }: ModernProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
     const handleGithubClick = (e: React.MouseEvent) => {
         e.stopPropagation()
         e.preventDefault()
