@@ -6,4 +6,5 @@ export interface Project {
     githubLink: string
     status: 'Finished' | 'In Progress' | 'Planned' | 'Abandoned' | 'On Hold'
     tags: string[]
+    featured: boolean
 }

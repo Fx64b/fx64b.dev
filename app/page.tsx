@@ -1,4 +1,5 @@
 import projects from '@/data/projectData'
+import { ArrowRight } from 'lucide-react'
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -8,6 +9,7 @@ import { HeroSection } from '@/components/hero-section'
 import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
 import { TechStackSection } from '@/components/tech-stack-section'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -53,10 +55,6 @@ export default function Home() {
 
                 <Separator className="my-8" />
 
-                <TechStackSection />
-
-                <Separator className="my-8" />
-
                 <Section>
                     <div className="mb-12 text-center">
                         <h2 className="mb-4 text-3xl font-bold tracking-tight">
@@ -69,16 +67,29 @@ export default function Home() {
                         </p>
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {projects.map((project) => (
-                            <ProjectCard
-                                key={project.title}
-                                project={project}
-                            />
-                        ))}
+                        {projects
+                            .filter((project) => project.featured)
+                            .map((project) => (
+                                <ProjectCard
+                                    key={project.title}
+                                    project={project}
+                                />
+                            ))}
+                    </div>
+                    <div className="mt-8 text-center">
+                        <Button asChild>
+                            <Link href="/projects" className="text-primary">
+                                View All Projects <ArrowRight />
+                            </Link>
+                        </Button>
                     </div>
                 </Section>
 
                 <Separator className="my-16" />
+
+                <TechStackSection />
+
+                <Separator className="my-8" />
 
                 <Section>
                     <div className="text-center">
