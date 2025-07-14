@@ -44,10 +44,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
     return (
         <Card className="group border-border/50 bg-card/50 hover:border-border hover:bg-card/80 relative h-full overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
-            <CardContent className="flex h-full flex-col p-6 pb-0">
-                <div className="mb-4 flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="relative">
+            <CardContent className="flex h-full flex-col p-4 pb-0 md:p-6">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <div className="relative flex-shrink-0">
                             <Image
                                 src={
                                     project.logo ||
@@ -59,8 +59,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
                                 className="border-border/50 rounded-lg border"
                             />
                         </div>
-                        <div>
-                            <h3 className="group-hover:text-foreground/90 text-lg font-semibold transition-colors">
+                        <div className="min-w-0 flex-1">
+                            <h3 className="group-hover:text-foreground/90 truncate text-lg font-semibold transition-colors">
                                 {project.title}
                             </h3>
                             <Badge
@@ -71,27 +71,29 @@ export function ProjectCard({ project }: ProjectCardProps) {
                         </div>
                     </div>
 
-                    <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="flex flex-shrink-0 gap-1 opacity-100 transition-opacity md:gap-2 md:opacity-0 md:group-hover:opacity-100">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-11 w-11 md:h-8 md:w-8"
                             onClick={handleGithubClick}
+                            aria-label="View GitHub repository"
                         >
-                            <Github className="h-4 w-4" />
+                            <Github className="h-5 w-5 md:h-4 md:w-4" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-11 w-11 md:h-8 md:w-8"
                             asChild
                         >
                             <Link
                                 href={project.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                aria-label="Visit project website"
                             >
-                                <ExternalLink className="h-4 w-4" />
+                                <ExternalLink className="h-5 w-5 md:h-4 md:w-4" />
                             </Link>
                         </Button>
                     </div>
@@ -102,7 +104,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 </p>
 
                 {project.tags && project.tags.length > 0 && (
-                    <div className="mt-auto flex flex-wrap gap-2 pb-6">
+                    <div className="mt-auto flex flex-wrap gap-2 pb-4 md:pb-6">
                         {project.tags.map((tag) => (
                             <Badge
                                 key={tag}

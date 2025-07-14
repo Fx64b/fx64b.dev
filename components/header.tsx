@@ -69,6 +69,16 @@ export function Header() {
                     >
                         Tools
                     </Link>
+                    <Link
+                        href="/projects"
+                        className={`hover:text-foreground hidden px-4 py-2 text-sm font-medium transition-colors sm:flex ${
+                            isActive('/projects')
+                                ? 'text-foreground'
+                                : 'text-foreground/60'
+                        }`}
+                    >
+                        Projects
+                    </Link>
 
                     <Separator orientation="vertical" className="mx-2 h-6" />
 
