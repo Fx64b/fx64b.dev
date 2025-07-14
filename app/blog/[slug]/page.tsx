@@ -1,9 +1,8 @@
 import { Post } from '@/types/post'
-import fs from 'fs'
-import matter from 'gray-matter'
-import path from 'path'
 
 import { Metadata } from 'next'
+
+import { getPostBySlug, getPostContent, getPostSlugs } from '@/app/lib/posts'
 
 import { AuthorBio } from '@/components/author-bio'
 import { BackgroundGrid } from '@/components/background-grid'
@@ -11,8 +10,6 @@ import { BlogHeader } from '@/components/blog-header'
 import MarkdownRenderer from '@/components/markdown-renderer'
 import { RelatedPosts } from '@/components/related-posts'
 import { TableOfContents } from '@/components/table-of-contents'
-
-import { getPostBySlug, getPostSlugs } from '../../lib/posts'
 
 interface Props {
     params: Promise<{
@@ -66,14 +63,11 @@ export default async function PostPage(props: Props) {
     const params = await props.params
     const { slug } = params
     const post: Post | null = getPostBySlug(slug)
+    const content = getPostContent(slug)
 
-    if (!post) {
+    if (!post || !content) {
         return <p>Post not found.</p>
     }
-
-    const fullPath = path.join(process.cwd(), 'content', `${slug}.md`)
-    const fileContents = fs.readFileSync(fullPath, 'utf8')
-    const { content } = matter(fileContents)
 
     return (
         <>

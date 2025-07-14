@@ -45,7 +45,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     return (
         <Card className="group border-border/50 bg-card/50 hover:border-border hover:bg-card/80 relative h-full overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
             <CardContent className="flex h-full flex-col p-4 pb-0 md:p-6">
-                <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex min-w-0 flex-1 items-center gap-3">
                         <div className="relative flex-shrink-0">
                             <Image
@@ -60,7 +60,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                             />
                         </div>
                         <div className="min-w-0 flex-1">
-                            <h3 className="group-hover:text-foreground/90 truncate text-lg font-semibold transition-colors">
+                            <h3 className="group-hover:text-foreground/90 text-lg font-semibold transition-colors">
                                 {project.title}
                             </h3>
                             <Badge

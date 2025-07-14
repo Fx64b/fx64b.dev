@@ -64,19 +64,14 @@ export default function Projects() {
                                     case studies
                                 </p>
                             </div>
-                            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
                                 {featuredProjects.map((project) => (
                                     <Link
                                         key={project.title}
                                         href={`/projects/${project.title.toLowerCase().replace(/\s+/g, '-')}`}
-                                        target={'_blank'}
-                                        rel={'noopener noreferrer'}
                                         className="group block"
                                     >
-                                        <ProjectCard
-                                            key={project.title}
-                                            project={project}
-                                        />
+                                        <ProjectCard project={project} />
                                     </Link>
                                 ))}
                             </div>

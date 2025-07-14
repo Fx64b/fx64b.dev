@@ -66,14 +66,20 @@ export default function Home() {
                             extensions and CLI tools.
                         </p>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
                         {projects
                             .filter((project) => project.featured)
                             .map((project) => (
-                                <ProjectCard
+                                <Link
                                     key={project.title}
-                                    project={project}
-                                />
+                                    href={`/projects/${project.title.toLowerCase().replace(/\s+/g, '-')}`}
+                                    className="group block"
+                                >
+                                    <ProjectCard
+                                        key={project.title}
+                                        project={project}
+                                    />
+                                </Link>
                             ))}
                     </div>
                     <div className="mt-8 text-center">

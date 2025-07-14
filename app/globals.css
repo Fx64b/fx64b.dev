@@ -45,44 +45,44 @@ html {
     --tw-prose-td-borders: theme('colors.border');
 }
 
-.blog h1,
-.blog h2 {
+.markdown h1,
+.markdown h2 {
     @apply mt-10;
 }
 
-.blog h3,
-.blog img:not(.rounded-full),
-.blog pre {
+.markdown h3,
+.markdown img:not(.rounded-full),
+.markdown pre {
     @apply mt-6 mb-2;
 }
 
-.blog h1 {
+.markdown h1 {
     @apply text-3xl font-bold;
 }
 
-.blog h2 {
+.markdown h2 {
     @apply text-2xl font-semibold;
 }
 
-.blog h3 {
+.markdown h3 {
     @apply text-xl;
 }
 
-.blog hr {
+.markdown hr {
     @apply my-6;
 }
 
-.blog ul {
+.markdown ul {
     @apply ml-5 list-disc;
 }
 
-.blog ol {
+.markdown ol {
     @apply ml-5 list-decimal;
 }
 
-.blog p > span,
-.blog strong > span,
-.blog li > span {
+.markdown p > span,
+.markdown strong > span,
+.markdown li > span {
     @apply self-baseline rounded-sm bg-[#131417] px-2 pb-[0.25rem] font-mono;
 }
 
