@@ -74,14 +74,12 @@ export function HeroSection() {
                     <div className="flex flex-col gap-4 sm:flex-row">
                         <Button size="lg" className="group" asChild>
                             <Link href="/projects">
-                            View My Work
-                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                View My Work
+                                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                             </Link>
                         </Button>
                         <Button variant="outline" size="lg" asChild>
-                            <a href="mailto:contact@fx64b.dev">
-                            Get In Touch
-                            </a>
+                            <a href="mailto:contact@fx64b.dev">Get In Touch</a>
                         </Button>
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 
 import { CheckIcon, ClipboardIcon } from 'lucide-react'
 import rehypeRaw from 'rehype-raw'
+import remarkGfm from 'remark-gfm'
 
 import React, { useState } from 'react'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
@@ -12,6 +13,14 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import Link from 'next/link'
 
 import { Separator } from '@/components/ui/separator'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
 
 interface MarkdownRendererProps {
     content: string
@@ -139,7 +148,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
 
     return (
         <ReactMarkdown
-            rehypePlugins={[rehypeRaw]}
+            rehypePlugins={[rehypeRaw, remarkGfm]}
             components={{
                 code: CodeBlock as any,
                 hr: () => <Separator className="my-8" />,
@@ -183,6 +192,16 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         {children}
                     </blockquote>
                 ),
+                table: ({ children }) => (
+                    <div className="my-6 w-full overflow-y-auto">
+                        <Table>{children}</Table>
+                    </div>
+                ),
+                thead: ({ children }) => <TableHeader>{children}</TableHeader>,
+                tbody: ({ children }) => <TableBody>{children}</TableBody>,
+                tr: ({ children }) => <TableRow>{children}</TableRow>,
+                th: ({ children }) => <TableHead>{children}</TableHead>,
+                td: ({ children }) => <TableCell>{children}</TableCell>,
             }}
         >
             {processedContent}
