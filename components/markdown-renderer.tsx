@@ -36,7 +36,20 @@ interface CodeBlockProps {
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     const processedContent = content.replace(
         /^(#{1,6})\s+(.+)$/gm,
-        (match, hashes, title) => {
+        (match, hashes, title, offset, string) => {
+            // Check if this heading is inside a code block
+            const beforeMatch = string.substring(0, offset)
+
+            // Count code block delimiters before this position
+            const codeBlockStarts = (beforeMatch.match(/```/g) || []).length
+            const inlineCodeStarts = (beforeMatch.match(/(?<!\\)`(?!`)/g) || [])
+                .length
+
+            // If we're inside a code block, don't transform
+            if (codeBlockStarts % 2 === 1 || inlineCodeStarts % 2 === 1) {
+                return match
+            }
+
             const id = title
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')

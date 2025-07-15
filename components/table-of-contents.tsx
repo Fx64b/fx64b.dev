@@ -25,12 +25,19 @@ export function TableOfContents({
     const [activeId, setActiveId] = useState<string>('')
 
     useEffect(() => {
-        // Extract headings from markdown content
+        // Remove code blocks first to avoid matching comments inside them
+        const contentWithoutCodeBlocks = content
+            .replace(/```[\s\S]*?```/g, '') // Remove fenced code blocks
+            .replace(/`[^`\n]*`/g, '') // Remove inline code
+
+        console.log('Content without code blocks:', contentWithoutCodeBlocks)
+
+        // Extract headings from the cleaned content
         const headingRegex = /^(#{1,3})\s+(.+)$/gm
         const extractedHeadings: TOCItem[] = []
         let match
 
-        while ((match = headingRegex.exec(content)) !== null) {
+        while ((match = headingRegex.exec(contentWithoutCodeBlocks)) !== null) {
             const level = match[1].length
             const text = match[2].replace(/\*\*/g, '')
             const id = text
