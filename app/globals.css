@@ -72,12 +72,12 @@ html {
     @apply my-6;
 }
 
-.markdown ul {
-    @apply ml-5 list-disc;
+.markdown ul:not(nav ul) {
+    @apply ml-10 list-disc;
 }
 
-.markdown ol {
-    @apply ml-5 list-decimal;
+.markdown ol:not(nav ul) {
+    @apply ml-10 list-decimal;
 }
 
 .markdown p > span,
