@@ -6,7 +6,7 @@ author: 'Fx64b'
 status: 'published'
 projectSlug: 'flashcard-app'
 version: '1.10.1'
-readTime: '12 mins'
+readTime: '15 mins'
 ---
 
 # Flashcard App - Technical Documentation

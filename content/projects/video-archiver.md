@@ -6,7 +6,7 @@ author: 'Fx64b'
 status: 'published'
 projectSlug: 'video-archiver'
 version: '0.1.3.0-BETA'
-readTime: '15 mins'
+readTime: '1 min'
 ---
 
 # Video Archiver - Technical Documentation

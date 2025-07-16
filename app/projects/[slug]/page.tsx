@@ -3,6 +3,7 @@ import {
     AlertCircleIcon,
     ArrowLeft,
     Calendar,
+    Clock,
     ExternalLink,
     FileText,
     GitBranch,
@@ -195,6 +196,14 @@ export default async function ProjectPage(props: Props) {
                                                     <span>
                                                         Version:{' '}
                                                         {projectDoc.version}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {projectDoc.readTime && (
+                                                <div className="flex items-center gap-1">
+                                                    <Clock className="h-4 w-4" />
+                                                    <span>
+                                                        {projectDoc.readTime}
                                                     </span>
                                                 </div>
                                             )}
