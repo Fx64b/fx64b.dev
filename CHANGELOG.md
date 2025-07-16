@@ -1,3 +1,40 @@
+# [3.3.0](https://github.com/Fx64b/fx64b.dev/compare/v3.2.2...v3.3.0) (2025-07-16)
+
+
+### Bug Fixes
+
+* **css:** adjust markdown list indentation for improved readability ([62f378e](https://github.com/Fx64b/fx64b.dev/commit/62f378eb679cbe209903065c0f8d0d278ddfac68))
+* **docs:** correct typos in flashcard app, skool loom downloader, and video archiver documentation ([a4991e0](https://github.com/Fx64b/fx64b.dev/commit/a4991e05db7cfaebe27ae928554dfe246329fcae))
+* **table-of-contents:** increase heading display threshold ([5c91e08](https://github.com/Fx64b/fx64b.dev/commit/5c91e080964faf31722f5e2c7d1cae59d6b39177))
+* update dependencies and remove debug log in table of contents ([aacab91](https://github.com/Fx64b/fx64b.dev/commit/aacab9151f9ae3db928bb8ca0d9ba05aa058a6e5))
+
+
+### Features
+
+* add background grid to tool not found and tool page components ([e366f0b](https://github.com/Fx64b/fx64b.dev/commit/e366f0be137d3bd609ffd936c17613a3d7f662ed))
+* add featured projects section with button to view all projects and enhance tech stack display ([b9dc4d9](https://github.com/Fx64b/fx64b.dev/commit/b9dc4d94911f0e14c28ebe4a984e927db0c02a2e))
+* add new components and update project data for site redesign ([7bc91c8](https://github.com/Fx64b/fx64b.dev/commit/7bc91c8811645846b9a20769664bb8709ae3f5f2))
+* add projects link to header and enhance project card layout with improved spacing and tags ([2ee41d6](https://github.com/Fx64b/fx64b.dev/commit/2ee41d691f4fdf804aa48d0764e366896282bfaa))
+* add table component and integrate remark-gfm for enhanced markdown support ([3a639be](https://github.com/Fx64b/fx64b.dev/commit/3a639be7729bdcdb39d1497bf69c9f1f4a6758a0))
+* add tech stack section with dynamic badges and update next.config for image handling ([6951b1a](https://github.com/Fx64b/fx64b.dev/commit/6951b1a84bbd94edf378e3e529eb664e0619fd79))
+* add technical documentation for Flashcard App and Video Archiver with structured metadata ([66f4cf2](https://github.com/Fx64b/fx64b.dev/commit/66f4cf20af5414c39c096c57334793044776c87a))
+* **blog|projects:** enhance markdown rendering by ignoring headings inside code blocks ([b0f1737](https://github.com/Fx64b/fx64b.dev/commit/b0f1737dc888d74d04c440788bec13cd61f49068))
+* **docs:** update Docker storage guide with troubleshooting tips and cleanup strategies ([5a376a7](https://github.com/Fx64b/fx64b.dev/commit/5a376a7c87e853de88126a1367d7fbbb6b1569d5))
+* **docs:** update flashcard app and skool loom downloader documentation for clarity and consistency ([7202437](https://github.com/Fx64b/fx64b.dev/commit/7202437491c9725b3afbe9a574548fa58a9933d1))
+* **docs:** update read time for flashcard app and video archiver documentation ([896c64b](https://github.com/Fx64b/fx64b.dev/commit/896c64b8327c6d81c7f145482de1ed63c5c0b581))
+* enhance table of contents with custom scrollbar and improved heading display logic ([74ade4d](https://github.com/Fx64b/fx64b.dev/commit/74ade4d843685a9a33729b38f9b867bc9a43e0c4))
+* enhance tech stack section with animated badge inversion and visibility detection ([d0916d6](https://github.com/Fx64b/fx64b.dev/commit/d0916d64512cd3fbf0dfee89e99db595d305bfd7))
+* implement author bio, related posts, and table of contents components for improved blog layout ([754e8da](https://github.com/Fx64b/fx64b.dev/commit/754e8da778193301fe945554797a4aeeb7832ade))
+* implement project layout and detail pages with dynamic metadata and project cards ([f6377ee](https://github.com/Fx64b/fx64b.dev/commit/f6377ee2cd347610ba429eb522d58b7cf0616362))
+* **projects:** add technical documentation for Skool Loom Downloader utility ([89c734a](https://github.com/Fx64b/fx64b.dev/commit/89c734a1347df4295a06f369158fb1b1c1a1ea07))
+* **projects:** enhance flashcard app documentation with links and improve clarity ([650ddf9](https://github.com/Fx64b/fx64b.dev/commit/650ddf97231503930bec0e196ad72abafbfcb1db))
+* **projects:** expand project overview and architecture details in flashcard-app.md ([a5f0fd8](https://github.com/Fx64b/fx64b.dev/commit/a5f0fd83bda2215420f9ecb5601974828d039d69))
+* **skool-loom-dl:** add troubleshooting and contributing sections to documentation ([98ea841](https://github.com/Fx64b/fx64b.dev/commit/98ea841198805a44f8f3786eefd58a28c8cad837))
+* update author bio and footer to include LinkedIn link and import ([434ebd3](https://github.com/Fx64b/fx64b.dev/commit/434ebd3e0d6130108cf3cb183130f81fbe03d940))
+* update hero section buttons to use Link and anchor elements for improved navigation ([be8e716](https://github.com/Fx64b/fx64b.dev/commit/be8e7165fa942e0523249a8d23200f04cd9c64e5))
+* update hero section with link to personal website and refactor project card component ([7ce4821](https://github.com/Fx64b/fx64b.dev/commit/7ce4821854bb66ca5baa60dd5ae383895b34945b))
+* update tech stack section to include OpenJDK and adjust badge generation for Java ([844cf6f](https://github.com/Fx64b/fx64b.dev/commit/844cf6f109f810ee412c997ba8dc42c570c67a79))
+
 ## [3.2.2](https://github.com/Fx64b/fx64b.dev/compare/v3.2.1...v3.2.2) (2025-05-05)
 
 
