@@ -11,8 +11,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
-// TODO: rename theis and remove the old project card component
-
 interface Project {
     title: string
     description: string
