@@ -55,8 +55,8 @@ export default function HourToDecimalConverter() {
     }
 
     const calculateDecimal = () => {
-        const hoursNum = hours === '' ? 0 : parseInt(hours)
-        const minutesNum = minutes === '' ? 0 : parseInt(minutes)
+        const hoursNum = hours === '' ? 0 : parseInt(hours, 10)
+        const minutesNum = minutes === '' ? 0 : parseInt(minutes, 10)
 
         const decimalHours = hoursNum + minutesNum / 60
 
