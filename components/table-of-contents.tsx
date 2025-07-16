@@ -169,7 +169,7 @@ export function TableOfContents({
                         ))}
                     </ul>
                     {/* Fade effect for scrollable content */}
-                    {displayHeadings.length > 8 && (
+                    {displayHeadings.length > 10 && (
                         <>
                             <div className="from-background pointer-events-none absolute top-[-2] right-0 left-0 h-4 bg-gradient-to-b to-transparent" />
                             <div className="from-background pointer-events-none absolute right-0 bottom-[-2] left-0 h-4 bg-gradient-to-t to-transparent" />
