@@ -104,3 +104,21 @@ _Alternative: Using cookies for authentication_
 | `-output`   | Directory to save videos                             | `downloads`    |
 | `-wait`     | Page load wait time in seconds                       | `5`            |
 | `-headless` | Run browser headless (set to `false` for debugging)  | `true`         |
+
+
+## Troubleshooting
+
+- **No videos found**: Verify your authentication and classroom URL
+- **Authentication fails**: Use email/password instead of cookies
+- **Page loads incomplete**: Increase wait time with `-wait=5` or higher
+- **Download errors**: Update yt-dlp (`pip install -U yt-dlp`)
+- **Login issues**: Try `-headless=false` to see the browser and debug
+- **Specific video errors**: Check if the video is still available on Loom
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Fx64b/skool-loom-dl/blob/main/LICENSE) file for details.
