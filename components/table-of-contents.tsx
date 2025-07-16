@@ -30,8 +30,6 @@ export function TableOfContents({
             .replace(/```[\s\S]*?```/g, '') // Remove fenced code blocks
             .replace(/`[^`\n]*`/g, '') // Remove inline code
 
-        console.log('Content without code blocks:', contentWithoutCodeBlocks)
-
         // Extract headings from the cleaned content
         const headingRegex = /^(#{1,3})\s+(.+)$/gm
         const extractedHeadings: TOCItem[] = []
