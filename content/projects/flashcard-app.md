@@ -105,7 +105,7 @@ Users can create and organize flashcards into decks. Each deck has:
 - Optional due date for exam preparation
 - Progress tracking
 
-The deck creation process is straightforward - you fill out a form, and it creates a new deck. 
+The deck creation process is straightforward - you fill out a form, and it creates a new deck.
 
 ### Flashcard Creation & Editing
 
@@ -143,7 +143,7 @@ Study sessions track your learning activity, including start and end times, numb
 ### Frontend
 
 - **[Next.js 15](https://nextjs.org/)** - The main framework. I really like how development feels with Next.js, even if it's probably overkill for some projects.
-- **[TypeScript](https://www.typescriptlang.org/)** -  (though I still have some untyped areas that need cleanup)
+- **[TypeScript](https://www.typescriptlang.org/)** - (though I still have some untyped areas that need cleanup)
 - **[Tailwind CSS](https://tailwindcss.com/)** - For styling. Combined with some custom CSS for animations.
 - **[Framer Motion](https://www.framer.com/motion/)** - For the flashcard flip animations and transitions
 - **[shadcn/ui](https://ui.shadcn.com/)** - Component library for consistent UI elements
@@ -337,7 +337,7 @@ Adding more languages is just a matter of creating new translation files and upd
 User language preferences are stored in the database for authenticated users, and in cookies for guests. The locale is determined in this order:
 
 1. User's saved preference (if logged in)
-2. Cookie value 
+2. Cookie value
 3. Default to English
 
 ### Translation Workflow
@@ -350,7 +350,7 @@ It's a manual process right now, which doesn't scale great, but it works for the
 
 ### Design System
 
-The UI uses a consistent design system built on top of [shadcn/ui](https://ui.shadcn.com/) components and [Tailwind CSS](https://tailwindcss.com/). 
+The UI uses a consistent design system built on top of [shadcn/ui](https://ui.shadcn.com/) components and [Tailwind CSS](https://tailwindcss.com/).
 I went for a clean, modern look that doesn't get in the way of learning.
 
 The design philosophy is “functional first, pretty second.” It needs to work well before it needs to look amazing.
@@ -529,4 +529,4 @@ This project is open source under the MIT License. Feel free to use it, modify i
 
 ## Activity
 
-![Alt](https://repobeats.axiom.co/api/embed/e26f5c728d5b30144b3d3353306a519469a999f0.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/e26f5c728d5b30144b3d3353306a519469a999f0.svg 'Repobeats analytics image')

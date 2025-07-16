@@ -105,7 +105,6 @@ _Alternative: Using cookies for authentication_
 | `-wait`     | Page load wait time in seconds                       | `5`            |
 | `-headless` | Run browser headless (set to `false` for debugging)  | `true`         |
 
-
 ## Troubleshooting
 
 - **No videos found**: Verify your authentication and classroom URL
