@@ -13,7 +13,7 @@ readTime: '5 mins'
 
 ## Overview
 
-The Skool Loom Downloader is a Go-based CLI utility that I wrote over the weekend. I was about to leave a Skool community and wanted to download my favourity courses before leaving.
+The Skool Loom Downloader is a Go-based CLI utility that I wrote over the weekend. I was about to leave a Skool community and wanted to download my favorite courses before leaving.
 I couldn't figure out a simple way to download them manually, so I decided to vibe code this tool to automate the process.
 In simple terms, it scrapes a Skool classroom page, based on the provided URL, and downloads all Loom videos from that page.
 

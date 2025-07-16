@@ -21,7 +21,7 @@ This project is currently on hold due to a lack of time. I'm planning to resume 
 <br /> <br />
 Once I resume development, I will update this documentation with the latest features and improvements.
 <br /> <br />
-In the meantime you can explore the codebase and contribute if you wish. Bellow you can see the current activity of the project.
+In the meantime you can explore the codebase and contribute if you wish. Below you can see the current activity of the project.
 
 ## Activity
 

@@ -48,7 +48,7 @@ It's deployed on Vercel and actually works pretty well. I use it regularly, whic
 
 ### Future Vision
 
-The goal is to create a flashcard app that doesn't suck. Something that combines the sophistication of Anki with a modern, intuitive interface. I want it to be powerful enough for serious learners but simple enough that you don't need to learn how to software works itself first.
+The goal is to create a flashcard app that doesn't suck. Something that combines the sophistication of Anki with a modern, intuitive interface. I want it to be powerful enough for serious learners but simple enough that you don't need to learn how the software works itself first.
 
 I'm currently working on some more advanced features like AI-powered flashcard generation coupled with a subscription model to support ongoing development costs. The idea is to keep the core features free while offering premium functionality for those who want it.
 
