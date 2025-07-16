@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 
 import DynamicToolLoader from '@/app/tools/components/DynamicToolLoader'
 
+import { BackgroundGrid } from '@/components/background-grid'
 import { Separator } from '@/components/ui/separator'
 
 interface ToolPageProps {
@@ -68,37 +69,42 @@ export default async function ToolPage(props: ToolPageProps) {
     }
 
     return (
-        <div className="mx-auto max-w-(--breakpoint-lg)">
-            <h1 className="mb-2 text-2xl font-bold">{tool.title}</h1>
-            <p className="text-muted-foreground mb-6">{tool.description}</p>
+        <>
+            <BackgroundGrid />
+            <div className="mx-auto max-w-(--breakpoint-lg)">
+                <h1 className="mb-2 text-2xl font-bold">{tool.title}</h1>
+                <p className="text-muted-foreground mb-6">{tool.description}</p>
 
-            <Separator className="my-6" />
+                <Separator className="my-6" />
 
-            <DynamicToolLoader slug={params.slug} />
+                <DynamicToolLoader slug={params.slug} />
 
-            <div className="mt-12">
-                <h3 className="mb-4 text-lg font-semibold">About this tool</h3>
-                <p>
-                    This is a free online tool that works entirely in your
-                    browser.
-                </p>
+                <div className="mt-12">
+                    <h3 className="mb-4 text-lg font-semibold">
+                        About this tool
+                    </h3>
+                    <p>
+                        This is a free online tool that works entirely in your
+                        browser.
+                    </p>
 
-                {tool.tags.length > 0 && (
-                    <div className="mt-4">
-                        <h4 className="mb-2 font-medium">Tags</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {tool.tags.map((tag) => (
-                                <span
-                                    key={tag}
-                                    className="bg-secondary rounded-full px-3 py-1 text-sm"
-                                >
-                                    {tag}
-                                </span>
-                            ))}
+                    {tool.tags.length > 0 && (
+                        <div className="mt-4">
+                            <h4 className="mb-2 font-medium">Tags</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {tool.tags.map((tag) => (
+                                    <span
+                                        key={tag}
+                                        className="bg-secondary rounded-full px-3 py-1 text-sm"
+                                    >
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     )
 }

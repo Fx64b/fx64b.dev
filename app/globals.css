@@ -18,47 +18,99 @@
     text-wrap: balance;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 /* Blog specific CSS */
 
-.blog h1,
-.blog h2 {
+/* Offset for fixed header when jumping to sections */
+:target {
+    scroll-margin-top: 100px;
+}
+
+.prose {
+    --tw-prose-body: theme('colors.foreground');
+    --tw-prose-headings: theme('colors.foreground');
+    --tw-prose-bold: theme('colors.foreground');
+    --tw-prose-counters: theme('colors.muted-foreground');
+    --tw-prose-bullets: theme('colors.muted-foreground');
+    --tw-prose-hr: theme('colors.border');
+    --tw-prose-quote-borders: theme('colors.border');
+    --tw-prose-captions: theme('colors.muted-foreground');
+    --tw-prose-code: theme('colors.foreground');
+    --tw-prose-pre-code: theme('colors.foreground');
+    --tw-prose-pre-bg: rgb(30, 30, 30);
+    --tw-prose-th-borders: theme('colors.border');
+    --tw-prose-td-borders: theme('colors.border');
+}
+
+.markdown h1,
+.markdown h2 {
     @apply mt-10;
 }
 
-.blog h3,
-.blog img:not(.rounded-full),
-.blog pre {
+.markdown h3,
+.markdown img:not(.rounded-full),
+.markdown pre {
     @apply mt-6 mb-2;
 }
 
-.blog h1 {
+.markdown h1 {
     @apply text-3xl font-bold;
 }
 
-.blog h2 {
+.markdown h2 {
     @apply text-2xl font-semibold;
 }
 
-.blog h3 {
+.markdown h3 {
     @apply text-xl;
 }
 
-.blog hr {
+.markdown hr {
     @apply my-6;
 }
 
-.blog ul {
-    @apply ml-5 list-disc;
+.markdown ul:not(nav ul) {
+    @apply ml-10 list-disc;
 }
 
-.blog ol {
-    @apply ml-5 list-decimal;
+.markdown ol:not(nav ul) {
+    @apply ml-10 list-decimal;
 }
 
-.blog p > span,
-.blog strong > span,
-.blog li > span {
+.markdown p > span,
+.markdown strong > span,
+.markdown li > span {
     @apply self-baseline rounded-sm bg-[#131417] px-2 pb-[0.25rem] font-mono;
+}
+
+/* Custom scrollbar for TOC */
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-thumb-muted {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
+/* Webkit scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
 }
 
 /*

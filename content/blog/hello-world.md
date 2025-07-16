@@ -44,7 +44,7 @@ And nothing screams "I'm serious about web development" like having a CI/CD pipe
 
 **So why all this?**
 
-1. Because I can.
+1. ~Because I can.~
 2. Because, honestly, I really wanted to experiment with these technologies, but I don't really have any ideas for actual projects to use them on.
 
 ## Building the site

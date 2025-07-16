@@ -99,31 +99,31 @@ describe('HourDecimalConverter', () => {
     })
 
     it('rounds to two decimal points correctly', async () => {
-        render(<HourDecimalConverter />);
-        const user = userEvent.setup();
+        render(<HourDecimalConverter />)
+        const user = userEvent.setup()
 
-        const hoursInput = screen.getByLabelText('Hours');
-        const minutesInput = screen.getByLabelText('Minutes (0-59)');
+        const hoursInput = screen.getByLabelText('Hours')
+        const minutesInput = screen.getByLabelText('Minutes (0-59)')
 
         // Test case: 8 hours 15 minutes (8.25)
-        await user.clear(hoursInput);
-        await user.type(hoursInput, '8');
-        await user.clear(minutesInput);
-        await user.type(minutesInput, '15');
-        expect(screen.getByText('8.25 decimal hours')).toBeInTheDocument();
+        await user.clear(hoursInput)
+        await user.type(hoursInput, '8')
+        await user.clear(minutesInput)
+        await user.type(minutesInput, '15')
+        expect(screen.getByText('8.25 decimal hours')).toBeInTheDocument()
 
         // Test case: 8 hours 18 minutes (8.3)
-        await user.clear(hoursInput);
-        await user.type(hoursInput, '8');
-        await user.clear(minutesInput);
-        await user.type(minutesInput, '18');
-        expect(screen.getByText('8.3 decimal hours')).toBeInTheDocument();
+        await user.clear(hoursInput)
+        await user.type(hoursInput, '8')
+        await user.clear(minutesInput)
+        await user.type(minutesInput, '18')
+        expect(screen.getByText('8.3 decimal hours')).toBeInTheDocument()
 
         // Test case: 8 hours 40 minutes (8.67)
-        await user.clear(hoursInput);
-        await user.type(hoursInput, '8');
-        await user.clear(minutesInput);
-        await user.type(minutesInput, '40');
-        expect(screen.getByText('8.67 decimal hours')).toBeInTheDocument();
-    });
+        await user.clear(hoursInput)
+        await user.type(hoursInput, '8')
+        await user.clear(minutesInput)
+        await user.type(minutesInput, '40')
+        expect(screen.getByText('8.67 decimal hours')).toBeInTheDocument()
+    })
 })
