@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowRight, Calendar, MapPin } from 'lucide-react'
+import { SwissCross } from 'swiss-cross'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -59,14 +60,11 @@ export function HeroSection() {
                         <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
                             <span>Switzerland</span>
-                            <span className="relative ml-1 inline-block h-[1.6em] w-[1.6em] rounded bg-red-600 align-middle">
-                                <span className="absolute top-1/12 right-[37%] bottom-1/12 left-[37%] bg-white"></span>
-                                <span className="absolute top-[37%] right-1/12 bottom-[37%] left-1/12 bg-white"></span>
-                            </span>
+                            <SwissCross borderRadius={'slight'} />
                         </div>
                         <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            <span>5+ years experience</span>
+                            <span>4+ years experience</span>
                         </div>
                     </div>
 
