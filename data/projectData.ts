@@ -51,6 +51,17 @@ const projectData: Project[] = [
         featured: true,
     },
     {
+        title: 'Swiss Cross',
+        description:
+            'A lightweight React component for rendering the Swiss cross symbol with customizable size, colors, and border radius. TypeScript support, and dual CommonJS/ESM distribution. ',
+        logo: '/sld.webp',
+        link: 'https://www.npmjs.com/package/swiss-cross',
+        githubLink: 'https://github.com/Fx64b/swiss-cross',
+        status: 'Finished',
+        tags: ['npm', 'Package', 'React', 'TypeScript', 'Swiss Cross'],
+        featured: true,
+    },
+    {
         title: 'This Portfolio',
         description:
             'Yes, it is open source! \nYou can find the source code on GitHub. This portfolio is built using Next.js, Tailwind CSS, and shadcn/ui.',
