@@ -194,7 +194,6 @@ export function TableOfContents({
                 className="border-border bg-muted/30 hover:bg-muted/50 flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors"
             >
                 <div className="flex items-center gap-2">
-                    {/* Replaced lucide-react icons with simple SVG components to fix import error */}
                     <svg
                         className="text-muted-foreground h-4 w-4"
                         fill="none"
@@ -215,7 +214,6 @@ export function TableOfContents({
                         ({displayHeadings.length} sections)
                     </span>
                 </div>
-                {/* Replaced lucide-react icons with simple SVG components to fix import error */}
                 <svg
                     className={cn(
                         'text-muted-foreground h-4 w-4 transition-transform duration-200',
