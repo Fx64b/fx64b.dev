@@ -1,10 +1,9 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { ChevronDown, List } from 'lucide-react'
 
 import { useEffect, useState } from 'react'
-
-import { Card, CardContent } from '@/components/ui/card'
 
 interface TOCItem {
     id: string
@@ -23,8 +22,14 @@ export function TableOfContents({
 }: TableOfContentsProps) {
     const [headings, setHeadings] = useState<TOCItem[]>([])
     const [activeId, setActiveId] = useState<string>('')
+    const [isExpanded, setIsExpanded] = useState(false)
 
     useEffect(() => {
+        if (!content) {
+            setHeadings([])
+            return
+        }
+
         // Remove code blocks first to avoid matching comments inside them
         const contentWithoutCodeBlocks = content
             .replace(/```[\s\S]*?```/g, '') // Remove fenced code blocks
@@ -99,7 +104,7 @@ export function TableOfContents({
         }
     }
 
-    if (headings.length === 0) {
+    if (!content || headings.length === 0) {
         return null
     }
 
@@ -180,35 +185,70 @@ export function TableOfContents({
 
     // Mobile variant - simple list
     return (
-        <Card className="mb-8">
-            <CardContent className="p-6">
-                <h4 className="mb-4 text-sm font-semibold">
-                    Table of Contents
-                </h4>
+        <div className="mb-8">
+            {/* Collapsible header */}
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="border-border bg-muted/30 hover:bg-muted/50 flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors"
+            >
+                <div className="flex items-center gap-2">
+                    <List className="text-muted-foreground h-4 w-4" />
+                    <span className="text-sm font-medium">
+                        Table of Contents
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                        ({displayHeadings.length} sections)
+                    </span>
+                </div>
+                <ChevronDown
+                    className={cn(
+                        'text-muted-foreground h-4 w-4 transition-transform duration-200',
+                        isExpanded && 'rotate-180'
+                    )}
+                />
+            </button>
 
-                <ul className="max-h-64 space-y-2 overflow-y-auto pr-2 text-sm">
-                    {displayHeadings.map((heading) => (
-                        <li
-                            key={heading.id}
-                            style={{
-                                paddingLeft: `${(heading.level - 1) * 16}px`,
-                            }}
-                        >
-                            <button
-                                onClick={() => scrollToHeading(heading.id)}
-                                className={cn(
-                                    'hover:text-primary w-full text-left transition-colors duration-200',
-                                    effectiveActiveId === heading.id
-                                        ? 'text-primary font-medium'
-                                        : 'text-muted-foreground'
-                                )}
+            {/* Expandable content */}
+            <div
+                className={cn(
+                    'overflow-hidden transition-all duration-300 ease-in-out',
+                    isExpanded
+                        ? 'max-h-[70vh] opacity-100'
+                        : 'max-h-0 opacity-0'
+                )}
+            >
+                <div className="border-border bg-muted/10 mt-2 rounded-r-lg border-l-2 px-4 py-3">
+                    <ul className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[60vh] space-y-2 overflow-y-auto pr-2 text-sm">
+                        {displayHeadings.map((heading, index) => (
+                            <li
+                                key={heading.id}
+                                className="relative"
+                                style={{
+                                    paddingLeft: `${(heading.level - 1) * 12}px`,
+                                }}
                             >
-                                {heading.text}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </CardContent>
-        </Card>
+                                {/* Active indicator */}
+                                <button
+                                    onClick={() => {
+                                        scrollToHeading(heading.id)
+                                        setIsExpanded(false) // Auto-collapse after selection
+                                    }}
+                                    className={cn(
+                                        'hover:text-primary hover:bg-muted/50 w-full rounded-md px-2 py-1 text-left transition-all duration-200',
+                                        effectiveActiveId === heading.id
+                                            ? 'text-primary bg-primary/10 font-medium'
+                                            : 'text-muted-foreground'
+                                    )}
+                                >
+                                    <span className="block truncate">
+                                        {heading.text}
+                                    </span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        </div>
     )
 }
