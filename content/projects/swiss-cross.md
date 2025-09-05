@@ -66,6 +66,10 @@ function App() {
 }
 ```
 
+**This will render:**
+
+![Swiss Cross Examples](/projects/swiss-cross_example.png)
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

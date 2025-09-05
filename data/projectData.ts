@@ -54,7 +54,7 @@ const projectData: Project[] = [
         title: 'Swiss Cross',
         description:
             'A lightweight React component for rendering the Swiss cross symbol with customizable size, colors, and border radius. TypeScript support, and dual CommonJS/ESM distribution. ',
-        logo: '/sld.webp',
+        logo: '/swiss-cross-logo.png',
         link: 'https://www.npmjs.com/package/swiss-cross',
         githubLink: 'https://github.com/Fx64b/swiss-cross',
         status: 'Finished',
