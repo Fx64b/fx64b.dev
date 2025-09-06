@@ -1,3 +1,18 @@
+# [3.4.0](https://github.com/Fx64b/fx64b.dev/compare/v3.3.0...v3.4.0) (2025-09-06)
+
+
+### Bug Fixes
+
+* **table-of-contents:** remove old comments ([8c4287c](https://github.com/Fx64b/fx64b.dev/commit/8c4287c9cd01aa28f2ee8236b2b31089c4064d99))
+
+
+### Features
+
+* add Swiss Cross component and documentation ([9140533](https://github.com/Fx64b/fx64b.dev/commit/9140533262090602df875333623b9425c57545e0))
+* **table-of-contents:** enhance styling and replace icons with SVG components ([e2ef071](https://github.com/Fx64b/fx64b.dev/commit/e2ef0716c3666c952d81caa13be884297131eabe))
+* **table-of-contents:** implement collapsible Table of Contents  with expandable sections on mobile ([167fd9b](https://github.com/Fx64b/fx64b.dev/commit/167fd9b050f312a5fc0998301ce1552e73f38f26))
+* update Swiss Cross logo and enhance documentation with examples ([59de7d2](https://github.com/Fx64b/fx64b.dev/commit/59de7d2d0a76eb3ccf04ec1c87bee0943ceb80a9))
+
 # [3.3.0](https://github.com/Fx64b/fx64b.dev/compare/v3.2.2...v3.3.0) (2025-07-16)
 
 
