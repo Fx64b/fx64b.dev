@@ -1,3 +1,10 @@
+## [3.4.1](https://github.com/Fx64b/fx64b.dev/compare/v3.4.0...v3.4.1) (2025-09-12)
+
+
+### Bug Fixes
+
+* **layout:** remove Suspense wrapper and update dependencies ([8d172d0](https://github.com/Fx64b/fx64b.dev/commit/8d172d0491f739dc1166874d0fc58d6e1f38315c))
+
 # [3.4.0](https://github.com/Fx64b/fx64b.dev/compare/v3.3.0...v3.4.0) (2025-09-06)
 
 
