@@ -1,5 +1,4 @@
 import type React from 'react'
-import { Suspense } from 'react'
 
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
@@ -25,11 +24,9 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="dark bg-background text-foreground min-h-screen antialiased">
-                <Suspense fallback={<div>Loading...</div>}>
-                    <Header />
-                    {children}
-                    <Footer />
-                </Suspense>
+                <Header />
+                {children}
+                <Footer />
                 <Analytics />
                 <SpeedInsights />
             </body>
