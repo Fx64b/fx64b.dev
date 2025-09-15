@@ -54,7 +54,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/node": "^22.18.1",
+    "@types/node": "^24.5.0",
     "@types/react": "19.1.8",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-dom": "19.1.6",
