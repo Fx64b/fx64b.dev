@@ -186,9 +186,7 @@ const handleWalking = (
 
             // If pathfinding failed but we have an approximate path, use it
             if (!pathResult.success && pathResult.path.length > 0) {
-                console.log(
-                    `Pathfinding issue for ${character.name}: ${pathResult.message}`
-                );
+                // Pathfinding issue - using approximate path
                 return {
                     position: character.position,
                     path: pathResult.path,
@@ -198,9 +196,7 @@ const handleWalking = (
             }
             // If pathfinding completely failed, stay in place
             else if (!pathResult.success) {
-                console.log(
-                    `Pathfinding failed for ${character.name}: ${pathResult.message}`
-                );
+                // Pathfinding failed - character stays in place
                 return {
                     position: character.position,
                     path: [],
@@ -334,7 +330,7 @@ const updateCharacter = (
     );
 
     if (!targetRoom) {
-        console.error(`Room not found: ${schedule.room} on floor ${schedule.floorId}`);
+        // Room not found - character stays in current state
         return character;
     }
 
