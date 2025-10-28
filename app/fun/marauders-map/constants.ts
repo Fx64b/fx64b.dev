@@ -229,7 +229,7 @@ export const STAIRCASES: StaircaseConnection[] = [
         startFloorId: 'dungeon',
         endFloorId: 'ground',
         startPosition: { x: 350, y: 200 }, // Aligned with dungeon corridor
-        endPosition: { x: 350, y: 350 }, // Aligned with ground floor corridor
+        endPosition: { x: 350, y: 200 }, // Aligned with ground floor corridor
         width: 50,
     },
     {
@@ -238,7 +238,7 @@ export const STAIRCASES: StaircaseConnection[] = [
         startFloorId: 'ground',
         endFloorId: 'first',
         startPosition: { x: 350, y: 200 }, // Aligned with ground floor corridor
-        endPosition: { x: 350, y: 350 }, // Aligned with first floor corridor
+        endPosition: { x: 350, y: 200 }, // Aligned with first floor corridor
         width: 50,
     },
     {
@@ -247,7 +247,7 @@ export const STAIRCASES: StaircaseConnection[] = [
         startFloorId: 'first',
         endFloorId: 'third',
         startPosition: { x: 350, y: 200 }, // Aligned with first floor corridor
-        endPosition: { x: 350, y: 350 }, // Aligned with third floor corridor
+        endPosition: { x: 350, y: 200 }, // Aligned with third floor corridor
         width: 50,
     },
     {
@@ -256,7 +256,7 @@ export const STAIRCASES: StaircaseConnection[] = [
         startFloorId: 'third',
         endFloorId: 'fifth',
         startPosition: { x: 350, y: 200 }, // Aligned with third floor corridor
-        endPosition: { x: 350, y: 350 }, // Aligned with fifth floor corridor
+        endPosition: { x: 350, y: 200 }, // Aligned with fifth floor corridor
         width: 50,
     },
     {
@@ -265,7 +265,7 @@ export const STAIRCASES: StaircaseConnection[] = [
         startFloorId: 'fifth',
         endFloorId: 'seventh',
         startPosition: { x: 350, y: 200 }, // Aligned with fifth floor corridor
-        endPosition: { x: 350, y: 350 }, // Aligned with seventh floor corridor
+        endPosition: { x: 350, y: 200 }, // Aligned with seventh floor corridor
         width: 50,
     },
     // Secret passages and additional stairs
