@@ -3,9 +3,12 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import path from 'path'
 
-const postsDirectory = path.join(process.cwd(), 'content')
+const postsDirectory = path.join(process.cwd(), 'content', 'blog')
 
 export function getPostSlugs(): string[] {
+    if (!fs.existsSync(postsDirectory)) {
+        return []
+    }
     return fs.readdirSync(postsDirectory).filter((file) => file.endsWith('.md'))
 }
 
@@ -32,4 +35,17 @@ export function getAllPosts(): Post[] {
         .map((slug) => getPostBySlug(slug))
         .filter((post): post is Post => post !== null)
         .sort((a, b) => (a.date > b.date ? -1 : 1))
+}
+
+export function getPostContent(slug: string): string | null {
+    const realSlug = slug.replace(/\.md$/, '')
+    const fullPath = path.join(postsDirectory, `${realSlug}.md`)
+
+    if (!fs.existsSync(fullPath)) {
+        return null
+    }
+
+    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const { content } = matter(fileContents)
+    return content
 }

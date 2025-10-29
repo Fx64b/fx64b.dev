@@ -60,7 +60,7 @@ export function Cross() {
         <div className="relative inline-flex items-center">
             <button
                 onClick={handleClick}
-                className="-m-2 inline-flex items-center p-2 focus:outline-none"
+                className="-m-2 inline-flex items-center p-4 hover:cursor-help focus:outline-none"
                 aria-label="Bible verse reference"
             >
                 <span className="relative inline-block h-[1.2em] w-[0.7em] align-middle">

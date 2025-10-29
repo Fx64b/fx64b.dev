@@ -39,5 +39,6 @@ next-env.d.ts
 # idea
 .idea
 
+# misc
 repomix-output.xml
 *.xml

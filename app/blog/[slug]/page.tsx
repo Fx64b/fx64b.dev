@@ -1,14 +1,15 @@
 import { Post } from '@/types/post'
-import fs from 'fs'
-import matter from 'gray-matter'
-import path from 'path'
 
 import { Metadata } from 'next'
 
-import { BlogHeader } from '@/components/BlogHeader'
-import MarkdownRenderer from '@/components/MarkdownRenderer'
+import { getPostBySlug, getPostContent, getPostSlugs } from '@/app/lib/posts'
 
-import { getPostBySlug, getPostSlugs } from '../../lib/posts'
+import { AuthorBio } from '@/components/author-bio'
+import { BackgroundGrid } from '@/components/background-grid'
+import { BlogHeader } from '@/components/blog-header'
+import MarkdownRenderer from '@/components/markdown-renderer'
+import { RelatedPosts } from '@/components/related-posts'
+import { TableOfContents } from '@/components/table-of-contents'
 
 interface Props {
     params: Promise<{
@@ -62,24 +63,52 @@ export default async function PostPage(props: Props) {
     const params = await props.params
     const { slug } = params
     const post: Post | null = getPostBySlug(slug)
+    const content = getPostContent(slug)
 
-    if (!post) {
+    if (!post || !content) {
         return <p>Post not found.</p>
     }
 
-    const fullPath = path.join(process.cwd(), 'content', `${slug}.md`)
-    const fileContents = fs.readFileSync(fullPath, 'utf8')
-    const { content } = matter(fileContents)
-
     return (
-        <article className="prose mx-auto md:max-w-(--breakpoint-lg)">
-            <BlogHeader
-                author={'F_x64b'}
-                readtime={post.read}
-                date={post.date}
-                title={post.title}
-            />
-            <MarkdownRenderer content={content} />
-        </article>
+        <>
+            <BackgroundGrid />
+            <div className="relative mx-auto max-w-7xl px-4 py-8">
+                <div className="flex justify-center">
+                    <aside className="hidden xl:block xl:w-64 xl:flex-shrink-0">
+                        <div className="fixed top-24 w-64 pr-8">
+                            <TableOfContents
+                                content={content}
+                                variant="desktop"
+                            />
+                        </div>
+                    </aside>
+
+                    <article className="prose prose-invert w-full max-w-3xl">
+                        <BlogHeader
+                            author={post.author || 'Fx64b'}
+                            readtime={post.read}
+                            date={post.date}
+                            title={post.title}
+                        />
+
+                        <div className="xl:hidden">
+                            <TableOfContents
+                                content={content}
+                                variant="mobile"
+                            />
+                        </div>
+
+                        <MarkdownRenderer content={content} />
+
+                        <div className="mt-16 space-y-8">
+                            <AuthorBio author={post.author} />
+                            <RelatedPosts currentSlug={slug} />
+                        </div>
+                    </article>
+
+                    <div className="hidden xl:block xl:w-64 xl:flex-shrink-0" />
+                </div>
+            </div>
+        </>
     )
 }

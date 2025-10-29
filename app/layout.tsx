@@ -1,18 +1,19 @@
-import React from 'react'
+import type React from 'react'
 
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
 
 import { Analytics } from '@vercel/analytics/react'
 
-import { Footer } from '@/components/Footer'
-import { Header } from '@/components/Header'
+import { Footer } from '@/components/footer'
+import { Header } from '@/components/header'
 
 import './globals.css'
 
 export const metadata: Metadata = {
-    title: 'Fx64b.dev',
-    description: 'Fx64b.dev - personal website of F_x64b.',
+    title: 'Fx64b - Software Engineer & Developer',
+    description:
+        'Software engineer from Switzerland specializing in React, Next.js, TypeScript, and Go.',
 }
 
 export default function RootLayout({
@@ -22,11 +23,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body
-                className={
-                    'bg-background text-foreground dark min-h-fit overflow-x-hidden'
-                }
-            >
+            <body className="dark bg-background text-foreground min-h-screen antialiased">
                 <Header />
                 {children}
                 <Footer />

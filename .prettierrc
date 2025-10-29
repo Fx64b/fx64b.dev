@@ -27,9 +27,7 @@
         {
             "files": "*.md",
             "options": {
-                "plugins": [],
-                "importOrderSeparation": false,
-                "importOrderSortSpecifiers": false
+                "plugins": []
             }
         }
     ]
