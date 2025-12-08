@@ -37,7 +37,7 @@ export function HeroSection() {
                         Software Engineer
                         <br />
                         <span className="from-foreground to-foreground/70 bg-gradient-to-r bg-clip-text text-transparent">
-                            & Developer
+                            & Security Enthusiast
                         </span>
                     </h1>
 
