@@ -31,6 +31,10 @@ global.IntersectionObserver = class IntersectionObserver {
     observe = vi.fn()
     unobserve = vi.fn()
     disconnect = vi.fn()
+    takeRecords = vi.fn(() => [])
+    root = null
+    rootMargin = '0px'
+    thresholds = [0]
 }
 
 // Mock clipboard API once here
