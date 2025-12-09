@@ -24,26 +24,25 @@ In simple terms, it scrapes a Skool classroom page, based on the provided URL, a
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
       </svg>
     </div>
-    <div className="ml-2 flex-1">
-      <span className="text-lg font-semibold text-primary">🚀 Hosted Solution Coming Soon!</span>
-      <div className="mt-3 text-sm">
-        <p className="mb-3">Tired of the technical setup? I'm building a <strong>hosted solution</strong> that makes downloading Skool videos effortless - no installation, no command line, just simple one-click downloads.</p>
-        <p className="mb-3"><strong>Join the waitlist at:</strong> <a href="https://skool.fx64b.dev" className="underline font-medium" target="_blank" rel="noopener noreferrer">https://skool.fx64b.dev</a></p>
-        <p className="mb-3"><strong>🎁 Early Bird Bonus:</strong> Join now and get <strong>1 month of Pro free</strong> when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.</p>
-
-        <div className="mt-4 pt-4 border-t border-primary/20">
-          <p className="font-semibold mb-2">What you'll get with the hosted solution:</p>
-          <ul className="space-y-2 ml-4">
-            <li><strong>✨ One-Click Downloads</strong> - Simple browser extension that adds a download button to every Skool video. No complicated setup required.</li>
-            <li><strong>📦 Bulk Downloads</strong> - Download entire modules or courses at once with Pro. Save hours and watch everything offline.</li>
-            <li><strong>📊 Progress Tracking</strong> - Dashboard to track all your downloads, manage storage, and see what's ready to watch.</li>
-            <li><strong>🆓 Free to Start</strong> - Get started with the free tier and upgrade to Pro when you need more.</li>
-          </ul>
-        </div>
+    <div className="ml-2">
+      <span className="text-lg font-semibold text-primary">Hosted Solution Coming Soon!</span>
+      <div className="mt-2 text-sm text-primary/90">
+        Tired of the technical setup? I'm building a hosted solution that makes downloading Skool videos effortless - no installation, no command line, just simple one-click downloads.
       </div>
     </div>
   </div>
 </div>
+
+**Join the waitlist at:** [https://skool.fx64b.dev](https://skool.fx64b.dev)
+
+**Early Bird Bonus:** Join now and get **1 month of Pro free** when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.
+
+### What you'll get with the hosted solution:
+
+- **One-Click Downloads** - Simple browser extension that adds a download button to every Skool video. No complicated setup required.
+- **Bulk Downloads** - Download entire modules or courses at once with Pro. Save hours and watch everything offline.
+- **Progress Tracking** - Dashboard to track all your downloads, manage storage, and see what's ready to watch.
+- **Free to Start** - Get started with the free tier and upgrade to Pro when you need more.
 
 ## Disclaimer
 
