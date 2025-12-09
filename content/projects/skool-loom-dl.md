@@ -17,32 +17,49 @@ The Skool Loom Downloader is a Go-based CLI utility that I wrote over the weeken
 I couldn't figure out a simple way to download them manually, so I decided to vibe code this tool to automate the process.
 In simple terms, it scrapes a Skool classroom page, based on the provided URL, and downloads all Loom videos from that page.
 
-<div className="border-l-4 mt-6 mb-6 border-primary bg-primary/10 p-6 rounded-md">
-  <div className="flex space-x-3">
-    <div className="mt-1">
-      <svg className="h-6 w-6 text-primary" viewBox="0 0 20 20" fill="currentColor">
+<div className="border-2 border-primary bg-primary/20 mt-8 mb-8 p-8 rounded-lg shadow-lg">
+  <div className="text-center mb-6">
+    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
+      <svg className="h-8 w-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
       </svg>
     </div>
-    <div className="ml-2">
-      <span className="text-lg font-semibold text-primary">Hosted Solution Coming Soon!</span>
-      <div className="mt-2 text-sm text-primary/90">
-        Tired of the technical setup? I'm building a hosted solution that makes downloading Skool videos effortless - no installation, no command line, just simple one-click downloads.
+    <h3 className="text-2xl font-bold text-primary mb-3">Hosted Solution Coming Soon!</h3>
+    <p className="text-base text-foreground/90 max-w-2xl mx-auto mb-6">
+      Tired of the technical setup? I'm building a hosted solution that makes downloading Skool videos effortless - no installation, no command line, just simple one-click downloads.
+    </p>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+      <a href="https://skool.fx64b.dev" className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-md hover:opacity-90 transition-opacity" target="_blank" rel="noopener noreferrer">
+        Join the Waitlist
+      </a>
+    </div>
+    <div className="bg-background/50 rounded-md p-4 mb-6">
+      <p className="text-sm font-semibold text-primary mb-1">Early Bird Bonus</p>
+      <p className="text-sm text-foreground/80">Join now and get <strong>1 month of Pro free</strong> when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.</p>
+    </div>
+  </div>
+  <div className="border-t border-primary/30 pt-6">
+    <h4 className="text-lg font-semibold text-center mb-4">What you'll get with the hosted solution:</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-background/50 rounded-md p-4">
+        <h5 className="font-semibold mb-2">One-Click Downloads</h5>
+        <p className="text-sm text-foreground/80">Simple browser extension that adds a download button to every Skool video. No complicated setup required.</p>
+      </div>
+      <div className="bg-background/50 rounded-md p-4">
+        <h5 className="font-semibold mb-2">Bulk Downloads</h5>
+        <p className="text-sm text-foreground/80">Download entire modules or courses at once with Pro. Save hours and watch everything offline.</p>
+      </div>
+      <div className="bg-background/50 rounded-md p-4">
+        <h5 className="font-semibold mb-2">Progress Tracking</h5>
+        <p className="text-sm text-foreground/80">Dashboard to track all your downloads, manage storage, and see what's ready to watch.</p>
+      </div>
+      <div className="bg-background/50 rounded-md p-4">
+        <h5 className="font-semibold mb-2">Free to Start</h5>
+        <p className="text-sm text-foreground/80">Get started with the free tier and upgrade to Pro when you need more.</p>
       </div>
     </div>
   </div>
 </div>
-
-**Join the waitlist at:** [https://skool.fx64b.dev](https://skool.fx64b.dev)
-
-**Early Bird Bonus:** Join now and get **1 month of Pro free** when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.
-
-### What you'll get with the hosted solution:
-
-- **One-Click Downloads** - Simple browser extension that adds a download button to every Skool video. No complicated setup required.
-- **Bulk Downloads** - Download entire modules or courses at once with Pro. Save hours and watch everything offline.
-- **Progress Tracking** - Dashboard to track all your downloads, manage storage, and see what's ready to watch.
-- **Free to Start** - Get started with the free tier and upgrade to Pro when you need more.
 
 ## Disclaimer
 
