@@ -11,6 +11,46 @@ readTime: '5 mins'
 
 # Skool Loom Video Downloader
 
+<div className="my-8 p-6 rounded-lg bg-primary/10 border-2 border-primary/20 text-center">
+  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/30 mb-4 text-sm font-medium">
+    Launching Soon!
+  </div>
+  <h3 className="text-2xl font-bold mb-3">Hosted Solution Coming Soon!</h3>
+  <p className="text-base mb-6 max-w-2xl mx-auto">Tired of the technical setup? I'm building a hosted solution that makes downloading Skool videos effortless - no installation, no command line, just simple one-click downloads.</p>
+  <a href="https://skool.fx64b.dev" className="inline-block px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-md hover:opacity-90 mb-6" target="_blank" rel="noopener noreferrer">Join the Waitlist</a>
+  <div className="text-sm max-w-xl mx-auto p-3 rounded-md bg-background/50 border border-primary/10 mb-4">
+    <strong>Early Bird Bonus:</strong> Join now and get 1 month of Pro free when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.
+  </div>
+</div>
+
+**What you'll get with the hosted solution:**
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
+    <div className="w-10 h-10 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center mb-2 mx-auto">
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    </div>
+    <h4 className="font-semibold text-center mb-1">One-Click Downloads</h4>
+    <p className="text-sm text-center">Simple browser extension that adds a download button to every Skool video.</p>
+  </div>
+  <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
+    <div className="w-10 h-10 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center mb-2 mx-auto">
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <h4 className="font-semibold text-center mb-1">Bulk Downloads</h4>
+    <p className="text-sm text-center">Download entire modules or courses at once with Pro. Save hours of time.</p>
+  </div>
+  <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
+    <div className="w-10 h-10 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center mb-2 mx-auto">
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    </div>
+    <h4 className="font-semibold text-center mb-1">Progress Tracking</h4>
+    <p className="text-sm text-center">Dashboard to track all your downloads, manage storage, and more.</p>
+  </div>
+</div>
+
+<hr className="my-8 border-border/40" />
+
 ## Overview
 
 The Skool Loom Downloader is a Go-based CLI utility that I wrote over the weekend. I was about to leave a Skool community and wanted to download my favorite courses before leaving.
