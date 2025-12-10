@@ -1,6 +1,6 @@
 'use client'
 
-import { Github, Twitter } from 'lucide-react'
+import { Github } from 'lucide-react'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -90,16 +90,6 @@ export function Header() {
                         >
                             <Github className="h-4 w-4" />
                             <span className="sr-only">GitHub</span>
-                        </Link>
-                    </Button>
-                    <Button variant="ghost" size="icon" asChild>
-                        <Link
-                            href="https://x.com/f_x64b"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <Twitter className="h-4 w-4" />
-                            <span className="sr-only">X</span>
                         </Link>
                     </Button>
                 </nav>

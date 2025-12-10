@@ -1,8 +1,9 @@
-import { Github, Linkedin, Mail, Twitter } from 'lucide-react'
+import { Github, Linkedin, Mail } from 'lucide-react'
 
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { XIcon } from '@/components/icons/x-icon'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface AuthorBioProps {
@@ -52,7 +53,7 @@ export function AuthorBio({
                                 rel="noopener noreferrer"
                                 className="bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-8 w-8 items-center justify-center rounded-md border"
                             >
-                                <Twitter className="h-4 w-4" />
+                                <XIcon className="h-4 w-4" />
                                 <span className="sr-only">X</span>
                             </Link>
                             <Link

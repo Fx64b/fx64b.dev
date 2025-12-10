@@ -1,4 +1,4 @@
-import { Github, Linkedin, Mail, Twitter } from 'lucide-react'
+import { Github, Linkedin, Mail } from 'lucide-react'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { getVersion } from '@/app/lib/version'
 
 import { Cross } from '@/components/Cross'
+import { XIcon } from '@/components/icons/x-icon'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
@@ -80,7 +81,7 @@ export function Footer() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <Twitter className="h-4 w-4" />
+                                    <XIcon className="h-4 w-4" />
                                     <span className="sr-only">X</span>
                                 </Link>
                             </Button>
