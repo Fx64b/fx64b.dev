@@ -49,6 +49,8 @@ readTime: '5 mins'
   </div>
 </div>
 
+<hr className="my-8 border-border/40" />
+
 ## Overview
 
 The Skool Loom Downloader is a Go-based CLI utility that I wrote over the weekend. I was about to leave a Skool community and wanted to download my favorite courses before leaving.
