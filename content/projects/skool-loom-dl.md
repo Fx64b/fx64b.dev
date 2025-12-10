@@ -17,45 +17,71 @@ The Skool Loom Downloader is a Go-based CLI utility that I wrote over the weeken
 I couldn't figure out a simple way to download them manually, so I decided to vibe code this tool to automate the process.
 In simple terms, it scrapes a Skool classroom page, based on the provided URL, and downloads all Loom videos from that page.
 
-<div className="border-2 border-primary bg-primary/20 mt-8 mb-8 p-8 rounded-lg shadow-lg">
-  <div className="text-center mb-6">
-    <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
-      <svg className="h-8 w-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
-        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-      </svg>
+<div className="my-12 p-8 rounded-lg bg-primary/10 border-2 border-primary/20">
+  <div className="text-center max-w-3xl mx-auto">
+    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30 mb-6">
+      <span className="text-sm font-medium">Launching Soon!</span>
     </div>
-    <h3 className="text-2xl font-bold text-primary mb-3">Hosted Solution Coming Soon!</h3>
-    <p className="text-base text-foreground/90 max-w-2xl mx-auto mb-6">
+
+    <h3 className="text-3xl font-bold mb-4">
+      Hosted Solution Coming Soon!
+    </h3>
+
+    <p className="text-lg text-foreground/80 mb-8 leading-relaxed">
       Tired of the technical setup? I'm building a hosted solution that makes downloading Skool videos effortless - no installation, no command line, just simple one-click downloads.
     </p>
-    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-      <a href="https://skool.fx64b.dev" className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-md hover:opacity-90 transition-opacity" target="_blank" rel="noopener noreferrer">
-        Join the Waitlist
-      </a>
+
+    <a
+      href="https://skool.fx64b.dev"
+      className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-md hover:opacity-90 transition-opacity mb-8"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Join the Waitlist
+    </a>
+
+    <div className="bg-background/50 rounded-lg p-4 mb-8 border border-primary/10">
+      <p className="text-sm font-semibold mb-1">Early Bird Bonus</p>
+      <p className="text-sm text-foreground/80">
+        Join now and get <strong className="text-primary">1 month of Pro free</strong> when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.
+      </p>
     </div>
-    <div className="bg-background/50 rounded-md p-4 mb-6">
-      <p className="text-sm font-semibold text-primary mb-1">Early Bird Bonus</p>
-      <p className="text-sm text-foreground/80">Join now and get <strong>1 month of Pro free</strong> when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.</p>
-    </div>
-  </div>
-  <div className="border-t border-primary/30 pt-6">
-    <h4 className="text-lg font-semibold text-center mb-4">What you'll get with the hosted solution:</h4>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="bg-background/50 rounded-md p-4">
-        <h5 className="font-semibold mb-2">One-Click Downloads</h5>
-        <p className="text-sm text-foreground/80">Simple browser extension that adds a download button to every Skool video. No complicated setup required.</p>
-      </div>
-      <div className="bg-background/50 rounded-md p-4">
-        <h5 className="font-semibold mb-2">Bulk Downloads</h5>
-        <p className="text-sm text-foreground/80">Download entire modules or courses at once with Pro. Save hours and watch everything offline.</p>
-      </div>
-      <div className="bg-background/50 rounded-md p-4">
-        <h5 className="font-semibold mb-2">Progress Tracking</h5>
-        <p className="text-sm text-foreground/80">Dashboard to track all your downloads, manage storage, and see what's ready to watch.</p>
-      </div>
-      <div className="bg-background/50 rounded-md p-4">
-        <h5 className="font-semibold mb-2">Free to Start</h5>
-        <p className="text-sm text-foreground/80">Get started with the free tier and upgrade to Pro when you need more.</p>
+
+    <div className="border-t border-primary/20 pt-8">
+      <h4 className="text-xl font-semibold mb-6">What you'll get</h4>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+        <div>
+          <div className="w-12 h-12 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center mb-3">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+          </div>
+          <h5 className="font-semibold mb-2">One-Click Downloads</h5>
+          <p className="text-sm text-foreground/70">Simple browser extension that adds a download button to every Skool video. No complicated setup required.</p>
+        </div>
+
+        <div>
+          <div className="w-12 h-12 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center mb-3">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <h5 className="font-semibold mb-2">Bulk Downloads</h5>
+          <p className="text-sm text-foreground/70">Download entire modules or courses at once with Pro. Save hours and watch everything offline.</p>
+        </div>
+
+        <div>
+          <div className="w-12 h-12 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center mb-3">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <h5 className="font-semibold mb-2">Progress Tracking</h5>
+          <p className="text-sm text-foreground/70">Dashboard to track all your downloads, manage storage, and see what's ready to watch.</p>
+        </div>
       </div>
     </div>
   </div>
