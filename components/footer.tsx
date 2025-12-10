@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { getVersion } from '@/app/lib/version'
 
 import { Cross } from '@/components/Cross'
+import { XIcon } from '@/components/icons/x-icon'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
@@ -72,6 +73,16 @@ export function Footer() {
                                 >
                                     <Github className="h-4 w-4" />
                                     <span className="sr-only">GitHub</span>
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="icon" asChild>
+                                <Link
+                                    href="https://x.com/f_x64b"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <XIcon className="h-4 w-4" />
+                                    <span className="sr-only">X</span>
                                 </Link>
                             </Button>
                             <Button variant="ghost" size="icon" asChild>

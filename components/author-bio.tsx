@@ -3,6 +3,7 @@ import { Github, Linkedin, Mail } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { XIcon } from '@/components/icons/x-icon'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface AuthorBioProps {
@@ -46,17 +47,15 @@ export function AuthorBio({
                                 <Github className="h-4 w-4" />
                                 <span className="sr-only">GitHub</span>
                             </Link>
-                            {/*TODO
                             <Link
-                                href="https://twitter.com/fx64b"
+                                href="https://x.com/f_x64b"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-8 w-8 items-center justify-center rounded-md border"
                             >
-                                <Twitter className="h-4 w-4" />
-                                <span className="sr-only">Twitter</span>
-                            </Link>*/}
-                            {/*TODO*/}
+                                <XIcon className="h-4 w-4" />
+                                <span className="sr-only">X</span>
+                            </Link>
                             <Link
                                 href="https://www.linkedin.com/in/fabio-maffucci-23515b328/"
                                 target="_blank"
