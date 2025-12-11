@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { BackgroundGrid } from '@/components/background-grid'
+import { CurrentlySection } from '@/components/currently-section'
 import { HeroSection } from '@/components/hero-section'
 import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
@@ -54,6 +55,10 @@ export default function Home() {
                 <HeroSection />
 
                 <Separator className="my-8" />
+
+                <CurrentlySection />
+
+                <Separator className="my-16" />
 
                 <Section>
                     <div className="mb-12 text-center">
