@@ -1,3 +1,10 @@
+## [3.4.2](https://github.com/Fx64b/fx64b.dev/compare/v3.4.1...v3.4.2) (2025-12-30)
+
+
+### Bug Fixes
+
+* **docs:** update project name, description, and version in technical documentation ([87116c0](https://github.com/Fx64b/fx64b.dev/commit/87116c00a03958c83e6ac41d114d3a135b371889))
+
 ## [3.4.1](https://github.com/Fx64b/fx64b.dev/compare/v3.4.0...v3.4.1) (2025-09-12)
 
 
