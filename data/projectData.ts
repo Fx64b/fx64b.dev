@@ -21,6 +21,25 @@ const projectData: Project[] = [
         featured: true,
     },
     {
+        title: 'Push to Prod',
+        description:
+            'A cookie clicker like game with a software development theme. Generate Lines of Code (LOC) by pressing ENTER, automate production with devs and tools ranging from a Rubber Duck to an AGI, survive random Slack events, and prestige with a "Refactor" system that awards permanent Legacy Code Token bonuses.',
+        logo: '/projects/push-to-prod-logo.png',
+        link: 'https://clicker.fx64b.dev',
+        githubLink: 'https://github.com/Fx64b/push-to-prod',
+        status: 'Finished',
+        tags: [
+            'React',
+            'TypeScript',
+            'Vite',
+            'Tailwind CSS',
+            'Zustand',
+            'Game',
+            'Idle Clicker',
+        ],
+        featured: true,
+    },
+    {
         title: 'video-archiver',
         description:
             'A YouTube video downloader and archiver with various tools to download, manage, categorize, convert, stream and manipulate videos. The project is still in early development stage.',
