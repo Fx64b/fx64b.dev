@@ -23,7 +23,7 @@ const projectData: Project[] = [
     {
         title: 'Push to Prod',
         description:
-            'An incremental idle clicker game with a software development theme. Generate Lines of Code (LOC) by pressing ENTER, automate production with devs and tools ranging from a Rubber Duck to an AGI, survive random Slack events, and prestige with a "Refactor" system that awards permanent Legacy Code Token bonuses.',
+            'A cookie clicker like game with a software development theme. Generate Lines of Code (LOC) by pressing ENTER, automate production with devs and tools ranging from a Rubber Duck to an AGI, survive random Slack events, and prestige with a "Refactor" system that awards permanent Legacy Code Token bonuses.',
         logo: '/projects/push-to-prod-logo.png',
         link: 'https://clicker.fx64b.dev',
         githubLink: 'https://github.com/Fx64b/push-to-prod',
