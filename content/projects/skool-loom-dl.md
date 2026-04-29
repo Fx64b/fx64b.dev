@@ -119,12 +119,12 @@ Version 2.0.0 represents a major upgrade with several important changes:
 1. Install [yt-dlp](https://github.com/yt-dlp/yt-dlp#installation)
 2. Download the latest release from the [Releases page](https://github.com/fx64b/skool-downloader/releases)
 3. Choose the appropriate binary for your platform:
-   - **Linux (x64)**: `skool-downloader-linux-amd64`
-   - **Linux (ARM64)**: `skool-downloader-linux-arm64`
-   - **Windows (x64)**: `skool-downloader-windows-amd64.exe`
-   - **Windows (ARM64)**: `skool-downloader-windows-arm64.exe`
-   - **macOS (Intel)**: `skool-downloader-darwin-amd64`
-   - **macOS (Apple Silicon)**: `skool-downloader-darwin-arm64`
+    - **Linux (x64)**: `skool-downloader-linux-amd64`
+    - **Linux (ARM64)**: `skool-downloader-linux-arm64`
+    - **Windows (x64)**: `skool-downloader-windows-amd64.exe`
+    - **Windows (ARM64)**: `skool-downloader-windows-arm64.exe`
+    - **macOS (Intel)**: `skool-downloader-darwin-amd64`
+    - **macOS (Apple Silicon)**: `skool-downloader-darwin-arm64`
 4. Make it executable (Linux/macOS): `chmod +x skool-downloader-*`
 
 > **Note:** Older versions were called `skool-loom-dl` before release v2.0.0
@@ -198,6 +198,7 @@ docker run -v $(pwd)/downloads:/data -v $(pwd)/cookies.json:/cookies.json skool-
 ```
 
 The Docker image includes:
+
 - Chrome/Chromium for browser automation
 - yt-dlp for video downloads
 - ffmpeg for video processing
@@ -247,6 +248,7 @@ go tool cover -func=coverage.out
 ```
 
 The unit tests cover:
+
 - Loom and YouTube URL extraction from HTML
 - Cookie parsing (JSON and Netscape formats)
 - Cookie format conversion
@@ -265,6 +267,7 @@ chmod +x test-integration.sh
 ```
 
 The integration tests verify:
+
 - Docker image builds successfully
 - Binary is executable in the container
 - yt-dlp is installed and functional
@@ -277,13 +280,13 @@ The integration tests verify:
 The project uses GitHub Actions for automated testing:
 
 1. **Lint and Build** (`lint-and-build.yml`): Runs on every push and PR
-   - Lints code with golangci-lint
-   - Builds the project
-   - Runs unit tests with coverage reporting
+    - Lints code with golangci-lint
+    - Builds the project
+    - Runs unit tests with coverage reporting
 
 2. **Docker Integration Tests** (`docker-integration-test.yml`): Runs on every push and PR
-   - Builds the Docker image
-   - Runs integration tests in a containerized environment
+    - Builds the Docker image
+    - Runs integration tests in a containerized environment
 
 ### Creating Releases (Maintainers)
 
@@ -296,6 +299,7 @@ To create a new release with cross-platform binaries:
 5. Click "Run workflow"
 
 The workflow will automatically:
+
 - Build binaries for all supported platforms
 - Create a new GitHub release
 - Attach all binaries to the release
