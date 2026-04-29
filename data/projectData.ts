@@ -1,6 +1,22 @@
 import { Project } from '@/types/project'
 
 const projectData: Project[] = [
+        {
+        title: 'Obsidianator',
+        description:
+            'Turn an Obsidian vault into a self-contained static website, or serve it directly in the browser without writing anything to disk.',
+        logo: '/obsidianator.svg',
+        link: 'https://github.com/Fx64b/obsidianator',
+        githubLink: 'https://github.com/Fx64b/obsidianator',
+        status: 'Finished',
+        tags: [
+            'Go Lang',
+            'Vite',
+            'Obsidian',
+            'CLI Tool',
+        ],
+        featured: true,
+    },
     {
         title: 'Flashcard App',
         description:
@@ -8,7 +24,7 @@ const projectData: Project[] = [
         logo: '/learn-logo.png',
         link: 'https://learn.fx64b.dev',
         githubLink: 'https://github.com/Fx64b/learn',
-        status: 'In Progress',
+        status: 'Finished',
         tags: [
             'Next.js',
             'TypeScript',
@@ -78,7 +94,7 @@ const projectData: Project[] = [
         githubLink: 'https://github.com/Fx64b/swiss-cross',
         status: 'Finished',
         tags: ['npm', 'Package', 'React', 'TypeScript', 'Swiss Cross'],
-        featured: true,
+        featured: false,
     },
     {
         title: 'This Portfolio',
