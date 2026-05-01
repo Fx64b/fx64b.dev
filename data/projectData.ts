@@ -116,6 +116,26 @@ const projectData: Project[] = [
         featured: false,
     },
     {
+        title: 'PentestGPT',
+        description:
+            'Advanced AI-powered penetration testing platform that provides integrated tools to help security teams conduct comprehensive penetration tests. Scan, exploit, and analyze web applications, networks, and cloud environments with ease and precision, without needing expert skills.',
+        logo: '/pentestgpt-logo.png',
+        link: 'https://pentestgpt.ai/',
+        githubLink: 'https://github.com/hackerai-tech/PentestGPT',
+        status: 'Finished',
+        tags: [
+            'AI',
+            'Penetration Testing',
+            'Web Applications',
+            'Network Security',
+            'Cloud Security',
+            'Next.js',
+            'TypeScript',
+            'Cybersecurity',
+        ],
+        featured: false,
+    },
+    {
         title: 'Skool Focus',
         description:
             'A browser extension that helps you focus while you use the skool.com website. \n\nWith an easy to use popup you can hide various distracting elements from the site like notification or the community feed.',

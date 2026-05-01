@@ -5,6 +5,8 @@ import { ArrowDown, Check, Copy } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { cn } from '@/lib/utils'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -172,7 +174,7 @@ export default function ByteConverter() {
                 {UNITS.map((unit) => (
                     <Card
                         key={unit}
-                        className={`${unit === fromUnit ? 'border-primary' : ''}`}
+                        className={cn(unit === fromUnit && 'border-primary')}
                     >
                         <CardContent className="relative h-[100px] p-4">
                             <div className="mb-1 flex items-center justify-between">

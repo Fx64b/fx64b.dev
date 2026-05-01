@@ -5,6 +5,8 @@ import { ArrowDown, Check, Copy } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { cn } from '@/lib/utils'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -85,7 +87,7 @@ export default function ColorConverter() {
                 rgb: `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`,
                 hsl: `hsl(${Math.round(hsl[0])}, ${Math.round(hsl[1])}%, ${Math.round(hsl[2])}%)`,
             })
-        } catch (err) {
+        } catch (_err: unknown) {
             setError('Invalid color format')
         }
     }
@@ -265,7 +267,7 @@ export default function ColorConverter() {
                                     value={inputValue}
                                     onChange={handleInputChange}
                                     placeholder="Enter color value"
-                                    className={`text-lg ${error ? 'border-destructive' : ''}`}
+                                    className={cn('text-lg', error && 'border-destructive')}
                                     aria-label="Color value to convert"
                                 />
                             </div>
@@ -311,7 +313,7 @@ export default function ColorConverter() {
                 {Object.keys(results).map((format) => (
                     <Card
                         key={format}
-                        className={`${format === inputFormat ? 'border-primary' : ''}`}
+                        className={cn(format === inputFormat && 'border-primary')}
                     >
                         <CardContent className="relative h-[100px] p-4">
                             <div className="mb-1 flex items-center justify-between">

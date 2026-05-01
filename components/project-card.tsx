@@ -5,7 +5,6 @@ import { ExternalLink, Github } from 'lucide-react'
 import type React from 'react'
 
 import Image from 'next/image'
-import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,11 +25,11 @@ interface ProjectCardProps {
 }
 
 const statusColors = {
-    Finished: 'bg-green-500/10 text-green-500',
-    'In Progress': 'bg-blue-500/10 text-blue-500',
-    Planned: 'bg-yellow-500/10 text-yellow-500',
-    Abandoned: 'bg-red-500/10 text-red-500',
-    'On Hold': 'bg-gray-500/10 text-gray-500',
+    Finished: 'bg-green-500/10 text-green-700 dark:text-green-400',
+    'In Progress': 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
+    Planned: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400',
+    Abandoned: 'bg-red-500/10 text-red-700 dark:text-red-400',
+    'On Hold': 'bg-gray-500/10 text-gray-600 dark:text-gray-400',
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
@@ -38,6 +37,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
         e.stopPropagation()
         e.preventDefault()
         window.open(project.githubLink, '_blank', 'noopener,noreferrer')
+    }
+
+    const handleLinkClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        e.preventDefault()
+        window.open(project.link, '_blank', 'noopener,noreferrer')
     }
 
     return (
@@ -83,16 +88,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
                             variant="ghost"
                             size="icon"
                             className="h-11 w-11 md:h-8 md:w-8"
-                            asChild
+                            onClick={handleLinkClick}
+                            aria-label="Visit project website"
                         >
-                            <Link
-                                href={project.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label="Visit project website"
-                            >
-                                <ExternalLink className="h-5 w-5 md:h-4 md:w-4" />
-                            </Link>
+                            <ExternalLink className="h-5 w-5 md:h-4 md:w-4" />
                         </Button>
                     </div>
                 </div>

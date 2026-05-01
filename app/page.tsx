@@ -76,7 +76,6 @@ export default function Home() {
                                     className="group block"
                                 >
                                     <ProjectCard
-                                        key={project.title}
                                         project={project}
                                     />
                                 </Link>
@@ -109,18 +108,14 @@ export default function Home() {
                             say hello.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                            <a
-                                href="mailto:contact@fx64b.dev"
-                                className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-medium transition-colors"
-                            >
-                                Get In Touch
-                            </a>
-                            <Link
-                                href="/blog"
-                                className="border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center rounded-md border px-6 py-3 text-sm font-medium transition-colors"
-                            >
-                                Read My Blog
-                            </Link>
+                            <Button asChild>
+                                <a href="mailto:contact@fx64b.dev">
+                                    Get In Touch
+                                </a>
+                            </Button>
+                            <Button variant="outline" asChild>
+                                <Link href="/blog">Read My Blog</Link>
+                            </Button>
                         </div>
                     </div>
                 </Section>

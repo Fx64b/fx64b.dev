@@ -5,7 +5,6 @@ import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 
 import React, { useState } from 'react'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
@@ -30,7 +29,7 @@ interface CodeBlockProps {
     inline?: boolean
     className?: string
     children?: React.ReactNode
-    [key: string]: any
+    [key: string]: unknown
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
@@ -107,16 +106,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                     <span className="text-xs font-medium text-gray-400">
                         {languageNames[language] || language.toUpperCase()}
                     </span>
-                    <CopyToClipboard
-                        text={code}
-                        onCopy={() => {
-                            setIsCopied(true)
-                            setTimeout(() => setIsCopied(false), 2000)
-                        }}
-                    >
                         <button
                             className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
                             aria-label="Copy code to clipboard"
+                            onClick={() => {
+                                navigator.clipboard.writeText(code)
+                                setIsCopied(true)
+                                setTimeout(() => setIsCopied(false), 2000)
+                            }}
                         >
                             {isCopied ? (
                                 <>
@@ -130,7 +127,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                                 </>
                             )}
                         </button>
-                    </CopyToClipboard>
                 </div>
                 <div className="overflow-hidden rounded-b-md">
                     <SyntaxHighlighter

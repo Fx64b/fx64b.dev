@@ -41,3 +41,6 @@ next-env.d.ts
 
 # misc
 repomix-output.xml
+
+.claude/
+CLAUDE.md

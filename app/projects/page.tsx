@@ -1,7 +1,4 @@
-'use client'
-
 import projectData from '@/data/projectData'
-import { Project } from '@/types/project'
 
 import Link from 'next/link'
 
@@ -12,28 +9,6 @@ import { Section } from '@/components/section'
 export default function Projects() {
     const featuredProjects = projectData.filter((project) => project.featured)
     const otherProjects = projectData.filter((project) => !project.featured)
-
-    // TODO: as soon as there are more external projects, move this to the projectData.ts file
-    const pentestGPTProject: Project = {
-        title: 'PentestGPT',
-        description:
-            'Advanced AI-powered penetration testing platform that provides integrated tools to help security teams conduct comprehensive penetration tests. Scan, exploit, and analyze web applications, networks, and cloud environments with ease and precision, without needing expert skills.',
-        logo: '/pentestgpt-logo.png',
-        link: 'https://pentestgpt.ai/',
-        githubLink: 'https://github.com/hackerai-tech/PentestGPT',
-        status: 'Finished',
-        tags: [
-            'AI',
-            'Penetration Testing',
-            'Web Applications',
-            'Network Security',
-            'Cloud Security',
-            'Next.js',
-            'TypeScript',
-            'Cybersecurity',
-        ],
-        featured: false,
-    }
 
     return (
         <>
@@ -98,24 +73,6 @@ export default function Projects() {
                             </div>
                         </div>
                     )}
-
-                    <div>
-                        <div className="mt-16 mb-8">
-                            <h2 className="mb-2 text-2xl font-bold tracking-tight">
-                                External Projects
-                            </h2>
-                            <p className="text-foreground/60 text-sm">
-                                Projects where I have helped with the
-                                implementation.
-                            </p>
-                        </div>
-                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                            <ProjectCard
-                                key={pentestGPTProject.title}
-                                project={pentestGPTProject}
-                            />
-                        </div>
-                    </div>
 
                     {projectData.length === 0 && (
                         <div className="py-16 text-center">

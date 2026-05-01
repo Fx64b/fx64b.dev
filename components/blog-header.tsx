@@ -36,7 +36,7 @@ export function BlogHeader({
                     <b>Readtime:</b> <span>{readtime}</span>
                 </div>
             )}
-            <p className="my-2 text-gray-500">{date}</p>
+            <p className="my-2 text-muted-foreground">{date}</p>
             <Separator />
         </div>
     )

@@ -16,7 +16,7 @@ export function HeroSection() {
                 <div className="flex flex-col items-center text-center">
                     {/* Status badge */}
                     <Badge variant="secondary" className="mb-6 px-3 py-1">
-                        <div className="mr-2 h-2 w-2 animate-pulse rounded-full bg-blue-500" />
+                        <div className="mr-2 h-2 w-2 animate-pulse rounded-full bg-green-500" />
                         Currently focused on projects
                     </Badge>
 

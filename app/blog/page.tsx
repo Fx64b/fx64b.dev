@@ -29,9 +29,9 @@ export default async function Blog() {
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        {posts.map((post, index) => (
+                        {posts.map((post) => (
                             <Link
-                                key={index}
+                                key={post.slug}
                                 href={`/blog/${post.slug}`}
                                 className="group block"
                             >
