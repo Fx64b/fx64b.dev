@@ -25,18 +25,20 @@ export default function DynamicToolLoader({ slug }: DynamicToolLoaderProps) {
 
     if (error) {
         return (
-            <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-6 text-center">
-                <h3 className="mb-2 text-lg font-medium">Tool Loading Error</h3>
-                <p>
-                    There was a problem loading this tool. It probably does not
-                    exist yet.
+            <div className="rounded-lg border border-dashed p-8 text-center">
+                <p className="text-muted-foreground text-sm">
+                    This tool could not be loaded.
                 </p>
             </div>
         )
     }
 
     if (!Component) {
-        return <div className="p-8 text-center">Loading tool...</div>
+        return (
+            <div className="flex items-center justify-center py-12">
+                <p className="text-muted-foreground text-sm">Loading...</p>
+            </div>
+        )
     }
 
     return <Component />
