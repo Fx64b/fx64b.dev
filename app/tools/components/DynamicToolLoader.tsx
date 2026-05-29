@@ -1,45 +1,23 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import ByteConverter from '@/components/tools/byte-converter'
+import CharacterWordCounter from '@/components/tools/character-word-counter'
+import ColorConverter from '@/components/tools/color-converter'
+import HourDecimalConverter from '@/components/tools/hour-decimal-converter'
+import TextCaseConverter from '@/components/tools/text-case-converter'
 
-interface DynamicToolLoaderProps {
-    slug: string
+import type React from 'react'
+
+const TOOLS: Record<string, React.ComponentType> = {
+    'byte-converter': ByteConverter,
+    'text-case-converter': TextCaseConverter,
+    'color-converter': ColorConverter,
+    'hour-decimal-converter': HourDecimalConverter,
+    'character-word-counter': CharacterWordCounter,
 }
 
-export default function DynamicToolLoader({ slug }: DynamicToolLoaderProps) {
-    const [Component, setComponent] = useState<React.ComponentType | null>(null)
-    const [error, setError] = useState<boolean>(false)
-
-    useEffect(() => {
-        const importComponent = async () => {
-            try {
-                const component = await import(`@/components/tools/${slug}`)
-                setComponent(() => component.default)
-            } catch (err) {
-                setError(true)
-            }
-        }
-
-        importComponent()
-    }, [slug])
-
-    if (error) {
-        return (
-            <div className="rounded-lg border border-dashed p-8 text-center">
-                <p className="text-muted-foreground text-sm">
-                    This tool could not be loaded.
-                </p>
-            </div>
-        )
-    }
-
-    if (!Component) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <p className="text-muted-foreground text-sm">Loading...</p>
-            </div>
-        )
-    }
-
+export default function DynamicToolLoader({ slug }: { slug: string }) {
+    const Component = TOOLS[slug]
+    if (!Component) return null
     return <Component />
 }
