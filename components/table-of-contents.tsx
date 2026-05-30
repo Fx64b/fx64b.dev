@@ -151,7 +151,7 @@ export function TableOfContents({
     }
 
     return (
-        <div className="mb-8">
+        <div className="not-prose mb-8">
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="border-border hover:bg-muted/50 flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors"
