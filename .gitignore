@@ -41,3 +41,7 @@ next-env.d.ts
 
 # misc
 repomix-output.xml
+
+# lock files (project uses pnpm)
+package-lock.json
+yarn.lock
