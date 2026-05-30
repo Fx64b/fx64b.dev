@@ -122,9 +122,9 @@ export function TableOfContents({
                 <p className="text-muted-foreground mb-3 text-xs font-medium uppercase tracking-wider">
                     On this page
                 </p>
-                <ul className="space-y-0.5">
+                <div className="space-y-0.5">
                     {displayHeadings.map((heading) => (
-                        <li
+                        <div
                             key={heading.id}
                             style={{
                                 paddingLeft: `${(heading.level - 1) * 12}px`,
@@ -143,9 +143,9 @@ export function TableOfContents({
                                     {heading.text}
                                 </span>
                             </button>
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             </nav>
         )
     }
@@ -174,9 +174,9 @@ export function TableOfContents({
                     isExpanded ? 'max-h-[60vh] opacity-100' : 'max-h-0 opacity-0'
                 )}
             >
-                <ul className="border-border mt-1 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                <div className="border-border mt-1 space-y-0.5 overflow-y-auto rounded-md border p-1">
                     {displayHeadings.map((heading) => (
-                        <li
+                        <div
                             key={heading.id}
                             style={{
                                 paddingLeft: `${(heading.level - 1) * 12}px`,
@@ -198,9 +198,9 @@ export function TableOfContents({
                                     {heading.text}
                                 </span>
                             </button>
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             </div>
         </div>
     )
