@@ -1,129 +1,151 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import HourDecimalConverter from '@/components/tools/hour-decimal-converter'
+import HourToDecimalConverter from '@/components/tools/hour-decimal-converter'
 
-describe('HourDecimalConverter', () => {
-    it('renders with default values', () => {
-        render(<HourDecimalConverter />)
+async function setTime(
+    user: ReturnType<typeof userEvent.setup>,
+    hours: string,
+    minutes: string
+) {
+    const hoursInput = screen.getByRole('textbox', { name: 'Hours' })
+    const minutesInput = screen.getByRole('textbox', { name: 'Minutes' })
+    await user.clear(hoursInput)
+    if (hours !== '') await user.type(hoursInput, hours)
+    await user.clear(minutesInput)
+    if (minutes !== '') await user.type(minutesInput, minutes)
+}
 
-        expect(
-            screen.getByText('Hour to Decimal Converter')
-        ).toBeInTheDocument()
-        expect(screen.getByLabelText('Hours')).toHaveValue('8')
-        expect(screen.getByLabelText('Minutes (0-59)')).toHaveValue('12')
-        expect(screen.getByText('Decimal Time Result')).toBeInTheDocument()
+describe('HourToDecimalConverter', () => {
+    describe('initial state', () => {
+        it('shows 8h 12m with result 8.2 on load', async () => {
+            render(<HourToDecimalConverter />)
+            expect(screen.getByRole('textbox', { name: 'Hours' })).toHaveValue('8')
+            expect(screen.getByRole('textbox', { name: 'Minutes' })).toHaveValue('12')
+            await waitFor(() =>
+                expect(screen.getByText('8.2')).toBeInTheDocument()
+            )
+        })
     })
 
-    it('converts hours and minutes to decimal correctly', async () => {
-        render(<HourDecimalConverter />)
-        const user = userEvent.setup()
+    describe('conversion accuracy', () => {
+        beforeEach(() => {
+            render(<HourToDecimalConverter />)
+        })
 
-        // Test various time combinations
-        const testCases = [
-            { hours: '1', minutes: '30' },
-            { hours: '2', minutes: '15' },
-            { hours: '0', minutes: '30' },
-            { hours: '12', minutes: '0' },
-        ]
+        it('1h 30m → 1.5', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '1', '30')
+            await waitFor(() =>
+                expect(screen.getByText('1.5')).toBeInTheDocument()
+            )
+        })
 
-        for (const { hours, minutes } of testCases) {
-            // Input hours
-            const hoursInput = screen.getByLabelText('Hours')
-            await user.clear(hoursInput)
-            await user.type(hoursInput, hours)
+        it('0h 15m → 0.25', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '0', '15')
+            await waitFor(() =>
+                expect(screen.getByText('0.25')).toBeInTheDocument()
+            )
+        })
 
-            // Input minutes
-            const minutesInput = screen.getByLabelText('Minutes (0-59)')
+        it('0h 45m → 0.75', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '0', '45')
+            await waitFor(() =>
+                expect(screen.getByText('0.75')).toBeInTheDocument()
+            )
+        })
+
+        it('2h 45m → 2.75', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '2', '45')
+            await waitFor(() =>
+                expect(screen.getByText('2.75')).toBeInTheDocument()
+            )
+        })
+
+        it('1h 0m → 1 (no trailing decimal)', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '1', '0')
+            await waitFor(() =>
+                expect(screen.getByText('1')).toBeInTheDocument()
+            )
+        })
+
+        it('0h 0m → 0', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '0', '0')
+            await waitFor(() =>
+                expect(screen.getByText('0')).toBeInTheDocument()
+            )
+        })
+    })
+
+    describe('edge cases', () => {
+        beforeEach(() => {
+            render(<HourToDecimalConverter />)
+        })
+
+        it('empty hours field is treated as 0', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '', '30')
+            await waitFor(() =>
+                expect(screen.getByText('0.5')).toBeInTheDocument()
+            )
+        })
+
+        it('empty minutes field is treated as 0', async () => {
+            const user = userEvent.setup()
+            await setTime(user, '3', '')
+            await waitFor(() =>
+                expect(screen.getByText('3')).toBeInTheDocument()
+            )
+        })
+
+        it('minutes > 59 are rejected (typing "60" keeps the field at "6")', async () => {
+            const user = userEvent.setup()
+            const minutesInput = screen.getByRole('textbox', { name: 'Minutes' })
             await user.clear(minutesInput)
-            await user.type(minutesInput, minutes)
+            await user.type(minutesInput, '60')
+            expect(minutesInput).toHaveValue('6')
+        })
 
-            // Check that result is displayed
-            expect(screen.getByText('Decimal Time Result')).toBeInTheDocument()
-        }
+        it('non-numeric characters are stripped from hours', async () => {
+            const user = userEvent.setup()
+            const hoursInput = screen.getByRole('textbox', { name: 'Hours' })
+            await user.clear(hoursInput)
+            await user.type(hoursInput, '2a')
+            expect(hoursInput).toHaveValue('2')
+        })
     })
 
-    it('rejects invalid input for minutes field', async () => {
-        render(<HourDecimalConverter />)
-        const user = userEvent.setup()
+    describe('copy to clipboard', () => {
+        let writeTextSpy: ReturnType<typeof vi.spyOn>
 
-        const minutesInput = screen.getByLabelText('Minutes (0-59)')
-        await user.clear(minutesInput)
+        beforeEach(() => {
+            writeTextSpy = vi
+                .spyOn(navigator.clipboard, 'writeText')
+                .mockResolvedValue(undefined)
+        })
 
-        // Try to input 65 minutes (over the limit of 59)
-        await user.type(minutesInput, '65')
+        afterEach(() => {
+            writeTextSpy.mockRestore()
+        })
 
-        // Should be truncated to just "6"
-        expect(minutesInput).not.toHaveValue('65')
-    })
+        it('copies the decimal result to clipboard', async () => {
+            const user = userEvent.setup()
+            render(<HourToDecimalConverter />)
+            await user.click(screen.getByTestId('copy-button'))
+            expect(writeTextSpy).toHaveBeenCalledWith('8.2')
+        })
 
-    it('handles edge cases correctly', async () => {
-        render(<HourDecimalConverter />)
-        const user = userEvent.setup()
-
-        // Test case: 0 hours 0 minutes
-        const hoursInput = screen.getByLabelText('Hours')
-        const minutesInput = screen.getByLabelText('Minutes (0-59)')
-
-        await user.clear(hoursInput)
-        await user.type(hoursInput, '0')
-        await user.clear(minutesInput)
-        await user.type(minutesInput, '0')
-
-        // Check result is displayed
-        expect(screen.getByText('Decimal Time Result')).toBeInTheDocument()
-
-        // Test case: Maximum value for minutes (59)
-        await user.clear(hoursInput)
-        await user.type(hoursInput, '1')
-        await user.clear(minutesInput)
-        await user.type(minutesInput, '59')
-
-        // Check result is displayed
-        expect(screen.getByText('Decimal Time Result')).toBeInTheDocument()
-    })
-
-    it('allows only numeric input', async () => {
-        render(<HourDecimalConverter />)
-        const user = userEvent.setup()
-
-        const hoursInput = screen.getByLabelText('Hours')
-        await user.clear(hoursInput)
-
-        // Try to input non-numeric characters
-        await user.type(hoursInput, 'abc123')
-
-        // Should only keep the numeric part
-        expect(hoursInput).toHaveValue('123')
-    })
-
-    it('rounds to two decimal points correctly', async () => {
-        render(<HourDecimalConverter />)
-        const user = userEvent.setup()
-
-        const hoursInput = screen.getByLabelText('Hours')
-        const minutesInput = screen.getByLabelText('Minutes (0-59)')
-
-        // Test case: 8 hours 15 minutes (8.25)
-        await user.clear(hoursInput)
-        await user.type(hoursInput, '8')
-        await user.clear(minutesInput)
-        await user.type(minutesInput, '15')
-        expect(screen.getByText('8.25 decimal hours')).toBeInTheDocument()
-
-        // Test case: 8 hours 18 minutes (8.3)
-        await user.clear(hoursInput)
-        await user.type(hoursInput, '8')
-        await user.clear(minutesInput)
-        await user.type(minutesInput, '18')
-        expect(screen.getByText('8.3 decimal hours')).toBeInTheDocument()
-
-        // Test case: 8 hours 40 minutes (8.67)
-        await user.clear(hoursInput)
-        await user.type(hoursInput, '8')
-        await user.clear(minutesInput)
-        await user.type(minutesInput, '40')
-        expect(screen.getByText('8.67 decimal hours')).toBeInTheDocument()
+        it('shows a check icon after copying', async () => {
+            const user = userEvent.setup()
+            render(<HourToDecimalConverter />)
+            await user.click(screen.getByTestId('copy-button'))
+            expect(screen.getByTestId('check-icon')).toBeInTheDocument()
+        })
     })
 })

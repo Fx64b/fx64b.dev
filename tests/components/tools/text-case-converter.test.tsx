@@ -1,103 +1,215 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import TextCaseConverter from '@/components/tools/text-case-converter'
 
+async function typeAndSelect(
+    user: ReturnType<typeof userEvent.setup>,
+    input: string,
+    optionLabel: string
+) {
+    const textarea = screen.getByPlaceholderText('Enter text to convert...')
+    await user.clear(textarea)
+    await user.type(textarea, input)
+
+    await user.click(screen.getByRole('combobox'))
+    await user.click(await screen.findByRole('option', { name: optionLabel }))
+}
+
 describe('TextCaseConverter', () => {
-    it('renders with default values', () => {
-        render(<TextCaseConverter />)
-        expect(screen.getByText('Text Case Converter')).toBeInTheDocument()
-
-        const textareas = screen.getAllByPlaceholderText(
-            'Enter text to convert...'
-        )
-        expect(textareas.length).toBeGreaterThan(0)
-
-        expect(
-            screen.getByText('Converted text will appear here')
-        ).toBeInTheDocument()
-    })
-
-    it('displays input text', async () => {
-        render(<TextCaseConverter />)
-        const user = userEvent.setup()
-
-        // Input text - just test that text enters the box
-        const textareas = screen.getAllByPlaceholderText(
-            'Enter text to convert...'
-        )
-        const textarea = textareas[0]
-        await user.type(textarea, 'testing text')
-
-        expect(textarea).toHaveValue('testing text')
-    })
-
-    it('handles empty input correctly', async () => {
-        render(<TextCaseConverter />)
-
-        // Should show placeholder
-        expect(
-            screen.getByText('Converted text will appear here')
-        ).toBeInTheDocument()
-    })
-
-    it('handles special characters correctly', async () => {
-        render(<TextCaseConverter />)
-        const user = userEvent.setup()
-
-        // Text with special characters
-        const specialText = 'This has 123 NUMBERS & !@#$ symbols'
-
-        const textareas = screen.getAllByPlaceholderText(
-            'Enter text to convert...'
-        )
-        const textarea = textareas[0]
-        await user.type(textarea, specialText)
-
-        expect(textarea).toHaveValue(specialText)
-    })
-
-    it('copies converted text to clipboard', async () => {
-        render(<TextCaseConverter />)
-        const user = userEvent.setup()
-
-        // Setup spy on clipboard API
-        const clipboardSpy = vi.spyOn(navigator.clipboard, 'writeText')
-
-        // Input text
-        const textareas = screen.getAllByPlaceholderText(
-            'Enter text to convert...'
-        )
-        const textarea = textareas[0]
-        await user.type(textarea, 'test text')
-
-        // Get copy button
-        const copyButton = screen.getByRole('button', {
-            name: /copy to clipboard/i,
+    describe('initial state', () => {
+        it('shows the placeholder when no input is given', () => {
+            render(<TextCaseConverter />)
+            expect(
+                screen.getByText('Converted text will appear here')
+            ).toBeInTheDocument()
         })
-        await user.click(copyButton)
 
-        expect(clipboardSpy).toHaveBeenCalled()
+        it('defaults to Title Case', () => {
+            render(<TextCaseConverter />)
+            expect(screen.getByRole('combobox')).toHaveTextContent('Title Case')
+        })
     })
 
-    it('shows converted text', async () => {
-        render(<TextCaseConverter />)
-        const user = userEvent.setup()
+    describe('case conversions', () => {
+        beforeEach(() => {
+            render(<TextCaseConverter />)
+        })
 
-        const input = 'This is a Test'
+        it('lowercase', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'Hello World', 'lowercase')
+            await waitFor(() =>
+                expect(screen.getByText('hello world')).toBeInTheDocument()
+            )
+        })
 
-        // Input text once
-        const textareas = screen.getAllByPlaceholderText(
-            'Enter text to convert...'
-        )
-        const textarea = textareas[0]
-        await user.type(textarea, input)
+        it('UPPERCASE', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'Hello World', 'UPPERCASE')
+            await waitFor(() =>
+                expect(screen.getByText('HELLO WORLD')).toBeInTheDocument()
+            )
+        })
 
-        // The component automatically updates the output, so we just check that
-        // the placeholder is gone after inputting text
-        expect(
-            screen.queryByText('Converted text will appear here')
-        ).not.toBeInTheDocument()
+        it('Title Case', async () => {
+            const user = userEvent.setup()
+            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            await user.type(textarea, 'hello world')
+            // Title Case is already the default selection
+            await waitFor(() =>
+                expect(screen.getByText('Hello World')).toBeInTheDocument()
+            )
+        })
+
+        it('Sentence case', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'hello world. foo bar.', 'Sentence case')
+            await waitFor(() =>
+                expect(
+                    screen.getByText('Hello world. Foo bar.')
+                ).toBeInTheDocument()
+            )
+        })
+
+        it('camelCase', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'hello world', 'camelCase')
+            await waitFor(() =>
+                expect(screen.getByText('helloWorld')).toBeInTheDocument()
+            )
+        })
+
+        it('PascalCase', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'hello world', 'PascalCase')
+            await waitFor(() =>
+                expect(screen.getByText('HelloWorld')).toBeInTheDocument()
+            )
+        })
+
+        it('snake_case', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'Hello World', 'snake_case')
+            await waitFor(() =>
+                expect(screen.getByText('hello_world')).toBeInTheDocument()
+            )
+        })
+
+        it('kebab-case', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'Hello World', 'kebab-case')
+            await waitFor(() =>
+                expect(screen.getByText('hello-world')).toBeInTheDocument()
+            )
+        })
+
+        it('CONSTANT_CASE', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'hello world', 'CONSTANT_CASE')
+            await waitFor(() =>
+                expect(screen.getByText('HELLO_WORLD')).toBeInTheDocument()
+            )
+        })
+
+        it('dot.case', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'Hello World', 'dot.case')
+            await waitFor(() =>
+                expect(screen.getByText('hello.world')).toBeInTheDocument()
+            )
+        })
+
+        it('path/case', async () => {
+            const user = userEvent.setup()
+            await typeAndSelect(user, 'Hello World', 'path/case')
+            await waitFor(() =>
+                expect(screen.getByText('hello/world')).toBeInTheDocument()
+            )
+        })
+    })
+
+    describe('edge cases', () => {
+        it('produces empty output for whitespace-only input', async () => {
+            const user = userEvent.setup()
+            render(<TextCaseConverter />)
+            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            await user.type(textarea, '   ')
+            await waitFor(() =>
+                expect(
+                    screen.getByText('Converted text will appear here')
+                ).toBeInTheDocument()
+            )
+        })
+
+        it('camelCase strips non-alphanumeric characters', async () => {
+            const user = userEvent.setup()
+            render(<TextCaseConverter />)
+            await typeAndSelect(user, 'hello-world', 'camelCase')
+            await waitFor(() =>
+                expect(screen.getByText('helloWorld')).toBeInTheDocument()
+            )
+        })
+
+        it('snake_case strips punctuation', async () => {
+            const user = userEvent.setup()
+            render(<TextCaseConverter />)
+            await typeAndSelect(user, 'hello, world!', 'snake_case')
+            await waitFor(() =>
+                expect(screen.getByText('hello_world')).toBeInTheDocument()
+            )
+        })
+
+        it('handles multi-word input for PascalCase correctly', async () => {
+            const user = userEvent.setup()
+            render(<TextCaseConverter />)
+            // "the quick brown fox" → "TheQuickBrownFox" also appears in the
+            // educational section, so use a different phrase to avoid ambiguity.
+            await typeAndSelect(user, 'hello world foo bar', 'PascalCase')
+            await waitFor(() =>
+                expect(screen.getByText('HelloWorldFooBar')).toBeInTheDocument()
+            )
+        })
+    })
+
+    describe('copy to clipboard', () => {
+        let writeTextSpy: ReturnType<typeof vi.spyOn>
+
+        beforeEach(() => {
+            writeTextSpy = vi
+                .spyOn(navigator.clipboard, 'writeText')
+                .mockResolvedValue(undefined)
+        })
+
+        afterEach(() => {
+            writeTextSpy.mockRestore()
+        })
+
+        it('copies the converted output to clipboard', async () => {
+            const user = userEvent.setup()
+            render(<TextCaseConverter />)
+            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            await user.type(textarea, 'hello world')
+
+            const copyBtn = screen.getByTestId('copy-button')
+            await user.click(copyBtn)
+
+            expect(writeTextSpy).toHaveBeenCalledWith('Hello World')
+        })
+
+        it('copy button is disabled when there is no output', () => {
+            render(<TextCaseConverter />)
+            expect(screen.getByTestId('copy-button')).toBeDisabled()
+        })
+
+        it('shows a check icon after copying', async () => {
+            const user = userEvent.setup()
+            render(<TextCaseConverter />)
+            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            await user.type(textarea, 'hello')
+            await user.click(screen.getByTestId('copy-button'))
+            expect(screen.getByTestId('check-icon')).toBeInTheDocument()
+        })
     })
 })

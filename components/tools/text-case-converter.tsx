@@ -161,10 +161,6 @@ export default function TextCaseConverter() {
 
     return (
         <div className="mx-auto max-w-3xl">
-            <h1 className="mb-4 text-center text-2xl font-bold">
-                Text Case Converter
-            </h1>
-
             <Card className="mb-4">
                 <CardContent className="pt-6">
                     <Textarea

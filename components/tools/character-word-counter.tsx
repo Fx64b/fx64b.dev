@@ -1,7 +1,19 @@
 'use client'
 
-import { Check, Copy } from 'lucide-react'
+import {
+    AlignLeft,
+    BookOpen,
+    Check,
+    Clock,
+    Copy,
+    Eye,
+    FileText,
+    List,
+    Mic,
+    Type,
+} from 'lucide-react'
 
+import type { LucideIcon } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -19,16 +31,16 @@ import {
 interface StatCardProps {
     title: string
     value: string
-    icon: string
+    icon: LucideIcon
 }
 
-function StatCard({ title, value, icon }: StatCardProps) {
+function StatCard({ title, value, icon: Icon }: StatCardProps) {
     return (
         <Card>
             <CardContent className="flex flex-col items-center p-4 text-center">
-                <span className="mb-2 text-2xl">{icon}</span>
-                <h3 className="mb-1 text-sm font-medium">{title}</h3>
-                <p className="font-mono text-lg">{value}</p>
+                <Icon className="text-muted-foreground mb-2 h-4 w-4" />
+                <p className="text-muted-foreground mb-1 text-xs">{title}</p>
+                <p className="font-mono text-lg font-medium">{value}</p>
             </CardContent>
         </Card>
     )
@@ -49,19 +61,16 @@ export default function CharacterWordCounter() {
     const [copied, setCopied] = useState<boolean>(false)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-    // Focus textarea on component mount
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.focus()
         }
     }, [])
 
-    // Update stats whenever text changes
     useEffect(() => {
         calculateStats(text)
     }, [text])
 
-    // Reset copied state after 2 seconds
     useEffect(() => {
         if (copied) {
             const timer = setTimeout(() => {
@@ -76,38 +85,25 @@ export default function CharacterWordCounter() {
     }
 
     const calculateStats = (text: string) => {
-        // Characters (with spaces)
         const characters = text.length
-
-        // Characters (without spaces)
         const charactersNoSpaces = text.replace(/\s/g, '').length
-
-        // Words
         const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
-
-        // Sentences (split by . ! ?)
         const sentences =
             text === ''
                 ? 0
                 : text.split(/[.!?]+/).filter((s) => s.trim().length > 0).length
-
-        // Paragraphs (split by newlines)
         const paragraphs =
             text === ''
                 ? 0
                 : text.split(/\n+/).filter((p) => p.trim().length > 0).length
-
-        // Lines
         const lines = text === '' ? 0 : text.split('\n').length
 
-        // Reading time (average 225 words per minute)
         const readingTimeMinutes = words / 225
         const readingTime =
             readingTimeMinutes < 1
                 ? Math.ceil(readingTimeMinutes * 60) + ' seconds'
                 : Math.ceil(readingTimeMinutes) + ' minutes'
 
-        // Speaking time (average 150 words per minute)
         const speakingTimeMinutes = words / 150
         const speakingTime =
             speakingTimeMinutes < 1
@@ -142,10 +138,6 @@ export default function CharacterWordCounter() {
 
     return (
         <div className="mx-auto max-w-3xl">
-            <h1 className="mb-4 text-center text-2xl font-bold">
-                Character & Word Counter
-            </h1>
-
             <Card className="mb-4">
                 <CardContent className="pt-6">
                     <div className="flex flex-col gap-4">
@@ -205,42 +197,42 @@ export default function CharacterWordCounter() {
                 <StatCard
                     title="Characters"
                     value={stats.characters.toString()}
-                    icon="📝"
+                    icon={Type}
                 />
                 <StatCard
                     title="Characters (no spaces)"
                     value={stats.charactersNoSpaces.toString()}
-                    icon="🔤"
+                    icon={AlignLeft}
                 />
                 <StatCard
                     title="Words"
                     value={stats.words.toString()}
-                    icon="📚"
+                    icon={BookOpen}
                 />
                 <StatCard
                     title="Sentences"
                     value={stats.sentences.toString()}
-                    icon="📃"
+                    icon={List}
                 />
                 <StatCard
                     title="Paragraphs"
                     value={stats.paragraphs.toString()}
-                    icon="📄"
+                    icon={FileText}
                 />
                 <StatCard
                     title="Lines"
                     value={stats.lines.toString()}
-                    icon="📑"
+                    icon={AlignLeft}
                 />
                 <StatCard
                     title="Reading Time"
                     value={stats.readingTime}
-                    icon="👁️"
+                    icon={Eye}
                 />
                 <StatCard
                     title="Speaking Time"
                     value={stats.speakingTime}
-                    icon="🗣️"
+                    icon={Mic}
                 />
             </div>
 
@@ -269,7 +261,7 @@ export default function CharacterWordCounter() {
                     <Card>
                         <CardContent className="pt-6">
                             <h3 className="mb-2 font-medium">
-                                Reading & Speaking Times
+                                Reading &amp; Speaking Times
                             </h3>
                             <p className="text-muted-foreground text-sm">
                                 Reading time is calculated based on an average

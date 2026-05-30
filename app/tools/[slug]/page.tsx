@@ -1,11 +1,13 @@
 import { getAllTools, getToolBySlug } from '@/data/toolsData'
-
+import { ChevronRight } from 'lucide-react'
 import { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import DynamicToolLoader from '@/app/tools/components/DynamicToolLoader'
 
 import { BackgroundGrid } from '@/components/background-grid'
+import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 
 interface ToolPageProps {
@@ -71,39 +73,53 @@ export default async function ToolPage(props: ToolPageProps) {
     return (
         <>
             <BackgroundGrid />
-            <div className="mx-auto max-w-(--breakpoint-lg)">
-                <h1 className="mb-2 text-2xl font-bold">{tool.title}</h1>
-                <p className="text-muted-foreground mb-6">{tool.description}</p>
+            <div className="container mx-auto max-w-(--breakpoint-lg) px-4 py-8">
+                <nav className="text-muted-foreground mb-6 flex items-center gap-1.5 text-sm">
+                    <Link
+                        href="/tools"
+                        className="hover:text-foreground transition-colors"
+                    >
+                        Tools
+                    </Link>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                    <span className="text-foreground truncate">{tool.title}</span>
+                </nav>
 
-                <Separator className="my-6" />
+                <div className="mb-6">
+                    <div className="mb-1.5 flex items-start gap-3">
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            {tool.title}
+                        </h1>
+                        <Badge
+                            variant="secondary"
+                            className="mt-1 shrink-0 capitalize"
+                        >
+                            {tool.category}
+                        </Badge>
+                    </div>
+                    <p className="text-muted-foreground">{tool.description}</p>
+                </div>
+
+                <Separator className="mb-8" />
 
                 <DynamicToolLoader slug={params.slug} />
 
-                <div className="mt-12">
-                    <h3 className="mb-4 text-lg font-semibold">
-                        About this tool
-                    </h3>
-                    <p>
-                        This is a free online tool that works entirely in your
-                        browser.
-                    </p>
-
-                    {tool.tags.length > 0 && (
-                        <div className="mt-4">
-                            <h4 className="mb-2 font-medium">Tags</h4>
-                            <div className="flex flex-wrap gap-2">
-                                {tool.tags.map((tag) => (
-                                    <span
-                                        key={tag}
-                                        className="bg-secondary rounded-full px-3 py-1 text-sm"
-                                    >
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                {tool.tags.length > 0 && (
+                    <div className="mt-10 flex flex-wrap items-center gap-2">
+                        <span className="text-muted-foreground text-xs uppercase tracking-wider">
+                            Tags
+                        </span>
+                        {tool.tags.map((tag) => (
+                            <Badge
+                                key={tag}
+                                variant="outline"
+                                className="text-xs"
+                            >
+                                {tag}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
             </div>
         </>
     )

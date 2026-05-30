@@ -37,10 +37,5 @@ global.IntersectionObserver = class IntersectionObserver {
     thresholds = [0]
 }
 
-// Mock clipboard API once here
-Object.defineProperty(navigator, 'clipboard', {
-    value: {
-        writeText: vi.fn(() => Promise.resolve()),
-    },
-    configurable: true,
-})
+// navigator.clipboard.writeText is mocked per-test via vi.spyOn in beforeEach
+// blocks within each test file — see the 'copy to clipboard' describe blocks.
