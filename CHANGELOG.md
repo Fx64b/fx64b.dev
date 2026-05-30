@@ -1,3 +1,23 @@
+# [3.5.0](https://github.com/Fx64b/fx64b.dev/compare/v3.4.2...v3.5.0) (2026-05-30)
+
+
+### Bug Fixes
+
+* add encoding category to tools overview page ([76493af](https://github.com/Fx64b/fx64b.dev/commit/76493aff327d553827cadb4cb6ca04a04c3e0bac))
+* **toc:** remove left margin on mobile expanded state ([d0cb9b8](https://github.com/Fx64b/fx64b.dev/commit/d0cb9b87e0f6f917fc3beee3e80ba58ada526333))
+* **toc:** replace ul/li with div to avoid prose padding-inline-start ([e30f427](https://github.com/Fx64b/fx64b.dev/commit/e30f427f3759e1e90dad46a282e3566c19a5b452))
+
+
+### Features
+
+* add 6 new cybersecurity and fun tools ([8235521](https://github.com/Fx64b/fx64b.dev/commit/823552166d1ab8b8c1c38cf92357ac8df47dafca))
+* add Obsidianator project details and logo ([d951553](https://github.com/Fx64b/fx64b.dev/commit/d951553000c7c2d06bb9fe4933dfcfe2bd96ed2a))
+* add Push to Prod clicker game project entry ([b03c153](https://github.com/Fx64b/fx64b.dev/commit/b03c153baeb6283ec60592498aee7d24284b2c48))
+* add Push to Prod logo from game favicon ([a4b09ee](https://github.com/Fx64b/fx64b.dev/commit/a4b09ee327d548b8f3caaea78f34697e21627971))
+* add tests for new tools, refactor MD5, add Dev/Cyber Ipsum modes ([22a4835](https://github.com/Fx64b/fx64b.dev/commit/22a483559a1bb70e6cf358ac83029554a5e0e0d4))
+* redesign blog/projects overview and table of contents ([ad23da4](https://github.com/Fx64b/fx64b.dev/commit/ad23da41d8bbff4b3b1870bbd2bf7c81bae0ee85))
+* **tools:** redesign tools overview and individual tool pages with shadcn ([4b4efeb](https://github.com/Fx64b/fx64b.dev/commit/4b4efeb3b69f6b08fd3cb29c6799f0ca6a46af21))
+
 ## [3.4.2](https://github.com/Fx64b/fx64b.dev/compare/v3.4.1...v3.4.2) (2025-12-30)
 
 
