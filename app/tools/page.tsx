@@ -4,6 +4,7 @@ import {
     ArrowLeftRight,
     ArrowRight,
     BookOpen,
+    Lock,
     Text,
     Wrench,
     Zap,
@@ -30,6 +31,7 @@ export const metadata: Metadata = {
 
 const CATEGORY_META = {
     conversion: { label: 'Conversion', icon: ArrowLeftRight },
+    encoding: { label: 'Encoding & Hashing', icon: Lock },
     formatting: { label: 'Formatting', icon: Text },
     generators: { label: 'Generators', icon: Zap },
     utilities: { label: 'Utilities', icon: Wrench },
@@ -37,12 +39,14 @@ const CATEGORY_META = {
 
 export default function ToolsPage() {
     const conversionTools = getToolsByCategory('conversion')
+    const encodingTools = getToolsByCategory('encoding')
     const formattingTools = getToolsByCategory('formatting')
     const generatorTools = getToolsByCategory('generators')
     const utilityTools = getToolsByCategory('utilities')
 
     const allCategories = [
         { key: 'conversion' as const, tools: conversionTools },
+        { key: 'encoding' as const, tools: encodingTools },
         { key: 'formatting' as const, tools: formattingTools },
         { key: 'generators' as const, tools: generatorTools },
         { key: 'utilities' as const, tools: utilityTools },
