@@ -34,6 +34,7 @@ global.IntersectionObserver = class IntersectionObserver {
     takeRecords = vi.fn(() => [])
     root = null
     rootMargin = '0px'
+    scrollMargin = '0px'
     thresholds = [0]
 }
 
