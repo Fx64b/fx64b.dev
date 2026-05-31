@@ -87,7 +87,7 @@ describe('LoremIpsumGenerator', () => {
             render(<LoremIpsumGenerator />)
             await user.click(screen.getByRole('button', { name: 'Dev Ipsum' }))
             // Uncheck "start with opening sentence" so we get pure dev words
-            const checkbox = screen.getByRole('checkbox')
+            const checkbox = screen.getByRole('checkbox', { name: 'Start with opening sentence' })
             await user.click(checkbox)
             await waitFor(() => {
                 const text = getOutput().toLowerCase()
@@ -176,11 +176,121 @@ describe('LoremIpsumGenerator', () => {
         it('unchecking it removes the fixed opening from classic mode', async () => {
             const user = userEvent.setup()
             render(<LoremIpsumGenerator />)
-            const checkbox = screen.getByRole('checkbox')
+            const checkbox = screen.getByRole('checkbox', { name: 'Start with opening sentence' })
             await user.click(checkbox) // uncheck
             await waitFor(() =>
                 expect(getOutput()).not.toMatch(/Lorem ipsum dolor sit amet/i)
             )
+        })
+    })
+
+    describe('Structured option', () => {
+        it('structured checkbox is present', () => {
+            render(<LoremIpsumGenerator />)
+            expect(screen.getByRole('checkbox', { name: 'Structured' })).toBeInTheDocument()
+        })
+
+        it('enabling structured renders heading elements in the output', async () => {
+            const user = userEvent.setup()
+            render(<LoremIpsumGenerator />)
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => {
+                const output = screen.getByTestId('output')
+                expect(output.querySelector('h1')).not.toBeNull()
+                expect(output.querySelector('h2')).not.toBeNull()
+            })
+        })
+
+        it('enabling structured hides the output-type buttons', async () => {
+            const user = userEvent.setup()
+            render(<LoremIpsumGenerator />)
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => {
+                expect(screen.queryByRole('button', { name: 'Paragraphs' })).not.toBeInTheDocument()
+                expect(screen.queryByRole('button', { name: 'Sentences' })).not.toBeInTheDocument()
+                expect(screen.queryByRole('button', { name: 'Words' })).not.toBeInTheDocument()
+            })
+        })
+
+        it('enabling structured hides the opening-sentence checkbox', async () => {
+            const user = userEvent.setup()
+            render(<LoremIpsumGenerator />)
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => {
+                expect(screen.queryByRole('checkbox', { name: 'Start with opening sentence' })).not.toBeInTheDocument()
+            })
+        })
+
+        it('shows a Markdown checkbox only when structured is enabled', async () => {
+            const user = userEvent.setup()
+            render(<LoremIpsumGenerator />)
+            expect(screen.queryByRole('checkbox', { name: 'Markdown' })).not.toBeInTheDocument()
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() =>
+                expect(screen.getByRole('checkbox', { name: 'Markdown' })).toBeInTheDocument()
+            )
+        })
+
+        it('Markdown on: copy output contains markdown heading syntax', async () => {
+            const user = userEvent.setup()
+            const writeTextSpy = vi
+                .spyOn(navigator.clipboard, 'writeText')
+                .mockResolvedValue(undefined)
+            render(<LoremIpsumGenerator />)
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Markdown' })).toBeChecked())
+            await waitFor(() => expect(screen.getByTestId('output').querySelector('h1')).not.toBeNull())
+            await user.click(screen.getByTestId('copy-button'))
+            expect(writeTextSpy).toHaveBeenCalledWith(expect.stringMatching(/^# /m))
+            writeTextSpy.mockRestore()
+        })
+
+        it('Markdown off: copy output uses plain-text underline headings', async () => {
+            const user = userEvent.setup()
+            const writeTextSpy = vi
+                .spyOn(navigator.clipboard, 'writeText')
+                .mockResolvedValue(undefined)
+            render(<LoremIpsumGenerator />)
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Markdown' })).toBeInTheDocument())
+            await user.click(screen.getByRole('checkbox', { name: 'Markdown' }))
+            await waitFor(() => expect(screen.getByTestId('output').querySelector('h1')).not.toBeNull())
+            await user.click(screen.getByTestId('copy-button'))
+            expect(writeTextSpy).toHaveBeenCalledWith(expect.stringMatching(/={3,}/))
+            writeTextSpy.mockRestore()
+        })
+
+        it('Dev Ipsum structured output contains a table element', async () => {
+            const user = userEvent.setup()
+            render(<LoremIpsumGenerator />)
+            await user.click(screen.getByRole('button', { name: 'Dev Ipsum' }))
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => {
+                const output = screen.getByTestId('output')
+                expect(output.querySelector('table')).not.toBeNull()
+            })
+        })
+
+        it('Cyber Ipsum structured output contains a table element', async () => {
+            const user = userEvent.setup()
+            render(<LoremIpsumGenerator />)
+            await user.click(screen.getByRole('button', { name: 'Cyber Ipsum' }))
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => {
+                const output = screen.getByTestId('output')
+                expect(output.querySelector('table')).not.toBeNull()
+            })
+        })
+
+        it('count label changes to "sections" when structured is enabled', async () => {
+            const user = userEvent.setup()
+            render(<LoremIpsumGenerator />)
+            expect(screen.getByText('of')).toBeInTheDocument()
+            await user.click(screen.getByRole('checkbox', { name: 'Structured' }))
+            await waitFor(() => {
+                expect(screen.queryByText('of')).not.toBeInTheDocument()
+                expect(screen.getByText('sections')).toBeInTheDocument()
+            })
         })
     })
 

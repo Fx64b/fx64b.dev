@@ -31,3 +31,14 @@ pnpm build
 1. Create `components/tools/<slug>.tsx` following the existing component pattern
 2. Add the tool metadata entry to `data/toolsData.ts`
 3. Import and register the component in `app/tools/components/DynamicToolLoader.tsx`
+4. **Write tests** — add `tests/components/tools/<slug>.test.tsx` covering the core behaviours
+
+## Testing
+
+Tests live in `tests/` and mirror the `components/` structure. Run them with `pnpm test`.
+
+**Rules:**
+- Every new tool must have a corresponding test file before the PR is merged.
+- When adding new functionality to an existing tool (new modes, options, outputs), update or extend its test file in the same commit.
+- Query checkboxes and inputs by their accessible name (`getByRole('checkbox', { name: '…' })`), not by role alone, to stay resilient to future UI additions.
+- Run `pnpm test` before pushing — a failing test suite blocks the pipeline.
