@@ -398,41 +398,11 @@ const toolsData: Tool[] = [
                 a: 'Yes. They use the browser’s crypto API (crypto.randomUUID / getRandomValues), not Math.random.',
             },
         ],
-        relatedSlugs: ['password-generator', 'hash-generator'],
+        relatedSlugs: ['hash-generator'],
         useCases: [
             'Generating database primary keys',
             'Creating unique identifiers for tests and seeds',
             'Correlation IDs for logging and tracing',
-        ],
-        addedAt: '2025-06-01',
-        updatedAt: '2025-06-01',
-    },
-    {
-        slug: 'password-generator',
-        title: 'Password Generator',
-        description:
-            'Generate strong random passwords with configurable character sets',
-        category: 'security',
-        tags: ['password', 'random', 'security', 'generator'],
-        popular: true,
-        keywords: ['passphrase', 'secret', 'strong password', 'credentials'],
-        summary:
-            'Generate strong, random passwords with adjustable length and character sets, computed locally with the crypto API.',
-        faq: [
-            {
-                q: 'Are the passwords generated securely?',
-                a: 'Yes. They are built from crypto.getRandomValues, a cryptographically secure random source, entirely in your browser.',
-            },
-            {
-                q: 'What makes a password strong?',
-                a: 'Length and character variety. Longer passwords with mixed character sets have far higher entropy and resist brute-forcing.',
-            },
-        ],
-        relatedSlugs: ['uuid-generator', 'hash-generator'],
-        useCases: [
-            'Creating unique passwords per account',
-            'Generating API keys and secrets',
-            'Producing test credentials',
         ],
         addedAt: '2025-06-01',
         updatedAt: '2025-06-01',

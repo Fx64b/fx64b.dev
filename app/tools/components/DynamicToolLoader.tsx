@@ -43,9 +43,6 @@ const TOOLS: Record<string, React.ComponentType> = {
     'uuid-generator': dynamic(
         () => import('@/components/tools/uuid-generator')
     ),
-    'password-generator': dynamic(
-        () => import('@/components/tools/password-generator')
-    ),
     'json-formatter': dynamic(
         () => import('@/components/tools/json-formatter')
     ),
