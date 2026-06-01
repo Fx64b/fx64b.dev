@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowDown, Check, Copy } from 'lucide-react'
+
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -52,9 +53,7 @@ export default function Base64EncoderDecoder() {
                 setOutput(decodeURIComponent(escape(atob(text.trim()))))
             }
         } catch {
-            setError(
-                m === 'decode' ? 'Invalid Base64 input' : 'Encoding error'
-            )
+            setError(m === 'decode' ? 'Invalid Base64 input' : 'Encoding error')
             setOutput('')
         }
     }
@@ -110,7 +109,9 @@ export default function Base64EncoderDecoder() {
                 <CardContent className="pt-6">
                     <div className="mb-2 flex items-center justify-between">
                         <span className="text-sm font-medium">
-                            {mode === 'encode' ? 'Base64 Output' : 'Decoded Text'}
+                            {mode === 'encode'
+                                ? 'Base64 Output'
+                                : 'Decoded Text'}
                         </span>
                         <TooltipProvider>
                             <Tooltip>
@@ -136,7 +137,7 @@ export default function Base64EncoderDecoder() {
                             </Tooltip>
                         </TooltipProvider>
                     </div>
-                    <div className="bg-secondary/20 min-h-[120px] break-all rounded-md p-3 font-mono text-sm">
+                    <div className="bg-secondary/20 min-h-[120px] rounded-md p-3 font-mono text-sm break-all">
                         {output || (
                             <span className="text-muted-foreground">
                                 Output will appear here...
@@ -153,7 +154,9 @@ export default function Base64EncoderDecoder() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">What is Base64?</h3>
+                            <h3 className="mb-2 font-medium">
+                                What is Base64?
+                            </h3>
                             <p className="text-muted-foreground text-sm">
                                 Base64 encodes binary data as printable ASCII
                                 text using 64 characters (A–Z, a–z, 0–9, +, /).
@@ -175,14 +178,12 @@ export default function Base64EncoderDecoder() {
                     </Card>
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Security Note
-                            </h3>
+                            <h3 className="mb-2 font-medium">Security Note</h3>
                             <p className="text-muted-foreground text-sm">
                                 Base64 is{' '}
                                 <strong>encoding, not encryption</strong>.
-                                Anyone can decode it instantly — never use it
-                                to protect sensitive data.
+                                Anyone can decode it instantly — never use it to
+                                protect sensitive data.
                             </p>
                         </CardContent>
                     </Card>
@@ -197,7 +198,8 @@ export default function Base64EncoderDecoder() {
                                     <strong>URL-safe:</strong> uses - and _
                                 </li>
                                 <li>
-                                    <strong>No padding:</strong> omits trailing =
+                                    <strong>No padding:</strong> omits trailing
+                                    =
                                 </li>
                             </ul>
                         </CardContent>

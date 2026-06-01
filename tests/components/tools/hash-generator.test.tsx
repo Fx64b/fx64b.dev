@@ -1,51 +1,52 @@
+import { md5, sha } from '@/lib/hash-utils'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import HashGenerator from '@/components/tools/hash-generator'
-import { md5, sha } from '@/lib/hash-utils'
 
 // ─── Pure unit tests for md5() ────────────────────────────────────────────────
 // Test vectors from RFC 1321 §A.5.  These are the canonical expected outputs
 // that any correct MD5 implementation must produce.
 
-const MD5_RFC_VECTORS: Array<{ input: string; digest: string; label: string }> = [
-    {
-        input: '',
-        digest: 'd41d8cd98f00b204e9800998ecf8427e',
-        label: 'empty string',
-    },
-    {
-        input: 'a',
-        digest: '0cc175b9c0f1b6a831c399e269772661',
-        label: '"a"',
-    },
-    {
-        input: 'abc',
-        digest: '900150983cd24fb0d6963f7d28e17f72',
-        label: '"abc"',
-    },
-    {
-        input: 'message digest',
-        digest: 'f96b697d7cb7938d525a2f31aaf161d0',
-        label: '"message digest"',
-    },
-    {
-        input: 'abcdefghijklmnopqrstuvwxyz',
-        digest: 'c3fcd3d76192e4007dfb496cca67e13b',
-        label: 'lowercase alphabet',
-    },
-    {
-        input: 'The quick brown fox jumps over the lazy dog',
-        digest: '9e107d9d372bb6826bd81d3542a419d6',
-        label: 'quick brown fox',
-    },
-    {
-        input: 'The quick brown fox jumps over the lazy dog.',
-        digest: 'e4d909c290d0fb1ca068ffaddf22cbd0',
-        label: 'quick brown fox with trailing period',
-    },
-]
+const MD5_RFC_VECTORS: Array<{ input: string; digest: string; label: string }> =
+    [
+        {
+            input: '',
+            digest: 'd41d8cd98f00b204e9800998ecf8427e',
+            label: 'empty string',
+        },
+        {
+            input: 'a',
+            digest: '0cc175b9c0f1b6a831c399e269772661',
+            label: '"a"',
+        },
+        {
+            input: 'abc',
+            digest: '900150983cd24fb0d6963f7d28e17f72',
+            label: '"abc"',
+        },
+        {
+            input: 'message digest',
+            digest: 'f96b697d7cb7938d525a2f31aaf161d0',
+            label: '"message digest"',
+        },
+        {
+            input: 'abcdefghijklmnopqrstuvwxyz',
+            digest: 'c3fcd3d76192e4007dfb496cca67e13b',
+            label: 'lowercase alphabet',
+        },
+        {
+            input: 'The quick brown fox jumps over the lazy dog',
+            digest: '9e107d9d372bb6826bd81d3542a419d6',
+            label: 'quick brown fox',
+        },
+        {
+            input: 'The quick brown fox jumps over the lazy dog.',
+            digest: 'e4d909c290d0fb1ca068ffaddf22cbd0',
+            label: 'quick brown fox with trailing period',
+        },
+    ]
 
 // SHA vectors: happy-dom's crypto.subtle may not match NIST exactly, so we
 // verify format (length, charset, determinism) rather than exact byte values.
@@ -137,7 +138,9 @@ describe('HashGenerator component', () => {
             render(<HashGenerator />)
             // getAllByText because algorithm names also appear in the educational section
             for (const name of ['MD5', 'SHA-1', 'SHA-256', 'SHA-512']) {
-                expect(screen.getAllByText(name).length).toBeGreaterThanOrEqual(1)
+                expect(screen.getAllByText(name).length).toBeGreaterThanOrEqual(
+                    1
+                )
             }
         })
 
@@ -148,10 +151,13 @@ describe('HashGenerator component', () => {
 
         it('copy buttons are disabled when input is empty', () => {
             render(<HashGenerator />)
-            for (const name of ['MD5', 'SHA-1', 'SHA-256', 'SHA-512'] as const) {
-                expect(
-                    screen.getByTestId(`copy-${name}`)
-                ).toBeDisabled()
+            for (const name of [
+                'MD5',
+                'SHA-1',
+                'SHA-256',
+                'SHA-512',
+            ] as const) {
+                expect(screen.getByTestId(`copy-${name}`)).toBeDisabled()
             }
         })
     })
@@ -162,9 +168,9 @@ describe('HashGenerator component', () => {
             render(<HashGenerator />)
             await user.type(screen.getByRole('textbox'), 'abc')
             await waitFor(() => {
-                expect(
-                    screen.getByTestId('hash-MD5').textContent
-                ).toBe('900150983cd24fb0d6963f7d28e17f72')
+                expect(screen.getByTestId('hash-MD5').textContent).toBe(
+                    '900150983cd24fb0d6963f7d28e17f72'
+                )
             })
         })
 
@@ -173,7 +179,8 @@ describe('HashGenerator component', () => {
             render(<HashGenerator />)
             await user.type(screen.getByRole('textbox'), 'hello')
             await waitFor(() => {
-                const text = screen.getByTestId('hash-SHA-256').textContent ?? ''
+                const text =
+                    screen.getByTestId('hash-SHA-256').textContent ?? ''
                 expect(text).toHaveLength(64)
                 expect(text).toMatch(/^[0-9a-f]+$/)
             })
@@ -184,7 +191,8 @@ describe('HashGenerator component', () => {
             render(<HashGenerator />)
             await user.type(screen.getByRole('textbox'), 'hello')
             await waitFor(() => {
-                const text = screen.getByTestId('hash-SHA-512').textContent ?? ''
+                const text =
+                    screen.getByTestId('hash-SHA-512').textContent ?? ''
                 expect(text).toHaveLength(128)
             })
         })
@@ -207,9 +215,7 @@ describe('HashGenerator component', () => {
                 expect(screen.getByTestId('hash-MD5').textContent).not.toBe('—')
             )
             await user.clear(screen.getByRole('textbox'))
-            await waitFor(() =>
-                expect(screen.getAllByText('—').length).toBe(4)
-            )
+            await waitFor(() => expect(screen.getAllByText('—').length).toBe(4))
         })
     })
 
@@ -231,7 +237,9 @@ describe('HashGenerator component', () => {
             render(<HashGenerator />)
             await user.type(screen.getByRole('textbox'), 'abc')
             await waitFor(() =>
-                expect(screen.getByTestId('hash-MD5').textContent).toHaveLength(32)
+                expect(screen.getByTestId('hash-MD5').textContent).toHaveLength(
+                    32
+                )
             )
             await user.click(screen.getByTestId('copy-MD5'))
             expect(writeTextSpy).toHaveBeenCalledWith(

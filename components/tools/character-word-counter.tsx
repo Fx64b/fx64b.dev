@@ -12,8 +12,8 @@ import {
     Mic,
     Type,
 } from 'lucide-react'
-
 import type { LucideIcon } from 'lucide-react'
+
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 

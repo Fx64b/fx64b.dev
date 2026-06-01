@@ -57,7 +57,9 @@ describe('ColorConverter', () => {
             render(<ColorConverter />)
             await setColorInput(user, '#ff0000')
             await waitFor(() =>
-                expect(screen.getByText('hsl(0, 100%, 50%)')).toBeInTheDocument()
+                expect(
+                    screen.getByText('hsl(0, 100%, 50%)')
+                ).toBeInTheDocument()
             )
         })
 
@@ -75,7 +77,9 @@ describe('ColorConverter', () => {
             render(<ColorConverter />)
             await setColorInput(user, '#ffffff')
             await waitFor(() =>
-                expect(screen.getByText('rgb(255, 255, 255)')).toBeInTheDocument()
+                expect(
+                    screen.getByText('rgb(255, 255, 255)')
+                ).toBeInTheDocument()
             )
         })
 

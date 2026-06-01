@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowDown, Check, Copy } from 'lucide-react'
+
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -136,7 +137,7 @@ export default function UrlEncoderDecoder() {
                             </Tooltip>
                         </TooltipProvider>
                     </div>
-                    <div className="bg-secondary/20 min-h-[100px] break-all rounded-md p-3 font-mono text-sm">
+                    <div className="bg-secondary/20 min-h-[100px] rounded-md p-3 font-mono text-sm break-all">
                         {output || (
                             <span className="text-muted-foreground">
                                 Output will appear here...
@@ -160,8 +161,8 @@ export default function UrlEncoderDecoder() {
                             </h3>
                             <p className="text-muted-foreground text-sm">
                                 URL encoding (percent-encoding) replaces unsafe
-                                characters with a <code>%</code> followed by
-                                two hexadecimal digits representing the
+                                characters with a <code>%</code> followed by two
+                                hexadecimal digits representing the
                                 character&apos;s byte value. For example, a
                                 space becomes <code>%20</code>.
                             </p>
@@ -189,9 +190,9 @@ export default function UrlEncoderDecoder() {
                             </h3>
                             <p className="text-muted-foreground text-sm">
                                 URL encoding is often used in web attacks such
-                                as bypassing WAF rules, path traversal
-                                (<code>%2F..%2F</code>), and injecting
-                                characters that would otherwise be filtered.
+                                as bypassing WAF rules, path traversal (
+                                <code>%2F..%2F</code>), and injecting characters
+                                that would otherwise be filtered.
                                 Double-encoding (<code>%2520</code>) can bypass
                                 some decoders.
                             </p>
@@ -199,12 +200,13 @@ export default function UrlEncoderDecoder() {
                     </Card>
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">Safe Characters</h3>
+                            <h3 className="mb-2 font-medium">
+                                Safe Characters
+                            </h3>
                             <p className="text-muted-foreground text-sm">
-                                Characters that do{' '}
-                                <strong>not</strong> need encoding: A–Z, a–z,
-                                0–9 and <code>- _ . ~</code>. All others are
-                                percent-encoded.
+                                Characters that do <strong>not</strong> need
+                                encoding: A–Z, a–z, 0–9 and <code>- _ . ~</code>
+                                . All others are percent-encoded.
                             </p>
                         </CardContent>
                     </Card>

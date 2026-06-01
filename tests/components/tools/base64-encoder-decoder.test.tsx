@@ -6,11 +6,11 @@ import Base64EncoderDecoder from '@/components/tools/base64-encoder-decoder'
 
 // Known Base64 encode/decode pairs (RFC 4648 §10 test vectors)
 const ENCODE_VECTORS: Array<{ plain: string; encoded: string }> = [
-    { plain: 'f',       encoded: 'Zg==' },
-    { plain: 'fo',      encoded: 'Zm8=' },
-    { plain: 'foo',     encoded: 'Zm9v' },
-    { plain: 'foobar',  encoded: 'Zm9vYmFy' },
-    { plain: 'hello',   encoded: 'aGVsbG8=' },
+    { plain: 'f', encoded: 'Zg==' },
+    { plain: 'fo', encoded: 'Zm8=' },
+    { plain: 'foo', encoded: 'Zm9v' },
+    { plain: 'foobar', encoded: 'Zm9vYmFy' },
+    { plain: 'hello', encoded: 'aGVsbG8=' },
     { plain: 'Hello, World!', encoded: 'SGVsbG8sIFdvcmxkIQ==' },
 ]
 
@@ -36,8 +36,12 @@ describe('Base64EncoderDecoder', () => {
             render(<Base64EncoderDecoder />)
             expect(screen.getByRole('textbox')).toHaveValue('')
             // Encode button should appear active (default variant styling)
-            expect(screen.getByRole('button', { name: 'Encode' })).toBeInTheDocument()
-            expect(screen.getByRole('button', { name: 'Decode' })).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Encode' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Decode' })
+            ).toBeInTheDocument()
         })
 
         it('shows the output placeholder when input is empty', () => {
@@ -127,7 +131,9 @@ describe('Base64EncoderDecoder', () => {
             await clickMode(user, 'Decode')
             await setInput(user, '!!!!')
             await waitFor(() =>
-                expect(screen.getByText('Invalid Base64 input')).toBeInTheDocument()
+                expect(
+                    screen.getByText('Invalid Base64 input')
+                ).toBeInTheDocument()
             )
             await user.clear(screen.getByRole('textbox'))
             await waitFor(() =>
