@@ -33,6 +33,32 @@ pnpm build
 3. Import and register the component in `app/tools/components/DynamicToolLoader.tsx`
 4. **Write tests** — add `tests/components/tools/<slug>.test.tsx` covering the core behaviours
 
+### Tool metadata (`data/toolsData.ts`)
+
+Each `Tool` (see `types/tool.d.ts`) supports search and SEO fields. For new
+tools, fill in the optional fields — they feed search relevance, structured
+data, and discoverability:
+
+- `keywords` — search-only synonyms/aliases (e.g. `b64`, `epoch`); not shown in the UI.
+- `summary` — one-to-two sentence blurb used for the meta description and tool header.
+- `faq` — Q&A pairs rendered on the page **and** emitted as `FAQPage` JSON-LD.
+- `useCases` — "When to use" bullet points.
+- `relatedSlugs` — slugs for the Related tools section (internal linking).
+- `addedAt` / `updatedAt` — ISO dates driving the sitemap `lastModified`.
+
+`category` may be one of `conversion`, `encoding`, `formatting`, `generators`,
+`utilities`, or `security`.
+
+### Search & SEO infrastructure
+
+- Catalog search/filtering lives in `app/tools/components/ToolsExplorer.tsx`
+  (text + tag + category, URL-synced). Scoring is in `scoreTools()` in
+  `data/toolsData.ts` — keep it dependency-free.
+- Per-tool pages emit `WebApplication`, `BreadcrumbList`, and `FAQPage` JSON-LD,
+  and dynamic OG images via `app/tools/[slug]/opengraph-image.tsx`.
+- `app/robots.ts`, `app/sitemap.ts`, and `app/llms.txt/route.ts` are generated
+  from `toolsData` — no manual edits needed when adding a tool.
+
 ## Testing
 
 Tests live in `tests/` and mirror the `components/` structure. Run them with `pnpm test`.

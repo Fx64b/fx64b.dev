@@ -42,7 +42,8 @@ export default async function sitemap({
         ...tools.map((tool) => ({
             type: 'tool' as const,
             slug: tool.slug,
-            lastModified: new Date().toISOString(),
+            lastModified:
+                tool.updatedAt || tool.addedAt || new Date().toISOString(),
         })),
         {
             type: 'projects' as const,
@@ -74,7 +75,7 @@ export default async function sitemap({
             case 'tool': {
                 return {
                     url: `${BASE_URL}/tools/${item.slug}`,
-                    lastModified: new Date().toISOString(),
+                    lastModified: item.lastModified,
                     changeFrequency: 'monthly' as const,
                     priority: 0.6,
                 }

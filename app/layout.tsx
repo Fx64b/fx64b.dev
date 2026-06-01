@@ -11,6 +11,7 @@ import { Header } from '@/components/header'
 import './globals.css'
 
 export const metadata: Metadata = {
+    metadataBase: new URL('https://fx64b.dev'),
     title: 'Fx64b - Software Engineer & Security Enthusiast',
     description:
         'Software engineer from Switzerland specializing in React, Next.js, TypeScript, and Go.',
