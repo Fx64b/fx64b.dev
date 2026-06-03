@@ -5,6 +5,7 @@ export type ToolCategory =
     | 'generators'
     | 'utilities'
     | 'security'
+    | 'fun'
 
 export interface ToolFaq {
     q: string

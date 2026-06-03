@@ -56,6 +56,18 @@ const TOOLS: Record<string, React.ComponentType> = {
     'qr-code-generator': dynamic(
         () => import('@/components/tools/qr-code-generator')
     ),
+    'bac-calculator': dynamic(
+        () => import('@/components/tools/bac-calculator')
+    ),
+    'standard-drinks-converter': dynamic(
+        () => import('@/components/tools/standard-drinks-converter')
+    ),
+    'decision-maker': dynamic(
+        () => import('@/components/tools/decision-maker')
+    ),
+    'age-in-everything': dynamic(
+        () => import('@/components/tools/age-in-everything')
+    ),
 }
 
 export default function DynamicToolLoader({ slug }: { slug: string }) {

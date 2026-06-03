@@ -7,6 +7,7 @@ import {
     ArrowLeftRight,
     ArrowRight,
     Lock,
+    PartyPopper,
     Search,
     Shield,
     Sparkles,
@@ -35,6 +36,7 @@ const CATEGORY_META: Record<
     generators: { label: 'Generators', icon: Zap },
     utilities: { label: 'Utilities', icon: Wrench },
     security: { label: 'Security & CTF', icon: Shield },
+    fun: { label: 'Fun & Curiosities', icon: PartyPopper },
 }
 
 const CATEGORY_ORDER: ToolCategory[] = [
@@ -44,6 +46,7 @@ const CATEGORY_ORDER: ToolCategory[] = [
     'generators',
     'utilities',
     'security',
+    'fun',
 ]
 
 interface ToolsExplorerProps {

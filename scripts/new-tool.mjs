@@ -21,6 +21,7 @@ const CATEGORIES = [
     'generators',
     'utilities',
     'security',
+    'fun',
 ]
 
 const [slug, title, category = 'utilities'] = process.argv.slice(2)

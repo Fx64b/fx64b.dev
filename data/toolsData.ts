@@ -557,6 +557,153 @@ const toolsData: Tool[] = [
         addedAt: '2025-06-01',
         updatedAt: '2025-06-01',
     },
+    {
+        slug: 'bac-calculator',
+        title: 'Blood Alcohol (BAC) Calculator',
+        description:
+            'Estimate your blood alcohol content from drinks, body weight and time',
+        category: 'fun',
+        tags: ['alcohol', 'bac', 'drinks', 'health', 'calculator'],
+        popular: true,
+        keywords: [
+            'blood alcohol',
+            'promille',
+            'per mille',
+            'widmark',
+            'breathalyzer',
+            'drunk',
+        ],
+        summary:
+            'Estimate your blood alcohol content (BAC) using the Widmark formula from the drinks you had, your body weight, sex and time elapsed.',
+        faq: [
+            {
+                q: 'How accurate is this BAC estimate?',
+                a: 'It is a rough approximation. Real blood alcohol depends on metabolism, food, hydration, medication and more. Never use it to decide whether to drive.',
+            },
+            {
+                q: 'What formula does it use?',
+                a: 'The Widmark formula, with distribution ratios of about 0.68 for men and 0.55 for women and an elimination rate of roughly 0.15 ‰ per hour.',
+            },
+            {
+                q: 'What is the difference between ‰ and % BAC?',
+                a: 'Per mille (‰) is grams of alcohol per litre of blood; percent BAC is grams per 100 ml. 1.0 ‰ equals 0.10 % BAC.',
+            },
+        ],
+        relatedSlugs: ['standard-drinks-converter', 'age-in-everything'],
+        useCases: [
+            'Curiosity about how drinks add up',
+            'Understanding the Widmark formula',
+            'Comparing impairment levels (educational only)',
+        ],
+        addedAt: '2025-06-03',
+        updatedAt: '2025-06-03',
+    },
+    {
+        slug: 'standard-drinks-converter',
+        title: 'Standard Drinks Converter',
+        description:
+            'Convert a drink’s volume and ABV into grams of alcohol and standard drinks',
+        category: 'fun',
+        tags: ['alcohol', 'drinks', 'units', 'abv', 'converter'],
+        keywords: [
+            'standard drink',
+            'alcohol units',
+            'grams of alcohol',
+            'abv',
+            'units of alcohol',
+        ],
+        summary:
+            'Convert any drink’s volume and ABV into grams of pure alcohol and the number of standard drinks across US, UK, EU, Australian and Japanese standards.',
+        faq: [
+            {
+                q: 'What is a standard drink?',
+                a: 'A reference amount of pure alcohol. It varies by country — 14 g in the US, 8 g (one unit) in the UK, 10 g in the EU and Australia.',
+            },
+            {
+                q: 'How is grams of alcohol calculated?',
+                a: 'Volume (ml) × ABV (%) ÷ 100 × 0.789, where 0.789 g/ml is the density of ethanol.',
+            },
+        ],
+        relatedSlugs: ['bac-calculator', 'byte-converter'],
+        useCases: [
+            'Comparing drink strengths across countries',
+            'Tracking alcohol intake',
+            'Understanding what a “unit” means',
+        ],
+        addedAt: '2025-06-03',
+        updatedAt: '2025-06-03',
+    },
+    {
+        slug: 'decision-maker',
+        title: 'Decision Maker',
+        description:
+            'Flip a coin, roll dice, ask a Magic 8-Ball or pick a random option',
+        category: 'fun',
+        tags: ['random', 'coin', 'dice', 'picker', 'decision'],
+        popular: true,
+        keywords: [
+            'coin flip',
+            'dice roller',
+            'magic 8 ball',
+            'random choice',
+            'yes or no',
+        ],
+        summary:
+            'Can’t decide? Flip a coin, roll any number of dice, consult a Magic 8-Ball, or let it pick a random option from your list.',
+        faq: [
+            {
+                q: 'Is the outcome truly random?',
+                a: 'It uses the browser’s random number generator, which is more than random enough for settling everyday choices.',
+            },
+            {
+                q: 'Can I roll non-standard dice?',
+                a: 'Yes. Set any number of dice and any number of sides, from coins to D20s and beyond.',
+            },
+        ],
+        relatedSlugs: ['uuid-generator', 'age-in-everything'],
+        useCases: [
+            'Settling friendly arguments',
+            'Tabletop and party games',
+            'Picking a winner or a restaurant',
+        ],
+        addedAt: '2025-06-03',
+        updatedAt: '2025-06-03',
+    },
+    {
+        slug: 'age-in-everything',
+        title: 'Age in Everything',
+        description:
+            'See your age in days, hours, heartbeats and on other planets',
+        category: 'fun',
+        tags: ['age', 'date', 'birthday', 'time', 'planets'],
+        keywords: [
+            'age calculator',
+            'age in days',
+            'age on mars',
+            'heartbeats',
+            'how old am i',
+        ],
+        summary:
+            'Enter your birthday to see your age in years, weeks, days, hours, heartbeats and breaths — plus how old you’d be on Mars, Jupiter and beyond.',
+        faq: [
+            {
+                q: 'How is my age on other planets calculated?',
+                a: 'Your age in Earth years is divided by each planet’s orbital period (its year length) in Earth years.',
+            },
+            {
+                q: 'Are the heartbeat and breath counts exact?',
+                a: 'No, they are estimates based on averages of about 80 heartbeats and 16 breaths per minute.',
+            },
+        ],
+        relatedSlugs: ['timestamp-converter', 'decision-maker'],
+        useCases: [
+            'Fun birthday facts',
+            'Curiosity about big numbers',
+            'Comparing your age across the solar system',
+        ],
+        addedAt: '2025-06-03',
+        updatedAt: '2025-06-03',
+    },
 ]
 
 export default toolsData

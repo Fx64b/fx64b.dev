@@ -53,7 +53,7 @@ data, and discoverability:
 - `addedAt` / `updatedAt` — ISO dates driving the sitemap `lastModified`.
 
 `category` may be one of `conversion`, `encoding`, `formatting`, `generators`,
-`utilities`, or `security`.
+`utilities`, `security`, or `fun`.
 
 ### Search & SEO infrastructure
 

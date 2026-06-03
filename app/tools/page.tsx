@@ -17,6 +17,7 @@ const VALID_CATEGORIES: ToolCategory[] = [
     'generators',
     'utilities',
     'security',
+    'fun',
 ]
 
 export const metadata: Metadata = {
