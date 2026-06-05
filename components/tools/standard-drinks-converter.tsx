@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react'
 
+import { NumberInput } from '@/components/tools/number-input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 
 const ETHANOL_DENSITY = 0.789
 
@@ -43,16 +43,11 @@ export default function StandardDrinksConverter() {
                             >
                                 Volume (ml)
                             </label>
-                            <Input
+                            <NumberInput
                                 id="sd-volume"
-                                type="number"
                                 min={0}
                                 value={volume}
-                                onChange={(e) =>
-                                    setVolume(
-                                        Math.max(Number(e.target.value), 0)
-                                    )
-                                }
+                                onValueChange={setVolume}
                                 aria-label="Volume (ml)"
                             />
                         </div>
@@ -63,16 +58,13 @@ export default function StandardDrinksConverter() {
                             >
                                 Alcohol by volume (%)
                             </label>
-                            <Input
+                            <NumberInput
                                 id="sd-abv"
-                                type="number"
                                 min={0}
                                 max={100}
                                 step={0.1}
                                 value={abv}
-                                onChange={(e) =>
-                                    setAbv(Math.max(Number(e.target.value), 0))
-                                }
+                                onValueChange={setAbv}
                                 aria-label="Alcohol by volume (%)"
                             />
                         </div>
@@ -96,7 +88,7 @@ export default function StandardDrinksConverter() {
             </Card>
 
             <Card>
-                <CardContent className="pt-6">
+                <CardContent className="pt-6" role="status" aria-live="polite">
                     <span className="text-muted-foreground text-sm">
                         Pure alcohol content
                     </span>

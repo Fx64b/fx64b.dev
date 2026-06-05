@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 
+import { NumberInput } from '@/components/tools/number-input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
 type Mode = 'coin' | 'dice' | '8ball' | 'picker'
@@ -99,15 +99,12 @@ export default function DecisionMaker() {
                                 >
                                     How many dice
                                 </label>
-                                <Input
+                                <NumberInput
                                     id="dice-count"
-                                    type="number"
                                     min={1}
                                     max={100}
                                     value={diceCount}
-                                    onChange={(e) =>
-                                        setDiceCount(Number(e.target.value))
-                                    }
+                                    onValueChange={setDiceCount}
                                     aria-label="How many dice"
                                     className="w-24"
                                 />
@@ -119,15 +116,12 @@ export default function DecisionMaker() {
                                 >
                                     Sides
                                 </label>
-                                <Input
+                                <NumberInput
                                     id="dice-sides"
-                                    type="number"
                                     min={2}
                                     max={1000}
                                     value={diceSides}
-                                    onChange={(e) =>
-                                        setDiceSides(Number(e.target.value))
-                                    }
+                                    onValueChange={setDiceSides}
                                     aria-label="Sides"
                                     className="w-24"
                                 />

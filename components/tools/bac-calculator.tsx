@@ -4,8 +4,8 @@ import { AlertTriangle } from 'lucide-react'
 
 import { useMemo, useState } from 'react'
 
+import { NumberInput } from '@/components/tools/number-input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 
 // Ethanol density (g/ml) and Widmark elimination rate (‰ per hour).
 const ETHANOL_DENSITY = 0.789
@@ -90,18 +90,14 @@ export default function BacCalculator() {
                             >
                                 {drink.label}
                             </label>
-                            <Input
+                            <NumberInput
                                 id={`drink-${drink.key}`}
-                                type="number"
                                 min={0}
                                 value={counts[drink.key]}
-                                onChange={(e) =>
+                                onValueChange={(n) =>
                                     setCounts((prev) => ({
                                         ...prev,
-                                        [drink.key]: Math.max(
-                                            Number(e.target.value),
-                                            0
-                                        ),
+                                        [drink.key]: n,
                                     }))
                                 }
                                 aria-label={drink.label}
@@ -121,12 +117,11 @@ export default function BacCalculator() {
                         >
                             Body weight (kg)
                         </label>
-                        <Input
+                        <NumberInput
                             id="bac-weight"
-                            type="number"
                             min={1}
                             value={weight}
-                            onChange={(e) => setWeight(Number(e.target.value))}
+                            onValueChange={setWeight}
                             aria-label="Body weight (kg)"
                         />
                     </div>
@@ -155,13 +150,12 @@ export default function BacCalculator() {
                         >
                             Hours since first drink
                         </label>
-                        <Input
+                        <NumberInput
                             id="bac-hours"
-                            type="number"
                             min={0}
                             step={0.5}
                             value={hours}
-                            onChange={(e) => setHours(Number(e.target.value))}
+                            onValueChange={setHours}
                             aria-label="Hours since first drink"
                         />
                     </div>
@@ -169,7 +163,7 @@ export default function BacCalculator() {
             </Card>
 
             <Card>
-                <CardContent className="pt-6">
+                <CardContent className="pt-6" role="status" aria-live="polite">
                     <span className="text-muted-foreground text-sm">
                         Estimated blood alcohol content
                     </span>

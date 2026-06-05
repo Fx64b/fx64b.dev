@@ -5,9 +5,9 @@ import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { CopyButton } from '@/components/tools/copy-button'
+import { NumberInput } from '@/components/tools/number-input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 
 const NIL_UUID = '00000000-0000-0000-0000-000000000000'
 
@@ -67,15 +67,13 @@ export default function UuidGenerator() {
                             >
                                 How many
                             </label>
-                            <Input
+                            <NumberInput
                                 id="uuid-count"
-                                type="number"
                                 min={1}
                                 max={100}
                                 value={count}
-                                onChange={(e) =>
-                                    setCount(Number(e.target.value))
-                                }
+                                onValueChange={setCount}
+                                aria-label="How many"
                                 className="w-28"
                             />
                         </div>

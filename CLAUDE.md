@@ -65,6 +65,53 @@ data, and discoverability:
 - `app/robots.ts`, `app/sitemap.ts`, and `app/llms.txt/route.ts` are generated
   from `toolsData` — no manual edits needed when adding a tool.
 
+## Tool UI/UX standard
+
+Every tool must follow these rules so the catalog feels consistent and is
+genuinely pleasant to use. Treat them as acceptance criteria.
+
+**Layout & structure**
+
+- Wrap the tool in `<div className="mx-auto max-w-3xl">` (add `space-y-4` when
+  stacking cards). Inputs and outputs live in `Card` / `CardContent`.
+- Results render in a `bg-secondary/20` rounded container. Monospace
+  (`font-mono`) for code, hashes, IDs and other machine output.
+- Output is **live**: recompute on input change via `useMemo`/`useEffect`. Use
+  an explicit action button only when the result is an intentional event
+  (generate, roll, format) or the computation is expensive.
+
+**Inputs**
+
+- Every input has an associated `<label htmlFor>` or an `aria-label`. Query by
+  that accessible name in tests.
+- **Numbers: always use `components/tools/number-input.tsx` (`NumberInput`),
+  never a raw `type="number"` input.** It keeps a local text buffer so the
+  field can be cleared, never snaps a forced `0` back in, avoids leading-zero
+  bugs, selects-all on focus, and clamps to `min`/`max` only in the value it
+  emits. Pass `value`/`onValueChange` plus optional `min`/`max`/`step`.
+- Never clamp or coerce a controlled input's value on every keystroke — it
+  traps the user (e.g. you can't delete the last digit). Clamp the derived
+  number, not the field.
+- Autofocus the primary input when a tool has one obvious entry point
+  (`useEffect` + `ref`), as the encoder/decoder tools do.
+
+**Output & feedback**
+
+- Copy-to-clipboard uses `components/tools/copy-button.tsx` (`CopyButton`);
+  don't hand-roll copy buttons.
+- Show a placeholder ("Output will appear here…") for empty output and a
+  distinct empty state for "no results".
+- Errors render inline as `text-destructive` text near the input — never throw
+  or leave the user guessing.
+- Wrap dynamically-updating result summaries in `role="status"` +
+  `aria-live="polite"` so screen readers announce changes.
+
+**Safety**
+
+- Tools that could be misread as authoritative (health, security) carry a
+  visible disclaimer (see `bac-calculator.tsx`). Everything runs client-side —
+  never send user input to a server.
+
 ## Testing
 
 Tests live in `tests/` and mirror the `components/` structure. Run them with `pnpm test`.
