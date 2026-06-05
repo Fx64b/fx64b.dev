@@ -1,18 +1,14 @@
 'use client'
 
-import { ArrowDown, Check, Copy } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
+
 import { useEffect, useRef, useState } from 'react'
 
+import { CopyButton } from '@/components/tools/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 type Mode = 'encode' | 'decode'
 
@@ -21,19 +17,11 @@ export default function UrlEncoderDecoder() {
     const [output, setOutput] = useState('')
     const [mode, setMode] = useState<Mode>('encode')
     const [error, setError] = useState('')
-    const [copied, setCopied] = useState(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(false), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
 
     useEffect(() => {
         convert(input, mode)
@@ -54,13 +42,6 @@ export default function UrlEncoderDecoder() {
         } catch {
             setError('Invalid input for decoding')
             setOutput('')
-        }
-    }
-
-    const copyOutput = () => {
-        if (output) {
-            navigator.clipboard.writeText(output)
-            setCopied(true)
         }
     }
 
@@ -112,31 +93,9 @@ export default function UrlEncoderDecoder() {
                                 ? 'Encoded Output'
                                 : 'Decoded Output'}
                         </span>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7"
-                                        onClick={copyOutput}
-                                        disabled={!output}
-                                    >
-                                        {copied ? (
-                                            <Check className="h-3.5 w-3.5" />
-                                        ) : (
-                                            <Copy className="h-3.5 w-3.5" />
-                                        )}
-                                        <span className="sr-only">Copy</span>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {copied ? 'Copied!' : 'Copy'}
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                        <CopyButton value={output} />
                     </div>
-                    <div className="bg-secondary/20 min-h-[100px] break-all rounded-md p-3 font-mono text-sm">
+                    <div className="bg-secondary/20 min-h-[100px] rounded-md p-3 font-mono text-sm break-all">
                         {output || (
                             <span className="text-muted-foreground">
                                 Output will appear here...
@@ -160,8 +119,8 @@ export default function UrlEncoderDecoder() {
                             </h3>
                             <p className="text-muted-foreground text-sm">
                                 URL encoding (percent-encoding) replaces unsafe
-                                characters with a <code>%</code> followed by
-                                two hexadecimal digits representing the
+                                characters with a <code>%</code> followed by two
+                                hexadecimal digits representing the
                                 character&apos;s byte value. For example, a
                                 space becomes <code>%20</code>.
                             </p>
@@ -189,9 +148,9 @@ export default function UrlEncoderDecoder() {
                             </h3>
                             <p className="text-muted-foreground text-sm">
                                 URL encoding is often used in web attacks such
-                                as bypassing WAF rules, path traversal
-                                (<code>%2F..%2F</code>), and injecting
-                                characters that would otherwise be filtered.
+                                as bypassing WAF rules, path traversal (
+                                <code>%2F..%2F</code>), and injecting characters
+                                that would otherwise be filtered.
                                 Double-encoding (<code>%2520</code>) can bypass
                                 some decoders.
                             </p>
@@ -199,12 +158,13 @@ export default function UrlEncoderDecoder() {
                     </Card>
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">Safe Characters</h3>
+                            <h3 className="mb-2 font-medium">
+                                Safe Characters
+                            </h3>
                             <p className="text-muted-foreground text-sm">
-                                Characters that do{' '}
-                                <strong>not</strong> need encoding: A–Z, a–z,
-                                0–9 and <code>- _ . ~</code>. All others are
-                                percent-encoded.
+                                Characters that do <strong>not</strong> need
+                                encoding: A–Z, a–z, 0–9 and <code>- _ . ~</code>
+                                . All others are percent-encoded.
                             </p>
                         </CardContent>
                     </Card>

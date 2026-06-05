@@ -1,31 +1,73 @@
 'use client'
 
-import Base64EncoderDecoder from '@/components/tools/base64-encoder-decoder'
-import ByteConverter from '@/components/tools/byte-converter'
-import CharacterWordCounter from '@/components/tools/character-word-counter'
-import ColorConverter from '@/components/tools/color-converter'
-import HashGenerator from '@/components/tools/hash-generator'
-import HourDecimalConverter from '@/components/tools/hour-decimal-converter'
-import IpSubnetCalculator from '@/components/tools/ip-subnet-calculator'
-import LoremIpsumGenerator from '@/components/tools/lorem-ipsum-generator'
-import ReverseShellGenerator from '@/components/tools/reverse-shell-generator'
-import TextCaseConverter from '@/components/tools/text-case-converter'
-import UrlEncoderDecoder from '@/components/tools/url-encoder-decoder'
-
 import type React from 'react'
 
+import dynamic from 'next/dynamic'
+
+// Lazily load each tool so a tool page only ships its own bundle.
 const TOOLS: Record<string, React.ComponentType> = {
-    'byte-converter': ByteConverter,
-    'text-case-converter': TextCaseConverter,
-    'color-converter': ColorConverter,
-    'hour-decimal-converter': HourDecimalConverter,
-    'character-word-counter': CharacterWordCounter,
-    'base64-encoder-decoder': Base64EncoderDecoder,
-    'hash-generator': HashGenerator,
-    'url-encoder-decoder': UrlEncoderDecoder,
-    'ip-subnet-calculator': IpSubnetCalculator,
-    'reverse-shell-generator': ReverseShellGenerator,
-    'lorem-ipsum-generator': LoremIpsumGenerator,
+    'byte-converter': dynamic(
+        () => import('@/components/tools/byte-converter')
+    ),
+    'text-case-converter': dynamic(
+        () => import('@/components/tools/text-case-converter')
+    ),
+    'color-converter': dynamic(
+        () => import('@/components/tools/color-converter')
+    ),
+    'hour-decimal-converter': dynamic(
+        () => import('@/components/tools/hour-decimal-converter')
+    ),
+    'character-word-counter': dynamic(
+        () => import('@/components/tools/character-word-counter')
+    ),
+    'base64-encoder-decoder': dynamic(
+        () => import('@/components/tools/base64-encoder-decoder')
+    ),
+    'hash-generator': dynamic(
+        () => import('@/components/tools/hash-generator')
+    ),
+    'url-encoder-decoder': dynamic(
+        () => import('@/components/tools/url-encoder-decoder')
+    ),
+    'ip-subnet-calculator': dynamic(
+        () => import('@/components/tools/ip-subnet-calculator')
+    ),
+    'reverse-shell-generator': dynamic(
+        () => import('@/components/tools/reverse-shell-generator')
+    ),
+    'lorem-ipsum-generator': dynamic(
+        () => import('@/components/tools/lorem-ipsum-generator')
+    ),
+    'jwt-decoder': dynamic(() => import('@/components/tools/jwt-decoder')),
+    'uuid-generator': dynamic(
+        () => import('@/components/tools/uuid-generator')
+    ),
+    'json-formatter': dynamic(
+        () => import('@/components/tools/json-formatter')
+    ),
+    'timestamp-converter': dynamic(
+        () => import('@/components/tools/timestamp-converter')
+    ),
+    'number-base-converter': dynamic(
+        () => import('@/components/tools/number-base-converter')
+    ),
+    'regex-tester': dynamic(() => import('@/components/tools/regex-tester')),
+    'qr-code-generator': dynamic(
+        () => import('@/components/tools/qr-code-generator')
+    ),
+    'bac-calculator': dynamic(
+        () => import('@/components/tools/bac-calculator')
+    ),
+    'standard-drinks-converter': dynamic(
+        () => import('@/components/tools/standard-drinks-converter')
+    ),
+    'decision-maker': dynamic(
+        () => import('@/components/tools/decision-maker')
+    ),
+    'age-in-everything': dynamic(
+        () => import('@/components/tools/age-in-everything')
+    ),
 }
 
 export default function DynamicToolLoader({ slug }: { slug: string }) {

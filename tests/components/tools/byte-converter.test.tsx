@@ -19,7 +19,9 @@ describe('ByteConverter', () => {
         it('renders all six unit labels', () => {
             render(<ByteConverter />)
             for (const unit of ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB']) {
-                expect(screen.getAllByText(unit).length).toBeGreaterThanOrEqual(1)
+                expect(screen.getAllByText(unit).length).toBeGreaterThanOrEqual(
+                    1
+                )
             }
         })
 
@@ -67,9 +69,9 @@ describe('ByteConverter', () => {
         it('uses exponential notation for very small values (e.g. MB → TB)', async () => {
             render(<ByteConverter />)
             await waitFor(() => {
-                const titles = Array.from(document.querySelectorAll('[title]')).map(
-                    (el) => el.getAttribute('title') ?? ''
-                )
+                const titles = Array.from(
+                    document.querySelectorAll('[title]')
+                ).map((el) => el.getAttribute('title') ?? '')
                 expect(titles.some((t) => t.includes('e-'))).toBe(true)
             })
         })
@@ -111,7 +113,9 @@ describe('ByteConverter', () => {
             render(<ByteConverter />)
             await user.clear(screen.getByRole('textbox'))
             await waitFor(() => {
-                expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(5)
+                expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(
+                    5
+                )
             })
         })
 
@@ -121,7 +125,9 @@ describe('ByteConverter', () => {
             await user.clear(screen.getByRole('textbox'))
             await user.type(screen.getByRole('textbox'), 'xyz')
             await waitFor(() => {
-                expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(5)
+                expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(
+                    5
+                )
             })
         })
 
@@ -165,7 +171,9 @@ describe('ByteConverter', () => {
             const user = userEvent.setup()
             render(<ByteConverter />)
             await waitFor(() => {
-                expect(screen.getAllByTestId('copy-button').length).toBeGreaterThan(0)
+                expect(
+                    screen.getAllByTestId('copy-button').length
+                ).toBeGreaterThan(0)
             })
             await user.click(screen.getAllByTestId('copy-button')[0])
             expect(screen.getByTestId('check-icon')).toBeInTheDocument()

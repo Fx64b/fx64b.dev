@@ -100,7 +100,9 @@ describe('IpSubnetCalculator', () => {
                     const user = userEvent.setup()
                     await setCidr(user, v.cidr)
                     await waitFor(() =>
-                        expect(screen.getAllByText(v.network).length).toBeGreaterThan(0)
+                        expect(
+                            screen.getAllByText(v.network).length
+                        ).toBeGreaterThan(0)
                     )
                 })
 
@@ -109,7 +111,9 @@ describe('IpSubnetCalculator', () => {
                         const user = userEvent.setup()
                         await setCidr(user, v.cidr)
                         await waitFor(() =>
-                            expect(screen.getAllByText(v.broadcast!).length).toBeGreaterThan(0)
+                            expect(
+                                screen.getAllByText(v.broadcast!).length
+                            ).toBeGreaterThan(0)
                         )
                     })
                 }
@@ -119,7 +123,9 @@ describe('IpSubnetCalculator', () => {
                         const user = userEvent.setup()
                         await setCidr(user, v.cidr)
                         await waitFor(() =>
-                            expect(screen.getAllByText(v.mask!).length).toBeGreaterThan(0)
+                            expect(
+                                screen.getAllByText(v.mask!).length
+                            ).toBeGreaterThan(0)
                         )
                     })
                 }
@@ -129,7 +135,9 @@ describe('IpSubnetCalculator', () => {
                         const user = userEvent.setup()
                         await setCidr(user, v.cidr)
                         await waitFor(() =>
-                            expect(screen.getAllByText(v.firstHost!).length).toBeGreaterThan(0)
+                            expect(
+                                screen.getAllByText(v.firstHost!).length
+                            ).toBeGreaterThan(0)
                         )
                     })
                 }
@@ -139,7 +147,9 @@ describe('IpSubnetCalculator', () => {
                         const user = userEvent.setup()
                         await setCidr(user, v.cidr)
                         await waitFor(() =>
-                            expect(screen.getAllByText(v.usableHosts!).length).toBeGreaterThan(0)
+                            expect(
+                                screen.getAllByText(v.usableHosts!).length
+                            ).toBeGreaterThan(0)
                         )
                     })
                 }
@@ -199,7 +209,9 @@ describe('IpSubnetCalculator', () => {
             render(<IpSubnetCalculator />)
             await setCidr(user, 'garbage')
             await waitFor(() =>
-                expect(screen.getByText(/invalid cidr notation/i)).toBeInTheDocument()
+                expect(
+                    screen.getByText(/invalid cidr notation/i)
+                ).toBeInTheDocument()
             )
             await setCidr(user, '10.0.0.0/8')
             await waitFor(() =>

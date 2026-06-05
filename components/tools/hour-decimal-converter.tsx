@@ -1,26 +1,19 @@
 'use client'
 
-import { ArrowDown, Check, Copy } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/tools/copy-button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 export default function HourToDecimalConverter() {
     const [hours, setHours] = useState<string>('8')
     const [minutes, setMinutes] = useState<string>('12')
     const [result, setResult] = useState<string>('8.2')
-    const [copied, setCopied] = useState<boolean>(false)
     const hoursRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
@@ -32,15 +25,6 @@ export default function HourToDecimalConverter() {
     useEffect(() => {
         calculateDecimal()
     }, [hours, minutes])
-
-    useEffect(() => {
-        if (copied) {
-            const timer = setTimeout(() => {
-                setCopied(false)
-            }, 2000)
-            return () => clearTimeout(timer)
-        }
-    }, [copied])
 
     const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/[^0-9]/g, '')
@@ -67,11 +51,6 @@ export default function HourToDecimalConverter() {
             .replace(/(\.\d)0$/, '$1')
 
         setResult(formatted)
-    }
-
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText(result)
-        setCopied(true)
     }
 
     return (
@@ -127,39 +106,12 @@ export default function HourToDecimalConverter() {
 
             <Card className="mb-8">
                 <CardContent className="relative p-6">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    data-testid="copy-button"
-                                    onClick={copyToClipboard}
-                                    className="absolute top-4 right-4 h-8 w-8"
-                                >
-                                    {copied ? (
-                                        <Check
-                                            data-testid="check-icon"
-                                            className="h-4 w-4"
-                                        />
-                                    ) : (
-                                        <Copy
-                                            data-testid="copy-icon"
-                                            className="h-4 w-4"
-                                        />
-                                    )}
-                                    <span className="sr-only">
-                                        Copy to clipboard
-                                    </span>
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>
-                                    {copied ? 'Copied!' : 'Copy to clipboard'}
-                                </p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <CopyButton
+                        value={result}
+                        label="Copy to clipboard"
+                        className="absolute top-4 right-4 h-8 w-8"
+                        testId="copy-button"
+                    />
 
                     <h3 className="mb-2 text-lg font-medium">
                         Decimal Time Result

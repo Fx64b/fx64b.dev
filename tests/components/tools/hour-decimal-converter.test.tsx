@@ -21,8 +21,12 @@ describe('HourToDecimalConverter', () => {
     describe('initial state', () => {
         it('shows 8h 12m with result 8.2 on load', async () => {
             render(<HourToDecimalConverter />)
-            expect(screen.getByRole('textbox', { name: 'Hours' })).toHaveValue('8')
-            expect(screen.getByRole('textbox', { name: 'Minutes' })).toHaveValue('12')
+            expect(screen.getByRole('textbox', { name: 'Hours' })).toHaveValue(
+                '8'
+            )
+            expect(
+                screen.getByRole('textbox', { name: 'Minutes' })
+            ).toHaveValue('12')
             await waitFor(() =>
                 expect(screen.getByText('8.2')).toBeInTheDocument()
             )
@@ -106,7 +110,9 @@ describe('HourToDecimalConverter', () => {
 
         it('minutes > 59 are rejected (typing "60" keeps the field at "6")', async () => {
             const user = userEvent.setup()
-            const minutesInput = screen.getByRole('textbox', { name: 'Minutes' })
+            const minutesInput = screen.getByRole('textbox', {
+                name: 'Minutes',
+            })
             await user.clear(minutesInput)
             await user.type(minutesInput, '60')
             expect(minutesInput).toHaveValue('6')

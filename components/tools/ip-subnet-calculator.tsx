@@ -1,18 +1,11 @@
 'use client'
 
-import { Check, Copy } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/tools/copy-button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 interface SubnetInfo {
     networkAddress: string
@@ -30,22 +23,23 @@ interface SubnetInfo {
 }
 
 function ipToInt(ip: string): number {
-    return ip
-        .split('.')
-        .reduce((acc, octet) => (acc << 8) | parseInt(octet, 10), 0) >>> 0
+    return (
+        ip
+            .split('.')
+            .reduce((acc, octet) => (acc << 8) | parseInt(octet, 10), 0) >>> 0
+    )
 }
 
 function intToIp(n: number): string {
-    return [
-        (n >>> 24) & 255,
-        (n >>> 16) & 255,
-        (n >>> 8) & 255,
-        n & 255,
-    ].join('.')
+    return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join(
+        '.'
+    )
 }
 
 function calculateSubnet(cidrInput: string): SubnetInfo | null {
-    const match = cidrInput.trim().match(/^(\d{1,3}(?:\.\d{1,3}){3})\/(\d{1,2})$/)
+    const match = cidrInput
+        .trim()
+        .match(/^(\d{1,3}(?:\.\d{1,3}){3})\/(\d{1,2})$/)
     if (!match) return null
 
     const [, ipStr, prefixStr] = match
@@ -57,7 +51,7 @@ function calculateSubnet(cidrInput: string): SubnetInfo | null {
 
     const ip = ipToInt(ipStr)
     const mask = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0
-    const wildcard = (~mask) >>> 0
+    const wildcard = ~mask >>> 0
     const network = (ip & mask) >>> 0
     const broadcast = (network | wildcard) >>> 0
     const firstHost = prefix === 32 ? network : (network + 1) >>> 0
@@ -73,7 +67,11 @@ function calculateSubnet(cidrInput: string): SubnetInfo | null {
     else if (firstOctet < 240) ipClass = 'D (Multicast)'
 
     const toBinary = (n: number) =>
-        n.toString(2).padStart(32, '0').replace(/(.{8})/g, '$1.').slice(0, -1)
+        n
+            .toString(2)
+            .padStart(32, '0')
+            .replace(/(.{8})/g, '$1.')
+            .slice(0, -1)
 
     return {
         networkAddress: intToIp(network),
@@ -91,25 +89,15 @@ function calculateSubnet(cidrInput: string): SubnetInfo | null {
     }
 }
 
-type CopyKey = keyof SubnetInfo
-
 export default function IpSubnetCalculator() {
     const [input, setInput] = useState('192.168.1.0/24')
     const [info, setInfo] = useState<SubnetInfo | null>(null)
     const [error, setError] = useState('')
-    const [copied, setCopied] = useState<CopyKey | null>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(null), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
 
     useEffect(() => {
         if (!input.trim()) {
@@ -127,20 +115,13 @@ export default function IpSubnetCalculator() {
         }
     }, [input])
 
-    const copyValue = (key: CopyKey, value: string) => {
-        navigator.clipboard.writeText(value)
-        setCopied(key)
-    }
-
     const Row = ({
         label,
         value,
-        field,
         mono = true,
     }: {
         label: string
         value: string
-        field: CopyKey
         mono?: boolean
     }) => (
         <div className="flex items-center justify-between py-2">
@@ -153,28 +134,11 @@ export default function IpSubnetCalculator() {
                 >
                     {value}
                 </span>
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 shrink-0"
-                                onClick={() => copyValue(field, value)}
-                            >
-                                {copied === field ? (
-                                    <Check className="h-3 w-3" />
-                                ) : (
-                                    <Copy className="h-3 w-3" />
-                                )}
-                                <span className="sr-only">Copy</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            {copied === field ? 'Copied!' : 'Copy'}
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                <CopyButton
+                    value={value}
+                    label={`Copy ${label}`}
+                    className="h-6 w-6 shrink-0"
+                />
             </div>
         </div>
     )
@@ -204,54 +168,36 @@ export default function IpSubnetCalculator() {
                             <Row
                                 label="Network Address"
                                 value={info.networkAddress}
-                                field="networkAddress"
                             />
-                            <Row
-                                label="Subnet Mask"
-                                value={info.subnetMask}
-                                field="subnetMask"
-                            />
+                            <Row label="Subnet Mask" value={info.subnetMask} />
                             <Row
                                 label="Broadcast Address"
                                 value={info.broadcastAddress}
-                                field="broadcastAddress"
                             />
-                            <Row
-                                label="First Host"
-                                value={info.firstHost}
-                                field="firstHost"
-                            />
-                            <Row
-                                label="Last Host"
-                                value={info.lastHost}
-                                field="lastHost"
-                            />
+                            <Row label="First Host" value={info.firstHost} />
+                            <Row label="Last Host" value={info.lastHost} />
                             <Row
                                 label="Wildcard Mask"
                                 value={info.wildcardMask}
-                                field="wildcardMask"
                             />
                             <Row
                                 label="Total Hosts"
                                 value={info.totalHosts.toLocaleString()}
-                                field="totalHosts"
                                 mono={false}
                             />
                             <Row
                                 label="Usable Hosts"
                                 value={info.usableHosts.toLocaleString()}
-                                field="usableHosts"
                                 mono={false}
                             />
                             <Row
                                 label="IP Class"
                                 value={info.ipClass}
-                                field="ipClass"
                                 mono={false}
                             />
                         </div>
                         <div className="mt-4">
-                            <p className="text-muted-foreground mb-1 text-xs font-medium uppercase tracking-wide">
+                            <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
                                 Subnet Mask (binary)
                             </p>
                             <div className="bg-secondary/20 overflow-x-auto rounded p-2 font-mono text-xs">
@@ -259,7 +205,7 @@ export default function IpSubnetCalculator() {
                             </div>
                         </div>
                         <div className="mt-3">
-                            <p className="text-muted-foreground mb-1 text-xs font-medium uppercase tracking-wide">
+                            <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
                                 Network Address (binary)
                             </p>
                             <div className="bg-secondary/20 overflow-x-auto rounded p-2 font-mono text-xs">
@@ -273,9 +219,7 @@ export default function IpSubnetCalculator() {
             <Separator className="my-8" />
 
             <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">
-                    About Subnetting
-                </h2>
+                <h2 className="mb-4 text-xl font-semibold">About Subnetting</h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <Card>
                         <CardContent className="pt-6">
@@ -291,9 +235,7 @@ export default function IpSubnetCalculator() {
                     </Card>
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Common Subnets
-                            </h3>
+                            <h3 className="mb-2 font-medium">Common Subnets</h3>
                             <div className="bg-secondary/20 rounded p-3 font-mono text-xs">
                                 <p>/8 → 16,777,214 hosts</p>
                                 <p>/16 → 65,534 hosts</p>
@@ -305,9 +247,7 @@ export default function IpSubnetCalculator() {
                     </Card>
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Private Ranges
-                            </h3>
+                            <h3 className="mb-2 font-medium">Private Ranges</h3>
                             <div className="bg-secondary/20 rounded p-3 font-mono text-xs">
                                 <p>10.0.0.0/8</p>
                                 <p>172.16.0.0/12</p>
@@ -317,9 +257,7 @@ export default function IpSubnetCalculator() {
                     </Card>
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Pentesting Use
-                            </h3>
+                            <h3 className="mb-2 font-medium">Pentesting Use</h3>
                             <p className="text-muted-foreground text-sm">
                                 During recon, subnet calculations help scope
                                 network segments, identify broadcast domains,

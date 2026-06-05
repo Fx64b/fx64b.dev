@@ -1,11 +1,11 @@
 'use client'
 
-import { ArrowDown, Check, Copy } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/tools/copy-button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
@@ -16,12 +16,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 type ColorFormat = 'hex' | 'rgb' | 'hsl'
 
@@ -33,7 +27,6 @@ export default function ColorConverter() {
         rgb: 'rgb(30, 144, 255)',
         hsl: 'hsl(210, 100%, 56%)',
     })
-    const [copied, setCopied] = useState<ColorFormat | null>(null)
     const [error, setError] = useState<string | null>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -48,15 +41,6 @@ export default function ColorConverter() {
             convertColor()
         }
     }, [inputValue, inputFormat])
-
-    useEffect(() => {
-        if (copied) {
-            const timer = setTimeout(() => {
-                setCopied(null)
-            }, 2000)
-            return () => clearTimeout(timer)
-        }
-    }, [copied])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value)
@@ -229,11 +213,6 @@ export default function ColorConverter() {
         return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]
     }
 
-    const copyToClipboard = (format: ColorFormat) => {
-        navigator.clipboard.writeText(results[format])
-        setCopied(format)
-    }
-
     const getColorPreviewStyle = () => {
         try {
             return {
@@ -315,45 +294,12 @@ export default function ColorConverter() {
                                     {format}
                                 </span>
                                 {format !== inputFormat && (
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    data-testid="copy-button"
-                                                    className="absolute top-2 right-2 h-6 w-6"
-                                                    onClick={() =>
-                                                        copyToClipboard(
-                                                            format as ColorFormat
-                                                        )
-                                                    }
-                                                >
-                                                    {copied === format ? (
-                                                        <Check
-                                                            data-testid="check-icon"
-                                                            className="h-3.5 w-3.5"
-                                                        />
-                                                    ) : (
-                                                        <Copy
-                                                            data-testid="copy-icon"
-                                                            className="h-3.5 w-3.5"
-                                                        />
-                                                    )}
-                                                    <span className="sr-only">
-                                                        Copy value
-                                                    </span>
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>
-                                                    {copied === format
-                                                        ? 'Copied!'
-                                                        : 'Copy'}
-                                                </p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                    <CopyButton
+                                        value={results[format as ColorFormat]}
+                                        label={`Copy ${format} value`}
+                                        className="absolute top-2 right-2 h-6 w-6"
+                                        testId="copy-button"
+                                    />
                                 )}
                             </div>
                             <div className="mt-2 truncate font-mono text-lg">

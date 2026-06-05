@@ -1,18 +1,14 @@
 'use client'
 
-import { ArrowDown, Check, Copy } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
+
 import { useEffect, useRef, useState } from 'react'
 
+import { CopyButton } from '@/components/tools/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 type Mode = 'encode' | 'decode'
 
@@ -21,19 +17,11 @@ export default function Base64EncoderDecoder() {
     const [output, setOutput] = useState('')
     const [mode, setMode] = useState<Mode>('encode')
     const [error, setError] = useState('')
-    const [copied, setCopied] = useState(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(false), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
 
     useEffect(() => {
         convert(input, mode)
@@ -52,17 +40,8 @@ export default function Base64EncoderDecoder() {
                 setOutput(decodeURIComponent(escape(atob(text.trim()))))
             }
         } catch {
-            setError(
-                m === 'decode' ? 'Invalid Base64 input' : 'Encoding error'
-            )
+            setError(m === 'decode' ? 'Invalid Base64 input' : 'Encoding error')
             setOutput('')
-        }
-    }
-
-    const copyOutput = () => {
-        if (output) {
-            navigator.clipboard.writeText(output)
-            setCopied(true)
         }
     }
 
@@ -110,33 +89,13 @@ export default function Base64EncoderDecoder() {
                 <CardContent className="pt-6">
                     <div className="mb-2 flex items-center justify-between">
                         <span className="text-sm font-medium">
-                            {mode === 'encode' ? 'Base64 Output' : 'Decoded Text'}
+                            {mode === 'encode'
+                                ? 'Base64 Output'
+                                : 'Decoded Text'}
                         </span>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7"
-                                        onClick={copyOutput}
-                                        disabled={!output}
-                                    >
-                                        {copied ? (
-                                            <Check className="h-3.5 w-3.5" />
-                                        ) : (
-                                            <Copy className="h-3.5 w-3.5" />
-                                        )}
-                                        <span className="sr-only">Copy</span>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {copied ? 'Copied!' : 'Copy'}
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                        <CopyButton value={output} />
                     </div>
-                    <div className="bg-secondary/20 min-h-[120px] break-all rounded-md p-3 font-mono text-sm">
+                    <div className="bg-secondary/20 min-h-[120px] rounded-md p-3 font-mono text-sm break-all">
                         {output || (
                             <span className="text-muted-foreground">
                                 Output will appear here...
@@ -153,7 +112,9 @@ export default function Base64EncoderDecoder() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">What is Base64?</h3>
+                            <h3 className="mb-2 font-medium">
+                                What is Base64?
+                            </h3>
                             <p className="text-muted-foreground text-sm">
                                 Base64 encodes binary data as printable ASCII
                                 text using 64 characters (A–Z, a–z, 0–9, +, /).
@@ -175,14 +136,12 @@ export default function Base64EncoderDecoder() {
                     </Card>
                     <Card>
                         <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Security Note
-                            </h3>
+                            <h3 className="mb-2 font-medium">Security Note</h3>
                             <p className="text-muted-foreground text-sm">
                                 Base64 is{' '}
                                 <strong>encoding, not encryption</strong>.
-                                Anyone can decode it instantly — never use it
-                                to protect sensitive data.
+                                Anyone can decode it instantly — never use it to
+                                protect sensitive data.
                             </p>
                         </CardContent>
                     </Card>
@@ -197,7 +156,8 @@ export default function Base64EncoderDecoder() {
                                     <strong>URL-safe:</strong> uses - and _
                                 </li>
                                 <li>
-                                    <strong>No padding:</strong> omits trailing =
+                                    <strong>No padding:</strong> omits trailing
+                                    =
                                 </li>
                             </ul>
                         </CardContent>

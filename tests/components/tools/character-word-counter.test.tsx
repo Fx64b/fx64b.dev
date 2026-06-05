@@ -112,7 +112,10 @@ describe('CharacterWordCounter', () => {
 
         it('counts two paragraphs separated by a newline', async () => {
             const user = userEvent.setup()
-            await user.type(getTextarea(), 'First paragraph{Enter}Second paragraph')
+            await user.type(
+                getTextarea(),
+                'First paragraph{Enter}Second paragraph'
+            )
             await waitFor(() => expect(getStatValue('Paragraphs')).toBe('2'))
         })
 

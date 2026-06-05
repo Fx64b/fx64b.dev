@@ -28,9 +28,9 @@ describe('ReverseShellGenerator', () => {
 
         it('pre-populates the port field with the default port', () => {
             render(<ReverseShellGenerator />)
-            expect(
-                screen.getByRole('textbox', { name: /port/i })
-            ).toHaveValue(DEFAULT_PORT)
+            expect(screen.getByRole('textbox', { name: /port/i })).toHaveValue(
+                DEFAULT_PORT
+            )
         })
 
         it('renders shell commands on load', () => {
@@ -53,7 +53,12 @@ describe('ReverseShellGenerator', () => {
 
         it('shows shell names for multiple languages/platforms', () => {
             render(<ReverseShellGenerator />)
-            for (const name of ['Python 3', 'PHP', 'PowerShell', 'Netcat (nc)']) {
+            for (const name of [
+                'Python 3',
+                'PHP',
+                'PowerShell',
+                'Netcat (nc)',
+            ]) {
                 expect(screen.getByText(name)).toBeInTheDocument()
             }
         })
@@ -61,7 +66,9 @@ describe('ReverseShellGenerator', () => {
         it('shows category filter buttons', () => {
             render(<ReverseShellGenerator />)
             for (const cat of ['All', 'Unix', 'Windows', 'Python', 'Web']) {
-                expect(screen.getByRole('button', { name: cat })).toBeInTheDocument()
+                expect(
+                    screen.getByRole('button', { name: cat })
+                ).toBeInTheDocument()
             }
         })
 
@@ -101,7 +108,9 @@ describe('ReverseShellGenerator', () => {
             await setField(user, /listener port/i, '1337')
             // Check IP and port both appear in the output (they appear in all commands)
             await waitFor(() => {
-                expect(screen.getAllByText(/10\.0\.0\.1/).length).toBeGreaterThan(0)
+                expect(
+                    screen.getAllByText(/10\.0\.0\.1/).length
+                ).toBeGreaterThan(0)
                 expect(screen.getAllByText(/1337/).length).toBeGreaterThan(0)
             })
         })

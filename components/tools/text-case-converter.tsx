@@ -1,11 +1,11 @@
 'use client'
 
-import { ArrowDown, Check, Copy } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/tools/copy-button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
     Select,
@@ -15,12 +15,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 type CaseType =
     | 'lowercase'
@@ -53,7 +47,6 @@ export default function TextCaseConverter() {
     const [inputText, setInputText] = useState<string>('')
     const [caseType, setCaseType] = useState<CaseType>('titlecase')
     const [outputText, setOutputText] = useState<string>('')
-    const [copied, setCopied] = useState<boolean>(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     // Focus input on component mount
@@ -151,14 +144,6 @@ export default function TextCaseConverter() {
         setOutputText(result)
     }
 
-    const handleCopy = () => {
-        if (outputText) {
-            navigator.clipboard.writeText(outputText)
-            setCopied(true)
-            setTimeout(() => setCopied(false), 2000)
-        }
-    }
-
     return (
         <div className="mx-auto max-w-3xl">
             <Card className="mb-4">
@@ -204,40 +189,12 @@ export default function TextCaseConverter() {
 
             <Card className="mb-8">
                 <CardContent className="relative pt-6">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    data-testid="copy-button"
-                                    size="icon"
-                                    onClick={handleCopy}
-                                    disabled={!outputText}
-                                    className="absolute top-4 right-4 h-8 w-8"
-                                >
-                                    {copied ? (
-                                        <Check
-                                            data-testid="check-icon"
-                                            className="h-4 w-4"
-                                        />
-                                    ) : (
-                                        <Copy
-                                            data-testid="copy-icon"
-                                            className="h-4 w-4"
-                                        />
-                                    )}
-                                    <span className="sr-only">
-                                        Copy to clipboard
-                                    </span>
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>
-                                    {copied ? 'Copied!' : 'Copy to clipboard'}
-                                </p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <CopyButton
+                        value={outputText}
+                        label="Copy to clipboard"
+                        className="absolute top-4 right-4 h-8 w-8"
+                        testId="copy-button"
+                    />
 
                     <div className="bg-secondary/30 min-h-[120px] rounded-md p-4 font-mono whitespace-pre-wrap">
                         {outputText || (
