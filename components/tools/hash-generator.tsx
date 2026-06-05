@@ -1,20 +1,13 @@
 'use client'
 
 import { md5, sha } from '@/lib/hash-utils'
-import { Check, Copy } from 'lucide-react'
 
 import { useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/tools/copy-button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 type HashName = 'MD5' | 'SHA-1' | 'SHA-256' | 'SHA-512'
 
@@ -25,19 +18,11 @@ export default function HashGenerator() {
     const [hashes, setHashes] = useState<Record<HashName, string>>(
         {} as Record<HashName, string>
     )
-    const [copiedHash, setCopiedHash] = useState<HashName | null>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copiedHash) {
-            const t = setTimeout(() => setCopiedHash(null), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copiedHash])
 
     useEffect(() => {
         generateHashes(input)
@@ -59,13 +44,6 @@ export default function HashGenerator() {
             'SHA-256': sha256,
             'SHA-512': sha512,
         })
-    }
-
-    const copyHash = (name: HashName) => {
-        if (hashes[name]) {
-            navigator.clipboard.writeText(hashes[name])
-            setCopiedHash(name)
-        }
     }
 
     return (
@@ -91,34 +69,12 @@ export default function HashGenerator() {
                                 <span className="text-sm font-semibold">
                                     {name}
                                 </span>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6"
-                                                onClick={() => copyHash(name)}
-                                                disabled={!hashes[name]}
-                                                data-testid={`copy-${name}`}
-                                            >
-                                                {copiedHash === name ? (
-                                                    <Check className="h-3.5 w-3.5" />
-                                                ) : (
-                                                    <Copy className="h-3.5 w-3.5" />
-                                                )}
-                                                <span className="sr-only">
-                                                    Copy {name} hash
-                                                </span>
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {copiedHash === name
-                                                ? 'Copied!'
-                                                : 'Copy'}
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                                <CopyButton
+                                    value={hashes[name] ?? ''}
+                                    label={`Copy ${name} hash`}
+                                    className="h-6 w-6"
+                                    testId={`copy-${name}`}
+                                />
                             </div>
                             <div
                                 className="bg-secondary/20 truncate rounded p-2 font-mono text-xs"

@@ -3,9 +3,7 @@
 import {
     AlignLeft,
     BookOpen,
-    Check,
     Clock,
-    Copy,
     Eye,
     FileText,
     List,
@@ -17,16 +15,11 @@ import type { LucideIcon } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { CopyButton } from '@/components/tools/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 interface StatCardProps {
     title: string
@@ -58,7 +51,6 @@ export default function CharacterWordCounter() {
         readingTime: '0 seconds',
         speakingTime: '0 seconds',
     })
-    const [copied, setCopied] = useState<boolean>(false)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
@@ -70,15 +62,6 @@ export default function CharacterWordCounter() {
     useEffect(() => {
         calculateStats(text)
     }, [text])
-
-    useEffect(() => {
-        if (copied) {
-            const timer = setTimeout(() => {
-                setCopied(false)
-            }, 2000)
-            return () => clearTimeout(timer)
-        }
-    }, [copied])
 
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value)
@@ -122,13 +105,6 @@ export default function CharacterWordCounter() {
         })
     }
 
-    const copyText = () => {
-        if (text) {
-            navigator.clipboard.writeText(text)
-            setCopied(true)
-        }
-    }
-
     const clearText = () => {
         setText('')
         if (textareaRef.current) {
@@ -149,36 +125,12 @@ export default function CharacterWordCounter() {
                             onChange={handleTextChange}
                         />
 
-                        <div className="flex flex-wrap justify-end gap-2">
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={copyText}
-                                            disabled={!text}
-                                            data-testid="copy-button"
-                                        >
-                                            {copied ? (
-                                                <Check
-                                                    data-testid="check-icon"
-                                                    className="mr-1 h-4 w-4"
-                                                />
-                                            ) : (
-                                                <Copy
-                                                    data-testid="copy-icon"
-                                                    className="mr-1 h-4 w-4"
-                                                />
-                                            )}
-                                            {copied ? 'Copied' : 'Copy'}
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Copy text to clipboard</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                            <CopyButton
+                                value={text}
+                                label="Copy text to clipboard"
+                                testId="copy-button"
+                            />
 
                             <Button
                                 variant="outline"

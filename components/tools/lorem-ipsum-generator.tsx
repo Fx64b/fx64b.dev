@@ -1,9 +1,10 @@
 'use client'
 
-import { Check, Copy, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 
 import { useEffect, useState } from 'react'
 
+import { CopyButton } from '@/components/tools/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -964,14 +965,6 @@ export default function LoremIpsumGenerator() {
     const [markdown, setMarkdown] = useState(true)
     const [output, setOutput] = useState('')
     const [blocks, setBlocks] = useState<Block[] | null>(null)
-    const [copied, setCopied] = useState(false)
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(false), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
 
     useEffect(() => {
         generate()
@@ -1022,13 +1015,6 @@ export default function LoremIpsumGenerator() {
                 paragraphs[0] = opening + (rest ? ' ' + rest : '')
             }
             setOutput(paragraphs.join('\n\n'))
-        }
-    }
-
-    const copyOutput = () => {
-        if (output) {
-            navigator.clipboard.writeText(output)
-            setCopied(true)
         }
     }
 
@@ -1156,33 +1142,7 @@ export default function LoremIpsumGenerator() {
                             {output.split(/\s+/).filter(Boolean).length} words ·{' '}
                             {output.length} characters
                         </span>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7"
-                                        onClick={copyOutput}
-                                        disabled={!output}
-                                        data-testid="copy-button"
-                                    >
-                                        {copied ? (
-                                            <Check
-                                                className="h-3.5 w-3.5"
-                                                data-testid="check-icon"
-                                            />
-                                        ) : (
-                                            <Copy className="h-3.5 w-3.5" />
-                                        )}
-                                        <span className="sr-only">Copy</span>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {copied ? 'Copied!' : 'Copy'}
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                        <CopyButton value={output} testId="copy-button" />
                     </div>
                     <div
                         className="min-h-[200px] text-sm leading-relaxed"

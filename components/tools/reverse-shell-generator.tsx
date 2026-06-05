@@ -1,19 +1,12 @@
 'use client'
 
-import { Check, Copy } from 'lucide-react'
-
 import { useEffect, useRef, useState } from 'react'
 
+import { CopyButton } from '@/components/tools/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 interface ShellTemplate {
     name: string
@@ -127,25 +120,12 @@ const CATEGORIES = Array.from(new Set(SHELLS.map((s) => s.category)))
 export default function ReverseShellGenerator() {
     const [ip, setIp] = useState('10.10.10.10')
     const [port, setPort] = useState('4444')
-    const [copied, setCopied] = useState<string | null>(null)
     const [activeCategory, setActiveCategory] = useState<string>('All')
     const ipRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (ipRef.current) ipRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(null), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
-
-    const copyShell = (name: string, command: string) => {
-        navigator.clipboard.writeText(command)
-        setCopied(name)
-    }
 
     const filtered =
         activeCategory === 'All'
@@ -225,37 +205,11 @@ export default function ReverseShellGenerator() {
                                             {shell.category}
                                         </span>
                                     </div>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-7 w-7 shrink-0"
-                                                    onClick={() =>
-                                                        copyShell(
-                                                            shell.name,
-                                                            command
-                                                        )
-                                                    }
-                                                >
-                                                    {copied === shell.name ? (
-                                                        <Check className="h-3.5 w-3.5" />
-                                                    ) : (
-                                                        <Copy className="h-3.5 w-3.5" />
-                                                    )}
-                                                    <span className="sr-only">
-                                                        Copy
-                                                    </span>
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                {copied === shell.name
-                                                    ? 'Copied!'
-                                                    : 'Copy'}
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                    <CopyButton
+                                        value={command}
+                                        label={`Copy ${shell.name} command`}
+                                        className="shrink-0"
+                                    />
                                 </div>
                                 <div className="bg-secondary/20 overflow-x-auto rounded p-3 font-mono text-xs whitespace-pre">
                                     {command}

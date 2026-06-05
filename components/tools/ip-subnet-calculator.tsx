@@ -1,19 +1,11 @@
 'use client'
 
-import { Check, Copy } from 'lucide-react'
-
 import { useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/tools/copy-button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 interface SubnetInfo {
     networkAddress: string
@@ -97,25 +89,15 @@ function calculateSubnet(cidrInput: string): SubnetInfo | null {
     }
 }
 
-type CopyKey = keyof SubnetInfo
-
 export default function IpSubnetCalculator() {
     const [input, setInput] = useState('192.168.1.0/24')
     const [info, setInfo] = useState<SubnetInfo | null>(null)
     const [error, setError] = useState('')
-    const [copied, setCopied] = useState<CopyKey | null>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(null), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
 
     useEffect(() => {
         if (!input.trim()) {
@@ -133,20 +115,13 @@ export default function IpSubnetCalculator() {
         }
     }, [input])
 
-    const copyValue = (key: CopyKey, value: string) => {
-        navigator.clipboard.writeText(value)
-        setCopied(key)
-    }
-
     const Row = ({
         label,
         value,
-        field,
         mono = true,
     }: {
         label: string
         value: string
-        field: CopyKey
         mono?: boolean
     }) => (
         <div className="flex items-center justify-between py-2">
@@ -159,28 +134,11 @@ export default function IpSubnetCalculator() {
                 >
                     {value}
                 </span>
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 shrink-0"
-                                onClick={() => copyValue(field, value)}
-                            >
-                                {copied === field ? (
-                                    <Check className="h-3 w-3" />
-                                ) : (
-                                    <Copy className="h-3 w-3" />
-                                )}
-                                <span className="sr-only">Copy</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            {copied === field ? 'Copied!' : 'Copy'}
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                <CopyButton
+                    value={value}
+                    label={`Copy ${label}`}
+                    className="h-6 w-6 shrink-0"
+                />
             </div>
         </div>
     )
@@ -210,49 +168,31 @@ export default function IpSubnetCalculator() {
                             <Row
                                 label="Network Address"
                                 value={info.networkAddress}
-                                field="networkAddress"
                             />
-                            <Row
-                                label="Subnet Mask"
-                                value={info.subnetMask}
-                                field="subnetMask"
-                            />
+                            <Row label="Subnet Mask" value={info.subnetMask} />
                             <Row
                                 label="Broadcast Address"
                                 value={info.broadcastAddress}
-                                field="broadcastAddress"
                             />
-                            <Row
-                                label="First Host"
-                                value={info.firstHost}
-                                field="firstHost"
-                            />
-                            <Row
-                                label="Last Host"
-                                value={info.lastHost}
-                                field="lastHost"
-                            />
+                            <Row label="First Host" value={info.firstHost} />
+                            <Row label="Last Host" value={info.lastHost} />
                             <Row
                                 label="Wildcard Mask"
                                 value={info.wildcardMask}
-                                field="wildcardMask"
                             />
                             <Row
                                 label="Total Hosts"
                                 value={info.totalHosts.toLocaleString()}
-                                field="totalHosts"
                                 mono={false}
                             />
                             <Row
                                 label="Usable Hosts"
                                 value={info.usableHosts.toLocaleString()}
-                                field="usableHosts"
                                 mono={false}
                             />
                             <Row
                                 label="IP Class"
                                 value={info.ipClass}
-                                field="ipClass"
                                 mono={false}
                             />
                         </div>

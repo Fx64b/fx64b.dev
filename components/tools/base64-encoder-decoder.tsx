@@ -1,19 +1,14 @@
 'use client'
 
-import { ArrowDown, Check, Copy } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 
 import { useEffect, useRef, useState } from 'react'
 
+import { CopyButton } from '@/components/tools/copy-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 type Mode = 'encode' | 'decode'
 
@@ -22,19 +17,11 @@ export default function Base64EncoderDecoder() {
     const [output, setOutput] = useState('')
     const [mode, setMode] = useState<Mode>('encode')
     const [error, setError] = useState('')
-    const [copied, setCopied] = useState(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus()
     }, [])
-
-    useEffect(() => {
-        if (copied) {
-            const t = setTimeout(() => setCopied(false), 2000)
-            return () => clearTimeout(t)
-        }
-    }, [copied])
 
     useEffect(() => {
         convert(input, mode)
@@ -55,13 +42,6 @@ export default function Base64EncoderDecoder() {
         } catch {
             setError(m === 'decode' ? 'Invalid Base64 input' : 'Encoding error')
             setOutput('')
-        }
-    }
-
-    const copyOutput = () => {
-        if (output) {
-            navigator.clipboard.writeText(output)
-            setCopied(true)
         }
     }
 
@@ -113,29 +93,7 @@ export default function Base64EncoderDecoder() {
                                 ? 'Base64 Output'
                                 : 'Decoded Text'}
                         </span>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7"
-                                        onClick={copyOutput}
-                                        disabled={!output}
-                                    >
-                                        {copied ? (
-                                            <Check className="h-3.5 w-3.5" />
-                                        ) : (
-                                            <Copy className="h-3.5 w-3.5" />
-                                        )}
-                                        <span className="sr-only">Copy</span>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {copied ? 'Copied!' : 'Copy'}
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                        <CopyButton value={output} />
                     </div>
                     <div className="bg-secondary/20 min-h-[120px] rounded-md p-3 font-mono text-sm break-all">
                         {output || (

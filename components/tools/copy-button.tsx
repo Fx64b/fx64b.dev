@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from '@/lib/utils'
 import { Check, Copy } from 'lucide-react'
 
 import { useEffect, useState } from 'react'
@@ -16,13 +17,18 @@ interface CopyButtonProps {
     value: string
     label?: string
     disabled?: boolean
+    className?: string
+    /** Forwarded to the button as `data-testid` (the check icon gets `check-icon`). */
+    testId?: string
 }
 
-/** Small reusable "copy to clipboard" icon button with a transient checkmark. */
+/** Reusable "copy to clipboard" icon button with a transient checkmark. */
 export function CopyButton({
     value,
     label = 'Copy',
     disabled,
+    className,
+    testId,
 }: CopyButtonProps) {
     const [copied, setCopied] = useState(false)
 
@@ -45,13 +51,17 @@ export function CopyButton({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className={cn('h-7 w-7', className)}
                         onClick={copy}
                         disabled={disabled ?? !value}
                         aria-label={label}
+                        data-testid={testId}
                     >
                         {copied ? (
-                            <Check className="h-3.5 w-3.5" />
+                            <Check
+                                className="h-3.5 w-3.5"
+                                data-testid="check-icon"
+                            />
                         ) : (
                             <Copy className="h-3.5 w-3.5" />
                         )}
