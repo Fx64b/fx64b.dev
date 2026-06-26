@@ -1,67 +1,19 @@
 import { Post } from '@/types/post'
 
-import { Metadata } from 'next'
+import { useParams } from 'react-router-dom'
 
-import { getPostBySlug, getPostContent, getPostSlugs } from '@/app/lib/posts'
+import { getPostBySlug, getPostContent } from '@/lib/posts'
 
 import { AuthorBio } from '@/components/author-bio'
 import { BackgroundGrid } from '@/components/background-grid'
 import { BlogHeader } from '@/components/blog-header'
 import MarkdownRenderer from '@/components/markdown-renderer'
 import { RelatedPosts } from '@/components/related-posts'
+import { Seo } from '@/components/seo'
 import { TableOfContents } from '@/components/table-of-contents'
 
-interface Props {
-    params: Promise<{
-        slug: string
-    }>
-}
-
-export async function generateMetadata(props: Props): Promise<Metadata> {
-    const params = await props.params
-    const slug: string = params.slug
-    const post = getPostBySlug(slug)
-
-    if (!post) {
-        return {
-            title: 'Post not found',
-            description: 'The requested Post could not be found.',
-        }
-    }
-
-    return {
-        title: `${post.title} - by ${post.author}`,
-        description: post.description,
-        openGraph: {
-            title: post.title,
-            description: post.description,
-            images: [
-                {
-                    url: 'https://fx64b.dev/logo.svg',
-                    alt: post.title,
-                },
-            ],
-            type: 'article',
-        },
-        twitter: {
-            card: 'summary',
-            title: post.title,
-            description: post.description,
-            images: ['https://fx64b.dev/logo.svg'],
-        },
-    }
-}
-
-export async function generateStaticParams() {
-    const slugs = getPostSlugs().map((slug) => slug.replace(/\.md$/, ''))
-    return slugs.map((slug) => ({
-        slug,
-    }))
-}
-
-export default async function PostPage(props: Props) {
-    const params = await props.params
-    const { slug } = params
+export default function BlogPost() {
+    const { slug = '' } = useParams()
     const post: Post | null = getPostBySlug(slug)
     const content = getPostContent(slug)
 
@@ -71,6 +23,31 @@ export default async function PostPage(props: Props) {
 
     return (
         <>
+            <Seo
+                title={`${post.title} - by ${post.author}`}
+                description={post.description}
+                path={`/blog/${slug}`}
+                type="article"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'BlogPosting',
+                    headline: post.title,
+                    description: post.description,
+                    datePublished: post.date,
+                    dateModified: post.date,
+                    author: {
+                        '@type': 'Person',
+                        name: post.author || 'Fx64b',
+                        url: 'https://fx64b.dev',
+                    },
+                    image: 'https://fx64b.dev/logo.svg',
+                    mainEntityOfPage: {
+                        '@type': 'WebPage',
+                        '@id': `https://fx64b.dev/blog/${slug}`,
+                    },
+                    publisher: { '@id': 'https://fx64b.dev/#person' },
+                }}
+            />
             <BackgroundGrid />
             <div className="relative mx-auto max-w-7xl px-4 py-8">
                 <div className="flex justify-center">

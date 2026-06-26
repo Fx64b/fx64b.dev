@@ -1,7 +1,7 @@
-import { Project } from '@/types/project'
+import { Project } from '../types/project'
 
 const projectData: Project[] = [
-        {
+    {
         title: 'Obsidianator',
         description:
             'Turn an Obsidian vault into a self-contained static website, or serve it directly in the browser without writing anything to disk.',
@@ -9,12 +9,7 @@ const projectData: Project[] = [
         link: 'https://github.com/Fx64b/obsidianator',
         githubLink: 'https://github.com/Fx64b/obsidianator',
         status: 'Finished',
-        tags: [
-            'Go Lang',
-            'Vite',
-            'Obsidian',
-            'CLI Tool',
-        ],
+        tags: ['Go Lang', 'Vite', 'Obsidian', 'CLI Tool'],
         featured: true,
     },
     {

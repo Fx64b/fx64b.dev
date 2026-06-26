@@ -1,9 +1,8 @@
 import { ArrowRight } from 'lucide-react'
 
-import Link from 'next/link'
+import { getAllPosts } from '@/lib/posts'
 
-import { getAllPosts } from '@/app/lib/posts'
-
+import Link from '@/components/link'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface RelatedPostsProps {

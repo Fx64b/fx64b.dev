@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/logo.svg" />
+        <meta name="theme-color" content="#030709" />
+        <meta
+            name="robots"
+            content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        />
+        <meta name="author" content="Fx64b" />
+        <!-- Per-page title, description, canonical, Open Graph and Twitter
+             tags are injected at build/runtime by the Seo component. -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@graph": [
+                    {
+                        "@type": "Person",
+                        "@id": "https://fx64b.dev/#person",
+                        "name": "Fabio Maffucci",
+                        "alternateName": "Fx64b",
+                        "url": "https://fx64b.dev",
+                        "image": "https://fx64b.dev/logo.svg",
+                        "jobTitle": "Software Engineer",
+                        "description": "Software engineer from Switzerland specializing in React, Next.js, TypeScript, and Go.",
+                        "nationality": "Swiss",
+                        "knowsAbout": [
+                            "React",
+                            "Next.js",
+                            "TypeScript",
+                            "Go",
+                            "Web Development",
+                            "Cybersecurity"
+                        ],
+                        "sameAs": [
+                            "https://github.com/Fx64b",
+                            "https://x.com/f_x64b",
+                            "https://www.linkedin.com/in/fabio-maffucci-23515b328/"
+                        ]
+                    },
+                    {
+                        "@type": "WebSite",
+                        "@id": "https://fx64b.dev/#website",
+                        "url": "https://fx64b.dev",
+                        "name": "Fx64b.dev",
+                        "description": "Personal website of Fx64b where you can find information about my latest projects and blog posts.",
+                        "publisher": { "@id": "https://fx64b.dev/#person" },
+                        "inLanguage": "en"
+                    }
+                ]
+            }
+        </script>
+    </head>
+    <body class="dark bg-background text-foreground min-h-screen antialiased">
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
+    </body>
+</html>

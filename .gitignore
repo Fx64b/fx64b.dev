@@ -9,8 +9,8 @@
 # testing
 /coverage
 
-# next.js
-/.next/
+# vite build output
+/dist/
 /out/
 
 # production
@@ -34,7 +34,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # idea
 .idea

@@ -1,35 +1,38 @@
-import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
 import unusedImports from 'eslint-plugin-unused-imports'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all,
-})
-
-export default [
+export default tseslint.config(
     {
-        ignores: ['**/content/'],
+        ignores: ['dist', 'content', 'coverage', 'node_modules'],
     },
-    ...compat.extends('next/core-web-vitals'),
+    js.configs.recommended,
+    ...tseslint.configs.recommended,
     {
+        files: ['**/*.{ts,tsx}'],
+        languageOptions: {
+            ecmaVersion: 2020,
+            globals: { ...globals.browser, ...globals.node },
+        },
         plugins: {
+            'react-hooks': reactHooks,
+            'react-refresh': reactRefresh,
             'unused-imports': unusedImports,
         },
-
         rules: {
+            ...reactHooks.configs.recommended.rules,
             'react-hooks/exhaustive-deps': 'off',
             'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
             'unused-imports/no-unused-imports': 'error',
             'no-console': 'warn',
             eqeqeq: 'error',
             curly: 'error',
             'comma-dangle': 'off',
         },
-    },
-]
+    }
+)

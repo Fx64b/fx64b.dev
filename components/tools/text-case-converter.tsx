@@ -1,5 +1,3 @@
-'use client'
-
 import { ArrowDown, Check, Copy } from 'lucide-react'
 
 import type React from 'react'

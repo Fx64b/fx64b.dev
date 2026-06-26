@@ -1,11 +1,8 @@
-'use client'
-
 import { ArrowRight, Calendar, MapPin } from 'lucide-react'
 import { SwissCross } from 'swiss-cross'
 
-import Image from 'next/image'
-import Link from 'next/link'
-
+import Image from '@/components/image'
+import Link from '@/components/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 

@@ -1,5 +1,3 @@
-'use client'
-
 import { ArrowDown, Check, Copy } from 'lucide-react'
 
 import type React from 'react'
@@ -161,15 +159,15 @@ export default function ColorConverter() {
     }
 
     const rgbToHsl = (rgb: number[]): number[] => {
-        let r = rgb[0] / 255
-        let g = rgb[1] / 255
-        let b = rgb[2] / 255
+        const r = rgb[0] / 255
+        const g = rgb[1] / 255
+        const b = rgb[2] / 255
 
         const max = Math.max(r, g, b)
         const min = Math.min(r, g, b)
         let h = 0,
-            s = 0,
-            l = (max + min) / 2
+            s = 0
+        const l = (max + min) / 2
 
         if (max !== min) {
             const d = max - min
@@ -267,7 +265,10 @@ export default function ColorConverter() {
                                     value={inputValue}
                                     onChange={handleInputChange}
                                     placeholder="Enter color value"
-                                    className={cn('text-lg', error && 'border-destructive')}
+                                    className={cn(
+                                        'text-lg',
+                                        error && 'border-destructive'
+                                    )}
                                     aria-label="Color value to convert"
                                 />
                             </div>
@@ -313,7 +314,9 @@ export default function ColorConverter() {
                 {Object.keys(results).map((format) => (
                     <Card
                         key={format}
-                        className={cn(format === inputFormat && 'border-primary')}
+                        className={cn(
+                            format === inputFormat && 'border-primary'
+                        )}
                     >
                         <CardContent className="relative h-[100px] p-4">
                             <div className="mb-1 flex items-center justify-between">

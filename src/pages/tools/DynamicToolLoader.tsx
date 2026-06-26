@@ -1,26 +1,34 @@
-'use client'
-
 import React, { useEffect, useState } from 'react'
 
 interface DynamicToolLoaderProps {
     slug: string
 }
 
+// Statically analyzable glob so Vite can code-split each tool into its own
+// chunk and load it on demand, mirroring the previous dynamic import.
+const toolModules = import.meta.glob<{ default: React.ComponentType }>(
+    '/components/tools/*.tsx'
+)
+
 export default function DynamicToolLoader({ slug }: DynamicToolLoaderProps) {
     const [Component, setComponent] = useState<React.ComponentType | null>(null)
     const [error, setError] = useState<boolean>(false)
 
     useEffect(() => {
-        const importComponent = async () => {
-            try {
-                const component = await import(`@/components/tools/${slug}`)
-                setComponent(() => component.default)
-            } catch (_err: unknown) {
-                setError(true)
-            }
+        const loader = toolModules[`/components/tools/${slug}.tsx`]
+
+        if (!loader) {
+            setError(true)
+            return
         }
 
-        importComponent()
+        loader()
+            .then((component) => {
+                setComponent(() => component.default)
+            })
+            .catch(() => {
+                setError(true)
+            })
     }, [slug])
 
     if (error) {

@@ -2,28 +2,15 @@ import { getToolsByCategory } from '@/data/toolsData'
 import type { Tool } from '@/types/tool'
 import { ArrowRight, Wrench } from 'lucide-react'
 
-import type { Metadata } from 'next'
-import Link from 'next/link'
-
 import { BackgroundGrid } from '@/components/background-grid'
+import Link from '@/components/link'
 import { Section } from '@/components/section'
+import { Seo } from '@/components/seo'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
-export const metadata: Metadata = {
-    title: 'Developer Tools - Fx64b.dev',
-    description:
-        'Free online tools for developers and everyday tasks. No ads, no tracking, just tools that work.',
-    openGraph: {
-        title: 'Free Online Tools for Developers',
-        description:
-            'Collection of free browser-based tools for developers and everyday tasks.',
-        url: 'https://fx64b.dev/tools',
-    },
-}
-
-export default function ToolsPage() {
+export default function ToolsIndex() {
     const conversionTools = getToolsByCategory('conversion')
     const formattingTools = getToolsByCategory('formatting')
     const generatorTools = getToolsByCategory('generators')
@@ -38,6 +25,34 @@ export default function ToolsPage() {
 
     return (
         <>
+            <Seo
+                title="Developer Tools - Fx64b.dev"
+                description="Free online tools for developers and everyday tasks. No ads, no tracking, just tools that work."
+                path="/tools"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'CollectionPage',
+                    '@id': 'https://fx64b.dev/tools',
+                    name: 'Developer Tools',
+                    description:
+                        'Free online tools for developers and everyday tasks. No ads, no tracking, just tools that work.',
+                    hasPart: allCategories.flatMap((category) =>
+                        category.tools.map((tool) => ({
+                            '@type': 'WebApplication',
+                            name: tool.title,
+                            description: tool.description,
+                            url: `https://fx64b.dev/tools/${tool.slug}`,
+                            applicationCategory: 'DeveloperApplication',
+                            operatingSystem: 'Any',
+                            offers: {
+                                '@type': 'Offer',
+                                price: '0',
+                                priceCurrency: 'USD',
+                            },
+                        }))
+                    ),
+                }}
+            />
             <BackgroundGrid />
 
             <main className="relative">

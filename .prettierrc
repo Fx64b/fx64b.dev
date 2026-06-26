@@ -8,11 +8,9 @@
     "trailingComma": "es5",
     "importOrder": [
         "^react",
-        "next",
-        "^next/",
+        "^react-router",
         "^@vercel/(.*)$",
-        "^@/app/(.*)$",
-        "^@app/lib/(.*)$",
+        "^@/lib/(.*)$",
         "^@/components/(.*)$",
         "^[./]"
     ],

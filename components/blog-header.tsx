@@ -1,5 +1,4 @@
-import Image from 'next/image'
-
+import Image from '@/components/image'
 import { Separator } from '@/components/ui/separator'
 
 interface BlogHeaderProps {
@@ -36,7 +35,7 @@ export function BlogHeader({
                     <b>Readtime:</b> <span>{readtime}</span>
                 </div>
             )}
-            <p className="my-2 text-muted-foreground">{date}</p>
+            <p className="text-muted-foreground my-2">{date}</p>
             <Separator />
         </div>
     )

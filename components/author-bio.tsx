@@ -1,9 +1,8 @@
 import { Github, Linkedin, Mail } from 'lucide-react'
 
-import Image from 'next/image'
-import Link from 'next/link'
-
 import { XIcon } from '@/components/icons/x-icon'
+import Image from '@/components/image'
+import Link from '@/components/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 

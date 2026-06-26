@@ -1,12 +1,11 @@
 import { Github, Linkedin, Mail } from 'lucide-react'
 
-import Image from 'next/image'
-import Link from 'next/link'
-
-import { getVersion } from '@/app/lib/version'
+import { getVersion } from '@/lib/version'
 
 import { Cross } from '@/components/Cross'
 import { XIcon } from '@/components/icons/x-icon'
+import Image from '@/components/image'
+import Link from '@/components/link'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 

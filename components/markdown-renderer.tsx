@@ -1,5 +1,3 @@
-'use client'
-
 import { CheckIcon, ClipboardIcon } from 'lucide-react'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
@@ -9,8 +7,7 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-import Link from 'next/link'
-
+import Link from '@/components/link'
 import { Separator } from '@/components/ui/separator'
 import {
     Table,
@@ -106,27 +103,27 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                     <span className="text-xs font-medium text-gray-400">
                         {languageNames[language] || language.toUpperCase()}
                     </span>
-                        <button
-                            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-                            aria-label="Copy code to clipboard"
-                            onClick={() => {
-                                navigator.clipboard.writeText(code)
-                                setIsCopied(true)
-                                setTimeout(() => setIsCopied(false), 2000)
-                            }}
-                        >
-                            {isCopied ? (
-                                <>
-                                    <CheckIcon className="h-3.5 w-3.5" />
-                                    Copied!
-                                </>
-                            ) : (
-                                <>
-                                    <ClipboardIcon className="h-3.5 w-3.5" />
-                                    Copy
-                                </>
-                            )}
-                        </button>
+                    <button
+                        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+                        aria-label="Copy code to clipboard"
+                        onClick={() => {
+                            navigator.clipboard.writeText(code)
+                            setIsCopied(true)
+                            setTimeout(() => setIsCopied(false), 2000)
+                        }}
+                    >
+                        {isCopied ? (
+                            <>
+                                <CheckIcon className="h-3.5 w-3.5" />
+                                Copied!
+                            </>
+                        ) : (
+                            <>
+                                <ClipboardIcon className="h-3.5 w-3.5" />
+                                Copy
+                            </>
+                        )}
+                    </button>
                 </div>
                 <div className="overflow-hidden rounded-b-md">
                     <SyntaxHighlighter
