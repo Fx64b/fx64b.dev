@@ -11,45 +11,58 @@ readTime: '6 mins'
 
 # Skool Downloader
 
-<div className="my-8 p-6 rounded-lg bg-primary/10 border-2 border-primary/20 text-center">
-  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/30 mb-4 text-sm font-medium">
-    Launching Soon!
-  </div>
-  <h3 className="text-2xl font-bold mb-3">Hosted Solution Coming Soon!</h3>
-  <p className="text-base mb-6 max-w-2xl mx-auto">Tired of the technical setup? I'm building a hosted solution that makes downloading Skool videos effortless - no installation, no command line, just simple one-click downloads.</p>
-  <a href="https://skool.fx64b.dev" className="inline-block px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-md hover:opacity-90 mb-6" target="_blank" rel="noopener noreferrer">Join the Waitlist</a>
-  <div className="text-sm max-w-xl mx-auto p-3 rounded-md bg-background/50 border border-primary/10 mb-4">
-    <strong>Early Bird Bonus:</strong> Join now and get 1 month of Pro free when we launch! Pro includes 50 downloads per day, 30-day video retention, and bulk ZIP exports.
+<div className="my-8 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/[0.04] to-background">
+  <div className="p-8 text-center sm:p-10">
+    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 mb-5 text-xs font-semibold uppercase tracking-wide">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+      </span>
+      Launching Soon
+    </div>
+    <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">Download Skool videos in one click</h2>
+    <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground sm:text-lg">No installs. No command line. A hosted tool that adds a download button to every Skool video — and lets you grab entire courses at once. Join the waitlist to get early access.</p>
+    <a href="https://skool.fx64b.dev" className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3 font-semibold text-primary-foreground no-underline transition-opacity hover:opacity-90" target="_blank" rel="noopener noreferrer">
+      Join the Waitlist
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <div className="mx-auto mt-6 flex max-w-md items-start gap-3 rounded-lg border border-primary/15 bg-background/60 p-4 text-left text-sm">
+      <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7L6.4 21l1.6-7-5.4-4.7 7.1-.6z"/></svg>
+      <span><strong className="text-foreground">Early bird bonus:</strong> join now and get 1 month of Pro free at launch — 50 downloads per day, 30-day video retention, and bulk ZIP exports.</span>
+    </div>
   </div>
 </div>
 
-**What you'll get with the hosted solution:**
-
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
-  <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
-    <div className="w-10 h-10 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center mb-2 mx-auto">
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+<div className="grid grid-cols-1 gap-4 my-8 md:grid-cols-3">
+  <div className="rounded-xl border border-primary/10 bg-primary/5 p-5">
+    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/20">
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
     </div>
-    <h4 className="font-semibold text-center mb-1">One-Click Downloads</h4>
-    <p className="text-sm text-center">Simple browser extension that adds a download button to every Skool video.</p>
+    <h4 className="mb-1 font-semibold">One-click downloads</h4>
+    <p className="mb-0 text-sm text-muted-foreground">A simple browser extension adds a download button to every Skool video.</p>
   </div>
-  <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
-    <div className="w-10 h-10 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center mb-2 mx-auto">
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+  <div className="rounded-xl border border-primary/10 bg-primary/5 p-5">
+    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/20">
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     </div>
-    <h4 className="font-semibold text-center mb-1">Bulk Downloads</h4>
-    <p className="text-sm text-center">Download entire modules or courses at once with Pro. Save hours of time.</p>
+    <h4 className="mb-1 font-semibold">Bulk downloads</h4>
+    <p className="mb-0 text-sm text-muted-foreground">Grab entire modules or courses at once with Pro. Save hours of clicking.</p>
   </div>
-  <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
-    <div className="w-10 h-10 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center mb-2 mx-auto">
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+  <div className="rounded-xl border border-primary/10 bg-primary/5 p-5">
+    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/20">
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
     </div>
-    <h4 className="font-semibold text-center mb-1">Progress Tracking</h4>
-    <p className="text-sm text-center">Dashboard to track all your downloads, manage storage, and more.</p>
+    <h4 className="mb-1 font-semibold">Progress tracking</h4>
+    <p className="mb-0 text-sm text-muted-foreground">A dashboard to track every download, manage storage, and pick up where you left off.</p>
   </div>
 </div>
 
-<hr className="my-8 border-border/40" />
+<hr className="my-10 border-border/40" />
+
+<div className="my-8 rounded-xl border border-border/60 bg-secondary/30 p-6">
+  <h3 className="mb-1 mt-0 text-lg font-semibold">Available now: the free, open-source CLI</h3>
+  <p className="mb-0 text-sm text-muted-foreground">Don't want to wait for the hosted version? The command-line tool documented below is free, open source, and ready to use today — everything that follows is its full technical documentation.</p>
+</div>
 
 ## Overview
 
@@ -119,12 +132,12 @@ Version 2.0.0 represents a major upgrade with several important changes:
 1. Install [yt-dlp](https://github.com/yt-dlp/yt-dlp#installation)
 2. Download the latest release from the [Releases page](https://github.com/fx64b/skool-downloader/releases)
 3. Choose the appropriate binary for your platform:
-   - **Linux (x64)**: `skool-downloader-linux-amd64`
-   - **Linux (ARM64)**: `skool-downloader-linux-arm64`
-   - **Windows (x64)**: `skool-downloader-windows-amd64.exe`
-   - **Windows (ARM64)**: `skool-downloader-windows-arm64.exe`
-   - **macOS (Intel)**: `skool-downloader-darwin-amd64`
-   - **macOS (Apple Silicon)**: `skool-downloader-darwin-arm64`
+    - **Linux (x64)**: `skool-downloader-linux-amd64`
+    - **Linux (ARM64)**: `skool-downloader-linux-arm64`
+    - **Windows (x64)**: `skool-downloader-windows-amd64.exe`
+    - **Windows (ARM64)**: `skool-downloader-windows-arm64.exe`
+    - **macOS (Intel)**: `skool-downloader-darwin-amd64`
+    - **macOS (Apple Silicon)**: `skool-downloader-darwin-arm64`
 4. Make it executable (Linux/macOS): `chmod +x skool-downloader-*`
 
 > **Note:** Older versions were called `skool-loom-dl` before release v2.0.0
@@ -198,6 +211,7 @@ docker run -v $(pwd)/downloads:/data -v $(pwd)/cookies.json:/cookies.json skool-
 ```
 
 The Docker image includes:
+
 - Chrome/Chromium for browser automation
 - yt-dlp for video downloads
 - ffmpeg for video processing
@@ -247,6 +261,7 @@ go tool cover -func=coverage.out
 ```
 
 The unit tests cover:
+
 - Loom and YouTube URL extraction from HTML
 - Cookie parsing (JSON and Netscape formats)
 - Cookie format conversion
@@ -265,6 +280,7 @@ chmod +x test-integration.sh
 ```
 
 The integration tests verify:
+
 - Docker image builds successfully
 - Binary is executable in the container
 - yt-dlp is installed and functional
@@ -277,13 +293,13 @@ The integration tests verify:
 The project uses GitHub Actions for automated testing:
 
 1. **Lint and Build** (`lint-and-build.yml`): Runs on every push and PR
-   - Lints code with golangci-lint
-   - Builds the project
-   - Runs unit tests with coverage reporting
+    - Lints code with golangci-lint
+    - Builds the project
+    - Runs unit tests with coverage reporting
 
 2. **Docker Integration Tests** (`docker-integration-test.yml`): Runs on every push and PR
-   - Builds the Docker image
-   - Runs integration tests in a containerized environment
+    - Builds the Docker image
+    - Runs integration tests in a containerized environment
 
 ### Creating Releases (Maintainers)
 
@@ -296,6 +312,7 @@ To create a new release with cross-platform binaries:
 5. Click "Run workflow"
 
 The workflow will automatically:
+
 - Build binaries for all supported platforms
 - Create a new GitHub release
 - Attach all binaries to the release
