@@ -106,27 +106,27 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                     <span className="text-xs font-medium text-gray-400">
                         {languageNames[language] || language.toUpperCase()}
                     </span>
-                        <button
-                            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-                            aria-label="Copy code to clipboard"
-                            onClick={() => {
-                                navigator.clipboard.writeText(code)
-                                setIsCopied(true)
-                                setTimeout(() => setIsCopied(false), 2000)
-                            }}
-                        >
-                            {isCopied ? (
-                                <>
-                                    <CheckIcon className="h-3.5 w-3.5" />
-                                    Copied!
-                                </>
-                            ) : (
-                                <>
-                                    <ClipboardIcon className="h-3.5 w-3.5" />
-                                    Copy
-                                </>
-                            )}
-                        </button>
+                    <button
+                        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+                        aria-label="Copy code to clipboard"
+                        onClick={() => {
+                            navigator.clipboard.writeText(code)
+                            setIsCopied(true)
+                            setTimeout(() => setIsCopied(false), 2000)
+                        }}
+                    >
+                        {isCopied ? (
+                            <>
+                                <CheckIcon className="h-3.5 w-3.5" />
+                                Copied!
+                            </>
+                        ) : (
+                            <>
+                                <ClipboardIcon className="h-3.5 w-3.5" />
+                                Copy
+                            </>
+                        )}
+                    </button>
                 </div>
                 <div className="overflow-hidden rounded-b-md">
                     <SyntaxHighlighter
@@ -161,11 +161,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             components={{
                 code: CodeBlock as any,
                 hr: () => <Separator className="my-8" />,
-                a: ({ href, children }) => (
+                a: ({ href, children, className }) => (
                     <Link
                         href={href!}
                         target={href?.startsWith('http') ? '_blank' : undefined}
-                        className="text-primary hover:text-primary/80 underline underline-offset-4"
+                        rel={
+                            href?.startsWith('http')
+                                ? 'noopener noreferrer'
+                                : undefined
+                        }
+                        className={
+                            (className as string) ||
+                            'text-primary hover:text-primary/80 underline underline-offset-4'
+                        }
                     >
                         {children}
                     </Link>

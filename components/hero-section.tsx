@@ -6,7 +6,6 @@ import { SwissCross } from 'swiss-cross'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 export function HeroSection() {
@@ -14,12 +13,6 @@ export function HeroSection() {
         <section className="relative py-24 md:py-32">
             <div className="container mx-auto max-w-6xl px-6">
                 <div className="flex flex-col items-center text-center">
-                    {/* Status badge */}
-                    <Badge variant="secondary" className="mb-6 px-3 py-1">
-                        <div className="mr-2 h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                        Currently focused on projects
-                    </Badge>
-
                     {/* Profile image */}
                     <div className="relative mb-8">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-white/5 blur-2xl" />
