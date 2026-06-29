@@ -15,8 +15,6 @@ jobs:
                   node-version: '24.x'
             - uses: pnpm/action-setup@v4
               name: Install pnpm
-              with:
-                  version: 10
             - name: Get pnpm store directory
               shell: bash
               run: |
