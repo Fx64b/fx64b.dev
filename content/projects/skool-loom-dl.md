@@ -13,13 +13,6 @@ readTime: '6 mins'
 
 <div className="my-8 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/[0.04] to-background">
   <div className="p-8 text-center sm:p-10">
-    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 mb-5 text-xs font-semibold uppercase tracking-wide">
-      <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
-      </span>
-      Launching Soon
-    </div>
     <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">Download Skool videos in one click</h2>
     <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground sm:text-lg">No installs. No command line. A hosted tool that adds a download button to every Skool video — and lets you grab entire courses at once. Join the waitlist to get early access.</p>
     <a href="https://skool.fx64b.dev" className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3 font-semibold text-primary-foreground no-underline transition-opacity hover:opacity-90" target="_blank" rel="noopener noreferrer">
