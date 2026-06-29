@@ -104,7 +104,7 @@ export function Footer() {
 
                 <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div className="text-foreground/60 flex items-center gap-4 text-sm">
-                        <span>© 2025 Fx64b</span>
+                        <span>© 2026 Fx64b</span>
                         <span>•</span>
                         <span>v{version}</span>
                         <Cross />
