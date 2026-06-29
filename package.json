@@ -3,6 +3,10 @@
   "version": "4.0.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "vite-react-ssg dev",
     "build": "vite-react-ssg build",
