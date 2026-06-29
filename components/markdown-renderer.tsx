@@ -158,11 +158,19 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             components={{
                 code: CodeBlock as any,
                 hr: () => <Separator className="my-8" />,
-                a: ({ href, children }) => (
+                a: ({ href, children, className }) => (
                     <Link
                         href={href!}
                         target={href?.startsWith('http') ? '_blank' : undefined}
-                        className="text-primary hover:text-primary/80 underline underline-offset-4"
+                        rel={
+                            href?.startsWith('http')
+                                ? 'noopener noreferrer'
+                                : undefined
+                        }
+                        className={
+                            (className as string) ||
+                            'text-primary hover:text-primary/80 underline underline-offset-4'
+                        }
                     >
                         {children}
                     </Link>
