@@ -1,12 +1,11 @@
 import { Github, Linkedin, Mail } from 'lucide-react'
 
-import Image from 'next/image'
-import Link from 'next/link'
-
-import { getVersion } from '@/app/lib/version'
+import { getVersion } from '@/lib/version'
 
 import { Cross } from '@/components/Cross'
 import { XIcon } from '@/components/icons/x-icon'
+import Image from '@/components/image'
+import Link from '@/components/link'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
@@ -105,7 +104,7 @@ export function Footer() {
 
                 <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <div className="text-foreground/60 flex items-center gap-4 text-sm">
-                        <span>© 2025 Fx64b</span>
+                        <span>© 2026 Fx64b</span>
                         <span>•</span>
                         <span>v{version}</span>
                         <Cross />

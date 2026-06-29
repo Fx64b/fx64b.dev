@@ -11,15 +11,15 @@ import {
     User,
 } from 'lucide-react'
 
-import type { Metadata } from 'next'
-import Image from 'next/image'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { useParams } from 'react-router-dom'
 
-import { getProjectDocBySlug } from '@/app/lib/projects'
+import { getProjectDocBySlug } from '@/lib/projects'
 
 import { BackgroundGrid } from '@/components/background-grid'
+import Image from '@/components/image'
+import Link from '@/components/link'
 import MarkdownRenderer from '@/components/markdown-renderer'
+import { Seo } from '@/components/seo'
 import { TableOfContents } from '@/components/table-of-contents'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -27,11 +27,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
-interface Props {
-    params: Promise<{
-        slug: string
-    }>
-}
+import NotFound from '../NotFound'
 
 function titleToSlug(title: string): string {
     return title.toLowerCase().replace(/\s+/g, '-')
@@ -43,61 +39,16 @@ function getProjectBySlug(slug: string) {
     )
 }
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-    const params = await props.params
-    const { slug } = params
+export default function ProjectPage() {
+    const { slug = '' } = useParams()
     const project = getProjectBySlug(slug)
     const projectDoc = getProjectDocBySlug(slug)
 
     if (!project) {
-        return {
-            title: 'Project not found',
-            description: 'The requested project could not be found.',
-        }
+        return <NotFound />
     }
 
     const description = projectDoc?.description || project.description
-
-    return {
-        title: `${project.title} - Fx64b Projects`,
-        metadataBase: new URL('https://fx64b.dev'),
-        description: description,
-        openGraph: {
-            title: project.title,
-            description: description,
-            images: [
-                {
-                    url: project.logo || 'https://fx64b.dev/logo.svg',
-                    alt: project.title,
-                },
-            ],
-            type: 'article',
-        },
-        twitter: {
-            card: 'summary',
-            title: project.title,
-            description: description,
-            images: [project.logo || 'https://fx64b.dev/logo.svg'],
-        },
-    }
-}
-
-export async function generateStaticParams() {
-    const featuredProjects = projectData.filter((project) => project.featured)
-    return featuredProjects.map((project) => ({
-        slug: titleToSlug(project.title),
-    }))
-}
-
-export default async function ProjectPage(props: Props) {
-    const params = await props.params
-    const { slug } = params
-    const project = getProjectBySlug(slug)
-    const projectDoc = getProjectDocBySlug(slug)
-
-    if (!project) {
-        notFound()
-    }
 
     const statusColors = {
         Finished: 'bg-green-500/10 text-green-500 border-green-500/20',
@@ -109,6 +60,28 @@ export default async function ProjectPage(props: Props) {
 
     return (
         <>
+            <Seo
+                title={`${project.title} - Fx64b Projects`}
+                description={description}
+                path={`/projects/${slug}`}
+                image={project.logo || 'https://fx64b.dev/logo.svg'}
+                type="article"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'SoftwareSourceCode',
+                    name: project.title,
+                    description: description,
+                    codeRepository: project.githubLink,
+                    url: `https://fx64b.dev/projects/${slug}`,
+                    author: { '@id': 'https://fx64b.dev/#person' },
+                    ...(projectDoc?.version && {
+                        version: projectDoc.version,
+                    }),
+                    ...(projectDoc?.lastUpdated && {
+                        dateModified: projectDoc.lastUpdated,
+                    }),
+                }}
+            />
             <BackgroundGrid />
             <div className="relative mx-auto max-w-7xl px-4 py-8">
                 <div className="mb-8">

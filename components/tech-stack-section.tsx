@@ -1,9 +1,6 @@
-'use client'
-
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import Image from 'next/image'
-
+import Image from '@/components/image'
 import { Section } from '@/components/section'
 import { Badge } from '@/components/ui/badge'
 

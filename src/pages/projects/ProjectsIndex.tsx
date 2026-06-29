@@ -1,17 +1,37 @@
 import projectData from '@/data/projectData'
 
-import Link from 'next/link'
-
 import { BackgroundGrid } from '@/components/background-grid'
+import Link from '@/components/link'
 import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
+import { Seo } from '@/components/seo'
 
-export default function Projects() {
+export default function ProjectsIndex() {
     const featuredProjects = projectData.filter((project) => project.featured)
     const otherProjects = projectData.filter((project) => !project.featured)
 
     return (
         <>
+            <Seo
+                title="Projects - Fx64b.dev"
+                description="A collection of projects I've worked on, ranging from web applications to browser extensions and CLI tools. Featured projects include detailed documentation."
+                path="/projects"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'CollectionPage',
+                    '@id': 'https://fx64b.dev/projects',
+                    name: 'Projects',
+                    description:
+                        "A collection of projects I've worked on, ranging from web applications to browser extensions and CLI tools.",
+                    hasPart: projectData.map((project) => ({
+                        '@type': 'SoftwareSourceCode',
+                        name: project.title,
+                        description: project.description,
+                        codeRepository: project.githubLink,
+                        url: project.link,
+                    })),
+                }}
+            />
             <BackgroundGrid />
 
             <main className="relative">

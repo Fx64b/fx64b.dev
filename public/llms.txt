@@ -1,0 +1,28 @@
+# Fx64b.dev
+
+> Personal website of Fabio Maffucci (Fx64b), a software engineer from
+> Switzerland specializing in React, Next.js, TypeScript, and Go, with a
+> growing focus on cybersecurity. The site hosts his blog, project
+> documentation, and a collection of free, privacy-friendly developer tools.
+
+## About
+
+- [Home](https://fx64b.dev/): Overview, featured projects, and tech stack.
+- [Blog](https://fx64b.dev/blog): Articles on software development, technology, and lessons learned.
+- [Projects](https://fx64b.dev/projects): Featured and other projects with documentation and source links.
+- [Tools](https://fx64b.dev/tools): Free, browser-based developer tools (no ads, no tracking).
+
+## Tools
+
+- [Byte Converter](https://fx64b.dev/tools/byte-converter): Convert between byte units (KB, MB, GB, TB, etc.).
+- [Text Case Converter](https://fx64b.dev/tools/text-case-converter): Convert text between cases.
+- [Color Converter](https://fx64b.dev/tools/color-converter): Convert between HEX, RGB, and HSL.
+- [Hour to Decimal Converter](https://fx64b.dev/tools/hour-decimal-converter): Convert hours and minutes to decimal time.
+- [Character & Word Counter](https://fx64b.dev/tools/character-word-counter): Count characters, words, sentences, and reading time.
+
+## Contact
+
+- GitHub: https://github.com/Fx64b
+- X: https://x.com/f_x64b
+- LinkedIn: https://www.linkedin.com/in/fabio-maffucci-23515b328/
+- Email: contact@fx64b.dev

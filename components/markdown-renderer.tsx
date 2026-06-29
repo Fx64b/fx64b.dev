@@ -1,5 +1,3 @@
-'use client'
-
 import { CheckIcon, ClipboardIcon } from 'lucide-react'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
@@ -9,8 +7,7 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-import Link from 'next/link'
-
+import Link from '@/components/link'
 import { Separator } from '@/components/ui/separator'
 import {
     Table,

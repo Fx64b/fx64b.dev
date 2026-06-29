@@ -1,16 +1,14 @@
-'use client'
-
 import { Github } from 'lucide-react'
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useLocation } from 'react-router-dom'
 
+import Image from '@/components/image'
+import Link from '@/components/link'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
 export function Header() {
-    const pathname = usePathname()
+    const pathname = useLocation().pathname
 
     const isActive = (path: string) => {
         if (path === '/') {

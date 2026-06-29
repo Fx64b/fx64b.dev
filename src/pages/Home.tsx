@@ -1,54 +1,32 @@
 import projects from '@/data/projectData'
 import { ArrowRight } from 'lucide-react'
 
-import type { Metadata } from 'next'
-import Link from 'next/link'
-
 import { BackgroundGrid } from '@/components/background-grid'
 import { HeroSection } from '@/components/hero-section'
+import Link from '@/components/link'
 import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
+import { Seo } from '@/components/seo'
 import { TechStackSection } from '@/components/tech-stack-section'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
-export async function generateMetadata(): Promise<Metadata> {
-    return {
-        title: 'Fx64b.dev',
-        description:
-            'Personal website of Fx64b where you can find information about my latest projects and blog posts.',
-        openGraph: {
-            title: 'Fx64b.dev',
-            description:
-                'Personal website of Fx64b where you can find information about my latest projects and blog posts.',
-            url: 'https://fx64b.dev',
-            images: [
-                {
-                    url: 'https://fx64b.dev/logo.svg',
-                    width: 200,
-                    height: 200,
-                    alt: 'Fx64b.dev Logo',
-                },
-            ],
-        },
-        twitter: {
-            card: 'summary',
-            title: 'Fx64b.dev',
-            description:
-                'Personal website of Fx64b where you can find information about my latest projects and blog posts.',
-            images: [
-                {
-                    url: 'https://fx64b.dev/logo.svg',
-                    alt: 'Fx64b.dev Logo',
-                },
-            ],
-        },
-    }
-}
+const description =
+    'Personal website of Fx64b where you can find information about my latest projects and blog posts.'
 
 export default function Home() {
     return (
         <>
+            <Seo
+                title="Fx64b.dev"
+                description={description}
+                path="/"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'ProfilePage',
+                    mainEntity: { '@id': 'https://fx64b.dev/#person' },
+                }}
+            />
             <BackgroundGrid />
             <main className="relative">
                 <HeroSection />
@@ -75,9 +53,7 @@ export default function Home() {
                                     href={`/projects/${project.title.toLowerCase().replace(/\s+/g, '-')}`}
                                     className="group block"
                                 >
-                                    <ProjectCard
-                                        project={project}
-                                    />
+                                    <ProjectCard project={project} />
                                 </Link>
                             ))}
                     </div>

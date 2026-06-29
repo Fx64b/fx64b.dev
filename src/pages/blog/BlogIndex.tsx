@@ -1,19 +1,40 @@
 import { ArrowRight, Calendar, Clock } from 'lucide-react'
 
-import Link from 'next/link'
-
-import { getAllPosts } from '@/app/lib/posts'
+import { getAllPosts } from '@/lib/posts'
 
 import { BackgroundGrid } from '@/components/background-grid'
+import Link from '@/components/link'
 import { Section } from '@/components/section'
+import { Seo } from '@/components/seo'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
-export default async function Blog() {
+export default function BlogIndex() {
     const posts = getAllPosts()
 
     return (
         <>
+            <Seo
+                title="Blog - Fx64b.dev"
+                description="Thoughts on software development, technology trends, and lessons learned from building applications."
+                path="/blog"
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'Blog',
+                    '@id': 'https://fx64b.dev/blog',
+                    name: 'Fx64b Blog',
+                    description:
+                        'Thoughts on software development, technology trends, and lessons learned from building applications.',
+                    author: { '@id': 'https://fx64b.dev/#person' },
+                    blogPost: posts.map((post) => ({
+                        '@type': 'BlogPosting',
+                        headline: post.title,
+                        description: post.description,
+                        datePublished: post.date,
+                        url: `https://fx64b.dev/blog/${post.slug}`,
+                    })),
+                }}
+            />
             <BackgroundGrid />
 
             <main className="relative">
