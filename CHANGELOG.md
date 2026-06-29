@@ -1,3 +1,14 @@
+# [3.5.0](https://github.com/Fx64b/fx64b.dev/compare/v3.4.2...v3.5.0) (2026-06-29)
+
+
+### Features
+
+* add Obsidianator project details and logo ([d951553](https://github.com/Fx64b/fx64b.dev/commit/d951553000c7c2d06bb9fe4933dfcfe2bd96ed2a))
+* add Push to Prod clicker game project entry ([b03c153](https://github.com/Fx64b/fx64b.dev/commit/b03c153baeb6283ec60592498aee7d24284b2c48))
+* add Push to Prod logo from game favicon ([a4b09ee](https://github.com/Fx64b/fx64b.dev/commit/a4b09ee327d548b8f3caaea78f34697e21627971))
+* migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
+* several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
+
 ## [3.4.2](https://github.com/Fx64b/fx64b.dev/compare/v3.4.1...v3.4.2) (2025-12-30)
 
 
