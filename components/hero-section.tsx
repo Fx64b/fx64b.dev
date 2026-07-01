@@ -3,37 +3,39 @@ import { SwissCross } from 'swiss-cross'
 
 import Image from '@/components/image'
 import Link from '@/components/link'
-
 import { Button } from '@/components/ui/button'
 
 export function HeroSection() {
     return (
-        <section className="relative py-24 md:py-32">
+        <section className="py-16 md:py-24">
             <div className="container mx-auto max-w-6xl px-6">
                 <div className="flex flex-col items-center text-center">
-                    {/* Profile image */}
-                    <div className="relative mb-8">
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-white/5 blur-2xl" />
-                        <Image
-                            src="/logo.svg"
-                            alt="Fx64b profile picture"
-                            width={120}
-                            height={120}
-                            className="border-border/50 bg-background relative rounded-full border"
-                        />
+                    <Image
+                        src="/logo.svg"
+                        alt="Fx64b profile picture"
+                        width={96}
+                        height={96}
+                        className="border-border bg-background rounded-full border"
+                    />
+
+                    <div className="text-muted-foreground mt-6 flex flex-wrap items-center justify-center gap-6 text-sm">
+                        <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            <span>Switzerland</span>
+                            <SwissCross borderRadius={'slight'} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span>4+ years experience</span>
+                        </div>
                     </div>
 
-                    {/* Main heading */}
-                    <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl">
+                    <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl">
                         Software Engineer
-                        <br />
-                        <span className="from-foreground to-foreground/70 bg-gradient-to-r bg-clip-text text-transparent">
-                            & Security Enthusiast
-                        </span>
+                        <br />& Security Enthusiast
                     </h1>
 
-                    {/* Description */}
-                    <p className="text-foreground/70 mb-8 max-w-2xl text-lg sm:text-xl">
+                    <p className="text-muted-foreground mt-6 max-w-2xl text-lg sm:text-xl">
                         Hey! I&#39;m{' '}
                         <Link
                             href={'https://fabio-maffucci.ch'}
@@ -46,21 +48,7 @@ export function HeroSection() {
                         Go. Currently exploring cybersecurity fundamentals.
                     </p>
 
-                    {/* Location and experience */}
-                    <div className="text-foreground/60 mb-8 flex flex-wrap items-center justify-center gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span>Switzerland</span>
-                            <SwissCross borderRadius={'slight'} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>4+ years experience</span>
-                        </div>
-                    </div>
-
-                    {/* CTA buttons */}
-                    <div className="flex flex-col gap-4 sm:flex-row">
+                    <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                         <Button size="lg" className="group" asChild>
                             <Link href="/projects">
                                 View My Work

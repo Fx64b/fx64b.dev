@@ -13,7 +13,7 @@ export function Footer() {
     const version = getVersion()
 
     return (
-        <footer className="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur">
+        <footer className="border-border bg-background border-t">
             <div className="container mx-auto max-w-6xl px-6 py-12">
                 <div className="grid gap-8 md:grid-cols-4">
                     {/* Brand section */}
@@ -28,7 +28,7 @@ export function Footer() {
                             />
                             <span className="text-xl font-bold">Fx64b</span>
                         </div>
-                        <p className="text-foreground/70 max-w-md text-sm leading-relaxed">
+                        <p className="text-muted-foreground max-w-md text-sm leading-relaxed">
                             Software engineer from Switzerland building modern
                             web applications with React, Next.js, TypeScript,
                             and Go.
@@ -41,19 +41,19 @@ export function Footer() {
                         <div className="space-y-2">
                             <Link
                                 href="/"
-                                className="text-foreground/70 hover:text-foreground block text-sm transition-colors"
+                                className="text-muted-foreground hover:text-foreground block text-sm transition-colors"
                             >
                                 Home
                             </Link>
                             <Link
                                 href="/blog"
-                                className="text-foreground/70 hover:text-foreground block text-sm transition-colors"
+                                className="text-muted-foreground hover:text-foreground block text-sm transition-colors"
                             >
                                 Blog
                             </Link>
                             <Link
                                 href="/tools"
-                                className="text-foreground/70 hover:text-foreground block text-sm transition-colors"
+                                className="text-muted-foreground hover:text-foreground block text-sm transition-colors"
                             >
                                 Tools
                             </Link>
@@ -103,7 +103,7 @@ export function Footer() {
                 <Separator className="my-8" />
 
                 <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                    <div className="text-foreground/60 flex items-center gap-4 text-sm">
+                    <div className="text-muted-foreground flex items-center gap-4 text-sm">
                         <span>© 2026 Fx64b</span>
                         <span>•</span>
                         <span>v{version}</span>

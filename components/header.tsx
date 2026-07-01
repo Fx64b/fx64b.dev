@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 
 import Image from '@/components/image'
 import Link from '@/components/link'
+import { ModeToggle } from '@/components/mode-toggle'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
@@ -18,12 +19,12 @@ export function Header() {
     }
 
     return (
-        <header className="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
+        <header className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
             <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
                 <div className="flex items-center">
                     <Link
                         href="/"
-                        className="hover:text-foreground/80 flex items-center space-x-2 text-xl font-bold tracking-tight transition-colors"
+                        className="hover:text-muted-foreground flex items-center space-x-2 text-xl font-bold tracking-tight transition-colors"
                     >
                         <Image
                             src={'/logo.svg'}
@@ -42,7 +43,7 @@ export function Header() {
                         className={`hover:text-foreground hidden px-4 py-2 text-sm font-medium transition-colors sm:flex ${
                             isActive('/')
                                 ? 'text-foreground'
-                                : 'text-foreground/60'
+                                : 'text-muted-foreground'
                         }`}
                     >
                         Home
@@ -52,7 +53,7 @@ export function Header() {
                         className={`hover:text-foreground px-4 py-2 text-sm font-medium transition-colors ${
                             isActive('/blog')
                                 ? 'text-foreground'
-                                : 'text-foreground/60'
+                                : 'text-muted-foreground'
                         }`}
                     >
                         Blog
@@ -62,7 +63,7 @@ export function Header() {
                         className={`hover:text-foreground px-4 py-2 text-sm font-medium transition-colors ${
                             isActive('/tools')
                                 ? 'text-foreground'
-                                : 'text-foreground/60'
+                                : 'text-muted-foreground'
                         }`}
                     >
                         Tools
@@ -72,13 +73,15 @@ export function Header() {
                         className={`hover:text-foreground hidden px-4 py-2 text-sm font-medium transition-colors sm:flex ${
                             isActive('/projects')
                                 ? 'text-foreground'
-                                : 'text-foreground/60'
+                                : 'text-muted-foreground'
                         }`}
                     >
                         Projects
                     </Link>
 
                     <Separator orientation="vertical" className="mx-2 h-6" />
+
+                    <ModeToggle />
 
                     <Button variant="ghost" size="icon" asChild>
                         <Link

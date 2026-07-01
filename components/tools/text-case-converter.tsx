@@ -3,6 +3,7 @@ import { ArrowDown, Check, Copy } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { ToolInfoSection } from '@/components/tools/tool-info-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -241,7 +242,7 @@ export default function TextCaseConverter() {
                         </Tooltip>
                     </TooltipProvider>
 
-                    <div className="bg-secondary/30 min-h-[120px] rounded-md p-4 font-mono whitespace-pre-wrap">
+                    <div className="bg-muted min-h-[120px] rounded-md p-4 font-mono whitespace-pre-wrap">
                         {outputText || (
                             <span className="text-muted-foreground">
                                 Converted text will appear here
@@ -251,90 +252,89 @@ export default function TextCaseConverter() {
                 </CardContent>
             </Card>
 
-            <div className="mt-8 mb-4">
-                <h2 className="mb-4 text-xl font-semibold">
-                    Case Types Explained
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">Title Case</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Capitalizes the first letter of each word. Used
-                                for titles, headings, and proper nouns.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                The Quick Brown Fox
-                            </div>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection
+                title="Case Types Explained"
+                columns={3}
+                className="mt-8"
+            >
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Title Case</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Capitalizes the first letter of each word. Used for
+                            titles, headings, and proper nouns.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            The Quick Brown Fox
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">camelCase</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                First word lowercase, subsequent words
-                                capitalized. Common in JavaScript variables.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                theQuickBrownFox
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">camelCase</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            First word lowercase, subsequent words capitalized.
+                            Common in JavaScript variables.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            theQuickBrownFox
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">PascalCase</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                All words capitalized without spaces. Used for
-                                class names in many languages.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                TheQuickBrownFox
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">PascalCase</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            All words capitalized without spaces. Used for class
+                            names in many languages.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            TheQuickBrownFox
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">snake_case</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Lowercase with underscores. Popular in Python,
-                                Ruby, and SQL.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                the_quick_brown_fox
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">snake_case</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Lowercase with underscores. Popular in Python, Ruby,
+                            and SQL.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            the_quick_brown_fox
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">kebab-case</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Lowercase with hyphens. Common in URLs, HTML
-                                attributes, and CSS properties.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                the-quick-brown-fox
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">kebab-case</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Lowercase with hyphens. Common in URLs, HTML
+                            attributes, and CSS properties.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            the-quick-brown-fox
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">CONSTANT_CASE</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                All uppercase with underscores. Used for
-                                constants and environment variables.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                THE_QUICK_BROWN_FOX
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">CONSTANT_CASE</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            All uppercase with underscores. Used for constants
+                            and environment variables.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            THE_QUICK_BROWN_FOX
+                        </div>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
         </div>
     )
 }

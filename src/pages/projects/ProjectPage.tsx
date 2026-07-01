@@ -13,9 +13,9 @@ import {
 
 import { useParams } from 'react-router-dom'
 
+import { statusColorsBordered as statusColors } from '@/lib/project-status'
 import { getProjectDocBySlug } from '@/lib/projects'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Image from '@/components/image'
 import Link from '@/components/link'
 import MarkdownRenderer from '@/components/markdown-renderer'
@@ -50,14 +50,6 @@ export default function ProjectPage() {
 
     const description = projectDoc?.description || project.description
 
-    const statusColors = {
-        Finished: 'bg-green-500/10 text-green-500 border-green-500/20',
-        'In Progress': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-        Planned: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-        Abandoned: 'bg-red-500/10 text-red-500 border-red-500/20',
-        'On Hold': 'bg-gray-500/10 text-gray-500 border-gray-500/20',
-    }
-
     return (
         <>
             <Seo
@@ -82,7 +74,6 @@ export default function ProjectPage() {
                     }),
                 }}
             />
-            <BackgroundGrid />
             <div className="relative mx-auto max-w-7xl px-4 py-8">
                 <div className="mb-8">
                     <Button variant="ghost" asChild className="group">
@@ -117,7 +108,7 @@ export default function ProjectPage() {
                                         alt={`${project.title} logo`}
                                         width={80}
                                         height={80}
-                                        className="border-border/50 rounded-xl border-2"
+                                        className="border-border rounded-xl border-2"
                                     />
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -220,21 +211,21 @@ export default function ProjectPage() {
                         )}
 
                         {projectDoc ? (
-                            <div className="prose prose-invert max-w-none">
+                            <div className="max-w-none">
                                 <MarkdownRenderer
                                     content={projectDoc.content}
                                 />
                             </div>
                         ) : (
                             /* Fallback content if no documentation */
-                            <div className="prose prose-invert max-w-none">
+                            <div className="max-w-none">
                                 {/* Overview */}
                                 <Card className="mb-8">
                                     <CardContent className="p-6">
                                         <h2 className="mb-4 text-2xl font-semibold">
                                             Overview
                                         </h2>
-                                        <p className="text-foreground/80 leading-relaxed">
+                                        <p className="text-muted-foreground leading-relaxed">
                                             {project.description}
                                         </p>
 
@@ -242,7 +233,7 @@ export default function ProjectPage() {
                                             variant="destructive"
                                             className="mt-8"
                                         >
-                                            <AlertCircleIcon className="h-8 w-8" />
+                                            <AlertCircleIcon className="h-5 w-5" />
                                             <AlertTitle>
                                                 This page is still work in
                                                 progress!

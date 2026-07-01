@@ -1,6 +1,5 @@
 import { Head } from 'vite-react-ssg'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Link from '@/components/link'
 import { Button } from '@/components/ui/button'
 
@@ -11,8 +10,10 @@ export default function NotFound() {
                 <title>Page Not Found - Fx64b.dev</title>
                 <meta name="robots" content="noindex, follow" />
             </Head>
-            <BackgroundGrid />
             <div className="flex min-h-[60vh] flex-col items-center justify-center py-12 text-center">
+                <p className="text-muted-foreground mb-2 font-mono text-sm tracking-widest">
+                    404
+                </p>
                 <h1 className="mb-4 text-4xl font-bold">Page Not Found</h1>
                 <p className="text-muted-foreground mb-8 text-xl">
                     The page you&#39;re looking for doesn&#39;t exist or may
@@ -23,7 +24,7 @@ export default function NotFound() {
                         <Link href="/">Go Home</Link>
                     </Button>
                     <Button variant="outline" asChild>
-                        <Link href="/blog">Read My Blog</Link>
+                        <Link href="/projects">Explore Projects</Link>
                     </Button>
                 </div>
             </div>
