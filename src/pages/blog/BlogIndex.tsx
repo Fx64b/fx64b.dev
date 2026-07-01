@@ -6,7 +6,6 @@ import Link from '@/components/link'
 import { Section } from '@/components/section'
 import { Seo } from '@/components/seo'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 export default function BlogIndex() {
     const posts = getAllPosts()
@@ -47,49 +46,49 @@ export default function BlogIndex() {
                         </p>
                     </div>
 
-                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        {posts.map((post) => (
-                            <Link
-                                key={post.slug}
-                                href={`/blog/${post.slug}`}
-                                className="group block"
-                            >
-                                <Card className="h-full">
-                                    <CardHeader className="pb-4">
-                                        <div className="text-muted-foreground mb-3 flex items-center gap-2 text-sm">
+                    {posts.length > 0 && (
+                        <div className="divide-border mx-auto max-w-3xl divide-y">
+                            {posts.map((post) => (
+                                <Link
+                                    key={post.slug}
+                                    href={`/blog/${post.slug}`}
+                                    className="group flex items-start justify-between gap-6 py-8 first:pt-0"
+                                >
+                                    <div className="min-w-0">
+                                        <div className="text-muted-foreground mb-2 flex items-center gap-2 text-sm">
                                             <Calendar className="h-4 w-4" />
                                             <span>{post.date}</span>
                                             {post.read && (
                                                 <>
-                                                    <Clock className="ml-auto h-4 w-4" />
+                                                    <Clock className="ml-2 h-4 w-4" />
                                                     <span>{post.read}</span>
                                                 </>
                                             )}
                                         </div>
-                                        <h2 className="group-hover:text-primary line-clamp-2 text-xl font-semibold transition-colors">
+                                        <h2 className="group-hover:text-primary mb-2 text-2xl font-semibold transition-colors">
                                             {post.title}
                                         </h2>
-                                    </CardHeader>
-                                    <CardContent
-                                        className={'flex h-full flex-col'}
-                                    >
-                                        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm leading-relaxed">
+                                        <p className="text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
                                             {post.description}
                                         </p>
-                                        <div className="mt-auto flex items-center justify-between">
-                                            <Badge
-                                                variant="secondary"
-                                                className="text-xs"
-                                            >
-                                                By {post.author}
-                                            </Badge>
-                                            <ArrowRight className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-all group-hover:translate-x-1" />
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        ))}
-                    </div>
+                                        <Badge
+                                            variant="secondary"
+                                            className="text-xs"
+                                        >
+                                            By {post.author}
+                                        </Badge>
+                                    </div>
+                                    <ArrowRight className="text-muted-foreground group-hover:text-primary mt-1 h-5 w-5 flex-shrink-0 transition-all group-hover:translate-x-1" />
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+
+                    {posts.length > 0 && (
+                        <p className="text-muted-foreground mx-auto mt-12 max-w-3xl text-center text-sm">
+                            More posts coming soon.
+                        </p>
+                    )}
 
                     {posts.length === 0 && (
                         <div className="py-16 text-center">

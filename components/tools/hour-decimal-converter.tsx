@@ -3,6 +3,7 @@ import { ArrowDown, Check, Copy } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { ToolInfoSection } from '@/components/tools/tool-info-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -166,7 +167,7 @@ export default function HourToDecimalConverter() {
                     <h3 className="mb-2 text-lg font-medium">
                         Decimal Time Result
                     </h3>
-                    <div className="bg-secondary/30 rounded-md p-4 font-mono text-2xl">
+                    <div className="bg-muted rounded-md p-4 font-mono text-2xl">
                         {result}
                     </div>
 
@@ -192,137 +193,123 @@ export default function HourToDecimalConverter() {
                 </CardContent>
             </Card>
 
-            <div className="mt-8 mb-4">
-                <h2 className="mb-4 text-xl font-semibold">
-                    Common Hour to Decimal Conversions
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">15 Minutes</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                One quarter of an hour.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                15 min = 0.25 hours
-                            </div>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection
+                title="Common Hour to Decimal Conversions"
+                columns={3}
+                className="mt-8"
+            >
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">15 Minutes</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            One quarter of an hour.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            15 min = 0.25 hours
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">30 Minutes</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Half an hour.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                30 min = 0.5 hours
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">30 Minutes</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Half an hour.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            30 min = 0.5 hours
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">45 Minutes</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Three quarters of an hour.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                45 min = 0.75 hours
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">45 Minutes</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Three quarters of an hour.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            45 min = 0.75 hours
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                1 Hour 30 Minutes
-                            </h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                An hour and a half.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                1h 30min = 1.5 hours
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">1 Hour 30 Minutes</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            An hour and a half.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            1h 30min = 1.5 hours
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                2 Hours 15 Minutes
-                            </h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Two and a quarter hours.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                2h 15min = 2.25 hours
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">2 Hours 15 Minutes</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Two and a quarter hours.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            2h 15min = 2.25 hours
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                8 Hours 30 Minutes
-                            </h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                A typical workday with a lunch break.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                8h 30min = 8.5 hours
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">8 Hours 30 Minutes</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            A typical workday with a lunch break.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            8h 30min = 8.5 hours
+                        </div>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
 
             <Separator className="my-6" />
 
-            <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">Usage Examples</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Time Tracking & Billing
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Decimal time is commonly used for:
-                            </p>
-                            <ul className="text-muted-foreground mt-2 list-disc pl-5 text-sm">
-                                <li>Timesheet calculation for hourly work</li>
-                                <li>
-                                    Billing clients when charging by the hour
-                                </li>
-                                <li>Project management time estimation</li>
-                                <li>
-                                    Payroll calculations for hourly employees
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection title="Usage Examples" columns={2}>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">
+                            Time Tracking & Billing
+                        </h3>
+                        <p className="text-muted-foreground text-sm">
+                            Decimal time is commonly used for:
+                        </p>
+                        <ul className="text-muted-foreground mt-2 list-disc pl-5 text-sm">
+                            <li>Timesheet calculation for hourly work</li>
+                            <li>Billing clients when charging by the hour</li>
+                            <li>Project management time estimation</li>
+                            <li>Payroll calculations for hourly employees</li>
+                        </ul>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                How to Convert Manually
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                The formula to convert hours and minutes to
-                                decimal time is:
-                            </p>
-                            <div className="bg-secondary/20 mt-2 rounded p-3 font-mono text-sm">
-                                hours + (minutes ÷ 60)
-                            </div>
-                            <p className="text-muted-foreground mt-2 text-sm">
-                                Example: 2 hours and 45 minutes = 2 + (45 ÷ 60)
-                                = 2 + 0.75 = 2.75
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">
+                            How to Convert Manually
+                        </h3>
+                        <p className="text-muted-foreground text-sm">
+                            The formula to convert hours and minutes to decimal
+                            time is:
+                        </p>
+                        <div className="bg-muted mt-2 rounded p-3 font-mono text-sm">
+                            hours + (minutes ÷ 60)
+                        </div>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                            Example: 2 hours and 45 minutes = 2 + (45 ÷ 60) = 2
+                            + 0.75 = 2.75
+                        </p>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
         </div>
     )
 }

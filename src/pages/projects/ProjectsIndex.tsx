@@ -1,9 +1,11 @@
 import projectData from '@/data/projectData'
+import { ExternalLink } from 'lucide-react'
 
 import Link from '@/components/link'
 import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
 import { Seo } from '@/components/seo'
+import { Badge } from '@/components/ui/badge'
 
 export default function ProjectsIndex() {
     const featuredProjects = projectData.filter((project) => project.featured)
@@ -81,12 +83,41 @@ export default function ProjectsIndex() {
                                     Additional projects and experiments
                                 </p>
                             </div>
-                            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="divide-border mx-auto max-w-3xl divide-y">
                                 {otherProjects.map((project) => (
-                                    <ProjectCard
+                                    <a
                                         key={project.title}
-                                        project={project}
-                                    />
+                                        href={project.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group flex items-center justify-between gap-4 py-4 first:pt-0"
+                                    >
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="group-hover:text-primary truncate font-semibold transition-colors">
+                                                {project.title}
+                                            </h3>
+                                            <p className="text-muted-foreground truncate text-sm">
+                                                {project.description}
+                                            </p>
+                                        </div>
+                                        {project.tags &&
+                                            project.tags.length > 0 && (
+                                                <div className="hidden flex-shrink-0 gap-2 sm:flex">
+                                                    {project.tags
+                                                        .slice(0, 2)
+                                                        .map((tag) => (
+                                                            <Badge
+                                                                key={tag}
+                                                                variant="secondary"
+                                                                className="text-xs"
+                                                            >
+                                                                {tag}
+                                                            </Badge>
+                                                        ))}
+                                                </div>
+                                            )}
+                                        <ExternalLink className="text-muted-foreground group-hover:text-primary h-4 w-4 flex-shrink-0 transition-colors" />
+                                    </a>
                                 ))}
                             </div>
                         </div>

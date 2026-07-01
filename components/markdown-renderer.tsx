@@ -153,73 +153,81 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     }
 
     return (
-        <ReactMarkdown
-            rehypePlugins={[rehypeRaw, remarkGfm]}
-            components={{
-                code: CodeBlock as any,
-                hr: () => <Separator className="my-8" />,
-                a: ({ href, children, className }) => (
-                    <Link
-                        href={href!}
-                        target={href?.startsWith('http') ? '_blank' : undefined}
-                        rel={
-                            href?.startsWith('http')
-                                ? 'noopener noreferrer'
-                                : undefined
-                        }
-                        className={
-                            (className as string) ||
-                            'text-primary underline underline-offset-4'
-                        }
-                    >
-                        {children}
-                    </Link>
-                ),
-                h1: ({ children }) => (
-                    <h1 className="scroll-mt-20 text-3xl font-bold tracking-tight">
-                        {children}
-                    </h1>
-                ),
-                h2: ({ children }) => (
-                    <h2 className="scroll-mt-20 text-2xl font-semibold tracking-tight">
-                        {children}
-                    </h2>
-                ),
-                h3: ({ children }) => (
-                    <h3 className="scroll-mt-20 text-xl font-semibold tracking-tight">
-                        {children}
-                    </h3>
-                ),
-                p: ({ children }) => <p className="leading-7">{children}</p>,
-                ul: ({ children }) => (
-                    <ul className="my-2 ml-6 list-disc [&>li]:mt-2">
-                        {children}
-                    </ul>
-                ),
-                ol: ({ children }) => (
-                    <ol className="my-2 ml-6 list-decimal [&>li]:mt-2">
-                        {children}
-                    </ol>
-                ),
-                blockquote: ({ children }) => (
-                    <blockquote className="mt-6 border-l-2 pl-6 italic">
-                        {children}
-                    </blockquote>
-                ),
-                table: ({ children }) => (
-                    <div className="my-6 w-full overflow-y-auto">
-                        <Table>{children}</Table>
-                    </div>
-                ),
-                thead: ({ children }) => <TableHeader>{children}</TableHeader>,
-                tbody: ({ children }) => <TableBody>{children}</TableBody>,
-                tr: ({ children }) => <TableRow>{children}</TableRow>,
-                th: ({ children }) => <TableHead>{children}</TableHead>,
-                td: ({ children }) => <TableCell>{children}</TableCell>,
-            }}
-        >
-            {processedContent}
-        </ReactMarkdown>
+        <div className="markdown">
+            <ReactMarkdown
+                rehypePlugins={[rehypeRaw, remarkGfm]}
+                components={{
+                    code: CodeBlock as any,
+                    hr: () => <Separator className="my-8" />,
+                    a: ({ href, children, className }) => (
+                        <Link
+                            href={href!}
+                            target={
+                                href?.startsWith('http') ? '_blank' : undefined
+                            }
+                            rel={
+                                href?.startsWith('http')
+                                    ? 'noopener noreferrer'
+                                    : undefined
+                            }
+                            className={
+                                (className as string) ||
+                                'text-primary underline underline-offset-4'
+                            }
+                        >
+                            {children}
+                        </Link>
+                    ),
+                    h1: ({ children }) => (
+                        <h1 className="scroll-mt-20 text-3xl font-bold tracking-tight">
+                            {children}
+                        </h1>
+                    ),
+                    h2: ({ children }) => (
+                        <h2 className="scroll-mt-20 text-2xl font-semibold tracking-tight">
+                            {children}
+                        </h2>
+                    ),
+                    h3: ({ children }) => (
+                        <h3 className="scroll-mt-20 text-xl font-semibold tracking-tight">
+                            {children}
+                        </h3>
+                    ),
+                    p: ({ children }) => (
+                        <p className="leading-7">{children}</p>
+                    ),
+                    ul: ({ children }) => (
+                        <ul className="my-2 ml-6 list-disc [&>li]:mt-2">
+                            {children}
+                        </ul>
+                    ),
+                    ol: ({ children }) => (
+                        <ol className="my-2 ml-6 list-decimal [&>li]:mt-2">
+                            {children}
+                        </ol>
+                    ),
+                    blockquote: ({ children }) => (
+                        <blockquote className="mt-6 border-l-2 pl-6 italic">
+                            {children}
+                        </blockquote>
+                    ),
+                    table: ({ children }) => (
+                        <div className="my-6 w-full overflow-y-auto">
+                            <Table>{children}</Table>
+                        </div>
+                    ),
+                    thead: ({ children }) => (
+                        <TableHeader>{children}</TableHeader>
+                    ),
+                    tbody: ({ children }) => <TableBody>{children}</TableBody>,
+                    tr: ({ children }) => <TableRow>{children}</TableRow>,
+                    th: ({ children }) => <TableHead>{children}</TableHead>,
+                    td: ({ children }) => <TableCell>{children}</TableCell>,
+                }}
+            >
+                {processedContent}
+            </ReactMarkdown>
+        </div>
     )
 }
 

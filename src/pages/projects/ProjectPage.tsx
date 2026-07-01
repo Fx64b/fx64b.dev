@@ -13,6 +13,7 @@ import {
 
 import { useParams } from 'react-router-dom'
 
+import { statusColorsBordered as statusColors } from '@/lib/project-status'
 import { getProjectDocBySlug } from '@/lib/projects'
 
 import Image from '@/components/image'
@@ -48,14 +49,6 @@ export default function ProjectPage() {
     }
 
     const description = projectDoc?.description || project.description
-
-    const statusColors = {
-        Finished: 'bg-green-500/10 text-green-500 border-green-500/20',
-        'In Progress': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-        Planned: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-        Abandoned: 'bg-red-500/10 text-red-500 border-red-500/20',
-        'On Hold': 'bg-gray-500/10 text-gray-500 border-gray-500/20',
-    }
 
     return (
         <>
@@ -240,7 +233,7 @@ export default function ProjectPage() {
                                             variant="destructive"
                                             className="mt-8"
                                         >
-                                            <AlertCircleIcon className="h-8 w-8" />
+                                            <AlertCircleIcon className="h-5 w-5" />
                                             <AlertTitle>
                                                 This page is still work in
                                                 progress!

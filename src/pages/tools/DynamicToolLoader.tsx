@@ -1,4 +1,8 @@
+import { AlertCircleIcon } from 'lucide-react'
+
 import React, { useEffect, useState } from 'react'
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface DynamicToolLoaderProps {
     slug: string
@@ -33,13 +37,14 @@ export default function DynamicToolLoader({ slug }: DynamicToolLoaderProps) {
 
     if (error) {
         return (
-            <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-6 text-center">
-                <h3 className="mb-2 text-lg font-medium">Tool Loading Error</h3>
-                <p>
+            <Alert variant="destructive">
+                <AlertCircleIcon className="h-5 w-5" />
+                <AlertTitle>Tool Loading Error</AlertTitle>
+                <AlertDescription>
                     There was a problem loading this tool. It probably does not
                     exist yet.
-                </p>
-            </div>
+                </AlertDescription>
+            </Alert>
         )
     }
 

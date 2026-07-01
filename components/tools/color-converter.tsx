@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { ToolInfoSection } from '@/components/tools/tool-info-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -373,109 +374,97 @@ export default function ColorConverter() {
                 ))}
             </div>
 
-            <div className="mt-8 mb-4">
-                <h2 className="mb-4 text-xl font-semibold">
-                    About Color Formats
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">HEX</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Hexadecimal color format used in CSS and HTML.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                #1e90ff
-                            </div>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection
+                title="About Color Formats"
+                columns={3}
+                className="mt-8"
+            >
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">HEX</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Hexadecimal color format used in CSS and HTML.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            #1e90ff
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">RGB</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Red, Green, Blue values (0-255).
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                rgb(30, 144, 255)
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">RGB</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Red, Green, Blue values (0-255).
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            rgb(30, 144, 255)
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">HSL</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Hue, Saturation, Lightness format.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                hsl(210, 100%, 56%)
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">HSL</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Hue, Saturation, Lightness format.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            hsl(210, 100%, 56%)
+                        </div>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
 
             <Separator className="my-6" />
 
-            <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">
-                    Color Format Tips
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Format Acceptance
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                The converter accepts various input formats:
-                            </p>
-                            <ul className="text-muted-foreground mt-2 list-disc pl-5 text-sm">
-                                <li>
-                                    <b>HEX:</b> Both with and without # prefix
-                                    (e.g., #1e90ff or 1e90ff)
-                                </li>
-                                <li>
-                                    <b>RGB:</b> Full format or just values
-                                    (e.g., rgb(30, 144, 255) or 30, 144, 255)
-                                </li>
-                                <li>
-                                    <b>HSL:</b> Full format or just values
-                                    (e.g., hsl(210, 100%, 56%) or 210, 100%,
-                                    56%)
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection title="Color Format Tips" columns={2}>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Format Acceptance</h3>
+                        <p className="text-muted-foreground text-sm">
+                            The converter accepts various input formats:
+                        </p>
+                        <ul className="text-muted-foreground mt-2 list-disc pl-5 text-sm">
+                            <li>
+                                <b>HEX:</b> Both with and without # prefix
+                                (e.g., #1e90ff or 1e90ff)
+                            </li>
+                            <li>
+                                <b>RGB:</b> Full format or just values (e.g.,
+                                rgb(30, 144, 255) or 30, 144, 255)
+                            </li>
+                            <li>
+                                <b>HSL:</b> Full format or just values (e.g.,
+                                hsl(210, 100%, 56%) or 210, 100%, 56%)
+                            </li>
+                        </ul>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Common Use Cases
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Different color formats are used in different
-                                contexts:
-                            </p>
-                            <ul className="text-muted-foreground mt-2 list-disc pl-5 text-sm">
-                                <li>
-                                    <b>HEX:</b> Most common in CSS and design
-                                    tools
-                                </li>
-                                <li>
-                                    <b>RGB:</b> Useful for programmatic color
-                                    manipulation
-                                </li>
-                                <li>
-                                    <b>HSL:</b> Intuitive for designers (hue,
-                                    saturation, lightness)
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Common Use Cases</h3>
+                        <p className="text-muted-foreground text-sm">
+                            Different color formats are used in different
+                            contexts:
+                        </p>
+                        <ul className="text-muted-foreground mt-2 list-disc pl-5 text-sm">
+                            <li>
+                                <b>HEX:</b> Most common in CSS and design tools
+                            </li>
+                            <li>
+                                <b>RGB:</b> Useful for programmatic color
+                                manipulation
+                            </li>
+                            <li>
+                                <b>HSL:</b> Intuitive for designers (hue,
+                                saturation, lightness)
+                            </li>
+                        </ul>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import { getToolsByCategory } from '@/data/toolsData'
+import { getPopularTools, getToolsByCategory } from '@/data/toolsData'
 import type { Tool } from '@/types/tool'
 import { ArrowRight, Wrench } from 'lucide-react'
 
@@ -9,11 +9,22 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
+function gridColsForCount(count: number) {
+    if (count <= 1) {
+        return 'grid-cols-1 max-w-sm'
+    }
+    if (count === 2) {
+        return 'grid-cols-1 sm:grid-cols-2 max-w-2xl'
+    }
+    return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+}
+
 export default function ToolsIndex() {
     const conversionTools = getToolsByCategory('conversion')
     const formattingTools = getToolsByCategory('formatting')
     const generatorTools = getToolsByCategory('generators')
     const utilityTools = getToolsByCategory('utilities')
+    const popularTools = getPopularTools()
 
     const allCategories = [
         { name: 'Conversion Tools', tools: conversionTools, icon: '🔄' },
@@ -71,6 +82,26 @@ export default function ToolsIndex() {
                         </p>
                     </div>
 
+                    {popularTools.length > 0 && (
+                        <div className="mb-16">
+                            <span className="text-muted-foreground mb-3 block text-xs font-medium tracking-wider uppercase">
+                                Popular
+                            </span>
+                            <div className="flex flex-wrap gap-3">
+                                {popularTools.map((tool) => (
+                                    <Link
+                                        key={tool.slug}
+                                        href={`/tools/${tool.slug}`}
+                                        className="group border-border hover:border-foreground/30 hover:text-primary inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors"
+                                    >
+                                        {tool.title}
+                                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {allCategories.map((category, categoryIndex) => (
                         <div key={category.name} className="mb-16">
                             <div className="mb-8 flex items-center gap-3">
@@ -85,7 +116,9 @@ export default function ToolsIndex() {
                                 </Badge>
                             </div>
 
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            <div
+                                className={`grid gap-6 ${gridColsForCount(category.tools.length)}`}
+                            >
                                 {category.tools.map((tool) => (
                                     <ToolCard key={tool.slug} tool={tool} />
                                 ))}
@@ -115,11 +148,18 @@ function ToolCard({ tool }: { tool: Tool }) {
         <Link href={`/tools/${tool.slug}`} className="group block">
             <Card className="h-full">
                 <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between">
-                        <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
-                            {tool.title}
-                        </h3>
-                        <ArrowRight className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-all group-hover:translate-x-1" />
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
+                                {tool.title}
+                            </h3>
+                            {tool.popular && (
+                                <Badge variant="outline" className="text-xs">
+                                    Popular
+                                </Badge>
+                            )}
+                        </div>
+                        <ArrowRight className="text-muted-foreground group-hover:text-primary h-4 w-4 flex-shrink-0 transition-all group-hover:translate-x-1" />
                     </div>
                 </CardHeader>
                 <CardContent>
