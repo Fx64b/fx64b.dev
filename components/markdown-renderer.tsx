@@ -99,7 +99,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
 
         return !inline && language ? (
             <div className="group relative my-6">
-                <div className="flex items-center justify-between rounded-t-md bg-[#1e1e1e] px-4 py-2">
+                <div className="flex items-center justify-between rounded-t-md bg-[#282c34] px-4 py-2">
                     <span className="text-xs font-medium text-gray-400">
                         {languageNames[language] || language.toUpperCase()}
                     </span>
@@ -144,7 +144,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             </div>
         ) : (
             <code
-                className="bg-secondary/50 rounded px-1.5 py-0.5 font-mono text-sm"
+                className="bg-muted rounded px-1.5 py-0.5 font-mono text-sm"
                 {...props}
             >
                 {children}
@@ -169,7 +169,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         }
                         className={
                             (className as string) ||
-                            'text-primary hover:text-primary/80 underline underline-offset-4'
+                            'text-primary underline underline-offset-4'
                         }
                     >
                         {children}

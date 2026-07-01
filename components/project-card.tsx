@@ -56,11 +56,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
                                 alt={`${project.title} logo`}
                                 width={40}
                                 height={40}
-                                className="border-border/50 rounded-lg border"
+                                className="border-border rounded-lg border"
                             />
                         </div>
                         <div className="min-w-0 flex-1">
-                            <h3 className="group-hover:text-foreground/90 text-lg font-semibold transition-colors">
+                            <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
                                 {project.title}
                             </h3>
                             <Badge
@@ -93,7 +93,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                     </div>
                 </div>
 
-                <p className="text-foreground/70 mb-4 text-sm leading-relaxed">
+                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
                     {project.description}
                 </p>
 

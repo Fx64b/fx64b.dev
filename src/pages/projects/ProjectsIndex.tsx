@@ -38,7 +38,7 @@ export default function ProjectsIndex() {
                         <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
                             Projects
                         </h1>
-                        <p className="text-foreground/70 mx-auto max-w-2xl text-lg">
+                        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
                             A collection of projects I&#39;ve worked on, ranging
                             from web applications to browser extensions and CLI
                             tools. Featured projects include detailed
@@ -52,7 +52,7 @@ export default function ProjectsIndex() {
                                 <h2 className="mb-2 text-2xl font-bold tracking-tight">
                                     Featured Projects
                                 </h2>
-                                <p className="text-foreground/60 text-sm">
+                                <p className="text-muted-foreground text-sm">
                                     Projects with detailed documentation and
                                     case studies
                                 </p>
@@ -77,7 +77,7 @@ export default function ProjectsIndex() {
                                 <h2 className="mb-2 text-2xl font-bold tracking-tight">
                                     Other Projects
                                 </h2>
-                                <p className="text-foreground/60 text-sm">
+                                <p className="text-muted-foreground text-sm">
                                     Additional projects and experiments
                                 </p>
                             </div>
@@ -94,7 +94,7 @@ export default function ProjectsIndex() {
 
                     {projectData.length === 0 && (
                         <div className="py-16 text-center">
-                            <p className="text-foreground/60 text-lg">
+                            <p className="text-muted-foreground text-lg">
                                 No projects here right now. Check back soon for
                                 updates!
                             </p>

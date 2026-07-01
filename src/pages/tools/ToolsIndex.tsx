@@ -57,14 +57,14 @@ export default function ToolsIndex() {
                 <Section className="pt-24">
                     <div className="mb-16 text-center">
                         <div className="mb-6 flex items-center justify-center">
-                            <div className="bg-foreground/10 flex h-12 w-12 items-center justify-center rounded-full">
+                            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
                                 <Wrench className="h-6 w-6" />
                             </div>
                         </div>
                         <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
                             Developer Tools
                         </h1>
-                        <p className="text-foreground/70 mx-auto max-w-2xl text-lg">
+                        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
                             A collection of free, browser-based tools for
                             developers and everyday tasks. No ads, no tracking,
                             just tools that work.
@@ -99,7 +99,7 @@ export default function ToolsIndex() {
 
                     {allCategories.length === 0 && (
                         <div className="py-16 text-center">
-                            <p className="text-foreground/60 text-lg">
+                            <p className="text-muted-foreground text-lg">
                                 Tools are coming soon. Check back later!
                             </p>
                         </div>
@@ -116,14 +116,14 @@ function ToolCard({ tool }: { tool: Tool }) {
             <Card className="h-full">
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="group-hover:text-foreground/90 text-lg font-semibold transition-colors">
+                        <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
                             {tool.title}
                         </h3>
-                        <ArrowRight className="text-foreground/40 group-hover:text-foreground/70 h-4 w-4 transition-all group-hover:translate-x-1" />
+                        <ArrowRight className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-all group-hover:translate-x-1" />
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-foreground/70 mb-4 text-sm leading-relaxed">
+                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
                         {tool.description}
                     </p>
                     <div className="flex flex-wrap gap-2">

@@ -148,7 +148,7 @@ export function TableOfContents({
                     On this page
                 </h4>
                 <div className="relative">
-                    <div className="border-border/50 bg-muted/20 relative max-h-[calc(100vh-200px)] overflow-hidden rounded-md border">
+                    <div className="border-border bg-muted/20 relative max-h-[calc(100vh-200px)] overflow-hidden rounded-md border">
                         <ul className="scrollbar-thumb-muted max-h-[calc(100vh-240px)] scrollbar-thin scrollbar-track-transparent space-y-1 overflow-y-auto p-3 text-sm">
                             {displayHeadings.map((heading) => (
                                 <li

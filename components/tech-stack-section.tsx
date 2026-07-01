@@ -19,14 +19,18 @@ const techCategories = {
     ],
 }
 
-export function TechStackSection() {
+interface TechStackSectionProps {
+    className?: string
+}
+
+export function TechStackSection({ className }: TechStackSectionProps) {
     return (
-        <Section>
+        <Section className={className}>
             <div className="mb-8 text-center">
                 <h2 className="mb-3 text-2xl font-bold tracking-tight">
                     Tech Stack
                 </h2>
-                <p className="text-foreground/70 mx-auto max-w-xl text-base">
+                <p className="text-muted-foreground mx-auto max-w-xl text-base">
                     Technologies I use to build my applications
                 </p>
             </div>

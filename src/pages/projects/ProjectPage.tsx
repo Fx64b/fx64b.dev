@@ -115,7 +115,7 @@ export default function ProjectPage() {
                                         alt={`${project.title} logo`}
                                         width={80}
                                         height={80}
-                                        className="border-border/50 rounded-xl border-2"
+                                        className="border-border rounded-xl border-2"
                                     />
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -232,7 +232,7 @@ export default function ProjectPage() {
                                         <h2 className="mb-4 text-2xl font-semibold">
                                             Overview
                                         </h2>
-                                        <p className="text-foreground/80 leading-relaxed">
+                                        <p className="text-muted-foreground leading-relaxed">
                                             {project.description}
                                         </p>
 

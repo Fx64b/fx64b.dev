@@ -41,7 +41,7 @@ export default function BlogIndex() {
                         <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
                             Blog
                         </h1>
-                        <p className="text-foreground/70 mx-auto max-w-2xl text-lg">
+                        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
                             Thoughts on software development, technology trends,
                             and lessons learned from building applications.
                         </p>
@@ -56,7 +56,7 @@ export default function BlogIndex() {
                             >
                                 <Card className="h-full">
                                     <CardHeader className="pb-4">
-                                        <div className="text-foreground/60 mb-3 flex items-center gap-2 text-sm">
+                                        <div className="text-muted-foreground mb-3 flex items-center gap-2 text-sm">
                                             <Calendar className="h-4 w-4" />
                                             <span>{post.date}</span>
                                             {post.read && (
@@ -66,14 +66,14 @@ export default function BlogIndex() {
                                                 </>
                                             )}
                                         </div>
-                                        <h2 className="group-hover:text-foreground/90 line-clamp-2 text-xl font-semibold transition-colors">
+                                        <h2 className="group-hover:text-primary line-clamp-2 text-xl font-semibold transition-colors">
                                             {post.title}
                                         </h2>
                                     </CardHeader>
                                     <CardContent
                                         className={'flex h-full flex-col'}
                                     >
-                                        <p className="text-foreground/70 mb-4 line-clamp-3 text-sm leading-relaxed">
+                                        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm leading-relaxed">
                                             {post.description}
                                         </p>
                                         <div className="mt-auto flex items-center justify-between">
@@ -83,7 +83,7 @@ export default function BlogIndex() {
                                             >
                                                 By {post.author}
                                             </Badge>
-                                            <ArrowRight className="text-foreground/40 group-hover:text-foreground/70 h-4 w-4 transition-all group-hover:translate-x-1" />
+                                            <ArrowRight className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-all group-hover:translate-x-1" />
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -93,7 +93,7 @@ export default function BlogIndex() {
 
                     {posts.length === 0 && (
                         <div className="py-16 text-center">
-                            <p className="text-foreground/60 text-lg">
+                            <p className="text-muted-foreground text-lg">
                                 No blog posts yet. Check back soon for updates!
                             </p>
                         </div>
