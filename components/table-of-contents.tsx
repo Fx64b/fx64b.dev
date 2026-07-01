@@ -149,7 +149,7 @@ export function TableOfContents({
                 </h4>
                 <div className="relative">
                     <div className="border-border/50 bg-muted/20 relative max-h-[calc(100vh-200px)] overflow-hidden rounded-md border">
-                        <ul className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[calc(100vh-240px)] space-y-1 overflow-y-auto p-3 text-sm">
+                        <ul className="scrollbar-thumb-muted max-h-[calc(100vh-240px)] scrollbar-thin scrollbar-track-transparent space-y-1 overflow-y-auto p-3 text-sm">
                             {displayHeadings.map((heading) => (
                                 <li
                                     key={heading.id}
@@ -240,7 +240,7 @@ export function TableOfContents({
                 )}
             >
                 <div className="border-border bg-muted/10 mt-2 rounded-r-lg border-l-2 px-4 py-3">
-                    <ul className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent max-h-[60vh] space-y-2 overflow-y-auto pr-2 text-sm">
+                    <ul className="scrollbar-thumb-muted max-h-[60vh] scrollbar-thin scrollbar-track-transparent space-y-2 overflow-y-auto pr-2 text-sm">
                         {displayHeadings.map((heading, index) => (
                             <li
                                 key={heading.id}

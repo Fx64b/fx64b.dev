@@ -43,7 +43,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     }
 
     return (
-        <Card className="group border-border/50 bg-card/50 hover:border-border hover:bg-card/80 relative h-full overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
+        <Card className="group h-full">
             <CardContent className="flex h-full flex-col p-4 pb-0 md:p-6">
                 <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex min-w-0 flex-1 items-center gap-3">

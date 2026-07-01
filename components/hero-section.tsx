@@ -3,7 +3,6 @@ import { SwissCross } from 'swiss-cross'
 
 import Image from '@/components/image'
 import Link from '@/components/link'
-
 import { Button } from '@/components/ui/button'
 
 export function HeroSection() {
@@ -12,24 +11,20 @@ export function HeroSection() {
             <div className="container mx-auto max-w-6xl px-6">
                 <div className="flex flex-col items-center text-center">
                     {/* Profile image */}
-                    <div className="relative mb-8">
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-white/5 blur-2xl" />
+                    <div className="mb-8">
                         <Image
                             src="/logo.svg"
                             alt="Fx64b profile picture"
                             width={120}
                             height={120}
-                            className="border-border/50 bg-background relative rounded-full border"
+                            className="border-border/50 bg-background rounded-full border"
                         />
                     </div>
 
                     {/* Main heading */}
                     <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl">
                         Software Engineer
-                        <br />
-                        <span className="from-foreground to-foreground/70 bg-gradient-to-r bg-clip-text text-transparent">
-                            & Security Enthusiast
-                        </span>
+                        <br />& Security Enthusiast
                     </h1>
 
                     {/* Description */}

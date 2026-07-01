@@ -15,7 +15,6 @@ import { useParams } from 'react-router-dom'
 
 import { getProjectDocBySlug } from '@/lib/projects'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Image from '@/components/image'
 import Link from '@/components/link'
 import MarkdownRenderer from '@/components/markdown-renderer'
@@ -82,7 +81,6 @@ export default function ProjectPage() {
                     }),
                 }}
             />
-            <BackgroundGrid />
             <div className="relative mx-auto max-w-7xl px-4 py-8">
                 <div className="mb-8">
                     <Button variant="ghost" asChild className="group">
@@ -220,14 +218,14 @@ export default function ProjectPage() {
                         )}
 
                         {projectDoc ? (
-                            <div className="prose prose-invert max-w-none">
+                            <div className="max-w-none">
                                 <MarkdownRenderer
                                     content={projectDoc.content}
                                 />
                             </div>
                         ) : (
                             /* Fallback content if no documentation */
-                            <div className="prose prose-invert max-w-none">
+                            <div className="max-w-none">
                                 {/* Overview */}
                                 <Card className="mb-8">
                                     <CardContent className="p-6">

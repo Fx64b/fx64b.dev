@@ -1,7 +1,6 @@
 import projects from '@/data/projectData'
 import { ArrowRight } from 'lucide-react'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import { HeroSection } from '@/components/hero-section'
 import Link from '@/components/link'
 import { ProjectCard } from '@/components/project-card'
@@ -27,7 +26,6 @@ export default function Home() {
                     mainEntity: { '@id': 'https://fx64b.dev/#person' },
                 }}
             />
-            <BackgroundGrid />
             <main className="relative">
                 <HeroSection />
 

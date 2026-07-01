@@ -2,7 +2,6 @@ import { ArrowRight, Calendar, Clock } from 'lucide-react'
 
 import { getAllPosts } from '@/lib/posts'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Link from '@/components/link'
 import { Section } from '@/components/section'
 import { Seo } from '@/components/seo'
@@ -35,7 +34,6 @@ export default function BlogIndex() {
                     })),
                 }}
             />
-            <BackgroundGrid />
 
             <main className="relative">
                 <Section className="pt-24">
@@ -56,7 +54,7 @@ export default function BlogIndex() {
                                 href={`/blog/${post.slug}`}
                                 className="group block"
                             >
-                                <Card className="border-border/50 bg-card/50 hover:border-border hover:bg-card/80 h-full backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
+                                <Card className="h-full">
                                     <CardHeader className="pb-4">
                                         <div className="text-foreground/60 mb-3 flex items-center gap-2 text-sm">
                                             <Calendar className="h-4 w-4" />

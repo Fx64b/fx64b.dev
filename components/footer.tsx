@@ -13,7 +13,7 @@ export function Footer() {
     const version = getVersion()
 
     return (
-        <footer className="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur">
+        <footer className="border-border/40 bg-background border-t">
             <div className="container mx-auto max-w-6xl px-6 py-12">
                 <div className="grid gap-8 md:grid-cols-4">
                     {/* Brand section */}

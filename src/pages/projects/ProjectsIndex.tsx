@@ -1,6 +1,5 @@
 import projectData from '@/data/projectData'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Link from '@/components/link'
 import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
@@ -32,7 +31,6 @@ export default function ProjectsIndex() {
                     })),
                 }}
             />
-            <BackgroundGrid />
 
             <main className="relative">
                 <Section className="pt-24">

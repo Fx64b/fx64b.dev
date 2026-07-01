@@ -1,6 +1,5 @@
 import { Head } from 'vite-react-ssg'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Link from '@/components/link'
 import { Button } from '@/components/ui/button'
 
@@ -11,7 +10,6 @@ export default function NotFound() {
                 <title>Page Not Found - Fx64b.dev</title>
                 <meta name="robots" content="noindex, follow" />
             </Head>
-            <BackgroundGrid />
             <div className="flex min-h-[60vh] flex-col items-center justify-center py-12 text-center">
                 <h1 className="mb-4 text-4xl font-bold">Page Not Found</h1>
                 <p className="text-muted-foreground mb-8 text-xl">

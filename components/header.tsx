@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 
 import Image from '@/components/image'
 import Link from '@/components/link'
+import { ModeToggle } from '@/components/mode-toggle'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
@@ -79,6 +80,8 @@ export function Header() {
                     </Link>
 
                     <Separator orientation="vertical" className="mx-2 h-6" />
+
+                    <ModeToggle />
 
                     <Button variant="ghost" size="icon" asChild>
                         <Link

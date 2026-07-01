@@ -2,7 +2,6 @@ import { getToolBySlug } from '@/data/toolsData'
 
 import { useParams } from 'react-router-dom'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import { Seo } from '@/components/seo'
 import { Separator } from '@/components/ui/separator'
 
@@ -40,7 +39,6 @@ export default function ToolDetail() {
                     author: { '@id': 'https://fx64b.dev/#person' },
                 }}
             />
-            <BackgroundGrid />
             <div className="mx-auto max-w-(--breakpoint-lg)">
                 <h1 className="mb-2 text-2xl font-bold">{tool.title}</h1>
                 <p className="text-muted-foreground mb-6">{tool.description}</p>

@@ -2,7 +2,6 @@ import { getToolsByCategory } from '@/data/toolsData'
 import type { Tool } from '@/types/tool'
 import { ArrowRight, Wrench } from 'lucide-react'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Link from '@/components/link'
 import { Section } from '@/components/section'
 import { Seo } from '@/components/seo'
@@ -53,7 +52,6 @@ export default function ToolsIndex() {
                     ),
                 }}
             />
-            <BackgroundGrid />
 
             <main className="relative">
                 <Section className="pt-24">
@@ -115,7 +113,7 @@ export default function ToolsIndex() {
 function ToolCard({ tool }: { tool: Tool }) {
     return (
         <Link href={`/tools/${tool.slug}`} className="group block">
-            <Card className="border-border/50 bg-card/50 hover:border-border hover:bg-card/80 h-full backdrop-blur-sm transition-all duration-300 hover:shadow-lg">
+            <Card className="h-full">
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <h3 className="group-hover:text-foreground/90 text-lg font-semibold transition-colors">
