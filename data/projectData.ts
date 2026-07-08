@@ -2,6 +2,24 @@ import { Project } from '../types/project'
 
 const projectData: Project[] = [
     {
+        title: 'Cards Against Security',
+        description:
+            'A dark-humor Cards Against Humanity clone for security professionals, where empty seats are filled by LLM-powered bots. No accounts, no signup: lobbies are keyed by a 6-char join code and sessions are ephemeral by design. Go rules engine, React frontend, real-time play over WebSockets.',
+        logo: '/projects/cards-against-security-logo.svg',
+        link: 'https://security.fx64b.dev',
+        githubLink: 'https://github.com/Fx64b/cards-against-security',
+        status: 'In Progress',
+        tags: [
+            'Go Lang',
+            'React',
+            'TypeScript',
+            'WebSockets',
+            'AI Bots',
+            'Game',
+        ],
+        featured: true,
+    },
+    {
         title: 'Obsidianator',
         description:
             'Turn an Obsidian vault into a self-contained static website, or serve it directly in the browser without writing anything to disk.',
