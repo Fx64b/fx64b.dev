@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { ToolInfoSection } from '@/components/tools/tool-info-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -244,133 +245,122 @@ export default function ByteConverter() {
                 /<kbd className="rounded border px-1.5 py-0.5 text-xs">↓</kbd>{' '}
                 to change units
             </div>
-            <div className="mt-8 mb-4">
-                <h2 className="mb-4 text-xl font-semibold">
-                    Common Byte Conversions
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Storage Devices
-                            </h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Hard drives and SSDs are typically measured in
-                                GB or TB.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                1 TB = 1,024 GB = 1,048,576 MB
-                            </div>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection
+                title="Common Byte Conversions"
+                columns={3}
+                className="mt-8"
+            >
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Storage Devices</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Hard drives and SSDs are typically measured in GB or
+                            TB.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            1 TB = 1,024 GB = 1,048,576 MB
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">RAM Memory</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Computer memory is commonly measured in GB or
-                                MB.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                16 GB RAM = 16,384 MB
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">RAM Memory</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Computer memory is commonly measured in GB or MB.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            16 GB RAM = 16,384 MB
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">File Sizes</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Documents are often KB or MB, while media files
-                                can be GB.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                5 MB = 5,120 KB = 5,242,880 Bytes
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">File Sizes</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Documents are often KB or MB, while media files can
+                            be GB.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            5 MB = 5,120 KB = 5,242,880 Bytes
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">Internet Speed</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Internet speeds are measured in Mbps (megabits),
-                                not MB (megabytes).
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                100 Mbps = 12.5 MB/s
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Internet Speed</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Internet speeds are measured in Mbps (megabits), not
+                            MB (megabytes).
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            100 Mbps = 12.5 MB/s
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">Cloud Storage</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Cloud storage plans typically offer GB or TB of
-                                space.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                2 TB = 2,048 GB = 2,097,152 MB
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Cloud Storage</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Cloud storage plans typically offer GB or TB of
+                            space.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            2 TB = 2,048 GB = 2,097,152 MB
+                        </div>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">Database Size</h3>
-                            <p className="text-muted-foreground mb-2 text-sm">
-                                Database sizes can range from MB to TB depending
-                                on the data.
-                            </p>
-                            <div className="bg-secondary/20 rounded p-3 font-mono text-sm">
-                                500 MB = 0.49 GB = 512,000 KB
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Database Size</h3>
+                        <p className="text-muted-foreground mb-2 text-sm">
+                            Database sizes can range from MB to TB depending on
+                            the data.
+                        </p>
+                        <div className="bg-muted rounded p-3 font-mono text-sm">
+                            500 MB = 0.49 GB = 512,000 KB
+                        </div>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
 
             <Separator className="my-6" />
 
-            <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">About Byte Units</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Binary vs Decimal
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                This converter uses the <strong>binary</strong>{' '}
-                                definition where 1 KB = 1024 Bytes, which is the
-                                standard in computing.
-                            </p>
-                            <p className="text-muted-foreground mt-2 text-sm">
-                                Note that some storage manufacturers use the{' '}
-                                <strong>decimal</strong> system (1 KB = 1000
-                                Bytes), which is why a &#34;1 TB&#34; hard drive
-                                shows less space in your operating system.
-                            </p>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection title="About Byte Units" columns={2}>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Binary vs Decimal</h3>
+                        <p className="text-muted-foreground text-sm">
+                            This converter uses the <strong>binary</strong>{' '}
+                            definition where 1 KB = 1024 Bytes, which is the
+                            standard in computing.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                            Note that some storage manufacturers use the{' '}
+                            <strong>decimal</strong> system (1 KB = 1000 Bytes),
+                            which is why a &#34;1 TB&#34; hard drive shows less
+                            space in your operating system.
+                        </p>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Unit Relationships
-                            </h3>
-                            <div className="space-y-1 text-sm">
-                                <p>1 KB (Kilobyte) = 1,024 Bytes</p>
-                                <p>1 MB (Megabyte) = 1,024 KB</p>
-                                <p>1 GB (Gigabyte) = 1,024 MB</p>
-                                <p>1 TB (Terabyte) = 1,024 GB</p>
-                                <p>1 PB (Petabyte) = 1,024 TB</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Unit Relationships</h3>
+                        <div className="space-y-1 text-sm">
+                            <p>1 KB (Kilobyte) = 1,024 Bytes</p>
+                            <p>1 MB (Megabyte) = 1,024 KB</p>
+                            <p>1 GB (Gigabyte) = 1,024 MB</p>
+                            <p>1 TB (Terabyte) = 1,024 GB</p>
+                            <p>1 PB (Petabyte) = 1,024 TB</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
         </div>
     )
 }

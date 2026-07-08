@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom'
 import { getPostBySlug, getPostContent } from '@/lib/posts'
 
 import { AuthorBio } from '@/components/author-bio'
-import { BackgroundGrid } from '@/components/background-grid'
 import { BlogHeader } from '@/components/blog-header'
 import MarkdownRenderer from '@/components/markdown-renderer'
 import { RelatedPosts } from '@/components/related-posts'
@@ -48,7 +47,6 @@ export default function BlogPost() {
                     publisher: { '@id': 'https://fx64b.dev/#person' },
                 }}
             />
-            <BackgroundGrid />
             <div className="relative mx-auto max-w-7xl px-4 py-8">
                 <div className="flex justify-center">
                     <aside className="hidden xl:block xl:w-64 xl:flex-shrink-0">
@@ -60,7 +58,7 @@ export default function BlogPost() {
                         </div>
                     </aside>
 
-                    <article className="prose prose-invert w-full max-w-3xl">
+                    <article className="w-full max-w-3xl">
                         <BlogHeader
                             author={post.author || 'Fx64b'}
                             readtime={post.read}

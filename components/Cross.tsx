@@ -62,16 +62,16 @@ export function Cross() {
                 aria-label="Bible verse reference"
             >
                 <span className="relative inline-block h-[1.2em] w-[0.7em] align-middle">
-                    <span className="absolute top-0 right-[40%] bottom-0 left-[40%] bg-white"></span>
-                    <span className="absolute top-[20%] right-0 bottom-[70%] left-0 bg-white"></span>
+                    <span className="bg-foreground absolute top-0 right-[40%] bottom-0 left-[40%]"></span>
+                    <span className="bg-foreground absolute top-[20%] right-0 bottom-[70%] left-0"></span>
                 </span>
             </button>
 
             {showVerse && (
-                <div className="absolute bottom-full left-1/2 z-50 mb-2 w-screen max-w-[300px] -translate-x-1/2 rounded bg-black p-2 text-center text-lg text-white">
+                <div className="bg-popover text-popover-foreground border-border absolute bottom-full left-1/2 z-50 mb-2 w-screen max-w-[300px] -translate-x-1/2 rounded border p-2 text-center text-lg">
                     &#34;{currentVerse.text}&#34;
                     <br />— {currentVerse.reference}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-black"></div>
+                    <div className="border-t-popover absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent"></div>
                 </div>
             )}
         </div>

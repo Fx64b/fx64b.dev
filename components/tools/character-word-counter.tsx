@@ -3,6 +3,7 @@ import { Check, Copy } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { ToolInfoSection } from '@/components/tools/tool-info-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -242,92 +243,79 @@ export default function CharacterWordCounter() {
                 />
             </div>
 
-            <div className="mt-8 mb-4">
-                <h2 className="mb-4 text-xl font-semibold">
-                    About the Counter
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                How Words Are Counted
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Words are counted by splitting the text at
-                                spaces, tabs, and line breaks. Multiple spaces
-                                between words are treated as a single separator.
-                            </p>
-                            <p className="text-muted-foreground mt-2 text-sm">
-                                Example: &#34;Hello world!&#34; contains 2
-                                words.
-                            </p>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection
+                title="About the Counter"
+                columns={2}
+                className="mt-8"
+            >
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">
+                            How Words Are Counted
+                        </h3>
+                        <p className="text-muted-foreground text-sm">
+                            Words are counted by splitting the text at spaces,
+                            tabs, and line breaks. Multiple spaces between words
+                            are treated as a single separator.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                            Example: &#34;Hello world!&#34; contains 2 words.
+                        </p>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Reading & Speaking Times
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Reading time is calculated based on an average
-                                reading speed of 225 words per minute. Speaking
-                                time uses 150 words per minute.
-                            </p>
-                            <p className="text-muted-foreground mt-2 text-sm">
-                                These are averages and actual times may vary
-                                based on complexity and individual
-                                reading/speaking rates.
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">
+                            Reading & Speaking Times
+                        </h3>
+                        <p className="text-muted-foreground text-sm">
+                            Reading time is calculated based on an average
+                            reading speed of 225 words per minute. Speaking time
+                            uses 150 words per minute.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-sm">
+                            These are averages and actual times may vary based
+                            on complexity and individual reading/speaking rates.
+                        </p>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
 
             <Separator className="my-6" />
 
-            <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">Use Cases</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Content Creation
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Track word counts for articles, blog posts, and
-                                social media content to meet platform
-                                requirements.
-                            </p>
-                        </CardContent>
-                    </Card>
+            <ToolInfoSection title="Use Cases" columns={3}>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Content Creation</h3>
+                        <p className="text-muted-foreground text-sm">
+                            Track word counts for articles, blog posts, and
+                            social media content to meet platform requirements.
+                        </p>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                SEO Optimization
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Monitor content length for SEO best practices
-                                and ensure meta descriptions fit within
-                                character limits.
-                            </p>
-                        </CardContent>
-                    </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">SEO Optimization</h3>
+                        <p className="text-muted-foreground text-sm">
+                            Monitor content length for SEO best practices and
+                            ensure meta descriptions fit within character
+                            limits.
+                        </p>
+                    </CardContent>
+                </Card>
 
-                    <Card>
-                        <CardContent className="pt-6">
-                            <h3 className="mb-2 font-medium">
-                                Academic Writing
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Check if essays and papers meet the required
-                                word count for assignments and publications.
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h3 className="mb-2 font-medium">Academic Writing</h3>
+                        <p className="text-muted-foreground text-sm">
+                            Check if essays and papers meet the required word
+                            count for assignments and publications.
+                        </p>
+                    </CardContent>
+                </Card>
+            </ToolInfoSection>
         </div>
     )
 }

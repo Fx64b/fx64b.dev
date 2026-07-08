@@ -6,7 +6,33 @@
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/logo.svg" />
-        <meta name="theme-color" content="#030709" />
+        <meta
+            name="theme-color"
+            content="#ffffff"
+            media="(prefers-color-scheme: light)"
+        />
+        <meta
+            name="theme-color"
+            content="#030709"
+            media="(prefers-color-scheme: dark)"
+        />
+        <script>
+            ;(function () {
+                try {
+                    var stored = localStorage.getItem('fx64b-ui-theme')
+                    var theme =
+                        stored === 'light' || stored === 'dark' ? stored : null
+                    if (!theme) {
+                        theme = window.matchMedia(
+                            '(prefers-color-scheme: dark)'
+                        ).matches
+                            ? 'dark'
+                            : 'light'
+                    }
+                    document.documentElement.classList.add(theme)
+                } catch (e) {}
+            })()
+        </script>
         <meta
             name="robots"
             content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
@@ -55,7 +81,7 @@
             }
         </script>
     </head>
-    <body class="dark bg-background text-foreground min-h-screen antialiased">
+    <body class="bg-background text-foreground min-h-screen antialiased">
         <div id="root"></div>
         <script type="module" src="/src/main.tsx"></script>
     </body>

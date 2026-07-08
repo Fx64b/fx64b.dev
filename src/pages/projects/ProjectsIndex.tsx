@@ -1,10 +1,11 @@
 import projectData from '@/data/projectData'
+import { ExternalLink } from 'lucide-react'
 
-import { BackgroundGrid } from '@/components/background-grid'
 import Link from '@/components/link'
 import { ProjectCard } from '@/components/project-card'
 import { Section } from '@/components/section'
 import { Seo } from '@/components/seo'
+import { Badge } from '@/components/ui/badge'
 
 export default function ProjectsIndex() {
     const featuredProjects = projectData.filter((project) => project.featured)
@@ -32,7 +33,6 @@ export default function ProjectsIndex() {
                     })),
                 }}
             />
-            <BackgroundGrid />
 
             <main className="relative">
                 <Section className="pt-24">
@@ -40,7 +40,7 @@ export default function ProjectsIndex() {
                         <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
                             Projects
                         </h1>
-                        <p className="text-foreground/70 mx-auto max-w-2xl text-lg">
+                        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
                             A collection of projects I&#39;ve worked on, ranging
                             from web applications to browser extensions and CLI
                             tools. Featured projects include detailed
@@ -54,7 +54,7 @@ export default function ProjectsIndex() {
                                 <h2 className="mb-2 text-2xl font-bold tracking-tight">
                                     Featured Projects
                                 </h2>
-                                <p className="text-foreground/60 text-sm">
+                                <p className="text-muted-foreground text-sm">
                                     Projects with detailed documentation and
                                     case studies
                                 </p>
@@ -79,16 +79,45 @@ export default function ProjectsIndex() {
                                 <h2 className="mb-2 text-2xl font-bold tracking-tight">
                                     Other Projects
                                 </h2>
-                                <p className="text-foreground/60 text-sm">
+                                <p className="text-muted-foreground text-sm">
                                     Additional projects and experiments
                                 </p>
                             </div>
-                            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="divide-border mx-auto max-w-3xl divide-y">
                                 {otherProjects.map((project) => (
-                                    <ProjectCard
+                                    <a
                                         key={project.title}
-                                        project={project}
-                                    />
+                                        href={project.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group flex items-center justify-between gap-4 py-4 first:pt-0"
+                                    >
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="group-hover:text-primary truncate font-semibold transition-colors">
+                                                {project.title}
+                                            </h3>
+                                            <p className="text-muted-foreground truncate text-sm">
+                                                {project.description}
+                                            </p>
+                                        </div>
+                                        {project.tags &&
+                                            project.tags.length > 0 && (
+                                                <div className="hidden flex-shrink-0 gap-2 sm:flex">
+                                                    {project.tags
+                                                        .slice(0, 2)
+                                                        .map((tag) => (
+                                                            <Badge
+                                                                key={tag}
+                                                                variant="secondary"
+                                                                className="text-xs"
+                                                            >
+                                                                {tag}
+                                                            </Badge>
+                                                        ))}
+                                                </div>
+                                            )}
+                                        <ExternalLink className="text-muted-foreground group-hover:text-primary h-4 w-4 flex-shrink-0 transition-colors" />
+                                    </a>
                                 ))}
                             </div>
                         </div>
@@ -96,7 +125,7 @@ export default function ProjectsIndex() {
 
                     {projectData.length === 0 && (
                         <div className="py-16 text-center">
-                            <p className="text-foreground/60 text-lg">
+                            <p className="text-muted-foreground text-lg">
                                 No projects here right now. Check back soon for
                                 updates!
                             </p>

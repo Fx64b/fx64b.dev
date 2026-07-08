@@ -54,7 +54,7 @@ export function RelatedPosts({ currentSlug, tags = [] }: RelatedPostsProps) {
                         href={`/blog/${post.slug}`}
                         className="group"
                     >
-                        <Card className="hover:border-primary/50 h-full transition-all hover:shadow-lg">
+                        <Card className="h-full">
                             <CardContent className="p-6">
                                 <h3 className="group-hover:text-primary line-clamp-2 font-semibold transition-colors">
                                     {post.title}
