@@ -1,61 +1,15 @@
 ---
 title: 'Skool Downloader - Technical Documentation'
 description: 'A Go utility to automatically scrape and download Loom and YouTube videos from Skool.com classrooms.'
-lastUpdated: '2025-12-30'
+lastUpdated: '2026-07-10'
 author: 'Fx64b'
 status: 'published'
 projectSlug: 'skool-loom-dl'
-version: '2.0.0 (2025/12/30)'
+version: '2.1.0 (2025/02/23)'
 readTime: '6 mins'
 ---
 
 # Skool Downloader
-
-<div className="my-8 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/[0.04] to-background">
-  <div className="p-8 text-center sm:p-10">
-    <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">Download Skool videos in one click</h2>
-    <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground sm:text-lg">No installs. No command line. A hosted tool that adds a download button to every Skool video — and lets you grab entire courses at once. Join the waitlist to get early access.</p>
-    <a href="https://skool.fx64b.dev" className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3 font-semibold text-primary-foreground no-underline transition-opacity hover:opacity-90" target="_blank" rel="noopener noreferrer">
-      Join the Waitlist
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </a>
-    <div className="mx-auto mt-6 flex max-w-md items-start gap-3 rounded-lg border border-primary/15 bg-background/60 p-4 text-left text-sm">
-      <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7L6.4 21l1.6-7-5.4-4.7 7.1-.6z"/></svg>
-      <span><strong className="text-foreground">Early bird bonus:</strong> join now and get 1 month of Pro free at launch — 50 downloads per day, 30-day video retention, and bulk ZIP exports.</span>
-    </div>
-  </div>
-</div>
-
-<div className="grid grid-cols-1 gap-4 my-8 md:grid-cols-3">
-  <div className="rounded-xl border border-primary/10 bg-primary/5 p-5">
-    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/20">
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-    </div>
-    <h4 className="mb-1 font-semibold">One-click downloads</h4>
-    <p className="mb-0 text-sm text-muted-foreground">A simple browser extension adds a download button to every Skool video.</p>
-  </div>
-  <div className="rounded-xl border border-primary/10 bg-primary/5 p-5">
-    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/20">
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    </div>
-    <h4 className="mb-1 font-semibold">Bulk downloads</h4>
-    <p className="mb-0 text-sm text-muted-foreground">Grab entire modules or courses at once with Pro. Save hours of clicking.</p>
-  </div>
-  <div className="rounded-xl border border-primary/10 bg-primary/5 p-5">
-    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md border border-primary/30 bg-primary/20">
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    </div>
-    <h4 className="mb-1 font-semibold">Progress tracking</h4>
-    <p className="mb-0 text-sm text-muted-foreground">A dashboard to track every download, manage storage, and pick up where you left off.</p>
-  </div>
-</div>
-
-<hr className="my-10 border-border/40" />
-
-<div className="my-8 rounded-xl border border-border/60 bg-secondary/30 p-6">
-  <h3 className="mb-1 mt-0 text-lg font-semibold">Available now: the free, open-source CLI</h3>
-  <p className="mb-0 text-sm text-muted-foreground">Don't want to wait for the hosted version? The command-line tool documented below is free, open source, and ready to use today — everything that follows is its full technical documentation.</p>
-</div>
 
 ## Overview
 

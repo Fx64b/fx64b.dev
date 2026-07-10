@@ -72,17 +72,5 @@
     "typescript-eslint": "^8.46.0",
     "vite": "^7.3.2",
     "vitest": "^4.1.5"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.2.7",
-      "@types/react-dom": "19.2.3"
-    },
-    "onlyBuiltDependencies": [
-      "@tailwindcss/oxide",
-      "@vercel/speed-insights",
-      "esbuild",
-      "sharp"
-    ]
   }
 }
