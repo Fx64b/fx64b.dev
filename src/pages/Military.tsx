@@ -44,9 +44,10 @@ interface TimeParts {
     hours: number
     minutes: number
     seconds: number
+    millis: number
 }
 
-/** Remaining time as months + weeks + days + hours + minutes + seconds. */
+/** Remaining time as months + weeks + days + hours + minutes + seconds + ms. */
 function breakdownBetween(from: Date, to: Date): TimeParts {
     if (to <= from) {
         return {
@@ -56,6 +57,7 @@ function breakdownBetween(from: Date, to: Date): TimeParts {
             hours: 0,
             minutes: 0,
             seconds: 0,
+            millis: 0,
         }
     }
     const months = calendarMonthsBetween(from, to)
@@ -69,7 +71,8 @@ function breakdownBetween(from: Date, to: Date): TimeParts {
     const minutes = Math.floor(rest / MS_MINUTE)
     rest -= minutes * MS_MINUTE
     const seconds = Math.floor(rest / MS_SECOND)
-    return { months, weeks, days, hours, minutes, seconds }
+    rest -= seconds * MS_SECOND
+    return { months, weeks, days, hours, minutes, seconds, millis: rest }
 }
 
 /** Elapsed time expressed as independent totals per unit. */
@@ -82,6 +85,7 @@ function totalsBetween(from: Date, to: Date): TimeParts {
         hours: Math.floor(ms / MS_HOUR),
         minutes: Math.floor(ms / MS_MINUTE),
         seconds: Math.floor(ms / MS_SECOND),
+        millis: ms,
     }
 }
 
@@ -92,10 +96,11 @@ const COUNTDOWN_UNITS: { key: keyof TimeParts; label: string }[] = [
     { key: 'hours', label: 'HOURS' },
     { key: 'minutes', label: 'MINUTES' },
     { key: 'seconds', label: 'SECONDS' },
+    { key: 'millis', label: 'MILLIS' },
 ]
 
-function pad(value: number): string {
-    return String(value).padStart(2, '0')
+function pad(value: number, digits = 2): string {
+    return String(value).padStart(digits, '0')
 }
 
 function group(value: number): string {
@@ -107,7 +112,7 @@ export default function Military() {
 
     useEffect(() => {
         setNow(new Date())
-        const timer = setInterval(() => setNow(new Date()), 250)
+        const timer = setInterval(() => setNow(new Date()), 50)
         return () => clearInterval(timer)
     }, [])
 
@@ -176,7 +181,7 @@ export default function Military() {
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4ade80]" />
                         </span>
                         <span>
-                            {complete ? 'MISSION COMPLETE' : 'OPERATION ACTIVE'}
+                            {complete ? 'SERVICE COMPLETE' : 'IN SERVICE'}
                         </span>
                     </div>
                     <div className="tabular-nums">
@@ -190,21 +195,28 @@ export default function Military() {
                 <main className="flex flex-col items-center gap-4 sm:gap-6">
                     <div className="text-center">
                         <div className="text-[10px] tracking-[0.4em] text-[#4ade80]/60 sm:text-xs">
-                            {complete ? 'T-PLUS ZERO' : 'T-MINUS TO'}
+                            {complete
+                                ? 'MILITARY SERVICE IS DONE'
+                                : 'UNTIL MILITARY SERVICE IS DONE'}
                         </div>
                         <div className="mt-1 text-sm tracking-[0.2em] text-[#c9f5ce]/90 sm:text-base">
-                            30.10.2026 — 19:00
+                            30.10.2026 - 19:00
                         </div>
                     </div>
 
-                    <div className="grid w-full max-w-5xl grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-6">
+                    <div className="grid w-full max-w-5xl grid-cols-4 gap-2 sm:gap-3 lg:grid-cols-7">
                         {COUNTDOWN_UNITS.map(({ key, label }) => (
                             <div
                                 key={key}
                                 className="flex flex-col items-center rounded-sm border border-[#4ade80]/20 bg-[#0a120a]/80 px-1 py-3 shadow-[inset_0_0_20px_rgba(74,222,128,0.06)] sm:py-4"
                             >
-                                <span className="text-3xl font-bold text-[#e4ffe7] tabular-nums [text-shadow:0_0_14px_rgba(74,222,128,0.45)] sm:text-5xl lg:text-6xl">
-                                    {remaining ? pad(remaining[key]) : '--'}
+                                <span className="text-2xl font-bold text-[#e4ffe7] tabular-nums [text-shadow:0_0_14px_rgba(74,222,128,0.45)] sm:text-4xl lg:text-5xl">
+                                    {remaining
+                                        ? pad(
+                                              remaining[key],
+                                              key === 'millis' ? 3 : 2
+                                          )
+                                        : '--'}
                                 </span>
                                 <span className="mt-1 text-[9px] tracking-[0.3em] text-[#4ade80]/70 sm:text-[10px]">
                                     {label}
@@ -216,9 +228,9 @@ export default function Military() {
                     {/* Progress */}
                     <div className="w-full max-w-5xl">
                         <div className="mb-1 flex items-center justify-between text-[9px] tracking-[0.25em] text-[#4ade80]/60 sm:text-[10px]">
-                            <span>MISSION PROGRESS</span>
+                            <span>SERVICE PROGRESS</span>
                             <span className="tabular-nums">
-                                {now ? `${progress.toFixed(2)}%` : '--.--%'}
+                                {now ? `${progress.toFixed(4)}%` : '--.----%'}
                             </span>
                         </div>
                         <div className="h-1.5 w-full overflow-hidden rounded-full border border-[#4ade80]/20 bg-[#0a120a]">
@@ -233,11 +245,18 @@ export default function Military() {
                 {/* Elapsed stats */}
                 <footer className="w-full">
                     <div className="mb-2 text-center text-[9px] tracking-[0.35em] text-[#fbbf24]/70 sm:text-[10px]">
-                        TIME IN SERVICE — SINCE 12.01.2026 07:00
+                        TIME IN SERVICE - SINCE 12.01.2026 07:00
                     </div>
-                    <div className="mx-auto grid max-w-5xl grid-cols-3 gap-x-2 gap-y-2 sm:grid-cols-6">
+                    <div className="mx-auto grid max-w-5xl grid-cols-3 gap-x-2 gap-y-2 lg:grid-cols-7">
                         {COUNTDOWN_UNITS.map(({ key, label }) => (
-                            <div key={key} className="text-center">
+                            <div
+                                key={key}
+                                className={`text-center ${
+                                    key === 'millis'
+                                        ? 'col-span-3 lg:col-span-1'
+                                        : ''
+                                }`}
+                            >
                                 <div className="text-sm font-semibold text-[#fbbf24] tabular-nums sm:text-lg">
                                     {elapsed ? group(elapsed[key]) : '--'}
                                 </div>
