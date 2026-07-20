@@ -230,7 +230,7 @@ export default function Military() {
                         <div className="mb-1 flex items-center justify-between text-[9px] tracking-[0.25em] text-[#4ade80]/60 sm:text-[10px]">
                             <span>SERVICE PROGRESS</span>
                             <span className="tabular-nums">
-                                {now ? `${progress.toFixed(4)}%` : '--.----%'}
+                                {now ? `${progress.toFixed(6)}%` : '--.------%'}
                             </span>
                         </div>
                         <div className="h-1.5 w-full overflow-hidden rounded-full border border-[#4ade80]/20 bg-[#0a120a]">
