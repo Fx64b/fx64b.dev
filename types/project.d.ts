@@ -1,7 +1,11 @@
 export interface Project {
     title: string
     description: string
+    /** One-line version of the description, used in list rows. */
+    summary?: string
     logo: string
+    /** Optional 16:9 screenshot or demo GIF shown on the project page. */
+    screenshot?: string
     link: string
     githubLink: string
     status: 'Finished' | 'In Progress' | 'Planned' | 'Abandoned' | 'On Hold'

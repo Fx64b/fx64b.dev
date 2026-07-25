@@ -251,9 +251,7 @@ export default function ColorConverter() {
 
     return (
         <div className="mx-auto max-w-3xl">
-            <h1 className="mb-4 text-center text-2xl font-bold">
-                Color Converter
-            </h1>
+            <h2 className="sr-only">Color Converter</h2>
 
             <Card className="mb-4">
                 <CardContent className="pt-6">

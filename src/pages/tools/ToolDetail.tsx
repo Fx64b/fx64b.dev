@@ -2,10 +2,10 @@ import { getToolBySlug } from '@/data/toolsData'
 
 import { useParams } from 'react-router-dom'
 
-import { Section } from '@/components/section'
+import { BackLink } from '@/components/back-link'
+import { Page } from '@/components/page'
+import { Pill } from '@/components/pill'
 import { Seo } from '@/components/seo'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 
 import NotFound from '../NotFound'
 import DynamicToolLoader from './DynamicToolLoader'
@@ -41,41 +41,35 @@ export default function ToolDetail() {
                     author: { '@id': 'https://fx64b.dev/#person' },
                 }}
             />
-            <Section className="pt-24">
-                <div className="mx-auto max-w-(--breakpoint-lg)">
-                    <h1 className="mb-2 text-2xl font-bold">{tool.title}</h1>
-                    <p className="text-muted-foreground mb-6">
-                        {tool.description}
+
+            <Page className="max-w-[860px]">
+                <BackLink href="/tools">Back to tools</BackLink>
+
+                <h1 className="mt-6 mb-2 text-[30px] font-extrabold tracking-[-0.02em] sm:text-[36px]">
+                    {tool.title}
+                </h1>
+                <p className="text-muted-foreground mb-8 max-w-[560px] text-[15.5px] leading-[1.7]">
+                    {tool.description}
+                </p>
+
+                <DynamicToolLoader slug={tool.slug} />
+
+                <div className="border-border mt-16 border-t pt-8">
+                    <p className="text-muted-foreground text-[13.5px] leading-[1.7]">
+                        This tool runs entirely in your browser — nothing you
+                        type is sent anywhere.
                     </p>
-
-                    <Separator className="my-6" />
-
-                    <DynamicToolLoader slug={tool.slug} />
-
-                    <div className="mt-12">
-                        <h3 className="mb-4 text-lg font-semibold">
-                            About this tool
-                        </h3>
-                        <p>
-                            This is a free online tool that works entirely in
-                            your browser.
-                        </p>
-
-                        {tool.tags.length > 0 && (
-                            <div className="mt-4">
-                                <h4 className="mb-2 font-medium">Tags</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {tool.tags.map((tag) => (
-                                        <Badge key={tag} variant="secondary">
-                                            {tag}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    {tool.tags.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-1.5">
+                            {tool.tags.map((tag) => (
+                                <Pill key={tag} size="sm">
+                                    {tag}
+                                </Pill>
+                            ))}
+                        </div>
+                    )}
                 </div>
-            </Section>
+            </Page>
         </>
     )
 }

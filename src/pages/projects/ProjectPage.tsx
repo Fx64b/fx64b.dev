@@ -1,31 +1,18 @@
 import projectData from '@/data/projectData'
-import {
-    AlertCircleIcon,
-    ArrowLeft,
-    Calendar,
-    Clock,
-    ExternalLink,
-    FileText,
-    GitBranch,
-    Github,
-    User,
-} from 'lucide-react'
+import { ExternalLink, Github } from 'lucide-react'
 
 import { useParams } from 'react-router-dom'
 
-import { statusColorsBordered as statusColors } from '@/lib/project-status'
 import { getProjectDocBySlug } from '@/lib/projects'
 
+import { ActionLink } from '@/components/action-link'
+import { BackLink } from '@/components/back-link'
 import Image from '@/components/image'
 import Link from '@/components/link'
 import MarkdownRenderer from '@/components/markdown-renderer'
+import { Pill } from '@/components/pill'
 import { Seo } from '@/components/seo'
 import { TableOfContents } from '@/components/table-of-contents'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 
 import NotFound from '../NotFound'
 
@@ -74,214 +61,107 @@ export default function ProjectPage() {
                     }),
                 }}
             />
-            <div className="relative mx-auto max-w-7xl px-4 py-8">
-                <div className="mb-8">
-                    <Button variant="ghost" asChild className="group">
-                        <Link href="/projects">
-                            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                            Back to Projects
-                        </Link>
-                    </Button>
-                </div>
 
-                <div className="flex justify-center">
-                    <aside className="hidden xl:block xl:w-64 xl:flex-shrink-0">
-                        {projectDoc?.content && (
-                            <div className="fixed top-36 w-64 pr-8">
-                                <TableOfContents
-                                    content={projectDoc.content}
-                                    variant="desktop"
-                                />
-                            </div>
-                        )}
-                    </aside>
+            <div className="mx-auto flex w-full max-w-[1240px] justify-center gap-8 px-5 pt-12 pb-24 sm:px-6 sm:pt-16">
+                <aside className="hidden w-52 shrink-0 xl:block">
+                    {projectDoc?.content && (
+                        <TableOfContents
+                            content={projectDoc.content}
+                            variant="desktop"
+                        />
+                    )}
+                </aside>
 
-                    <div className="w-full max-w-4xl">
-                        <div className="mb-12">
-                            <div className="mb-6 flex flex-col gap-6 sm:flex-row sm:items-start">
-                                <div className="relative flex-shrink-0">
-                                    <Image
-                                        src={
-                                            project.logo ||
-                                            '/placeholder.svg?height=80&width=80'
-                                        }
-                                        alt={`${project.title} logo`}
-                                        width={80}
-                                        height={80}
-                                        className="border-border rounded-xl border-2"
-                                    />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <h1 className="mb-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                                        {project.title}
-                                    </h1>
-                                    <div className="mb-4 flex flex-wrap items-center gap-3">
-                                        <Badge
-                                            className={`${statusColors[project.status]} border`}
-                                        >
-                                            {project.status}
-                                        </Badge>
-                                        <Badge variant="secondary">
-                                            Featured Project
-                                        </Badge>
-                                        {projectDoc && (
-                                            <Badge
-                                                variant="outline"
-                                                className="gap-1"
-                                            >
-                                                <FileText className="h-3 w-3" />
-                                                Documentation
-                                            </Badge>
-                                        )}
-                                    </div>
+                <main className="w-full max-w-[720px] min-w-0">
+                    <BackLink href="/projects">Back to projects</BackLink>
 
-                                    {projectDoc && (
-                                        <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm">
-                                            {projectDoc.lastUpdated && (
-                                                <div className="flex items-center gap-1">
-                                                    <Calendar className="h-4 w-4" />
-                                                    <span>
-                                                        Updated{' '}
-                                                        {projectDoc.lastUpdated}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {projectDoc.author && (
-                                                <div className="flex items-center gap-1">
-                                                    <User className="h-4 w-4" />
-                                                    <span>
-                                                        By {projectDoc.author}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {projectDoc.version && (
-                                                <div className="flex items-center gap-1">
-                                                    <GitBranch className="h-4 w-4" />
-                                                    <span>
-                                                        Version:{' '}
-                                                        {projectDoc.version}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {projectDoc.readTime && (
-                                                <div className="flex items-center gap-1">
-                                                    <Clock className="h-4 w-4" />
-                                                    <span>
-                                                        {projectDoc.readTime}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Action buttons */}
-                                    <div className="flex flex-wrap gap-3">
-                                        <Button asChild>
-                                            <Link
-                                                href={project.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <ExternalLink className="mr-2 h-4 w-4" />
-                                                View Project
-                                            </Link>
-                                        </Button>
-                                        <Button variant="outline" asChild>
-                                            <Link
-                                                href={project.githubLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <Github className="mr-2 h-4 w-4" />
-                                                Source Code
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {projectDoc?.content && (
-                            <div className="mb-8 xl:hidden">
-                                <TableOfContents
-                                    content={projectDoc.content}
-                                    variant="mobile"
-                                />
-                            </div>
-                        )}
-
-                        {projectDoc ? (
-                            <div className="max-w-none">
-                                <MarkdownRenderer
-                                    content={projectDoc.content}
-                                />
-                            </div>
-                        ) : (
-                            /* Fallback content if no documentation */
-                            <div className="max-w-none">
-                                {/* Overview */}
-                                <Card className="mb-8">
-                                    <CardContent className="p-6">
-                                        <h2 className="mb-4 text-2xl font-semibold">
-                                            Overview
-                                        </h2>
-                                        <p className="text-muted-foreground leading-relaxed">
-                                            {project.description}
-                                        </p>
-
-                                        <Alert
-                                            variant="destructive"
-                                            className="mt-8"
-                                        >
-                                            <AlertCircleIcon className="h-5 w-5" />
-                                            <AlertTitle>
-                                                This page is still work in
-                                                progress!
-                                            </AlertTitle>
-                                            <AlertDescription>
-                                                <p>
-                                                    If you see this page, it is
-                                                    because of one of the
-                                                    following two reasons:
-                                                </p>
-                                                <ul className="list-inside list-disc text-sm">
-                                                    <li>
-                                                        The documentation for
-                                                        this project is still
-                                                        being written and not
-                                                        ready to be published
-                                                        yet
-                                                    </li>
-                                                    <li>
-                                                        I simply forgot to write
-                                                        any documentation and
-                                                        accidentally published
-                                                        this
-                                                    </li>
-                                                </ul>
-                                            </AlertDescription>
-                                        </Alert>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        )}
-
-                        <Separator className="my-12" />
-
-                        {/* Related projects */}
-                        <div className="text-center">
-                            <h2 className="mb-4 text-2xl font-bold">
-                                Explore More Projects
-                            </h2>
-                            <Button asChild>
-                                <Link href="/projects">View All Projects</Link>
-                            </Button>
-                        </div>
+                    <div className="mt-6 mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                        <h1 className="text-[30px] font-extrabold tracking-[-0.02em] sm:text-[36px]">
+                            {project.title}
+                        </h1>
+                        <span className="text-muted-foreground text-[13px]">
+                            {project.status}
+                        </span>
                     </div>
 
-                    {/* Right spacer for desktop TOC */}
-                    <div className="hidden xl:block xl:w-64 xl:flex-shrink-0" />
-                </div>
+                    {project.tags.length > 0 && (
+                        <div className="mb-8 flex flex-wrap gap-1.5">
+                            {project.tags.map((tag) => (
+                                <Pill key={tag} size="sm">
+                                    {tag}
+                                </Pill>
+                            ))}
+                        </div>
+                    )}
+
+                    {project.screenshot ? (
+                        <div className="border-border mb-8 aspect-video w-full overflow-hidden rounded-lg border">
+                            <Image
+                                src={project.screenshot}
+                                alt={`${project.title} screenshot`}
+                                className="h-full w-full object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <div className="border-border bg-muted/40 mb-8 flex h-40 w-full items-center justify-center rounded-lg border">
+                            <Image
+                                src={project.logo || '/logo.svg'}
+                                alt={`${project.title} logo`}
+                                width={72}
+                                height={72}
+                                className="max-h-[72px] w-auto"
+                            />
+                        </div>
+                    )}
+
+                    <div className="mb-10 flex flex-wrap gap-2.5">
+                        <ActionLink href={project.link} external>
+                            <ExternalLink className="size-4" />
+                            View live
+                        </ActionLink>
+                        <ActionLink
+                            href={project.githubLink}
+                            variant="secondary"
+                            external
+                        >
+                            <Github className="size-4" />
+                            Source code
+                        </ActionLink>
+                    </div>
+
+                    {projectDoc?.content && (
+                        <div className="xl:hidden">
+                            <TableOfContents
+                                content={projectDoc.content}
+                                variant="mobile"
+                            />
+                        </div>
+                    )}
+
+                    {projectDoc ? (
+                        <MarkdownRenderer content={projectDoc.content} />
+                    ) : (
+                        <div className="markdown">
+                            <p>{project.description}</p>
+                            <p className="border-border text-muted-foreground rounded-lg border border-dashed p-4 text-[13.5px] leading-[1.7]">
+                                Documentation for this project is still being
+                                written — check back later, or read the source
+                                on GitHub in the meantime.
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="border-border mt-16 border-t pt-8">
+                        <Link
+                            href="/projects"
+                            className="text-muted-foreground hover:text-foreground text-[13.5px] transition-colors duration-150 ease-out"
+                        >
+                            All projects →
+                        </Link>
+                    </div>
+                </main>
+
+                <div className="hidden w-52 shrink-0 xl:block" />
             </div>
         </>
     )

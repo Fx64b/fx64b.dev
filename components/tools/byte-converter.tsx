@@ -123,9 +123,7 @@ export default function ByteConverter() {
 
     return (
         <div className="mx-auto max-w-3xl">
-            <h1 className="mb-4 text-center text-2xl font-bold">
-                Byte Converter
-            </h1>
+            <h2 className="sr-only">Byte Converter</h2>
 
             <Card className="mb-4">
                 <CardContent className="pt-6">

@@ -141,9 +141,7 @@ export default function CharacterWordCounter() {
 
     return (
         <div className="mx-auto max-w-3xl">
-            <h1 className="mb-4 text-center text-2xl font-bold">
-                Character & Word Counter
-            </h1>
+            <h2 className="sr-only">Character & Word Counter</h2>
 
             <Card className="mb-4">
                 <CardContent className="pt-6">
