@@ -5,13 +5,8 @@ import remarkGfm from 'remark-gfm'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import {
-    oneDark,
-    oneLight,
-} from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 import Link from '@/components/link'
-import { useTheme } from '@/components/theme-provider'
 import { Separator } from '@/components/ui/separator'
 import {
     Table,
@@ -33,8 +28,16 @@ interface CodeBlockProps {
     [key: string]: unknown
 }
 
+// Line numbers are positioned inline; their colour comes from the stylesheet.
+const lineNumberStyle: React.CSSProperties = {
+    display: 'inline-block',
+    minWidth: '2.25em',
+    paddingRight: '1em',
+    textAlign: 'right',
+    userSelect: 'none',
+}
+
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
-    const { resolvedTheme } = useTheme()
     const processedContent = content.replace(
         /^(#{1,6})\s+(.+)$/gm,
         (match, hashes, title, offset, string) => {
@@ -130,18 +133,17 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         )}
                     </button>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="code-block overflow-x-auto p-4">
+                    {/* Highlighting is emitted as Prism class names and
+                        coloured from globals.css, so the palette follows the
+                        theme instead of being baked into the pre-rendered
+                        HTML by a JavaScript-chosen inline style. */}
                     <SyntaxHighlighter
-                        style={resolvedTheme === 'dark' ? oneDark : oneLight}
+                        useInlineStyles={false}
                         language={language}
                         PreTag="div"
                         showLineNumbers={!isSingleLine}
-                        customStyle={{
-                            margin: 0,
-                            borderRadius: 0,
-                            background: 'transparent',
-                            fontSize: '13px',
-                        }}
+                        lineNumberStyle={lineNumberStyle}
                         {...props}
                     >
                         {code}
