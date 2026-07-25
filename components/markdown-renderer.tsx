@@ -37,6 +37,23 @@ const lineNumberStyle: React.CSSProperties = {
     userSelect: 'none',
 }
 
+// Even with `useInlineStyles` off, the highlighter puts Prism's default theme
+// on the <code> tag as an inline style — black text, a Consolas stack and a
+// white text-shadow. Inline styles beat the stylesheet, so hand everything
+// back to the block's own typography and palette.
+const codeTagProps = {
+    style: {
+        color: 'inherit',
+        background: 'transparent',
+        textShadow: 'none',
+        fontFamily: 'inherit',
+        fontSize: 'inherit',
+        lineHeight: 'inherit',
+        tabSize: 2,
+        padding: 0,
+    } as React.CSSProperties,
+}
+
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     const processedContent = content.replace(
         /^(#{1,6})\s+(.+)$/gm,
@@ -144,6 +161,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         PreTag="div"
                         showLineNumbers={!isSingleLine}
                         lineNumberStyle={lineNumberStyle}
+                        codeTagProps={codeTagProps}
                         {...props}
                     >
                         {code}
