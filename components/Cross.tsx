@@ -70,7 +70,7 @@ export function Cross() {
             {showVerse && (
                 <div className="bg-popover text-popover-foreground border-border absolute bottom-full left-1/2 z-50 mb-2 w-screen max-w-[300px] -translate-x-1/2 rounded border p-2 text-center text-lg">
                     &#34;{currentVerse.text}&#34;
-                    <br />— {currentVerse.reference}
+                    <br />- {currentVerse.reference}
                     <div className="border-t-popover absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent"></div>
                 </div>
             )}

@@ -10,7 +10,7 @@ const RELOAD_COOLDOWN_MS = 15_000
 
 /**
  * Errors that mean the page is running against a build that no longer exists
- * on the server — a deploy landed while the tab was open, so a lazily loaded
+ * on the server - a deploy landed while the tab was open, so a lazily loaded
  * chunk or the router's static loader-data manifest now 404s and the HTML
  * error page fails to parse as JSON. Reloading picks up the new build.
  */
@@ -58,7 +58,7 @@ export default function RouteError() {
                     Something went wrong.
                 </h1>
                 <p className="text-muted-foreground mt-5 mb-8 max-w-[480px] text-[16px] leading-[1.7]">
-                    This page failed to load. Reloading usually fixes it — the
+                    This page failed to load. Reloading usually fixes it - the
                     site may have been updated while you were reading.
                 </p>
                 <div className="flex flex-wrap gap-2.5">

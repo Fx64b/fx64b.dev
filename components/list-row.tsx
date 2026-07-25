@@ -22,7 +22,7 @@ interface ListRowProps {
     href: string
     title: string
     description?: string
-    /** Muted text on the right — status, date, category. */
+    /** Muted text on the right - status, date, category. */
     meta?: ReactNode
     external?: boolean
     /** Blog rows use a slightly larger title and tighter padding. */

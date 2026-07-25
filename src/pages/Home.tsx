@@ -166,7 +166,7 @@ export default function Home() {
                     className="pb-24"
                 >
                     <p className="text-muted-foreground mb-5 max-w-[480px] text-[15px] leading-[1.7]">
-                        Email is the fastest way to reach me — for project work,
+                        Email is the fastest way to reach me - for project work,
                         feedback on something I built, or just to say hello.
                     </p>
                     <div className="flex flex-wrap gap-3">

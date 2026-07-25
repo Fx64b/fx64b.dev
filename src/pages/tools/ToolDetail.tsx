@@ -56,7 +56,7 @@ export default function ToolDetail() {
 
                 <div className="border-border mt-16 border-t pt-8">
                     <p className="text-muted-foreground text-[13.5px] leading-[1.7]">
-                        This tool runs entirely in your browser — nothing you
+                        This tool runs entirely in your browser - nothing you
                         type is sent anywhere.
                     </p>
                     {tool.tags.length > 0 && (

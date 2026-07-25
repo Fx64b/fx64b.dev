@@ -73,4 +73,4 @@ obsidianator export --help
 | Exporter | `internal/export/` | Write static files to disk, serve in-memory, SSE live reload |
 | Frontend | `web/src/` | React + Vite app, embedded into the binary at build time |
 
-The Go binary embeds the compiled frontend (`web/` → `./static`) via `//go:embed`. In `serve` mode nothing touches disk — vault data is served as JSON from memory and attachments are proxied directly from the vault directory.
+The Go binary embeds the compiled frontend (`web/` → `./static`) via `//go:embed`. In `serve` mode nothing touches disk - vault data is served as JSON from memory and attachments are proxied directly from the vault directory.

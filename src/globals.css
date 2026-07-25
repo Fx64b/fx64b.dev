@@ -18,7 +18,7 @@ html {
     scroll-margin-top: 80px;
 }
 
-/* Design tokens — neutral zinc palette, no accent colour anywhere.
+/* Design tokens - neutral zinc palette, no accent colour anywhere.
    Values are the Tailwind zinc scale; hex equivalents in comments. */
 
 :root {
@@ -233,7 +233,7 @@ html {
     @apply bg-muted text-foreground self-baseline rounded-xs px-1.5 pb-[0.15rem] font-mono text-[13.5px];
 }
 
-/* Headings are wrapped in a span carrying the anchor id — keep it invisible */
+/* Headings are wrapped in a span carrying the anchor id - keep it invisible */
 .markdown h1 > span,
 .markdown h2 > span,
 .markdown h3 > span,
@@ -241,7 +241,7 @@ html {
     @apply bg-transparent p-0 font-sans text-inherit;
 }
 
-/* Syntax highlighting — One Light / One Dark, applied through Prism class
+/* Syntax highlighting - One Light / One Dark, applied through Prism class
    names so the palette follows the theme instead of being frozen into the
    pre-rendered HTML. The code sits directly on the block's `muted` surface. */
 

@@ -22,7 +22,7 @@ function titleToSlug(title: string): string {
 }
 
 export const routes: RouteRecord[] = [
-    // Standalone, unlisted route — intentionally outside the App layout
+    // Standalone, unlisted route - intentionally outside the App layout
     // (no header/footer) and absent from the sitemap and navigation.
     {
         path: '/military',

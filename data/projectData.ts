@@ -122,7 +122,7 @@ const projectData: Project[] = [
     },
     {
         title: 'This Portfolio',
-        summary: 'The site you are looking at right now — open source',
+        summary: 'The site you are looking at right now - open source',
         description:
             'Yes, it is open source! \nYou can find the source code on GitHub. This portfolio is built using Next.js, Tailwind CSS, and shadcn/ui.',
         logo: '/logo.svg',

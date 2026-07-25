@@ -11,7 +11,7 @@ interface EyebrowProps {
     className?: string
 }
 
-/** Uppercase section label — 13px/600, 0.06em tracking. */
+/** Uppercase section label - 13px/600, 0.06em tracking. */
 export function Eyebrow({ children, action, className }: EyebrowProps) {
     return (
         <div

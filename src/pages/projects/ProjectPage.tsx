@@ -145,7 +145,7 @@ export default function ProjectPage() {
                             <p>{project.description}</p>
                             <p className="border-border text-muted-foreground rounded-lg border border-dashed p-4 text-[13.5px] leading-[1.7]">
                                 Documentation for this project is still being
-                                written — check back later, or read the source
+                                written - check back later, or read the source
                                 on GitHub in the meantime.
                             </p>
                         </div>
