@@ -154,7 +154,7 @@ export default function ProjectPage() {
                     <div className="border-border mt-16 border-t pt-8">
                         <Link
                             href="/projects"
-                            className="text-muted-foreground hover:text-foreground text-[13.5px] transition-colors duration-150 ease-out"
+                            className="text-muted-foreground hover:text-brand text-[13.5px] transition-colors duration-150 ease-out"
                         >
                             All projects →
                         </Link>

@@ -18,7 +18,7 @@ html {
     scroll-margin-top: 80px;
 }
 
-/* Design tokens - neutral zinc palette, no accent colour anywhere.
+/* Design tokens - a neutral zinc palette plus a single accent.
    Values are the Tailwind zinc scale; hex equivalents in comments. */
 
 :root {
@@ -50,9 +50,10 @@ html {
 
     --border: oklch(0.92 0.004 286.32); /* zinc-200 #e4e4e7 */
     --input: oklch(0.92 0.004 286.32);
-    /* The one colour on the site: a muted Swiss red, used for links in prose,
-       focus rings and the active nav item. Everything else stays monochrome. */
-    --brand: #c8443c;
+    /* The one colour on the site: a deep teal, used for links in prose, focus
+       rings, the active nav item, hover states and the section markers.
+       Everything else stays monochrome. */
+    --brand: #16786e;
     --ring: var(--brand);
 }
 
@@ -82,7 +83,7 @@ html {
     --border: oklch(0.274 0.006 286.033); /* zinc-800 #27272a */
     --input: oklch(0.274 0.006 286.033);
     /* Lifted for legibility on the near-black background */
-    --brand: #f08a84;
+    --brand: #4fbcae;
     --ring: var(--brand);
 }
 

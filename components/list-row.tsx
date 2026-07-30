@@ -50,7 +50,7 @@ export function ListRow({
             <span className="min-w-0">
                 <span
                     className={cn(
-                        'text-foreground block',
+                        'text-foreground group-hover:text-brand block transition-colors duration-150 ease-out',
                         variant === 'compact'
                             ? 'text-[15px] font-semibold'
                             : 'text-[16px] font-bold'

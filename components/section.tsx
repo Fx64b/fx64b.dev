@@ -20,7 +20,11 @@ export function Eyebrow({ children, action, className }: EyebrowProps) {
                 className
             )}
         >
-            <h2 className="text-muted-foreground text-[13px] font-semibold tracking-[0.06em] uppercase">
+            <h2 className="text-muted-foreground flex items-center gap-2.5 text-[13px] font-semibold tracking-[0.06em] uppercase">
+                <span
+                    aria-hidden="true"
+                    className="bg-brand inline-block h-[2px] w-3 shrink-0 rounded-full"
+                />
                 {children}
             </h2>
             {action}
