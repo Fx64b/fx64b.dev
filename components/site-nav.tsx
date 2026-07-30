@@ -64,7 +64,7 @@ export function SiteNav() {
                             className={cn(
                                 'hover:text-foreground transition-colors duration-150 ease-out',
                                 isActive(link.href)
-                                    ? 'text-foreground'
+                                    ? 'text-brand'
                                     : 'text-muted-foreground'
                             )}
                         >

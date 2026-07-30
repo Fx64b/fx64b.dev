@@ -27,7 +27,7 @@ export function AuthorBio({
                 Software engineer from Switzerland.{' '}
                 <Link
                     href="/#contact"
-                    className="text-foreground underline decoration-1 underline-offset-4"
+                    className="text-brand decoration-brand/40 hover:decoration-brand underline decoration-1 underline-offset-4 transition-colors duration-150 ease-out"
                 >
                     Get in touch
                 </Link>

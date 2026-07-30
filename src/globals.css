@@ -50,7 +50,10 @@ html {
 
     --border: oklch(0.92 0.004 286.32); /* zinc-200 #e4e4e7 */
     --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.705 0.015 286.067); /* zinc-400 #a1a1aa */
+    /* The one colour on the site: a muted Swiss red, used for links in prose,
+       focus rings and the active nav item. Everything else stays monochrome. */
+    --brand: #c8443c;
+    --ring: var(--brand);
 }
 
 .dark {
@@ -78,7 +81,9 @@ html {
 
     --border: oklch(0.274 0.006 286.033); /* zinc-800 #27272a */
     --input: oklch(0.274 0.006 286.033);
-    --ring: oklch(0.552 0.016 285.938); /* zinc-500 #71717a */
+    /* Lifted for legibility on the near-black background */
+    --brand: #f08a84;
+    --ring: var(--brand);
 }
 
 @theme {
@@ -114,6 +119,7 @@ html {
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+    --color-brand: var(--brand);
 }
 
 @layer base {
@@ -192,7 +198,7 @@ html {
 }
 
 .markdown a {
-    @apply text-foreground underline decoration-1 underline-offset-4;
+    @apply text-brand decoration-brand/40 hover:decoration-brand underline decoration-1 underline-offset-4 transition-colors duration-150 ease-out;
 }
 
 .markdown ul:not(nav ul) {
