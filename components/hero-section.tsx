@@ -34,7 +34,7 @@ export function HeroSection() {
                         width={128}
                         height={128}
                         priority
-                        className="border-border size-24 shrink-0 rounded-lg border sm:size-32"
+                        className="border-border size-24 shrink-0 self-center rounded-lg border sm:size-32 sm:self-start"
                     />
                 </div>
             </Reveal>

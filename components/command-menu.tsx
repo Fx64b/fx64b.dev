@@ -8,6 +8,8 @@ import { formatMonthYear } from '@/lib/format'
 import { getAllPosts } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 
+import { ScrollArea } from '@/components/ui/scroll-area'
+
 type CommandItem = {
     id: string
     title: string
@@ -196,62 +198,66 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
                     />
                 </div>
 
-                <div
-                    ref={listRef}
-                    role="listbox"
-                    aria-label="Results"
-                    className="max-h-[min(60vh,360px)] overflow-y-auto p-2"
-                >
-                    {results.length === 0 && (
-                        <p className="text-muted-foreground px-3 py-6 text-center text-[13.5px]">
-                            No results found.
-                        </p>
-                    )}
+                <ScrollArea viewportClassName="max-h-[min(60vh,360px)]">
+                    <div
+                        ref={listRef}
+                        role="listbox"
+                        aria-label="Results"
+                        className="p-2"
+                    >
+                        {results.length === 0 && (
+                            <p className="text-muted-foreground px-3 py-6 text-center text-[13.5px]">
+                                No results found.
+                            </p>
+                        )}
 
-                    {results.map((item, index) => {
-                        const showGroup = item.group !== renderedGroup
-                        renderedGroup = item.group
-                        const isActive = index === activeIndex
+                        {results.map((item, index) => {
+                            const showGroup = item.group !== renderedGroup
+                            renderedGroup = item.group
+                            const isActive = index === activeIndex
 
-                        return (
-                            <div key={item.id}>
-                                {showGroup && (
-                                    <div
+                            return (
+                                <div key={item.id}>
+                                    {showGroup && (
+                                        <div
+                                            className={cn(
+                                                'text-muted-foreground px-3 pb-1.5 text-[11px] font-semibold tracking-[0.06em] uppercase',
+                                                index === 0 ? 'pt-1' : 'pt-4'
+                                            )}
+                                        >
+                                            {item.group}
+                                        </div>
+                                    )}
+                                    <button
+                                        type="button"
+                                        role="option"
+                                        aria-selected={isActive}
+                                        data-active={isActive}
+                                        onMouseMove={() =>
+                                            setActiveIndex(index)
+                                        }
+                                        onClick={() => select(item)}
                                         className={cn(
-                                            'text-muted-foreground px-3 pb-1.5 text-[11px] font-semibold tracking-[0.06em] uppercase',
-                                            index === 0 ? 'pt-1' : 'pt-4'
+                                            'flex w-full cursor-pointer items-center justify-between gap-4 rounded-sm px-3 py-2.5 text-left text-[13.5px] transition-colors duration-150 ease-out',
+                                            isActive
+                                                ? 'bg-muted text-foreground'
+                                                : 'text-foreground'
                                         )}
                                     >
-                                        {item.group}
-                                    </div>
-                                )}
-                                <button
-                                    type="button"
-                                    role="option"
-                                    aria-selected={isActive}
-                                    data-active={isActive}
-                                    onMouseMove={() => setActiveIndex(index)}
-                                    onClick={() => select(item)}
-                                    className={cn(
-                                        'flex w-full cursor-pointer items-center justify-between gap-4 rounded-sm px-3 py-2.5 text-left text-[13.5px] transition-colors duration-150 ease-out',
-                                        isActive
-                                            ? 'bg-muted text-foreground'
-                                            : 'text-foreground'
-                                    )}
-                                >
-                                    <span className="truncate">
-                                        {item.title}
-                                    </span>
-                                    {item.hint && (
-                                        <span className="text-muted-foreground shrink-0 truncate text-[12px]">
-                                            {item.hint}
+                                        <span className="truncate">
+                                            {item.title}
                                         </span>
-                                    )}
-                                </button>
-                            </div>
-                        )
-                    })}
-                </div>
+                                        {item.hint && (
+                                            <span className="text-muted-foreground shrink-0 truncate text-[12px]">
+                                                {item.hint}
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </ScrollArea>
             </div>
         </div>
     )

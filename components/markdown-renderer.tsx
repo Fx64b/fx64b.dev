@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 
 import Link from '@/components/link'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import {
     Table,
@@ -150,7 +151,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         )}
                     </button>
                 </div>
-                <div className="code-block overflow-x-auto p-4">
+                <ScrollArea className="code-block" viewportClassName="p-4">
                     {/* Highlighting is emitted as Prism class names and
                         coloured from globals.css, so the palette follows the
                         theme instead of being baked into the pre-rendered
@@ -166,7 +167,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                     >
                         {code}
                     </SyntaxHighlighter>
-                </div>
+                </ScrollArea>
             </div>
         ) : (
             <code
@@ -202,9 +203,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         </Link>
                     ),
                     table: ({ children }) => (
-                        <div className="my-6 w-full overflow-y-auto">
+                        <ScrollArea className="my-6 w-full">
                             <Table>{children}</Table>
-                        </div>
+                        </ScrollArea>
                     ),
                     thead: ({ children }) => (
                         <TableHeader>{children}</TableHeader>

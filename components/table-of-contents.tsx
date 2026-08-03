@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { ScrollArea } from '@/components/ui/scroll-area'
+
 interface TOCItem {
     id: string
     text: string
@@ -149,30 +151,32 @@ export function TableOfContents({
                 <h2 className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.06em] uppercase">
                     On this page
                 </h2>
-                <ul className="border-border max-h-[calc(100vh-200px)] scrollbar-thin space-y-0.5 overflow-y-auto border-l text-[13px]">
-                    {displayHeadings.map((heading) => (
-                        <li
-                            key={heading.id}
-                            style={{
-                                paddingLeft: `${(heading.level - 1) * 10}px`,
-                            }}
-                        >
-                            <button
-                                onClick={() => scrollToHeading(heading.id)}
-                                className={cn(
-                                    'hover:text-foreground -ml-px w-full cursor-pointer border-l py-1 pl-3 text-left transition-colors duration-150 ease-out',
-                                    effectiveActiveId === heading.id
-                                        ? 'border-foreground text-foreground'
-                                        : 'text-muted-foreground border-transparent'
-                                )}
+                <ScrollArea viewportClassName="max-h-[calc(100vh-200px)]">
+                    <ul className="border-border space-y-0.5 border-l pr-2 text-[13px]">
+                        {displayHeadings.map((heading) => (
+                            <li
+                                key={heading.id}
+                                style={{
+                                    paddingLeft: `${(heading.level - 1) * 10}px`,
+                                }}
                             >
-                                <span className="block truncate">
-                                    {heading.text}
-                                </span>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                                <button
+                                    onClick={() => scrollToHeading(heading.id)}
+                                    className={cn(
+                                        'hover:text-foreground -ml-px w-full cursor-pointer border-l py-1 pl-3 text-left transition-colors duration-150 ease-out',
+                                        effectiveActiveId === heading.id
+                                            ? 'border-foreground text-foreground'
+                                            : 'text-muted-foreground border-transparent'
+                                    )}
+                                >
+                                    <span className="block truncate">
+                                        {heading.text}
+                                    </span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </ScrollArea>
             </nav>
         )
     }
@@ -206,33 +210,35 @@ export function TableOfContents({
                         : 'max-h-0 opacity-0'
                 )}
             >
-                <ul className="border-border mt-2 max-h-[55vh] scrollbar-thin space-y-0.5 overflow-y-auto border-l text-[13px]">
-                    {displayHeadings.map((heading) => (
-                        <li
-                            key={heading.id}
-                            style={{
-                                paddingLeft: `${(heading.level - 1) * 10}px`,
-                            }}
-                        >
-                            <button
-                                onClick={() => {
-                                    scrollToHeading(heading.id)
-                                    setIsExpanded(false)
+                <ScrollArea className="mt-2" viewportClassName="max-h-[55vh]">
+                    <ul className="border-border space-y-0.5 border-l pr-2 text-[13px]">
+                        {displayHeadings.map((heading) => (
+                            <li
+                                key={heading.id}
+                                style={{
+                                    paddingLeft: `${(heading.level - 1) * 10}px`,
                                 }}
-                                className={cn(
-                                    'hover:text-foreground -ml-px w-full cursor-pointer border-l py-1 pl-3 text-left transition-colors duration-150 ease-out',
-                                    effectiveActiveId === heading.id
-                                        ? 'border-foreground text-foreground'
-                                        : 'text-muted-foreground border-transparent'
-                                )}
                             >
-                                <span className="block truncate">
-                                    {heading.text}
-                                </span>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                                <button
+                                    onClick={() => {
+                                        scrollToHeading(heading.id)
+                                        setIsExpanded(false)
+                                    }}
+                                    className={cn(
+                                        'hover:text-foreground -ml-px w-full cursor-pointer border-l py-1 pl-3 text-left transition-colors duration-150 ease-out',
+                                        effectiveActiveId === heading.id
+                                            ? 'border-foreground text-foreground'
+                                            : 'text-muted-foreground border-transparent'
+                                    )}
+                                >
+                                    <span className="block truncate">
+                                        {heading.text}
+                                    </span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </ScrollArea>
             </div>
         </div>
     )
