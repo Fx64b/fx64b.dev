@@ -6,6 +6,16 @@
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/logo.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossorigin="anonymous"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap"
+            rel="stylesheet"
+        />
         <meta
             name="theme-color"
             content="#ffffff"
@@ -13,7 +23,7 @@
         />
         <meta
             name="theme-color"
-            content="#030709"
+            content="#09090b"
             media="(prefers-color-scheme: dark)"
         />
         <script>
@@ -31,6 +41,8 @@
                     }
                     document.documentElement.classList.add(theme)
                 } catch (e) {}
+                // Entry animations only run when JavaScript is available.
+                document.documentElement.classList.add('js')
             })()
         </script>
         <meta

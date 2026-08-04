@@ -5,9 +5,9 @@ import remarkGfm from 'remark-gfm'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 import Link from '@/components/link'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import {
     Table,
@@ -27,6 +27,32 @@ interface CodeBlockProps {
     className?: string
     children?: React.ReactNode
     [key: string]: unknown
+}
+
+// Line numbers are positioned inline; their colour comes from the stylesheet.
+const lineNumberStyle: React.CSSProperties = {
+    display: 'inline-block',
+    minWidth: '2.25em',
+    paddingRight: '1em',
+    textAlign: 'right',
+    userSelect: 'none',
+}
+
+// Even with `useInlineStyles` off, the highlighter puts Prism's default theme
+// on the <code> tag as an inline style - black text, a Consolas stack and a
+// white text-shadow. Inline styles beat the stylesheet, so hand everything
+// back to the block's own typography and palette.
+const codeTagProps = {
+    style: {
+        color: 'inherit',
+        background: 'transparent',
+        textShadow: 'none',
+        fontFamily: 'inherit',
+        fontSize: 'inherit',
+        lineHeight: 'inherit',
+        tabSize: 2,
+        padding: 0,
+    } as React.CSSProperties,
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
@@ -98,13 +124,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         }
 
         return !inline && language ? (
-            <div className="group relative my-6">
-                <div className="flex items-center justify-between rounded-t-md bg-[#282c34] px-4 py-2">
-                    <span className="text-xs font-medium text-gray-400">
+            <div className="group border-border bg-muted relative my-6 overflow-hidden rounded-lg border">
+                <div className="border-border flex items-center justify-between border-b px-4 py-2">
+                    <span className="text-muted-foreground font-mono text-[11px] tracking-[0.06em] uppercase">
                         {languageNames[language] || language.toUpperCase()}
                     </span>
                     <button
-                        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+                        className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-1.5 rounded-xs px-1.5 py-1 text-[11px] transition-colors duration-150 ease-out"
                         aria-label="Copy code to clipboard"
                         onClick={() => {
                             navigator.clipboard.writeText(code)
@@ -114,37 +140,38 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                     >
                         {isCopied ? (
                             <>
-                                <CheckIcon className="h-3.5 w-3.5" />
+                                <CheckIcon className="size-3.5" />
                                 Copied!
                             </>
                         ) : (
                             <>
-                                <ClipboardIcon className="h-3.5 w-3.5" />
+                                <ClipboardIcon className="size-3.5" />
                                 Copy
                             </>
                         )}
                     </button>
                 </div>
-                <div className="overflow-hidden rounded-b-md">
+                <ScrollArea className="code-block" viewportClassName="p-4">
+                    {/* Highlighting is emitted as Prism class names and
+                        coloured from globals.css, so the palette follows the
+                        theme instead of being baked into the pre-rendered
+                        HTML by a JavaScript-chosen inline style. */}
                     <SyntaxHighlighter
-                        style={oneDark}
+                        useInlineStyles={false}
                         language={language}
                         PreTag="div"
                         showLineNumbers={!isSingleLine}
-                        customStyle={{
-                            margin: 0,
-                            borderRadius: 0,
-                            fontSize: '0.875rem',
-                        }}
+                        lineNumberStyle={lineNumberStyle}
+                        codeTagProps={codeTagProps}
                         {...props}
                     >
                         {code}
                     </SyntaxHighlighter>
-                </div>
+                </ScrollArea>
             </div>
         ) : (
             <code
-                className="bg-muted rounded px-1.5 py-0.5 font-mono text-sm"
+                className="bg-muted text-foreground rounded-xs px-1.5 py-0.5 font-mono text-[13.5px]"
                 {...props}
             >
                 {children}
@@ -158,7 +185,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                 rehypePlugins={[rehypeRaw, remarkGfm]}
                 components={{
                     code: CodeBlock as any,
-                    hr: () => <Separator className="my-8" />,
+                    hr: () => <Separator className="my-10" />,
                     a: ({ href, children, className }) => (
                         <Link
                             href={href!}
@@ -170,51 +197,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                                     ? 'noopener noreferrer'
                                     : undefined
                             }
-                            className={
-                                (className as string) ||
-                                'text-primary underline underline-offset-4'
-                            }
+                            className={className as string}
                         >
                             {children}
                         </Link>
                     ),
-                    h1: ({ children }) => (
-                        <h1 className="scroll-mt-20 text-3xl font-bold tracking-tight">
-                            {children}
-                        </h1>
-                    ),
-                    h2: ({ children }) => (
-                        <h2 className="scroll-mt-20 text-2xl font-semibold tracking-tight">
-                            {children}
-                        </h2>
-                    ),
-                    h3: ({ children }) => (
-                        <h3 className="scroll-mt-20 text-xl font-semibold tracking-tight">
-                            {children}
-                        </h3>
-                    ),
-                    p: ({ children }) => (
-                        <p className="leading-7">{children}</p>
-                    ),
-                    ul: ({ children }) => (
-                        <ul className="my-2 ml-6 list-disc [&>li]:mt-2">
-                            {children}
-                        </ul>
-                    ),
-                    ol: ({ children }) => (
-                        <ol className="my-2 ml-6 list-decimal [&>li]:mt-2">
-                            {children}
-                        </ol>
-                    ),
-                    blockquote: ({ children }) => (
-                        <blockquote className="mt-6 border-l-2 pl-6 italic">
-                            {children}
-                        </blockquote>
-                    ),
                     table: ({ children }) => (
-                        <div className="my-6 w-full overflow-y-auto">
+                        <ScrollArea className="my-6 w-full">
                             <Table>{children}</Table>
-                        </div>
+                        </ScrollArea>
                     ),
                     thead: ({ children }) => (
                         <TableHeader>{children}</TableHeader>

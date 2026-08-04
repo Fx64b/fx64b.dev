@@ -1,10 +1,5 @@
-import { Github, Linkedin, Mail } from 'lucide-react'
-
-import { XIcon } from '@/components/icons/x-icon'
 import Image from '@/components/image'
 import Link from '@/components/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 
 interface AuthorBioProps {
     author?: string
@@ -16,68 +11,28 @@ export function AuthorBio({
     avatar = '/logo.svg',
 }: AuthorBioProps) {
     return (
-        <Card className="overflow-hidden">
-            <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                    <Image
-                        src={avatar}
-                        alt={author}
-                        width={80}
-                        height={80}
-                        className="border-border rounded-full border-2"
-                    />
-                    <div className="flex-1">
-                        <h3 className="text-lg font-semibold">
-                            About {author}
-                        </h3>
-                        <p className="text-muted-foreground mt-2 text-sm">
-                            Software engineer from Switzerland building modern
-                            web applications with React, Next.js, TypeScript,
-                            and Go. Currently exploring cybersecurity
-                            fundamentals and sharing my journey through this
-                            blog.
-                        </p>
-                        <div className="mt-4 flex gap-2">
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link
-                                    href="https://github.com/Fx64b"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Github className="h-4 w-4" />
-                                    <span className="sr-only">GitHub</span>
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link
-                                    href="https://x.com/f_x64b"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <XIcon className="h-4 w-4" />
-                                    <span className="sr-only">X</span>
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link
-                                    href="https://www.linkedin.com/in/fabio-maffucci-23515b328/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Linkedin className="h-4 w-4" />
-                                    <span className="sr-only">LinkedIn</span>
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link href="mailto:contact@fx64b.dev">
-                                    <Mail className="h-4 w-4" />
-                                    <span className="sr-only">Email</span>
-                                </Link>
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+        <div className="border-border flex items-center gap-4 border-t pt-8">
+            <Image
+                src={avatar}
+                alt={author}
+                width={44}
+                height={44}
+                className="border-border shrink-0 rounded-full border"
+            />
+            <p className="text-muted-foreground text-[13.5px] leading-[1.7]">
+                <span className="text-foreground font-semibold">
+                    Written by {author}
+                </span>
+                <br />
+                Software engineer from Switzerland.{' '}
+                <Link
+                    href="/#contact"
+                    className="text-brand decoration-brand/40 hover:decoration-brand underline decoration-1 underline-offset-4 transition-colors duration-150 ease-out"
+                >
+                    Get in touch
+                </Link>
+                .
+            </p>
+        </div>
     )
 }

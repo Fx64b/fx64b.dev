@@ -3,6 +3,8 @@ import { Project } from '../types/project'
 const projectData: Project[] = [
     {
         title: 'Cards Against Security',
+        summary:
+            'Cards Against Humanity for security folks, with LLM bots filling empty seats',
         description:
             'A dark-humor Cards Against Humanity clone for security professionals, where empty seats are filled by LLM-powered bots. No accounts, no signup: lobbies are keyed by a 6-char join code and sessions are ephemeral by design. Go rules engine, React frontend, real-time play over WebSockets.',
         logo: '/projects/cards-against-security-logo.svg',
@@ -21,6 +23,7 @@ const projectData: Project[] = [
     },
     {
         title: 'Obsidianator',
+        summary: 'Turns an Obsidian vault into a self-contained static site',
         description:
             'Turn an Obsidian vault into a self-contained static website, or serve it directly in the browser without writing anything to disk.',
         logo: '/obsidianator.svg',
@@ -32,6 +35,8 @@ const projectData: Project[] = [
     },
     {
         title: 'Flashcard App',
+        summary:
+            'Spaced-repetition flashcard app with analytics and bulk import',
         description:
             'A modern flashcard application for effective learning using the Spaced Repetition System (SRS). Features email authentication, study time tracking, progress analytics, and bulk card import. Built with Next.js 15, TypeScript, and Turso database. Currently in early development.',
         logo: '/learn-logo.png',
@@ -51,6 +56,8 @@ const projectData: Project[] = [
     },
     {
         title: 'Push to Prod',
+        summary:
+            'Idle clicker game about shipping code, from rubber duck to AGI',
         description:
             'A cookie clicker like game with a software development theme. Generate Lines of Code (LOC) by pressing ENTER, automate production with devs and tools ranging from a Rubber Duck to an AGI, survive random Slack events, and prestige with a "Refactor" system that awards permanent Legacy Code Token bonuses.',
         logo: '/projects/push-to-prod-logo.png',
@@ -70,6 +77,7 @@ const projectData: Project[] = [
     },
     {
         title: 'video-archiver',
+        summary: 'Self-hosted YouTube downloader, archive and media manager',
         description:
             'A YouTube video downloader and archiver with various tools to download, manage, categorize, convert, stream and manipulate videos. The project is still in early development stage.',
         logo: '/va-logo.png',
@@ -89,6 +97,8 @@ const projectData: Project[] = [
     },
     {
         title: 'skool-loom-dl',
+        summary:
+            'Go utility that scrapes and downloads Loom videos from Skool classrooms',
         description:
             'Skool-Loom-Downloader is a lightweight Go utility that automatically scrapes and downloads Loom videos from Skool.com classrooms. It supports both cookie-based and email/password authentication, handles JSON and Netscape cookie formats, and comes with Docker support for easy deployment.',
         logo: '/sld.webp',
@@ -100,6 +110,7 @@ const projectData: Project[] = [
     },
     {
         title: 'Swiss Cross',
+        summary: 'Tiny React component that renders the Swiss cross',
         description:
             'A lightweight React component for rendering the Swiss cross symbol with customizable size, colors, and border radius. TypeScript support, and dual CommonJS/ESM distribution. ',
         logo: '/swiss-cross-logo.png',
@@ -111,6 +122,7 @@ const projectData: Project[] = [
     },
     {
         title: 'This Portfolio',
+        summary: 'The site you are looking at right now - open source',
         description:
             'Yes, it is open source! \nYou can find the source code on GitHub. This portfolio is built using Next.js, Tailwind CSS, and shadcn/ui.',
         logo: '/logo.svg',
@@ -130,6 +142,7 @@ const projectData: Project[] = [
     },
     {
         title: 'PentestGPT',
+        summary: 'AI-assisted penetration testing platform',
         description:
             'Advanced AI-powered penetration testing platform that provides integrated tools to help security teams conduct comprehensive penetration tests. Scan, exploit, and analyze web applications, networks, and cloud environments with ease and precision, without needing expert skills.',
         logo: '/pentestgpt-logo.png',
@@ -150,6 +163,7 @@ const projectData: Project[] = [
     },
     {
         title: 'Skool Focus',
+        summary: 'Browser extension that hides distracting parts of skool.com',
         description:
             'A browser extension that helps you focus while you use the skool.com website. \n\nWith an easy to use popup you can hide various distracting elements from the site like notification or the community feed.',
         logo: '/skool-focus-logo.png',

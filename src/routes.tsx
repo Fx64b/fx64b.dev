@@ -9,6 +9,7 @@ import { BlogLayout, ProjectsLayout, ToolsLayout } from './layouts'
 import Home from './pages/Home'
 import Military from './pages/Military'
 import NotFound from './pages/NotFound'
+import RouteError from './pages/RouteError'
 import BlogIndex from './pages/blog/BlogIndex'
 import BlogPost from './pages/blog/BlogPost'
 import ProjectPage from './pages/projects/ProjectPage'
@@ -21,7 +22,7 @@ function titleToSlug(title: string): string {
 }
 
 export const routes: RouteRecord[] = [
-    // Standalone, unlisted route — intentionally outside the App layout
+    // Standalone, unlisted route - intentionally outside the App layout
     // (no header/footer) and absent from the sitemap and navigation.
     {
         path: '/military',
@@ -32,6 +33,9 @@ export const routes: RouteRecord[] = [
         path: '/',
         element: <App />,
         entry: 'src/App.tsx',
+        // Catches render and loader failures anywhere below, including a
+        // navigation made from a tab whose build has since been redeployed.
+        errorElement: <RouteError />,
         children: [
             {
                 index: true,

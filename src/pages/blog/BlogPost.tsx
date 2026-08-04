@@ -5,11 +5,14 @@ import { useParams } from 'react-router-dom'
 import { getPostBySlug, getPostContent } from '@/lib/posts'
 
 import { AuthorBio } from '@/components/author-bio'
+import { BackLink } from '@/components/back-link'
 import { BlogHeader } from '@/components/blog-header'
 import MarkdownRenderer from '@/components/markdown-renderer'
 import { RelatedPosts } from '@/components/related-posts'
 import { Seo } from '@/components/seo'
 import { TableOfContents } from '@/components/table-of-contents'
+
+import NotFound from '../NotFound'
 
 export default function BlogPost() {
     const { slug = '' } = useParams()
@@ -17,7 +20,7 @@ export default function BlogPost() {
     const content = getPostContent(slug)
 
     if (!post || !content) {
-        return <p>Post not found.</p>
+        return <NotFound />
     }
 
     return (
@@ -47,42 +50,37 @@ export default function BlogPost() {
                     publisher: { '@id': 'https://fx64b.dev/#person' },
                 }}
             />
-            <div className="relative mx-auto max-w-7xl px-4 py-8">
-                <div className="flex justify-center">
-                    <aside className="hidden xl:block xl:w-64 xl:flex-shrink-0">
-                        <div className="fixed top-24 w-64 pr-8">
-                            <TableOfContents
-                                content={content}
-                                variant="desktop"
-                            />
-                        </div>
-                    </aside>
 
-                    <article className="w-full max-w-3xl">
-                        <BlogHeader
-                            author={post.author || 'Fx64b'}
-                            readtime={post.read}
-                            date={post.date}
-                            title={post.title}
-                        />
+            <div className="mx-auto flex w-full max-w-[1160px] justify-center gap-8 px-5 pt-12 pb-24 sm:px-6 sm:pt-16">
+                <aside className="hidden w-52 shrink-0 xl:block">
+                    <TableOfContents content={content} variant="desktop" />
+                </aside>
 
-                        <div className="xl:hidden">
-                            <TableOfContents
-                                content={content}
-                                variant="mobile"
-                            />
-                        </div>
+                <article className="w-full max-w-[640px] min-w-0">
+                    <div className="mb-6">
+                        <BackLink href="/blog">Back to writing</BackLink>
+                    </div>
 
-                        <MarkdownRenderer content={content} />
+                    <BlogHeader
+                        author={post.author || 'Fx64b'}
+                        readtime={post.read}
+                        date={post.date}
+                        title={post.title}
+                    />
 
-                        <div className="mt-16 space-y-8">
-                            <AuthorBio author={post.author} />
-                            <RelatedPosts currentSlug={slug} />
-                        </div>
-                    </article>
+                    <div className="xl:hidden">
+                        <TableOfContents content={content} variant="mobile" />
+                    </div>
 
-                    <div className="hidden xl:block xl:w-64 xl:flex-shrink-0" />
-                </div>
+                    <MarkdownRenderer content={content} />
+
+                    <div className="mt-16 space-y-10">
+                        <AuthorBio author={post.author} />
+                        <RelatedPosts currentSlug={slug} />
+                    </div>
+                </article>
+
+                <div className="hidden w-52 shrink-0 xl:block" />
             </div>
         </>
     )

@@ -23,9 +23,6 @@ importers:
       lucide-react:
         specifier: ^0.542.0
         version: 0.542.0(react@19.1.4)
-      prism-themes:
-        specifier: ^1.9.0
-        version: 1.9.0
       radix-ui:
         specifier: ^1.6.1
         version: 1.6.1(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.1.4(react@19.1.4))(react@19.1.4)
@@ -50,9 +47,6 @@ importers:
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
-      swiss-cross:
-        specifier: ^1.0.3
-        version: 1.0.3(react@19.1.4)
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
@@ -3968,9 +3962,6 @@ packages:
     resolution: {integrity: sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==}
     engines: {node: '>=18'}
 
-  prism-themes@1.9.0:
-    resolution: {integrity: sha512-tX2AYsehKDw1EORwBps+WhBFKc2kxfoFpQAjxBndbZKr4fRmMkv47XN0BghC/K1qwodB1otbe4oF23vUTFDokw==}
-
   prismjs@1.30.0:
     resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
     engines: {node: '>=6'}
@@ -4363,12 +4354,6 @@ packages:
   supports-hyperlinks@3.2.0:
     resolution: {integrity: sha512-zFObLMyZeEwzAoKCyu1B91U79K2t7ApXuQfo8OuxwXLDgcKxuwM+YvcbIhm6QWqz7mHUH1TVytR1PwVVjEuMig==}
     engines: {node: '>=14.18'}
-
-  swiss-cross@1.0.3:
-    resolution: {integrity: sha512-f71fH+8fOYoygyLdYyj+hPGbvcnV8iG+S6f7gdAU4/J99GSl6/L9qOhutwtKSyMihiO/KS6BJTZwLGWtfG1daw==}
-    engines: {node: '>=18.12.0', npm: '>=8.0.0'}
-    peerDependencies:
-      react: '>=16.8.0'
 
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
@@ -8567,8 +8552,6 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  prism-themes@1.9.0: {}
-
   prismjs@1.30.0: {}
 
   process-nextick-args@2.0.1: {}
@@ -9111,10 +9094,6 @@ snapshots:
     dependencies:
       has-flag: 4.0.0
       supports-color: 7.2.0
-
-  swiss-cross@1.0.3(react@19.1.4):
-    dependencies:
-      react: 19.1.4
 
   symbol-tree@3.2.4: {}
 

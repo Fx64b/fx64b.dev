@@ -4,111 +4,51 @@ import { getVersion } from '@/lib/version'
 
 import { Cross } from '@/components/Cross'
 import { XIcon } from '@/components/icons/x-icon'
-import Image from '@/components/image'
 import Link from '@/components/link'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+
+const socials = [
+    {
+        href: 'https://github.com/Fx64b',
+        label: 'GitHub',
+        icon: Github,
+        external: true,
+    },
+    { href: 'https://x.com/f_x64b', label: 'X', icon: XIcon, external: true },
+    {
+        href: 'https://www.linkedin.com/in/fabio-maffucci-23515b328/',
+        label: 'LinkedIn',
+        icon: Linkedin,
+        external: true,
+    },
+    { href: 'mailto:contact@fx64b.dev', label: 'Email', icon: Mail },
+]
 
 export function Footer() {
     const version = getVersion()
 
     return (
-        <footer className="border-border bg-background border-t">
-            <div className="container mx-auto max-w-6xl px-6 py-12">
-                <div className="grid gap-8 md:grid-cols-4">
-                    {/* Brand section */}
-                    <div className="md:col-span-2">
-                        <div className="mb-4 flex items-center space-x-2">
-                            <Image
-                                src={'/logo.svg'}
-                                alt={'F'}
-                                width={38}
-                                height={38}
-                                className="rounded-md"
-                            />
-                            <span className="text-xl font-bold">Fx64b</span>
-                        </div>
-                        <p className="text-muted-foreground max-w-md text-sm leading-relaxed">
-                            Software engineer from Switzerland building modern
-                            web applications with React, Next.js, TypeScript,
-                            and Go.
-                        </p>
-                    </div>
-
-                    {/* Quick links */}
-                    <div>
-                        <h3 className="mb-4 font-semibold">Quick Links</h3>
-                        <div className="space-y-2">
-                            <Link
-                                href="/"
-                                className="text-muted-foreground hover:text-foreground block text-sm transition-colors"
-                            >
-                                Home
-                            </Link>
-                            <Link
-                                href="/blog"
-                                className="text-muted-foreground hover:text-foreground block text-sm transition-colors"
-                            >
-                                Blog
-                            </Link>
-                            <Link
-                                href="/tools"
-                                className="text-muted-foreground hover:text-foreground block text-sm transition-colors"
-                            >
-                                Tools
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Connect */}
-                    <div>
-                        <h3 className="mb-4 font-semibold">Connect</h3>
-                        <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link
-                                    href="https://github.com/Fx64b"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Github className="h-4 w-4" />
-                                    <span className="sr-only">GitHub</span>
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link
-                                    href="https://x.com/f_x64b"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <XIcon className="h-4 w-4" />
-                                    <span className="sr-only">X</span>
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link href="mailto:contact@fx64b.dev">
-                                    <Mail className="h-4 w-4" />
-                                    <span className="sr-only">Email</span>
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link href="https://www.linkedin.com/in/fabio-maffucci-23515b328/">
-                                    <Linkedin className="h-4 w-4" />
-                                    <span className="sr-only">Linkedin</span>
-                                </Link>
-                            </Button>
-                        </div>
-                    </div>
+        <footer className="border-border border-t">
+            <div className="text-muted-foreground mx-auto flex w-full max-w-[720px] flex-wrap items-center justify-between gap-4 px-5 py-8 text-[12.5px] sm:px-6">
+                <div className="flex items-center gap-3">
+                    <span>© {new Date().getFullYear()} Fx64b</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono text-[12px]">v{version}</span>
+                    <Cross />
                 </div>
 
-                <Separator className="my-8" />
-
-                <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                    <div className="text-muted-foreground flex items-center gap-4 text-sm">
-                        <span>© 2026 Fx64b</span>
-                        <span>•</span>
-                        <span>v{version}</span>
-                        <Cross />
-                    </div>
+                <div className="flex items-center gap-1">
+                    {socials.map(({ href, label, icon: Icon, external }) => (
+                        <Link
+                            key={label}
+                            href={href}
+                            target={external ? '_blank' : undefined}
+                            rel={external ? 'noopener noreferrer' : undefined}
+                            aria-label={label}
+                            className="hover:text-foreground focus-visible:ring-ring flex size-8 items-center justify-center rounded-sm transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] focus-visible:outline-none"
+                        >
+                            <Icon className="size-4" />
+                        </Link>
+                    ))}
                 </div>
             </div>
         </footer>

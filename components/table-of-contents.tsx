@@ -1,6 +1,10 @@
+import { ChevronDown } from 'lucide-react'
+
 import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
+
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface TOCItem {
     id: string
@@ -140,126 +144,29 @@ export function TableOfContents({
 
     const effectiveActiveId = getEffectiveActiveId()
 
-    // Desktop variant - sticky sidebar
+    // Desktop variant - sticky rail next to the content column
     if (variant === 'desktop') {
         return (
             <nav className="sticky top-24">
-                <h4 className="text-foreground mb-4 text-sm font-semibold">
+                <h2 className="text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.06em] uppercase">
                     On this page
-                </h4>
-                <div className="relative">
-                    <div className="border-border bg-muted/20 relative max-h-[calc(100vh-200px)] overflow-hidden rounded-md border">
-                        <ul className="scrollbar-thumb-muted max-h-[calc(100vh-240px)] scrollbar-thin scrollbar-track-transparent space-y-1 overflow-y-auto p-3 text-sm">
-                            {displayHeadings.map((heading) => (
-                                <li
-                                    key={heading.id}
-                                    style={{
-                                        paddingLeft: `${(heading.level - 1) * 12}px`,
-                                    }}
-                                >
-                                    <button
-                                        onClick={() =>
-                                            scrollToHeading(heading.id)
-                                        }
-                                        className={cn(
-                                            'hover:text-primary hover:bg-muted/50 w-full rounded-sm px-2 py-1.5 text-left transition-all duration-200',
-                                            effectiveActiveId === heading.id
-                                                ? 'text-primary bg-primary/10 border-primary border-l-2 font-medium'
-                                                : 'text-muted-foreground'
-                                        )}
-                                    >
-                                        <span className="block truncate">
-                                            {heading.text}
-                                        </span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="from-muted/20 pointer-events-none absolute top-0 right-0 left-0 h-6 bg-gradient-to-b to-transparent" />
-                        <div className="from-muted/20 pointer-events-none absolute right-0 bottom-0 left-0 h-6 bg-gradient-to-t to-transparent" />
-                    </div>
-                </div>
-            </nav>
-        )
-    }
-
-    // Mobile variant - simple list
-    return (
-        <div className="mb-8">
-            {/* Collapsible header */}
-            <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="border-border bg-muted/30 hover:bg-muted/50 flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors"
-            >
-                <div className="flex items-center gap-2">
-                    <svg
-                        className="text-muted-foreground h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 6h16M4 12h16M4 18h16"
-                        />
-                    </svg>
-                    <span className="text-sm font-medium">
-                        Table of Contents
-                    </span>
-                    <span className="text-muted-foreground text-xs">
-                        ({displayHeadings.length} sections)
-                    </span>
-                </div>
-                <svg
-                    className={cn(
-                        'text-muted-foreground h-4 w-4 transition-transform duration-200',
-                        isExpanded && 'rotate-180'
-                    )}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </button>
-
-            {/* Expandable content */}
-            <div
-                className={cn(
-                    'overflow-hidden transition-all duration-300 ease-in-out',
-                    isExpanded
-                        ? 'max-h-[70vh] opacity-100'
-                        : 'max-h-0 opacity-0'
-                )}
-            >
-                <div className="border-border bg-muted/10 mt-2 rounded-r-lg border-l-2 px-4 py-3">
-                    <ul className="scrollbar-thumb-muted max-h-[60vh] scrollbar-thin scrollbar-track-transparent space-y-2 overflow-y-auto pr-2 text-sm">
-                        {displayHeadings.map((heading, index) => (
+                </h2>
+                <ScrollArea viewportClassName="max-h-[calc(100vh-200px)]">
+                    <ul className="border-border space-y-0.5 border-l pr-2 text-[13px]">
+                        {displayHeadings.map((heading) => (
                             <li
                                 key={heading.id}
-                                className="relative"
                                 style={{
-                                    paddingLeft: `${(heading.level - 1) * 12}px`,
+                                    paddingLeft: `${(heading.level - 1) * 10}px`,
                                 }}
                             >
-                                {/* Active indicator */}
                                 <button
-                                    onClick={() => {
-                                        scrollToHeading(heading.id)
-                                        setIsExpanded(false) // Auto-collapse after selection
-                                    }}
+                                    onClick={() => scrollToHeading(heading.id)}
                                     className={cn(
-                                        'hover:text-primary hover:bg-muted/50 w-full rounded-md px-2 py-1 text-left transition-all duration-200',
+                                        'hover:text-foreground -ml-px w-full cursor-pointer border-l py-1 pl-3 text-left transition-colors duration-150 ease-out',
                                         effectiveActiveId === heading.id
-                                            ? 'text-primary bg-primary/10 font-medium'
-                                            : 'text-muted-foreground'
+                                            ? 'border-foreground text-foreground'
+                                            : 'text-muted-foreground border-transparent'
                                     )}
                                 >
                                     <span className="block truncate">
@@ -269,7 +176,69 @@ export function TableOfContents({
                             </li>
                         ))}
                     </ul>
-                </div>
+                </ScrollArea>
+            </nav>
+        )
+    }
+
+    // Mobile variant - collapsible list
+    return (
+        <div className="mb-10">
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="border-border hover:bg-muted flex w-full cursor-pointer items-center justify-between rounded-sm border px-3 py-2.5 text-left text-[13px] transition-colors duration-150 ease-out"
+            >
+                <span className="text-muted-foreground">
+                    On this page
+                    <span className="ml-2 text-[12px]">
+                        ({displayHeadings.length})
+                    </span>
+                </span>
+                <ChevronDown
+                    className={cn(
+                        'text-muted-foreground size-4 transition-transform duration-200',
+                        isExpanded && 'rotate-180'
+                    )}
+                />
+            </button>
+
+            <div
+                className={cn(
+                    'overflow-hidden transition-all duration-300 ease-out',
+                    isExpanded
+                        ? 'max-h-[60vh] opacity-100'
+                        : 'max-h-0 opacity-0'
+                )}
+            >
+                <ScrollArea className="mt-2" viewportClassName="max-h-[55vh]">
+                    <ul className="border-border space-y-0.5 border-l pr-2 text-[13px]">
+                        {displayHeadings.map((heading) => (
+                            <li
+                                key={heading.id}
+                                style={{
+                                    paddingLeft: `${(heading.level - 1) * 10}px`,
+                                }}
+                            >
+                                <button
+                                    onClick={() => {
+                                        scrollToHeading(heading.id)
+                                        setIsExpanded(false)
+                                    }}
+                                    className={cn(
+                                        'hover:text-foreground -ml-px w-full cursor-pointer border-l py-1 pl-3 text-left transition-colors duration-150 ease-out',
+                                        effectiveActiveId === heading.id
+                                            ? 'border-foreground text-foreground'
+                                            : 'text-muted-foreground border-transparent'
+                                    )}
+                                >
+                                    <span className="block truncate">
+                                        {heading.text}
+                                    </span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </ScrollArea>
             </div>
         </div>
     )

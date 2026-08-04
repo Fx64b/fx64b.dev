@@ -1,5 +1,3 @@
-@import 'prism-themes/themes/prism-one-dark.css' layer(base);
-
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
@@ -14,167 +12,96 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Blog specific CSS */
-
-/* Offset for fixed header when jumping to sections */
-:target {
-    scroll-margin-top: 100px;
+/* Clear the sticky nav when jumping to an in-page section */
+:target,
+[id] {
+    scroll-margin-top: 80px;
 }
 
-.markdown h1,
-.markdown h2 {
-    @apply mt-10;
-}
-
-.markdown h3,
-.markdown img:not(.rounded-full),
-.markdown pre {
-    @apply mt-6 mb-2;
-}
-
-.markdown h1 {
-    @apply text-3xl font-bold;
-}
-
-.markdown h2 {
-    @apply text-2xl font-semibold;
-}
-
-.markdown h3 {
-    @apply text-xl;
-}
-
-.markdown hr {
-    @apply my-6;
-}
-
-.markdown ul:not(nav ul) {
-    @apply ml-10 list-disc;
-}
-
-.markdown ol:not(nav ul) {
-    @apply ml-10 list-decimal;
-}
-
-.markdown p > span,
-.markdown strong > span,
-.markdown li > span {
-    @apply bg-muted self-baseline rounded-sm px-2 pb-[0.25rem] font-mono;
-}
-
-/* Custom scrollbar for TOC */
-.scrollbar-thin {
-    scrollbar-width: thin;
-}
-
-.scrollbar-thumb-muted {
-    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
-}
-
-/* Webkit scrollbar styles */
-.scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted-foreground) / 0.3);
-    border-radius: 3px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground) / 0.5);
-}
-
-/*
-  ---break---
-*/
+/* Design tokens - a neutral zinc palette plus a single accent.
+   Values are the Tailwind zinc scale; hex equivalents in comments. */
 
 :root {
     --radius: 0.625rem;
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
-    --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
-}
 
-/*
-  ---break---
-*/
+    --background: oklch(1 0 0); /* #ffffff */
+    --foreground: oklch(0.141 0.005 285.823); /* zinc-950 #09090b */
+
+    --card: oklch(1 0 0); /* #ffffff */
+    --card-foreground: oklch(0.141 0.005 285.823);
+    /* Surface used by nav buttons and the command dialog */
+    --popover: oklch(1 0 0); /* #ffffff */
+    --popover-foreground: oklch(0.141 0.005 285.823);
+
+    /* Primary is the inverted foreground/background pair */
+    --primary: oklch(0.141 0.005 285.823); /* #09090b */
+    --primary-foreground: oklch(1 0 0); /* #ffffff */
+
+    --secondary: oklch(0.967 0.001 286.375); /* zinc-100 #f4f4f5 */
+    --secondary-foreground: oklch(0.141 0.005 285.823);
+
+    --muted: oklch(0.967 0.001 286.375); /* zinc-100 #f4f4f5 */
+    --muted-foreground: oklch(0.442 0.017 285.786); /* zinc-600 #52525b */
+
+    --accent: oklch(0.967 0.001 286.375);
+    --accent-foreground: oklch(0.141 0.005 285.823);
+
+    --destructive: oklch(0.577 0.245 27.325);
+
+    --border: oklch(0.92 0.004 286.32); /* zinc-200 #e4e4e7 */
+    --input: oklch(0.92 0.004 286.32);
+    /* The one colour on the site: a deep teal, used for links in prose, focus
+       rings, the active nav item, hover states and the section markers.
+       Everything else stays monochrome. */
+    --brand: #16786e;
+    --ring: var(--brand);
+}
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
+    --background: oklch(0.141 0.005 285.823); /* zinc-950 #09090b */
+    --foreground: oklch(0.985 0 0); /* zinc-50 #fafafa */
+
+    --card: oklch(0.21 0.006 285.885); /* zinc-900 #18181b */
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
+    --popover: oklch(0.21 0.006 285.885); /* zinc-900 #18181b */
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
+
+    --primary: oklch(0.985 0 0); /* #fafafa */
+    --primary-foreground: oklch(0.141 0.005 285.823); /* #09090b */
+
+    --secondary: oklch(0.274 0.006 286.033); /* zinc-800 #27272a */
     --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
+
+    --muted: oklch(0.274 0.006 286.033); /* zinc-800 #27272a */
+    --muted-foreground: oklch(0.705 0.015 286.067); /* zinc-400 #a1a1aa */
+
+    --accent: oklch(0.274 0.006 286.033);
     --accent-foreground: oklch(0.985 0 0);
+
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+
+    --border: oklch(0.274 0.006 286.033); /* zinc-800 #27272a */
+    --input: oklch(0.274 0.006 286.033);
+    /* Lifted for legibility on the near-black background */
+    --brand: #4fbcae;
+    --ring: var(--brand);
 }
 
-/*
-  ---break---
-*/
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono:
+        'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Radii used by the design: kbd 4, nav / command rows 6, buttons 7,
+       cards / dialog / media 10 */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 7px;
+    --radius-lg: 10px;
+    --radius-xl: 14px;
+}
 
 @theme inline {
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);
@@ -193,30 +120,277 @@ html {
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
+    --color-brand: var(--brand);
 }
-
-/*
-  ---break---
-*/
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
     }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground antialiased;
     }
+}
+
+/* Section entry motion. The `js` class is set by the inline script in
+   index.html so content stays visible when JavaScript is unavailable. */
+
+.js .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.js .reveal[data-revealed='true'] {
+    opacity: 1;
+    transform: none;
+    transition:
+        opacity 450ms ease-out,
+        transform 450ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .js .reveal,
+    .js .reveal[data-revealed='true'] {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* Long-form prose (blog posts, project documentation) */
+
+.markdown {
+    @apply text-[16px] leading-[1.75];
+}
+
+.markdown p,
+.markdown li {
+    @apply text-muted-foreground;
+}
+
+.markdown p {
+    @apply mb-5;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+    @apply text-foreground scroll-mt-24 font-bold tracking-tight;
+}
+
+.markdown h1 {
+    @apply mt-12 mb-4 text-[26px];
+}
+
+.markdown h2 {
+    @apply mt-12 mb-4 text-[21px];
+}
+
+.markdown h3 {
+    @apply mt-8 mb-3 text-[17px];
+}
+
+.markdown h4 {
+    @apply mt-6 mb-2 text-[15.5px];
+}
+
+.markdown a {
+    @apply text-brand decoration-brand/40 hover:decoration-brand underline decoration-1 underline-offset-4 transition-colors duration-150 ease-out;
+}
+
+.markdown ul:not(nav ul) {
+    @apply mb-5 ml-5 list-disc;
+}
+
+.markdown ol:not(nav ul) {
+    @apply mb-5 ml-5 list-decimal;
+}
+
+.markdown li {
+    @apply mt-1.5;
+}
+
+.markdown blockquote {
+    @apply border-border text-muted-foreground my-6 border-l pl-5 italic;
+}
+
+.markdown img:not(.rounded-full) {
+    @apply border-border my-6 rounded-lg border;
+}
+
+.markdown pre {
+    @apply my-6;
+}
+
+.markdown hr {
+    @apply border-border my-10;
+}
+
+.markdown code {
+    @apply font-mono text-[13.5px];
+}
+
+.markdown p > span,
+.markdown strong > span,
+.markdown li > span {
+    @apply bg-muted text-foreground self-baseline rounded-xs px-1.5 pb-[0.15rem] font-mono text-[13.5px];
+}
+
+/* Headings are wrapped in a span carrying the anchor id - keep it invisible */
+.markdown h1 > span,
+.markdown h2 > span,
+.markdown h3 > span,
+.markdown h4 > span {
+    @apply bg-transparent p-0 font-sans text-inherit;
+}
+
+/* Syntax highlighting - One Light / One Dark, applied through Prism class
+   names so the palette follows the theme instead of being frozen into the
+   pre-rendered HTML. The code sits directly on the block's `muted` surface. */
+
+.code-block {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    tab-size: 2;
+    hyphens: none;
+    color: #383a42;
+}
+
+.dark .code-block {
+    color: #abb2bf;
+}
+
+.code-block code,
+.code-block pre,
+.code-block div[class*='language-'] {
+    background: transparent;
+    padding: 0;
+    white-space: pre;
+}
+
+.code-block .linenumber {
+    color: var(--muted-foreground);
+    font-style: normal;
+}
+
+.code-block .token.comment,
+.code-block .token.prolog,
+.code-block .token.cdata {
+    color: #a0a1a7;
+    font-style: italic;
+}
+
+.code-block .token.doctype,
+.code-block .token.punctuation,
+.code-block .token.entity {
+    color: #383a42;
+}
+
+.code-block .token.attr-name,
+.code-block .token.class-name,
+.code-block .token.boolean,
+.code-block .token.constant,
+.code-block .token.number,
+.code-block .token.atrule {
+    color: #986801;
+}
+
+.code-block .token.keyword {
+    color: #a626a4;
+}
+
+.code-block .token.property,
+.code-block .token.tag,
+.code-block .token.symbol,
+.code-block .token.deleted,
+.code-block .token.important {
+    color: #e45649;
+}
+
+.code-block .token.selector,
+.code-block .token.string,
+.code-block .token.char,
+.code-block .token.builtin,
+.code-block .token.inserted,
+.code-block .token.regex,
+.code-block .token.attr-value,
+.code-block .token.attr-value > .token.punctuation {
+    color: #50a14f;
+}
+
+.code-block .token.variable,
+.code-block .token.operator,
+.code-block .token.function {
+    color: #4078f2;
+}
+
+.code-block .token.url {
+    color: #0184bc;
+}
+
+.code-block .token.bold {
+    font-weight: 700;
+}
+
+.code-block .token.italic {
+    font-style: italic;
+}
+
+.dark .code-block .token.comment,
+.dark .code-block .token.prolog,
+.dark .code-block .token.cdata {
+    color: #5c6370;
+}
+
+.dark .code-block .token.doctype,
+.dark .code-block .token.punctuation,
+.dark .code-block .token.entity {
+    color: #abb2bf;
+}
+
+.dark .code-block .token.attr-name,
+.dark .code-block .token.class-name,
+.dark .code-block .token.boolean,
+.dark .code-block .token.constant,
+.dark .code-block .token.number,
+.dark .code-block .token.atrule {
+    color: #d19a66;
+}
+
+.dark .code-block .token.keyword {
+    color: #c678dd;
+}
+
+.dark .code-block .token.property,
+.dark .code-block .token.tag,
+.dark .code-block .token.symbol,
+.dark .code-block .token.deleted,
+.dark .code-block .token.important {
+    color: #e06c75;
+}
+
+.dark .code-block .token.selector,
+.dark .code-block .token.string,
+.dark .code-block .token.char,
+.dark .code-block .token.builtin,
+.dark .code-block .token.inserted,
+.dark .code-block .token.regex,
+.dark .code-block .token.attr-value,
+.dark .code-block .token.attr-value > .token.punctuation {
+    color: #98c379;
+}
+
+.dark .code-block .token.variable,
+.dark .code-block .token.operator,
+.dark .code-block .token.function {
+    color: #61afef;
+}
+
+.dark .code-block .token.url {
+    color: #56b6c2;
 }

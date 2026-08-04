@@ -1,7 +1,6 @@
 import { Head } from 'vite-react-ssg'
 
-import Link from '@/components/link'
-import { Button } from '@/components/ui/button'
+import { ActionLink } from '@/components/action-link'
 
 export default function NotFound() {
     return (
@@ -10,24 +9,24 @@ export default function NotFound() {
                 <title>Page Not Found - Fx64b.dev</title>
                 <meta name="robots" content="noindex, follow" />
             </Head>
-            <div className="flex min-h-[60vh] flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground mb-2 font-mono text-sm tracking-widest">
+            <main className="mx-auto flex w-full max-w-[720px] flex-col items-start px-5 pt-24 pb-32 sm:px-6">
+                <p className="text-muted-foreground mb-3 font-mono text-[13px] tracking-[0.06em]">
                     404
                 </p>
-                <h1 className="mb-4 text-4xl font-bold">Page Not Found</h1>
-                <p className="text-muted-foreground mb-8 text-xl">
+                <h1 className="text-[36px] leading-none font-extrabold tracking-[-0.03em] sm:text-[48px]">
+                    Page not found.
+                </h1>
+                <p className="text-muted-foreground mt-5 mb-8 max-w-[480px] text-[16px] leading-[1.7]">
                     The page you&#39;re looking for doesn&#39;t exist or may
                     have been moved.
                 </p>
-                <div className="flex gap-4">
-                    <Button asChild>
-                        <Link href="/">Go Home</Link>
-                    </Button>
-                    <Button variant="outline" asChild>
-                        <Link href="/projects">Explore Projects</Link>
-                    </Button>
+                <div className="flex flex-wrap gap-2.5">
+                    <ActionLink href="/">Go home</ActionLink>
+                    <ActionLink href="/projects" variant="secondary">
+                        Explore projects
+                    </ActionLink>
                 </div>
-            </div>
+            </main>
         </>
     )
 }

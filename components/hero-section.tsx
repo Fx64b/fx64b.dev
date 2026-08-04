@@ -1,66 +1,43 @@
-import { ArrowRight, Calendar, MapPin } from 'lucide-react'
-import { SwissCross } from 'swiss-cross'
-
+import { ActionLink } from '@/components/action-link'
 import Image from '@/components/image'
-import Link from '@/components/link'
-import { Button } from '@/components/ui/button'
+import { Reveal } from '@/components/reveal'
 
 export function HeroSection() {
     return (
-        <section className="py-16 md:py-24">
-            <div className="container mx-auto max-w-6xl px-6">
-                <div className="flex flex-col items-center text-center">
+        <section className="mx-auto w-full max-w-[720px] px-5 pt-16 pb-10 sm:px-6 sm:pt-20">
+            <Reveal>
+                {/* Column-reverse puts the mark above the text on small screens
+                    and the row puts it to the right of it from `sm` up. */}
+                <div className="flex flex-col-reverse items-start gap-8 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                        <h1 className="text-[40px] leading-none font-extrabold tracking-[-0.03em] sm:text-[64px]">
+                            Hi, I&#39;m
+                            <br />
+                            Fabio.
+                        </h1>
+                        <p className="text-muted-foreground mt-5 mb-8 max-w-[520px] text-[18px] leading-[1.6]">
+                            Software engineer from Switzerland building modern
+                            web applications with React, Next.js, TypeScript and
+                            Go. Currently exploring cybersecurity fundamentals.
+                        </p>
+                        <div className="flex flex-wrap gap-2.5">
+                            <ActionLink href="/#work">View my work</ActionLink>
+                            <ActionLink href="/#contact" variant="secondary">
+                                Get in touch
+                            </ActionLink>
+                        </div>
+                    </div>
+
                     <Image
-                        src="/logo.svg"
-                        alt="Fx64b profile picture"
-                        width={96}
-                        height={96}
-                        className="border-border bg-background rounded-full border"
+                        src="/logo-mark.svg"
+                        alt="Fx64b"
+                        width={128}
+                        height={128}
+                        priority
+                        className="border-border size-24 shrink-0 self-center rounded-lg border sm:size-32 sm:self-start"
                     />
-
-                    <div className="text-muted-foreground mt-6 flex flex-wrap items-center justify-center gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span>Switzerland</span>
-                            <SwissCross borderRadius={'slight'} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>4+ years experience</span>
-                        </div>
-                    </div>
-
-                    <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl">
-                        Software Engineer
-                        <br />& Security Enthusiast
-                    </h1>
-
-                    <p className="text-muted-foreground mt-6 max-w-2xl text-lg sm:text-xl">
-                        Hey! I&#39;m{' '}
-                        <Link
-                            href={'https://fabio-maffucci.ch'}
-                            className={'text-primary underline'}
-                        >
-                            Fabio
-                        </Link>
-                        , a software engineer from Switzerland building modern
-                        web applications with React, Next.js, TypeScript, and
-                        Go. Currently exploring cybersecurity fundamentals.
-                    </p>
-
-                    <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                        <Button size="lg" className="group" asChild>
-                            <Link href="/projects">
-                                View My Work
-                                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </Link>
-                        </Button>
-                        <Button variant="outline" size="lg" asChild>
-                            <a href="mailto:contact@fx64b.dev">Get In Touch</a>
-                        </Button>
-                    </div>
                 </div>
-            </div>
+            </Reveal>
         </section>
     )
 }
