@@ -5,8 +5,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig } from 'vite'
 
-import { contentPlugin } from './vite-plugin-content'
-import { generateSeoFiles } from './vite-plugin-seo'
+import { contentPlugin } from './vite-plugin-content.ts'
+import { generateSeoFiles } from './vite-plugin-seo.ts'
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8')) as {
     version: string
@@ -16,7 +16,7 @@ export default defineConfig({
     plugins: [react(), tailwindcss(), contentPlugin()],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './'),
+            '@': path.resolve(import.meta.dirname, './'),
         },
     },
     define: {
@@ -29,7 +29,7 @@ export default defineConfig({
         entry: 'src/main.tsx',
         script: 'async',
         onFinished: () => {
-            generateSeoFiles(path.resolve(__dirname, 'dist'))
+            generateSeoFiles(path.resolve(import.meta.dirname, 'dist'))
         },
     },
     test: {

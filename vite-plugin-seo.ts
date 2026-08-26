@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import projectData from './data/projectData'
-import toolsData from './data/toolsData'
-import { type CollectionItem, loadCollection } from './vite-plugin-content'
+import projectData from './data/projectData.ts'
+import toolsData from './data/toolsData.ts'
+import { type CollectionItem, loadCollection } from './vite-plugin-content.ts'
 
 const BASE_URL = 'https://fx64b.dev'
 
