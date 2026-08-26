@@ -1,79 +1,80 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+
+const verses = [
+    {
+        text: 'By wisdom a house is built, and through understanding it is established.',
+        reference: 'Proverbs 24:3',
+    },
+    {
+        text: 'Whatever you do, work at it with all your heart, as working for the Lord, not for human masters.',
+        reference: 'Colossians 3:23',
+    },
+    {
+        text: 'The heavens declare the glory of God; the skies proclaim the work of his hands.',
+        reference: 'Psalm 19:1',
+    },
+    {
+        text: 'For we are God’s handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do.',
+        reference: 'Ephesians 2:10',
+    },
+    {
+        text: 'In the beginning God created the heavens and the earth.',
+        reference: 'Genesis 1:1',
+    },
+    {
+        text: 'I can do all things through Christ who strengthens me.',
+        reference: 'Philippians 4:13',
+    },
+    {
+        text: 'Commit to the Lord whatever you do, and he will establish your plans.',
+        reference: 'Proverbs 16:3',
+    },
+]
 
 export function Cross() {
-    const [showVerse, setShowVerse] = useState(false)
-    const [currentVerse, setCurrentVerse] = useState({
-        text: '',
-        reference: '',
-    })
+    const [verse, setVerse] = useState(verses[0])
 
-    const verses = [
-        {
-            text: 'By wisdom a house is built, and through understanding it is established.',
-            reference: 'Proverbs 24:3',
-        },
-        {
-            text: 'Whatever you do, work at it with all your heart, as working for the Lord, not for human masters.',
-            reference: 'Colossians 3:23',
-        },
-        {
-            text: 'The heavens declare the glory of God; the skies proclaim the work of his hands.',
-            reference: 'Psalm 19:1',
-        },
-        {
-            text: 'For we are God’s handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do.',
-            reference: 'Ephesians 2:10',
-        },
-        {
-            text: 'In the beginning God created the heavens and the earth.',
-            reference: 'Genesis 1:1',
-        },
-        {
-            text: 'I can do all things through Christ who strengthens me.',
-            reference: 'Philippians 4:13',
-        },
-        {
-            text: 'Commit to the Lord whatever you do, and he will establish your plans.',
-            reference: 'Proverbs 16:3',
-        },
-    ]
-
-    const selectRandomVerse = () => {
-        const randomIndex = Math.floor(Math.random() * verses.length)
-        setCurrentVerse(verses[randomIndex])
-    }
-
-    useEffect(() => {
-        selectRandomVerse()
-    }, [])
-
-    const handleClick = () => {
-        if (!showVerse) {
-            selectRandomVerse()
-        }
-        setShowVerse(!showVerse)
+    const pickRandomVerse = () => {
+        setVerse((current) => {
+            const others = verses.filter((v) => v !== current)
+            return others[Math.floor(Math.random() * others.length)]
+        })
     }
 
     return (
-        <div className="relative inline-flex items-center">
-            <button
-                onClick={handleClick}
-                className="-m-2 inline-flex items-center p-4 hover:cursor-help focus:outline-none"
-                aria-label="Bible verse reference"
+        <Popover onOpenChange={(open) => open && pickRandomVerse()}>
+            <PopoverTrigger
+                aria-label="Show a Bible verse"
+                className="hover:text-foreground focus-visible:ring-ring flex size-8 cursor-pointer items-center justify-center rounded-sm transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] focus-visible:outline-none"
             >
-                <span className="relative inline-block h-[1.2em] w-[0.7em] align-middle">
-                    <span className="bg-foreground absolute top-0 right-[40%] bottom-0 left-[40%]"></span>
-                    <span className="bg-foreground absolute top-[20%] right-0 bottom-[70%] left-0"></span>
-                </span>
-            </button>
-
-            {showVerse && (
-                <div className="bg-popover text-popover-foreground border-border absolute bottom-full left-1/2 z-50 mb-2 w-screen max-w-[300px] -translate-x-1/2 rounded border p-2 text-center text-lg">
-                    &#34;{currentVerse.text}&#34;
-                    <br />- {currentVerse.reference}
-                    <div className="border-t-popover absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent"></div>
+                <svg
+                    viewBox="0 0 12 16"
+                    className="h-4 w-3"
+                    fill="currentColor"
+                    aria-hidden="true"
+                >
+                    <rect x="5" width="2" height="16" />
+                    <rect y="3" width="12" height="2" />
+                </svg>
+            </PopoverTrigger>
+            <PopoverContent
+                side="top"
+                collisionPadding={12}
+                className="w-fit max-w-xs text-center"
+            >
+                <blockquote className="text-sm leading-relaxed">
+                    “{verse.text}”
+                </blockquote>
+                <div className="text-muted-foreground mt-2 text-xs">
+                     {verse.reference}
                 </div>
-            )}
-        </div>
+            </PopoverContent>
+        </Popover>
     )
 }
