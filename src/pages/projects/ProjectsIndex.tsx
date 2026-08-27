@@ -43,6 +43,18 @@ export default function ProjectsIndex() {
             <Page>
                 <PageHeader title="Projects">{description}</PageHeader>
 
+                <Reveal className="mb-12">
+                    <Eyebrow>Security</Eyebrow>
+                    <ListRows>
+                        <ListRow
+                            href="/cheatsheet"
+                            title="Interactive OSCP Cheat Sheet"
+                            description="A visual, interactive map of the OSCP kill chain - enumeration through to Domain Admin, with copyable commands at every step."
+                            meta="Interactive"
+                        />
+                    </ListRows>
+                </Reveal>
+
                 {featuredProjects.length > 0 && (
                     <Reveal className="mb-12">
                         <Eyebrow>Featured</Eyebrow>

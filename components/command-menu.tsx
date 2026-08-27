@@ -48,6 +48,12 @@ function buildItems(): CommandItem[] {
             href: '/tools',
         },
         {
+            id: 'nav-cheatsheet',
+            title: 'OSCP Cheat Sheet',
+            group: 'Navigation',
+            href: '/cheatsheet',
+        },
+        {
             id: 'nav-contact',
             title: 'Contact',
             group: 'Navigation',

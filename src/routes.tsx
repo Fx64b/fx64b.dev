@@ -14,6 +14,7 @@ import BlogIndex from './pages/blog/BlogIndex'
 import BlogPost from './pages/blog/BlogPost'
 import ProjectPage from './pages/projects/ProjectPage'
 import ProjectsIndex from './pages/projects/ProjectsIndex'
+import OscpCheatsheet from './pages/oscp/OscpCheatsheet'
 import ToolDetail from './pages/tools/ToolDetail'
 import ToolsIndex from './pages/tools/ToolsIndex'
 
@@ -100,6 +101,13 @@ export const routes: RouteRecord[] = [
                             getAllTools().map((tool) => tool.slug),
                     },
                 ],
+            },
+            {
+                // Real route, but intentionally unlinked from the nav and the
+                // sitemap while the content is still being built out.
+                path: 'cheatsheet',
+                element: <OscpCheatsheet />,
+                entry: 'src/pages/oscp/OscpCheatsheet.tsx',
             },
             {
                 path: '*',

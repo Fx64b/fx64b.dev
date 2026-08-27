@@ -89,6 +89,17 @@ export default function Home() {
                     </div>
                 </Section>
 
+                <Section id="cheatsheet" label="Security">
+                    <ListRows>
+                        <ListRow
+                            href="/cheatsheet"
+                            title="Interactive OSCP Cheat Sheet"
+                            description="A visual, interactive map of the OSCP kill chain - enumeration through to Domain Admin, with copyable commands at every step."
+                            meta="Interactive"
+                        />
+                    </ListRows>
+                </Section>
+
                 <Section
                     id="work"
                     label="Selected projects"
