@@ -394,3 +394,36 @@ html {
 .dark .code-block .token.url {
     color: #56b6c2;
 }
+
+/*
+ * React Flow (OSCP cheat sheet graph) theming. React Flow's dark colorMode
+ * leaves the zoom/fit control glyphs dark, so they vanish on a dark page.
+ * Drive the control chrome and edge labels from the site theme tokens instead
+ * (these flip automatically via :root / .dark).
+ */
+.react-flow__controls {
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+}
+
+.react-flow__controls-button {
+    background-color: var(--card);
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+}
+
+.react-flow__controls-button:hover {
+    background-color: var(--muted);
+}
+
+.react-flow__controls-button svg {
+    fill: var(--foreground);
+}
+
+.react-flow__edge-textbg {
+    fill: var(--card);
+}
+
+.react-flow__edge-text {
+    fill: var(--muted-foreground);
+    font-size: 10px;
+}

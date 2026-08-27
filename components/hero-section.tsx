@@ -21,7 +21,9 @@ export function HeroSection() {
                             Go. Currently exploring cybersecurity fundamentals.
                         </p>
                         <div className="flex flex-wrap gap-2.5">
-                            <ActionLink href="/#work">View my work</ActionLink>
+                            <ActionLink href="/#cheatsheet">
+                                View my work
+                            </ActionLink>
                             <ActionLink href="/#contact" variant="secondary">
                                 Get in touch
                             </ActionLink>

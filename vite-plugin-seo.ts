@@ -13,20 +13,34 @@ function titleToSlug(title: string): string {
 
 interface SitemapEntry {
     url: string
-    lastModified: string
-    changeFrequency: string
-    priority: number
+    /**
+     * Real content-change date (W3C / ISO). Omitted when we have no reliable
+     * signal - Google only trusts `lastmod` when it is accurate, and a value
+     * that changes on every deploy (e.g. build time) trains it to ignore the
+     * field, so an absent date is better than a fabricated one. Google ignores
+     * `<priority>` and `<changefreq>` entirely, so we don't emit them.
+     */
+    lastModified?: string
+}
+
+/** Newest ISO/`YYYY-MM-DD` date from a list; undefined if none are present. */
+function newestDate(dates: Array<unknown>): string | undefined {
+    const valid = dates
+        .filter((d) => d !== null && d !== undefined && d !== '')
+        .map(String)
+        .sort()
+    return valid.length > 0 ? valid[valid.length - 1] : undefined
 }
 
 /**
- * Generates sitemap.xml mirroring (and extending) the previous Next.js
- * `app/sitemap.ts` output, plus the static index routes for fuller coverage.
+ * Generates sitemap.xml. Only canonical, indexable URLs are listed. `lastmod`
+ * is derived from real content dates (blog frontmatter `date`, project
+ * `lastUpdated`) and left off for pages that have no dependable change date.
  */
 export function generateSeoFiles(outDir: string): void {
     const posts = loadCollection('blog')
     const projectDocs = loadCollection('projects')
     const featuredProjects = projectData.filter((project) => project.featured)
-    const now = new Date().toISOString()
 
     const findDoc = (slug: string): CollectionItem | undefined =>
         projectDocs.find(
@@ -35,42 +49,39 @@ export function generateSeoFiles(outDir: string): void {
                 doc.slug === slug
         )
 
+    const postDates = posts.map((post) => post.data.date)
+    const projectUpdatedDates = featuredProjects.map((project) => {
+        const doc = findDoc(titleToSlug(project.title))
+        return doc?.data.lastUpdated
+    })
+
     const entries: SitemapEntry[] = [
         {
             url: `${BASE_URL}`,
-            lastModified: now,
-            changeFrequency: 'weekly',
-            priority: 1.0,
+            lastModified: newestDate([...postDates, ...projectUpdatedDates]),
         },
         {
             url: `${BASE_URL}/blog`,
-            lastModified: now,
-            changeFrequency: 'weekly',
-            priority: 0.9,
+            lastModified: newestDate(postDates),
         },
         {
             url: `${BASE_URL}/projects`,
-            lastModified: now,
-            changeFrequency: 'weekly',
-            priority: 0.8,
+            lastModified: newestDate(projectUpdatedDates),
         },
         {
+            // No per-tool change dates tracked, so no reliable index date.
             url: `${BASE_URL}/tools`,
-            lastModified: now,
-            changeFrequency: 'weekly',
-            priority: 0.8,
+        },
+        {
+            // Content lives in data/oscp/*; no change date is tracked for it.
+            url: `${BASE_URL}/cheatsheet`,
         },
         ...posts.map((post) => ({
             url: `${BASE_URL}/blog/${post.slug}`,
-            lastModified: String(post.data.date ?? now),
-            changeFrequency: 'monthly',
-            priority: 0.7,
+            lastModified: post.data.date ? String(post.data.date) : undefined,
         })),
         ...toolsData.map((tool) => ({
             url: `${BASE_URL}/tools/${tool.slug}`,
-            lastModified: now,
-            changeFrequency: 'monthly',
-            priority: 0.6,
         })),
         ...featuredProjects.map((project) => {
             const slug = titleToSlug(project.title)
@@ -79,9 +90,7 @@ export function generateSeoFiles(outDir: string): void {
                 url: `${BASE_URL}/projects/${slug}`,
                 lastModified: doc?.data.lastUpdated
                     ? String(doc.data.lastUpdated)
-                    : now,
-                changeFrequency: 'monthly',
-                priority: 0.8,
+                    : undefined,
             }
         }),
     ]
@@ -89,14 +98,14 @@ export function generateSeoFiles(outDir: string): void {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries
-    .map(
-        (entry) => `  <url>
-    <loc>${entry.url}</loc>
-    <lastmod>${entry.lastModified}</lastmod>
-    <changefreq>${entry.changeFrequency}</changefreq>
-    <priority>${entry.priority.toFixed(1)}</priority>
+    .map((entry) => {
+        const lastmod = entry.lastModified
+            ? `\n    <lastmod>${entry.lastModified}</lastmod>`
+            : ''
+        return `  <url>
+    <loc>${entry.url}</loc>${lastmod}
   </url>`
-    )
+    })
     .join('\n')}
 </urlset>
 `
