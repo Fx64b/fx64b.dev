@@ -11,7 +11,7 @@ Built as a statically generated React app and deployed to Vercel.
 - **radix-ui** primitives, **lucide-react** icons, **@xyflow/react** for the
   OSCP graph, **react-markdown** + `remark-gfm`/`rehype-raw` for content.
 - **Vitest** + Testing Library for tests, **ESLint** + **Prettier** for lint/format.
-- **pnpm** for package management, **semantic-release** for versioning.
+- **pnpm** for package management, **release-please** for versioning & releases.
 
 ## Requirements
 
@@ -92,7 +92,9 @@ Vitest runs under `happy-dom` with Testing Library. Config lives in
 ## Deployment
 
 Static build (`pnpm build`) deployed to Vercel (`vercel.json`). Releases and the
-changelog are handled by semantic-release from Conventional Commit messages.
+changelog are handled by release-please (`.github/workflows/release.yml`) from
+Conventional Commit messages: it maintains a release PR that bumps the version
+and `CHANGELOG.md`, and on merge tags the commit and cuts a GitHub release.
 
 ## Adding OSCP cheat sheet entries
 

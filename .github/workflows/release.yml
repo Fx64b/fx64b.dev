@@ -1,35 +1,22 @@
 name: Release
 on:
+    push:
+        branches:
+            - main
     workflow_dispatch:
+
+permissions:
+    contents: write
+    pull-requests: write
+
 jobs:
-    release:
+    release-please:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+            - name: Run release-please
+              uses: googleapis/release-please-action@v5
               with:
+                  # PAT so the release PR triggers the build workflow. The
+                  # default GITHUB_TOKEN would work too, but PRs it opens do
+                  # not trigger other workflows (e.g. Build and Test).
                   token: ${{ secrets.RELEASE_TOKEN }}
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '24.x'
-            - uses: pnpm/action-setup@v4
-              name: Install pnpm
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-            - uses: actions/cache@v4
-              name: Setup pnpm cache
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-store-
-            - name: Install dependencies
-              run: pnpm install
-            - name: Run semantic-release
-              run: pnpx semantic-release
-              env:
-                  GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-                  GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
