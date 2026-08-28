@@ -314,9 +314,6 @@ function GuidedRail({
                 Your path
             </p>
             <ScrollArea className="min-h-0 flex-1 pr-3">
-                {/* w-px min-w-full: keep this list from growing the Radix
-                    scroll viewport's `display: table` wrapper past the
-                    rail's width - see the note in ResultList. */}
                 <ol className="flex w-px min-w-full flex-col gap-1">
                     {path.map((id, i) => {
                         const node = getNode(id)

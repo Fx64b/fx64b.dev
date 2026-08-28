@@ -28,12 +28,6 @@ export function ResultList({
         )
     }
     return (
-        // `w-px min-w-full`: Radix's ScrollArea viewport wraps children in a
-        // `display: table` box that shrink-to-fits its widest descendant, so
-        // long titles blow the list past the rail's width instead of
-        // truncating. Pinning this list to an intrinsic width of 1px (then
-        // stretching it back out with min-width) keeps it from contributing
-        // to that measurement, so `truncate` below can do its job.
         <ul className="flex w-px min-w-full flex-col gap-0.5">
             {nodes.map((n) => {
                 const color = PHASE_MAP[n.phase].color
