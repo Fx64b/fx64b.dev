@@ -28,7 +28,7 @@ export function ResultList({
         )
     }
     return (
-        <ul className="flex flex-col gap-0.5">
+        <ul className="flex w-px min-w-full flex-col gap-0.5">
             {nodes.map((n) => {
                 const color = PHASE_MAP[n.phase].color
                 const selected = n.id === selectedId

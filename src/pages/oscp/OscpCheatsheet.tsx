@@ -145,9 +145,9 @@ export default function OscpCheatsheet() {
                     )}
                 </div>
 
-                <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
+                <div className="grid min-w-0 gap-5 lg:grid-cols-[340px_1fr]">
                     {/* Left rail */}
-                    <div className="border-border bg-card/40 flex max-h-[620px] flex-col rounded-lg border p-3">
+                    <div className="border-border bg-card/40 flex min-w-0 max-h-[50vh] flex-col rounded-lg border p-3 sm:max-h-[420px] lg:max-h-[620px]">
                         {mode === 'explore' ? (
                             <>
                                 <FilterBar
@@ -177,7 +177,7 @@ export default function OscpCheatsheet() {
                     </div>
 
                     {/* Graph */}
-                    <div className="border-border bg-card/40 relative h-[620px] overflow-hidden rounded-lg border">
+                    <div className="border-border bg-card/40 relative h-[60vh] min-h-[320px] min-w-0 overflow-hidden rounded-lg border sm:h-[460px] lg:h-[620px]">
                         {visible.size > 0 ? (
                             <ClientOnly fallback={<GraphSkeleton />}>
                                 {() => (
@@ -314,7 +314,7 @@ function GuidedRail({
                 Your path
             </p>
             <ScrollArea className="min-h-0 flex-1 pr-3">
-                <ol className="flex flex-col gap-1">
+                <ol className="flex w-px min-w-full flex-col gap-1">
                     {path.map((id, i) => {
                         const node = getNode(id)
                         if (!node) {return null}
