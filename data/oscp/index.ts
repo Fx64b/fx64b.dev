@@ -119,10 +119,14 @@ export const ENTRY_POINTS: string[] = [
     'login-form-found',
     'lfi',
     'sqli',
+    'git-exposure',
     'snmp-enum',
+    'redis-enum',
     'creds-found',
     'foothold-linux',
     'foothold-windows',
+    'laps',
+    'sebackup-ntsd',
     'ad-foothold',
 ]
 

