@@ -31,7 +31,7 @@ const GraphCanvas = lazy(() => import('@/components/oscp/GraphCanvas'))
 type Mode = 'explore' | 'guided'
 
 const description =
-    'An interactive OSCP cheat sheet: search what you found, then follow the graph from finding to technique to the next step. Enumeration through Active Directory - 84 nodes, fully offline in your browser.'
+    'An interactive OSCP cheat sheet: search what you found, then follow the graph from finding to technique to the next step. Enumeration through Active Directory - 94 nodes, fully offline in your browser.'
 
 function GraphSkeleton() {
     return (

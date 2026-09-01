@@ -14,6 +14,18 @@ const enumeration: OscpContent = {
             os: 'agnostic',
             description:
                 'You have an IP and nothing else. Everything starts here. The single most common OSCP mistake is under-enumerating - scan all ports, then enumerate every service before touching an exploit.',
+            commands: [
+                {
+                    label: 'Workspace + reachability',
+                    code: `mkdir -p ~/oscp/<target>/{nmap,loot,exploits} && cd ~/oscp/<target>
+ping -c 2 <target>; ip -br a`,
+                },
+                {
+                    label: 'Host discovery on the subnet',
+                    code: `sudo nmap -sn <subnet>/24 -oG ping-sweep.txt
+grep Up ping-sweep.txt | cut -d ' ' -f 2`,
+                },
+            ],
             tags: ['start', 'recon', 'begin'],
         },
         {
@@ -33,6 +45,10 @@ const enumeration: OscpContent = {
                     label: 'Targeted deep scan once ports are known',
                     code: 'sudo nmap -sC -sV -p 22,80,445 -Pn <target> -oN nmap/deep.txt',
                     note: 'Save output. -oA writes all three formats (nmap/normal/grep).',
+                },
+                {
+                    label: 'Save all formats',
+                    code: 'sudo nmap -sS -sC -sV -Pn -p- -T4 -oA nmap/full <target>',
                 },
             ],
             references: [
@@ -57,6 +73,11 @@ const enumeration: OscpContent = {
                     code: 'sudo nmap -sU --top-ports 50 -Pn <target>',
                     note: 'UDP infers state from ICMP-unreachable; dropped ICMP -> false "open". Verify anything interesting.',
                 },
+                {
+                    label: 'SNMP / IKE / TFTP focused',
+                    code: `sudo nmap -sU -p 53,69,123,161,162,500,1900,4500 -sV -Pn <target>
+# noisy UDP (123/137/138/1900/5353/5355) is often a false open - verify`,
+                },
             ],
             tags: ['udp', 'snmp', 'nmap'],
         },
@@ -68,6 +89,18 @@ const enumeration: OscpContent = {
             os: 'agnostic',
             description:
                 'Scan finished. You now have a port -> service -> version map. Branch to a per-service playbook for each one; do not fixate on port 80 alone.',
+            commands: [
+                {
+                    label: 'Extract ports from nmap',
+                    code: `grep -E '^[0-9]+/tcp\\s+open' nmap/*.nmap
+nmap -p $(awk -F/ '/open/{print $1}' nmap/*.nmap | paste -sd,) -sC -sV -Pn <target>`,
+                },
+                {
+                    label: 'Quick service map',
+                    code: `nmap -p- --min-rate 2000 -T4 -Pn <target> -oA nmap/full
+nmap -sC -sV -p <ports> -Pn <target> -oA nmap/svc`,
+                },
+            ],
             tags: ['ports', 'services', 'results'],
         },
         {
@@ -78,6 +111,20 @@ const enumeration: OscpContent = {
             os: 'agnostic',
             description:
                 'A web port is listening (80, 443, 8080, 8000, 8443, ...). Fingerprint the stack, then start content discovery.',
+            commands: [
+                {
+                    label: 'Fingerprint the stack',
+                    code: `whatweb http://<target>:<port>
+curl -sI http://<target>:<port>
+nikto -h http://<target>:<port>`,
+                },
+                {
+                    label: 'Quick content + robots',
+                    code: `curl -s http://<target>:<port>/robots.txt
+curl -s http://<target>:<port>/sitemap.xml
+feroxbuster -u http://<target>:<port> -w /usr/share/seclists/Discovery/Web-Content/common.txt`,
+                },
+            ],
             tags: ['http', 'https', 'web', '80', '443', '8080'],
         },
         {
@@ -88,6 +135,20 @@ const enumeration: OscpContent = {
             os: 'windows',
             description:
                 'SMB is listening. Check the version for ms17-010, then enumerate shares/users - anonymously first.',
+            commands: [
+                {
+                    label: 'Version + null shares',
+                    code: `nmap -p139,445 --script smb-os-discovery,smb-protocols,smb-vuln-ms17-010 <target>
+smbclient -L //<target>/ -N
+netexec smb <target> -u '' -p '' --shares`,
+                },
+                {
+                    label: 'Users + RID cycle',
+                    code: `netexec smb <target> -u '' -p '' --users --rid-brute
+enum4linux-ng -A <target>
+rpcclient -U '' -N <target> -c 'srvinfo; enumdomusers'`,
+                },
+            ],
             tags: ['smb', '445', '139', 'windows'],
         },
         {
@@ -98,6 +159,19 @@ const enumeration: OscpContent = {
             os: 'agnostic',
             description:
                 '-sV returned a precise product and version. This is your cue to hunt for a public exploit before manual work.',
+            commands: [
+                {
+                    label: 'Match version to a PoC',
+                    code: `searchsploit <product> <version>
+searchsploit -x <id>          # read first
+searchsploit -m <id>          # copy locally`,
+                },
+                {
+                    label: 'CVE / nmap vuln scripts',
+                    code: `searchsploit --cve <cve>
+nmap -sV --script vuln -p <port> <target>`,
+                },
+            ],
             tags: ['version', 'banner', 'cve'],
         },
     ],
@@ -136,6 +210,7 @@ const enumeration: OscpContent = {
             to: 'ldap-enum',
             label: '389/636 open (likely a DC)',
         },
+        { from: 'open-ports', to: 'redis-enum', label: '6379 open' },
     ],
 }
 
