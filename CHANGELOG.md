@@ -28,6 +28,14 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.1.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.0.0...fx64b.dev-v5.1.0) (2026-09-03)
+
+
+### Features
+
+* **cheatsheet:** add new nodes and improve the overall data ([31af00d](https://github.com/Fx64b/fx64b.dev/commit/31af00d6576adff37fdfb62fde2feed8f1f8bbf4))
+* **cheatsheet:** add new nodes and improve the overall data ¨ ([24bab04](https://github.com/Fx64b/fx64b.dev/commit/24bab044e03eeb8c4253af076fd8fbf18a52b7c6))
+
 ## [5.0.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v4.0.0...fx64b.dev-v5.0.0) (2026-08-27)
 
 
