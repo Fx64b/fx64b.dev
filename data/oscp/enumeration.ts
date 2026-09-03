@@ -50,6 +50,10 @@ grep Up ping-sweep.txt | cut -d ' ' -f 2`,
                     label: 'Save all formats',
                     code: 'sudo nmap -sS -sC -sV -Pn -p- -T4 -oA nmap/full <target>',
                 },
+                {
+                    label: 'Top-ports quick sweep',
+                    code: 'sudo nmap -sS -sC -sV -Pn --top-ports 1000 -T4 <target>',
+                },
             ],
             references: [
                 {
@@ -211,6 +215,10 @@ nmap -sV --script vuln -p <port> <target>`,
             label: '389/636 open (likely a DC)',
         },
         { from: 'open-ports', to: 'redis-enum', label: '6379 open' },
+        { from: 'open-ports', to: 'dns-enum', label: '53 open' },
+        { from: 'open-ports', to: 'smtp-enum', label: '25/465/587 open' },
+        { from: 'open-ports', to: 'imap-pop3-enum', label: '110/143/993/995 open' },
+        { from: 'open-ports', to: 'nfs-enum', label: '2049 open' },
     ],
 }
 

