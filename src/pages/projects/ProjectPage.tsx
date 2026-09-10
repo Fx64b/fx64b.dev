@@ -36,6 +36,13 @@ export default function ProjectPage() {
     }
 
     const description = projectDoc?.description || project.description
+    // Twitter/Facebook/LinkedIn/Slack/Discord all ignore og:image when it
+    // points at an SVG, so an SVG logo can't be used as the social preview -
+    // fall back to the sitewide OG image instead.
+    const ogImage =
+        project.logo && !project.logo.endsWith('.svg')
+            ? `https://fx64b.dev${project.logo}`
+            : undefined
 
     return (
         <>
@@ -43,7 +50,7 @@ export default function ProjectPage() {
                 title={`${project.title} - Fx64b Projects`}
                 description={description}
                 path={`/projects/${slug}`}
-                image={project.logo || 'https://fx64b.dev/logo.svg'}
+                image={ogImage}
                 type="article"
                 jsonLd={{
                     '@context': 'https://schema.org',
