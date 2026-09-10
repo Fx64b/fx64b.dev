@@ -42,7 +42,7 @@ export default function BlogPost() {
                         name: post.author || 'Fx64b',
                         url: 'https://fx64b.dev',
                     },
-                    image: 'https://fx64b.dev/logo.svg',
+                    image: 'https://fx64b.dev/og/default.png',
                     mainEntityOfPage: {
                         '@type': 'WebPage',
                         '@id': `https://fx64b.dev/blog/${slug}`,

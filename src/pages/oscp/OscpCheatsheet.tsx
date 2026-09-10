@@ -104,6 +104,7 @@ export default function OscpCheatsheet() {
                 title="Interactive OSCP Cheat Sheet - Fx64b.dev"
                 description={description}
                 path="/cheatsheet"
+                image="https://fx64b.dev/og/cheatsheet.png"
             />
 
             <main className="mx-auto w-full max-w-[1400px] px-4 pt-10 pb-20 sm:px-6">
