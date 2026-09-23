@@ -44,3 +44,11 @@ Object.defineProperty(navigator, 'clipboard', {
     },
     configurable: true,
 })
+
+// Blob URLs (happy-dom doesn't implement them)
+if (!URL.createObjectURL) {
+    URL.createObjectURL = vi.fn(() => 'blob:mock')
+}
+if (!URL.revokeObjectURL) {
+    URL.revokeObjectURL = vi.fn()
+}

@@ -3,3 +3,4 @@ dist
 content
 package.json
 CHANGELOG.md
+public/vendor
