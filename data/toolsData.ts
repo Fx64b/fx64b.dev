@@ -41,6 +41,14 @@ const toolsData: Tool[] = [
         tags: ['text', 'count', 'words', 'characters', 'content'],
         popular: true,
     },
+    {
+        slug: 'document-scanner',
+        title: 'Document Scanner',
+        description:
+            'Photograph printed pages and turn them into a clean, straightened PDF',
+        category: 'utilities',
+        tags: ['pdf', 'scan', 'camera', 'document', 'image'],
+    },
 ]
 
 export default toolsData
