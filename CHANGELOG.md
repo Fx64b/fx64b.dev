@@ -28,6 +28,14 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.2.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.1.0...fx64b.dev-v5.2.0) (2026-09-23)
+
+
+### Features
+
+* **tools:** add document scanner ([4e14a68](https://github.com/Fx64b/fx64b.dev/commit/4e14a68ce0ad721d151ffee3e2d431ec07a540c8))
+* **tools:** add document scanner ([a8a523a](https://github.com/Fx64b/fx64b.dev/commit/a8a523a6f03207eb558d263e1f55e10697bbab18))
+
 ## [5.1.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.0.0...fx64b.dev-v5.1.0) (2026-09-03)
 
 
