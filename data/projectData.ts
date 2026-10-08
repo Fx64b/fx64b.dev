@@ -36,9 +36,9 @@ const projectData: Project[] = [
     {
         title: 'Flashcard App',
         summary:
-            'Spaced-repetition flashcard app with analytics and bulk import',
+            'Duolingo-meets-Quizlet learning app with spaced repetition and AI',
         description:
-            'A modern flashcard application for effective learning using the Spaced Repetition System (SRS). Features email authentication, study time tracking, progress analytics, and bulk card import. Built with Next.js 15, TypeScript, and Turso database. Currently in early development.',
+            'A learning app that turns your notes into short, varied exercises on top of spaced repetition (SuperMemo-2). Nine item types, twelve exercise kinds, learn sessions, flashcards, a match game and practice tests, plus XP, streaks and achievements. AI generates items from text and PDFs. Built with Next.js 15, TypeScript, Turso and Stripe.',
         logo: '/learn-logo.png',
         link: 'https://learn.fx64b.dev',
         githubLink: 'https://github.com/Fx64b/learn',
@@ -51,6 +51,7 @@ const projectData: Project[] = [
             'Turso',
             'Spaced Repetition',
             'Flashcards',
+            'Gamification',
         ],
         featured: true,
     },
