@@ -5,19 +5,19 @@ lastUpdated: '2026-10-08'
 author: 'Fx64b'
 status: 'published'
 projectSlug: 'flashcard-app'
-version: '2.0.0'
-readTime: '28 mins'
+version: '3.0.0'
+readTime: '31 mins'
 ---
 
 # Flashcard App - Technical Documentation
 
 ## Overview
 
-The Flashcard App (these days simply called **Learn**) is a web application for effective learning built on top of the Spaced Repetition System (SRS). Built with [Next.js 15](https://nextjs.org/), [TypeScript](https://www.typescriptlang.org/), and [Turso database](https://turso.tech/), it started as a classic flashcard app and has since turned into something closer to "Duolingo meets Quizlet": you bring your material, and the app turns it into short, varied exercises.
+The Flashcard App (these days simply called **Learn**) is a web application for effective learning built on top of the Spaced Repetition System (SRS). Built with [Next.js 16](https://nextjs.org/), [TypeScript](https://www.typescriptlang.org/), and [Turso database](https://turso.tech/), it started as a classic flashcard app and has since turned into something closer to "Duolingo meets Quizlet": you bring your material, and the app turns it into short, varied exercises.
 
 What started as a quick project for my final general education exam turned into something much more ambitious. The app implements a proper SRS algorithm (borrowed heavily from Anki's approach), supports multiple languages, includes AI-powered generation that actually works pretty well, has a complete subscription system with Stripe integration, and since version 2.0 also has nine item types, twelve kinds of exercises, XP, streaks and achievements.
 
-Honestly, it was already over-engineered for what I initially needed back at version 1.11. Version 2.0 did not exactly fix that. But where's the fun in building something simple?
+Honestly, it was already over-engineered for what I initially needed back at version 1.11. Version 2.0 did not exactly fix that, and version 3.0 followed on the same day with a full dependency migration to Next.js 16. But where's the fun in building something simple?
 
 ![Learn landing page](/projects/learn/learn-landing.webp)
 
@@ -75,9 +75,28 @@ A large part of 2.0 was written together with [Claude Code](https://claude.com/c
 
 Release management also got an update along the way: semantic-release was replaced by [release-please](https://github.com/googleapis/release-please), which keeps a release PR open with the next version and changelog. Merging that PR is how 2.0.0 shipped.
 
+#### Version 3.0: the great dependency update
+
+Two major versions on the same day. Thanks, semantic versioning.
+
+With 2.0 out of the door, the dependencies were the next problem. Most of them were one or more major versions behind, and some of the upgrades depended on each other. So instead of upgrading package by package, I did everything in one go: 59 files changed, about 4,500 lines added and 3,900 removed. Because it requires a newer Node.js version and a new Stripe API version, it is technically a breaking change, so release-please made it 3.0.0. For users, nothing changed except that some things now work better on phones.
+
+The big ones:
+
+- **Next.js 15.4 → 16.4** - `middleware.ts` is now called `proxy.ts` (the codemod did that part), Turbopack is the default for `next dev`, `next lint` is gone in favor of the plain ESLint CLI with a flat config, and `revalidateTag` now wants a cache profile. Next.js 16 also type-checks the tests during the build, which found a few type errors that had been hiding there for a while.
+- **React 19.3** with the new React Hooks lint rules (v7). They complained about impure calls and ref reads during render and about synchronous `setState` calls in effects. Fixing those made a few components noticeably cleaner.
+- **AI SDK 4 → 7** and `@ai-sdk/google` 1 → 4 - The generator now uses `generateText` with `Output.object` instead of the old object API. Three major versions in one jump, plus new names for things like `mediaType` and `maxOutputTokens`.
+- **Stripe 18 → 23** with a new API version. That's the scary one, because payments are the one thing you really don't want to break. The webhook endpoint had to be moved to the new API version as well.
+- **Zod 4** - The zod schemas are the single source of truth for all item types, so the editor, the import and the AI output all depend on this upgrade.
+- **And the rest** - Vitest 5, ESLint 10, TypeScript 6, Tailwind 4.3, lucide 1.x, react-day-picker 10, Resend 6 and more. Node.js 22.12 is now the minimum, and CI runs on Node 24.
+
+Not everything went to the latest version. TypeScript stays on 6 because TypeScript 7 doesn't have a JavaScript API yet that Next.js and typescript-eslint can use. And `nodemailer` stays on 7 because NextAuth v4 needs it. My favorite detail: lucide 1.x removed all brand icons, so the GitHub logo in the footer is now an inline SVG.
+
+Right after the migration I also fixed the layout on phones. The landing page heading pushed the demo card off the screen in German, the deck editor squeezed its title to one letter per line, and German compound words like "Nutzungsbedingungen" simply overflowed. Headings now hyphenate based on the page language, and every page was checked at 320, 360, 375, 768 and 1280 px in both languages. Being German finally paid off as a test case.
+
 ### Current State
 
-As of version 2.0.0, the app includes:
+As of version 3.0.0, the app includes:
 
 - Proper SRS implementation with the SuperMemo-2 algorithm
 - Nine item types and twelve exercise kinds, picked per item and mastery stage
@@ -87,6 +106,7 @@ As of version 2.0.0, the app includes:
 - Item editor for all types, image upload for diagrams, JSON import/export
 - Multi-language support (English and German)
 - Complete subscription system with Pro features and payment recovery
+- Next.js 16, React 19.3 and up-to-date dependencies across the board
 
 It's deployed on Vercel and actually works pretty well. I use it regularly, along with a growing number of other users, which I guess is the ultimate test for any personal project.
 
@@ -141,7 +161,7 @@ Because these modules are pure, they are easy to test. That's a nice change from
 
 ### Data Flow
 
-Data flows through server actions, which is honestly one of my favorite things about Next.js 15. No need to set up API routes for everything - you can just call server functions directly from your components.
+Data flows through server actions, which is honestly one of my favorite things about Next.js. No need to set up API routes for everything - you can just call server functions directly from your components.
 
 A learn session works like this: a server action loads the deck and the SRS state, the pure session builder creates a queue of exercises, and the client runs through it. After every answer, the client calls `submitExerciseResult`, which grades the outcome and stores the new SRS state. At the end, `completeSession` adds the session bonus, updates the streak and checks for new achievements.
 
@@ -298,10 +318,10 @@ The subscription gating is implemented throughout the app, with Pro features cle
 
 ### Frontend
 
-- **[Next.js 15](https://nextjs.org/)** - The main framework. I really like how development feels with Next.js, even if it's probably overkill for some projects.
-- **[React 19](https://react.dev/)** - Upgraded along the way, partly because of the security patches.
-- **[TypeScript](https://www.typescriptlang.org/)** - In strict mode. The new item types are a discriminated union, which makes TypeScript actually useful instead of just annoying.
-- **[Tailwind CSS v4](https://tailwindcss.com/)** - For styling.
+- **[Next.js 16](https://nextjs.org/)** - The main framework, with Turbopack. I really like how development feels with Next.js, even if it's probably overkill for some projects.
+- **[React 19.3](https://react.dev/)** - Upgraded along the way, first because of the security patches, then as part of the 3.0 migration.
+- **[TypeScript 6](https://www.typescriptlang.org/)** - In strict mode. The new item types are a discriminated union, which makes TypeScript actually useful instead of just annoying.
+- **[Tailwind CSS 4.3](https://tailwindcss.com/)** - For styling.
 - **[Framer Motion](https://www.framer.com/motion/)** - For flips, transitions and the little celebrations
 - **[shadcn/ui](https://ui.shadcn.com/)** - Component library for consistent UI elements
 
@@ -309,7 +329,7 @@ The subscription gating is implemented throughout the app, with Pro features cle
 
 - **[Next.js Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)** - Instead of building a separate API
 - **[Drizzle ORM](https://orm.drizzle.team/)** - Turned out to be a solid choice, even if it caused a few hours of debugging frustration initially.
-- **[zod](https://zod.dev/)** - Schemas for every item type, shared by the editor, the import and the AI
+- **[Zod 4](https://zod.dev/)** - Schemas for every item type, shared by the editor, the import and the AI
 - **[NextAuth.js](https://next-auth.js.org/)** - For authentication via magic email links
 
 ### Database
@@ -321,15 +341,16 @@ I chose Turso because it's basically SQLite but hosted, which gives you the simp
 
 ### External Services
 
-- **[Google Gemini](https://ai.google.dev/)** - For AI generation, now Gemini 3 Flash
-- **[Stripe](https://stripe.com/)** - Complete payment processing, subscriptions, and billing
+- **[Google Gemini](https://ai.google.dev/)** via the [AI SDK](https://ai-sdk.dev/) 7 - For AI generation, now Gemini 3 Flash
+- **[Stripe](https://stripe.com/)** - Complete payment processing, subscriptions, and billing (SDK 23)
 - **[Resend](https://resend.com/)** - For sending authentication and payment-related emails
 - **[Upstash Redis](https://upstash.com/)** - Rate limiting
 - **[Vercel](https://vercel.com/)** - Hosting, cron jobs and Blob storage for images and PDF uploads
 
 ### Testing & Tooling
 
-- **[Vitest](https://vitest.dev/)** with Testing Library - 500+ tests, running in GitHub Actions on every push and PR
+- **[Vitest 5](https://vitest.dev/)** with Testing Library - 500+ tests, running in GitHub Actions on Node 24 on every push and PR
+- **[ESLint 10](https://eslint.org/)** - Flat config through the ESLint CLI, since `next lint` no longer exists
 - **[release-please](https://github.com/googleapis/release-please)** - Versions and changelog from Conventional Commits
 
 ## AI Integration
@@ -350,7 +371,7 @@ The AI generator was more or less rebuilt for 2.0. It no longer creates only fro
 
 **Technical Details:**
 
-- Uses `gemini-3-flash-preview` by default (configurable via an environment variable, so the next model retirement is just a config change)
+- Uses `gemini-3-flash-preview` by default, through the structured output of the AI SDK 7 (`Output.object`). The model is configurable via an environment variable, so the next model retirement is just a config change
 - The model returns a flat item object. Everything goes through the strict item schema, and items that fail validation are simply dropped
 - The prompts of the newest 200 items in the deck go to the model as context. New items whose normalized prompt matches an existing one are not saved
 - Without a requested count, an exact number from the prompt wins, otherwise the model picks between 10 and 60
@@ -539,7 +560,7 @@ The rate limiting saved me when I accidentally created an infinite loop during d
 
 ### Security Headers
 
-The app includes standard security headers like CSP (Content Security Policy), X-Frame-Options and HSTS (HTTP Strict Transport Security). The CSP is now built in one place in the middleware. Every new origin the browser talks to (like Vercel Blob for uploads) needs an explicit entry there, which I learned the hard way when the new PDF uploads were blocked right after release.
+The app includes standard security headers like CSP (Content Security Policy), X-Frame-Options and HSTS (HTTP Strict Transport Security). The CSP is now built in one place and applied by the Next.js proxy (formerly middleware). Every new origin the browser talks to (like Vercel Blob for uploads) needs an explicit entry there, which I learned the hard way when the new PDF uploads were blocked right after release.
 
 ### Data Protection
 
@@ -640,6 +661,8 @@ There are also new docs, help, roadmap and contact pages, because "just ask me" 
 
 The app works on mobile, tablet, and desktop. The exercises are built for touch first: big tiles, drag or arrow buttons for ordering, and tap targets for images.
 
+Since 3.0, every page is checked at 320, 360, 375, 768 and 1280 px in English and German, with no horizontal scrolling anywhere. On small screens, some buttons and badges show only their icon so titles keep their space, and long German words hyphenate instead of breaking the layout.
+
 ### Accessibility
 
 Basic accessibility features are implemented:
@@ -728,6 +751,7 @@ The less good news:
 - The statistics code is the last big piece from the 1.x days
 - The database still says `flashcards` and `card_reviews` while the code says items
 - Some older components still use the classic card model and could use the new item types
+- Authentication is still on NextAuth v4, which also keeps `nodemailer` on an older major version. Moving to Auth.js v5 is overdue
 
 ## Future Roadmap
 
@@ -774,7 +798,7 @@ The current architecture should handle several thousand users, but there are are
 
 ### Development Setup
 
-To run the app locally:
+You need Node.js 22.12 or newer and pnpm. To run the app locally:
 
 ```bash
 # Clone the repository

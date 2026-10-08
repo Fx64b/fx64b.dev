@@ -38,7 +38,7 @@ const projectData: Project[] = [
         summary:
             'Duolingo-meets-Quizlet learning app with spaced repetition and AI',
         description:
-            'A learning app that turns your notes into short, varied exercises on top of spaced repetition (SuperMemo-2). Nine item types, twelve exercise kinds, learn sessions, flashcards, a match game and practice tests, plus XP, streaks and achievements. AI generates items from text and PDFs. Built with Next.js 15, TypeScript, Turso and Stripe.',
+            'A learning app that turns your notes into short, varied exercises on top of spaced repetition (SuperMemo-2). Nine item types, twelve exercise kinds, learn sessions, flashcards, a match game and practice tests, plus XP, streaks and achievements. AI generates items from text and PDFs. Built with Next.js 16, TypeScript, Turso and Stripe.',
         logo: '/learn-logo.png',
         link: 'https://learn.fx64b.dev',
         githubLink: 'https://github.com/Fx64b/learn',
