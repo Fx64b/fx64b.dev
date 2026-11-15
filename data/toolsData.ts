@@ -49,6 +49,21 @@ const toolsData: Tool[] = [
         category: 'utilities',
         tags: ['pdf', 'scan', 'camera', 'document', 'image'],
     },
+    {
+        slug: 'card-sheet-designer',
+        title: 'Card Sheet Designer',
+        description:
+            'Design business-card-sized cards with photos and text, ready to print on an A4 sheet',
+        category: 'generators',
+        tags: [
+            'print',
+            'cards',
+            'a4',
+            'business card',
+            'christmas',
+            'bible verse',
+        ],
+    },
 ]
 
 export default toolsData
