@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 
-import { backgroundFor } from './design'
+import { backgroundFor, textFor } from './design'
 import { cardPosition, cutLines } from './layout'
 import type {
     Background,
@@ -268,8 +268,10 @@ function CardFace({
                 </div>
             </div>
             {interactive && !hasText && (
-                <div className="csd-screen-only pointer-events-none absolute top-[1.5mm] left-[2mm] font-sans text-[7pt] text-black/35 mix-blend-difference">
-                    {index + 1}
+                <div className="csd-screen-only pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <span className="rounded-[1mm] bg-white/85 px-[2.5mm] py-[1mm] font-sans text-[10pt] text-neutral-500">
+                        Card {index + 1} · add text
+                    </span>
                 </div>
             )}
             {interactive && selected && (
@@ -409,7 +411,7 @@ export default function CardSheet({
                         return (
                             <CardFace
                                 key={card.id}
-                                card={card}
+                                card={{ ...card, ...textFor(design, card) }}
                                 slot={i}
                                 index={index}
                                 background={backgroundFor(design, card)}

@@ -63,6 +63,7 @@ const toolsData: Tool[] = [
             'christmas',
             'bible verse',
         ],
+        wide: true,
     },
 ]
 

@@ -1,7 +1,6 @@
 export type HAlign = 'left' | 'center' | 'right'
 export type VAlign = 'top' | 'center' | 'bottom'
 export type Orientation = 'landscape' | 'portrait'
-export type BackgroundMode = 'same' | 'individual'
 export type LineStyle = 'solid' | 'dashed' | 'dotted' | 'double'
 
 export interface ImageCredit {
@@ -104,10 +103,13 @@ export interface LayoutSettings {
 export interface Design {
     version: 1
     layout: LayoutSettings
-    backgroundMode: BackgroundMode
+    /** Shared background; a card's own background takes precedence. */
     background: Background
     textStyle: TextStyle
     pages: number
+    /** When on, every card shows `sharedText` instead of its own text. */
+    sameText: boolean
+    sharedText: { text: string; reference: string }
     cards: CardData[]
 }
 

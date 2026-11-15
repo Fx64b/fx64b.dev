@@ -1,33 +1,37 @@
 import {
+    ChevronLeft,
+    ChevronRight,
     Download,
     FileUp,
     Loader2,
-    Minus,
     Plus,
     Printer,
     RotateCcw,
+    Trash2,
 } from 'lucide-react'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import BackgroundControls from '@/components/tools/card-sheet-designer/BackgroundControls'
-import CardEditor from '@/components/tools/card-sheet-designer/CardEditor'
+import BackgroundStep from '@/components/tools/card-sheet-designer/BackgroundStep'
 import CardSheet from '@/components/tools/card-sheet-designer/CardSheet'
-import ImagePicker from '@/components/tools/card-sheet-designer/ImagePicker'
 import LayoutPanel from '@/components/tools/card-sheet-designer/LayoutPanel'
-import TextStylePanel, {
-    BulkTextInput,
-} from '@/components/tools/card-sheet-designer/TextPanel'
-import { Segmented } from '@/components/tools/card-sheet-designer/controls'
+import StyleStep from '@/components/tools/card-sheet-designer/StyleStep'
+import TextStep from '@/components/tools/card-sheet-designer/TextStep'
+import { Step } from '@/components/tools/card-sheet-designer/controls'
 import {
     MAX_PAGES,
     applyEntries,
+    backgroundAllCards,
+    backgroundFor,
+    cardsWithOwnBackground,
     createDefaultDesign,
     ensureCardCount,
     googleFontsUrl,
     normalizeDesign,
     parseBulkText,
+    styleAllCards,
+    textFor,
     visibleCardCount,
 } from '@/components/tools/card-sheet-designer/design'
 import {
@@ -46,15 +50,14 @@ import {
 } from '@/components/tools/card-sheet-designer/storage'
 import type {
     Background,
-    BackgroundMode,
     CardData,
     Design,
     ImageCredit,
+    TextOverrides,
+    TextStyle,
 } from '@/components/tools/card-sheet-designer/types'
 import { ToolInfoSection } from '@/components/tools/tool-info-section'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 /**
  * The printed sheet lives in its own element directly under <body>. While
@@ -131,16 +134,48 @@ function downloadText(text: string, name: string, type: string) {
     setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }
 
+const PAGE_W = A4.width * PX_PER_MM
+const PAGE_H = A4.height * PX_PER_MM
+
+/** Height the sticky column needs besides the sheet (nav, sheet bar, print). */
+const STICKY_CHROME = 230
+
+function useViewportHeight() {
+    const [height, setHeight] = useState(0)
+    useEffect(() => {
+        const update = () => setHeight(window.innerHeight)
+        update()
+        window.addEventListener('resize', update)
+        return () => window.removeEventListener('resize', update)
+    }, [])
+    return height
+}
+
+function useIsDesktop() {
+    const [desktop, setDesktop] = useState(false)
+    useEffect(() => {
+        const mq = window.matchMedia('(min-width: 768px)')
+        const update = () => setDesktop(mq.matches)
+        update()
+        mq.addEventListener?.('change', update)
+        return () => mq.removeEventListener?.('change', update)
+    }, [])
+    return desktop
+}
+
 function PreviewPane({
     design,
     page,
     selectedIndex,
     onSelect,
+    scale: fixedScale,
 }: {
     design: Design
     page: number
     selectedIndex: number
     onSelect: (index: number) => void
+    /** Fixed scale (sticky desktop column); otherwise fit the width. */
+    scale?: number
 }) {
     const grid = computeGrid(design.layout)
     const wrapRef = useRef<HTMLDivElement>(null)
@@ -158,14 +193,13 @@ function PreviewPane({
         return () => ro.disconnect()
     }, [])
 
-    const pageWidthPx = A4.width * PX_PER_MM
-    const scale = width > 0 ? width / pageWidthPx : 0.6
+    const scale = fixedScale ?? (width > 0 ? width / PAGE_W : 0.6)
 
     return (
         <div ref={wrapRef} className="w-full">
             <div
-                className="relative overflow-hidden rounded-sm shadow-[0_1px_8px_rgba(0,0,0,0.18)] ring-1 ring-black/10"
-                style={{ height: A4.height * PX_PER_MM * scale }}
+                className="relative mx-auto overflow-hidden rounded-sm bg-white shadow-[0_1px_10px_rgba(0,0,0,0.18)] ring-1 ring-black/10"
+                style={{ height: PAGE_H * scale, width: PAGE_W * scale }}
                 data-testid="sheet-preview"
             >
                 <div
@@ -189,14 +223,24 @@ function PreviewPane({
     )
 }
 
+type Scope = 'all' | 'card'
+type StepId = 'text' | 'background' | 'style' | 'layout'
+
 export default function CardSheetDesigner() {
     const [design, setDesign] = useState<Design>(createDefaultDesign)
     const [selected, setSelected] = useState(0)
-    const [tab, setTab] = useState('text')
+    const [openSteps, setOpenSteps] = useState<Record<StepId, boolean>>({
+        text: true,
+        background: true,
+        style: false,
+        layout: false,
+    })
+    const [bgScope, setBgScope] = useState<Scope>('all')
+    const [styleScope, setStyleScope] = useState<Scope>('all')
     const [restored, setRestored] = useState(false)
     const [saveFailed, setSaveFailed] = useState(false)
     const [printing, setPrinting] = useState(false)
-    const [importError, setImportError] = useState<string | null>(null)
+    const [fileError, setFileError] = useState<string | null>(null)
     const [confirmReset, setConfirmReset] = useState(false)
     const printRootRef = useRef<HTMLDivElement>(null)
     const importRef = useRef<HTMLInputElement>(null)
@@ -235,6 +279,18 @@ export default function CardSheetDesigner() {
         return () => clearTimeout(t)
     }, [design, restored])
 
+    const desktop = useIsDesktop()
+    const viewportHeight = useViewportHeight()
+    // On wide screens the sheet stays in view next to the steps, so it is
+    // sized to the window height; on phones it uses the full width.
+    const desktopScale =
+        desktop && viewportHeight > 0
+            ? Math.min(
+                  0.72,
+                  Math.max(0.42, (viewportHeight - STICKY_CHROME) / PAGE_H)
+              )
+            : undefined
+
     const grid = computeGrid(design.layout)
     const total = visibleCardCount(design)
     const sel = Math.max(0, Math.min(selected, total - 1))
@@ -243,9 +299,9 @@ export default function CardSheetDesigner() {
     const page = Math.min(design.pages - 1, Math.floor(sel / perPage))
     const pixels = imagePixelsFor(grid)
     // Cards kept from a roomier layout that no longer fit on the sheets.
-    const hiddenWithText = design.cards
-        .slice(total)
-        .filter((c) => c.text || c.reference).length
+    const hiddenWithText = design.sameText
+        ? 0
+        : design.cards.slice(total).filter((c) => c.text || c.reference).length
     const lastTextIndex = design.cards.findLastIndex(
         (c) => c.text || c.reference
     )
@@ -277,41 +333,92 @@ export default function CardSheetDesigner() {
             pages: Math.max(1, Math.min(MAX_PAGES, pages)),
         }))
 
-    // ----- backgrounds -----------------------------------------------------
+    const selectCard = (index: number) =>
+        setSelected(Math.max(0, Math.min(total - 1, index)))
 
-    const individual = design.backgroundMode === 'individual'
-    const cardBg: Background = card?.background ?? design.background
+    const toggleStep = (id: StepId) =>
+        setOpenSteps((s) => ({ ...s, [id]: !s[id] }))
+
+    // ----- text ------------------------------------------------------------
+
+    const cardText = card ? textFor(design, card) : { text: '', reference: '' }
+
+    const changeText = (
+        patch: Partial<{ text: string; reference: string }>
+    ) => {
+        if (design.sameText) {
+            update((d) => ({ ...d, sharedText: { ...d.sharedText, ...patch } }))
+        } else {
+            updateCard(sel, patch)
+        }
+    }
+
+    const setSameText = (on: boolean) =>
+        update((d) => {
+            if (!on) {
+                return { ...d, sameText: false }
+            }
+            // Start from the selected card's text, or the first card with any.
+            const visible = d.cards.slice(0, visibleCardCount(d))
+            const source =
+                [d.cards[sel], ...visible].find(
+                    (c) => c && (c.text || c.reference)
+                ) ?? d.sharedText
+            return {
+                ...d,
+                sameText: true,
+                sharedText:
+                    d.sharedText.text || d.sharedText.reference
+                        ? d.sharedText
+                        : { text: source.text, reference: source.reference },
+            }
+        })
+
+    const applyList = (text: string) => {
+        update((d) => ({
+            ...applyEntries(d, parseBulkText(text), 0),
+            sameText: false,
+        }))
+        setSelected(0)
+    }
+
+    const clearAllTexts = () =>
+        update((d) => ({
+            ...d,
+            sharedText: { text: '', reference: '' },
+            cards: d.cards.map((c) => ({ ...c, text: '', reference: '' })),
+        }))
+
+    // ----- background ------------------------------------------------------
+
+    const editedBg: Background =
+        bgScope === 'card' && card
+            ? backgroundFor(design, card)
+            : design.background
 
     const withImage = (
         base: Background,
         image: string,
         credit: ImageCredit
-    ): Background => ({
-        ...base,
-        image,
-        credit,
-        posX: 50,
-        posY: 50,
-        zoom: 1,
-    })
+    ): Background => ({ ...base, image, credit, posX: 50, posY: 50, zoom: 1 })
 
-    const pickImage = (image: string, credit: ImageCredit) => {
-        if (individual) {
-            updateCard(sel, { background: withImage(cardBg, image, credit) })
+    const patchBackground = (patch: Partial<Background>) => {
+        if (bgScope === 'card') {
+            updateCard(sel, { background: { ...editedBg, ...patch } })
         } else {
-            update((d) => ({
-                ...d,
-                background: withImage(d.background, image, credit),
-            }))
+            update((d) => backgroundAllCards(d, patch))
         }
     }
 
-    const patchBackground = (patch: Partial<Background>) => {
-        if (individual) {
-            updateCard(sel, { background: { ...cardBg, ...patch } })
-        } else {
-            update((d) => ({ ...d, background: { ...d.background, ...patch } }))
-        }
+    const pickImage = (image: string, credit: ImageCredit) => {
+        const next = withImage(editedBg, image, credit)
+        patchBackground({
+            image: next.image,
+            credit: next.credit,
+            posX: 50,
+            posY: 50,
+            zoom: 1,
+        })
     }
 
     const fillWithPhotos = (results: ImageResult[]) => {
@@ -322,11 +429,7 @@ export default function CardSheetDesigner() {
             const r = results[i % results.length]
             return {
                 ...c,
-                background: withImage(
-                    c.background ?? d.background,
-                    r.full,
-                    r.credit
-                ),
+                background: withImage(backgroundFor(d, c), r.full, r.credit),
             }
         })
     }
@@ -336,50 +439,29 @@ export default function CardSheetDesigner() {
         mapVisibleCards((c, i, d) => ({
             ...c,
             background: withImage(
-                c.background ?? d.background,
+                backgroundFor(d, c),
                 picsumSeedUrl(`${seed}-${i}`, pixels.width, pixels.height),
-                {
-                    provider: 'picsum',
-                    license: 'Unsplash License',
-                }
+                { provider: 'picsum', license: 'Unsplash License' }
             ),
         }))
     }
 
-    const applyCardBgToAll = () => {
-        const bg = cardBg
-        mapVisibleCards((c) => ({ ...c, background: { ...bg } }))
-    }
+    // ----- text style ------------------------------------------------------
 
-    // ----- texts -----------------------------------------------------------
+    const editedStyle: TextStyle =
+        styleScope === 'card' && card
+            ? { ...design.textStyle, ...card.style }
+            : design.textStyle
 
-    const fillFromList = (text: string) => {
-        const entries = parseBulkText(text)
-        update((d) => applyEntries(d, entries, 0))
-        setSelected(0)
-    }
-
-    const sameTextForAll = (text: string) => {
-        const [entry] = parseBulkText(text)
-        if (entry) {
-            mapVisibleCards((c) => ({
-                ...c,
-                text: entry.text,
-                reference: entry.reference,
-            }))
+    const changeStyle = (patch: Partial<TextStyle>) => {
+        if (styleScope === 'card' && card) {
+            updateCard(sel, {
+                style: { ...card.style, ...(patch as TextOverrides) },
+            })
+        } else {
+            update((d) => styleAllCards(d, patch))
         }
     }
-
-    const copyCardTextToAll = () => {
-        if (!card) {
-            return
-        }
-        const { text, reference, style } = card
-        mapVisibleCards((c) => ({ ...c, text, reference, style }))
-    }
-
-    const clearAllTexts = () =>
-        mapVisibleCards((c) => ({ ...c, text: '', reference: '' }))
 
     // ----- file actions ----------------------------------------------------
 
@@ -397,7 +479,7 @@ export default function CardSheetDesigner() {
     const exportDesign = () =>
         downloadText(
             JSON.stringify(design, null, 2),
-            `card-sheet-${new Date().toISOString().slice(0, 10)}.json`,
+            `cards-${new Date().toISOString().slice(0, 10)}.json`,
             'application/json'
         )
 
@@ -409,11 +491,11 @@ export default function CardSheetDesigner() {
             const next = normalizeDesign(JSON.parse(await file.text()))
             setDesign(next)
             setSelected(0)
-            setImportError(null)
+            setFileError(null)
         } catch (e) {
-            setImportError(
+            setFileError(
                 e instanceof SyntaxError
-                    ? 'This file is not valid JSON.'
+                    ? 'This file is not a saved card design.'
                     : (e as Error).message
             )
         } finally {
@@ -434,106 +516,115 @@ export default function CardSheetDesigner() {
         setSelected(0)
     }
 
+    const bgSummary = design.background.image
+        ? cardsWithOwnBackground(design) > 0
+            ? 'Different photos'
+            : 'Photo'
+        : cardsWithOwnBackground(design) > 0
+          ? 'Different photos'
+          : 'Plain colour'
+
     return (
-        <div className="space-y-6">
+        <div>
             <style>{PRINT_CSS}</style>
 
-            <Card>
-                <CardContent className="flex flex-wrap items-center gap-2">
-                    <Button
-                        type="button"
-                        onClick={() => void print()}
-                        disabled={printing || grid.perPage === 0}
-                    >
-                        {printing ? (
-                            <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                            <Printer className="size-4" />
-                        )}
-                        Print / save as PDF
-                    </Button>
-                    <div className="border-border flex items-center gap-1 rounded-md border px-1">
-                        <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            className="size-7"
-                            aria-label="Remove a page"
-                            disabled={design.pages <= 1}
-                            onClick={() => setPages(design.pages - 1)}
-                        >
-                            <Minus className="size-3.5" />
-                        </Button>
-                        <span
-                            className="min-w-16 text-center text-[13px] tabular-nums"
-                            data-testid="page-count"
-                        >
-                            {design.pages}{' '}
-                            {design.pages === 1 ? 'sheet' : 'sheets'}
-                        </span>
-                        <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            className="size-7"
-                            aria-label="Add a page"
-                            disabled={design.pages >= MAX_PAGES}
-                            onClick={() => setPages(design.pages + 1)}
-                        >
-                            <Plus className="size-3.5" />
-                        </Button>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-[auto_minmax(0,1fr)] lg:gap-12">
+                {/* Sheet preview and the main action, always in view. */}
+                <div
+                    className="min-w-0 space-y-3 md:sticky md:top-24 md:self-start"
+                    style={
+                        desktopScale
+                            ? { width: PAGE_W * desktopScale }
+                            : undefined
+                    }
+                >
+                    <div className="flex h-8 items-center justify-between gap-2 text-[13px]">
+                        <div className="flex items-center gap-1">
+                            {design.pages > 1 && (
+                                <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-7"
+                                    aria-label="Previous sheet"
+                                    disabled={page === 0}
+                                    onClick={() =>
+                                        selectCard((page - 1) * perPage)
+                                    }
+                                >
+                                    <ChevronLeft className="size-4" />
+                                </Button>
+                            )}
+                            <span
+                                className="font-medium"
+                                data-testid="page-count"
+                            >
+                                Sheet {page + 1} of {design.pages}
+                            </span>
+                            {design.pages > 1 && (
+                                <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-7"
+                                    aria-label="Next sheet"
+                                    disabled={page >= design.pages - 1}
+                                    onClick={() =>
+                                        selectCard((page + 1) * perPage)
+                                    }
+                                >
+                                    <ChevronRight className="size-4" />
+                                </Button>
+                            )}
+                            <span className="text-muted-foreground">
+                                · {total} cards
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            {design.pages > 1 && (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7"
+                                    aria-label="Remove last sheet"
+                                    onClick={() => setPages(design.pages - 1)}
+                                >
+                                    <Trash2 className="size-3.5" />
+                                </Button>
+                            )}
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-7"
+                                disabled={design.pages >= MAX_PAGES}
+                                onClick={() => {
+                                    setPages(design.pages + 1)
+                                    setSelected(design.pages * perPage)
+                                }}
+                            >
+                                <Plus className="size-3.5" />
+                                Add sheet
+                            </Button>
+                        </div>
                     </div>
-                    <div className="ml-auto flex flex-wrap gap-1">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={exportDesign}
-                        >
-                            <Download className="size-3.5" />
-                            Export
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => importRef.current?.click()}
-                        >
-                            <FileUp className="size-3.5" />
-                            Import
-                        </Button>
-                        <input
-                            ref={importRef}
-                            type="file"
-                            accept="application/json,.json"
-                            className="hidden"
-                            aria-label="Import design file"
-                            onChange={(e) =>
-                                void importDesign(e.target.files?.[0])
-                            }
-                        />
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={reset}
-                        >
-                            <RotateCcw className="size-3.5" />
-                            {confirmReset ? 'Click again to reset' : 'Reset'}
-                        </Button>
-                    </div>
-                    <p className="text-muted-foreground w-full text-[12px]">
-                        {total} cards ·{' '}
-                        {saveFailed
-                            ? 'could not autosave - use Export to keep your design'
-                            : 'saved automatically in this browser'}
-                    </p>
+
+                    <PreviewPane
+                        design={design}
+                        page={page}
+                        selectedIndex={sel}
+                        onSelect={setSelected}
+                        scale={desktopScale}
+                    />
+
                     {hiddenWithText > 0 && grid.perPage > 0 && (
-                        <p className="w-full text-[13px] text-amber-700 dark:text-amber-400">
-                            {hiddenWithText} more{' '}
-                            {hiddenWithText === 1 ? 'card has' : 'cards have'}{' '}
-                            text but{' '}
-                            {hiddenWithText === 1 ? "doesn't" : "don't"} fit on{' '}
+                        <p className="text-[13px] text-amber-700 dark:text-amber-400">
+                            {hiddenWithText}{' '}
+                            {hiddenWithText === 1
+                                ? 'card with text no longer fits'
+                                : 'cards with text no longer fit'}{' '}
+                            on{' '}
                             {design.pages === 1 ? 'this sheet' : 'these sheets'}
                             .{' '}
                             {design.pages < MAX_PAGES && (
@@ -553,229 +644,216 @@ export default function CardSheetDesigner() {
                             )}
                         </p>
                     )}
-                    {importError && (
-                        <p
-                            role="alert"
-                            className="text-destructive w-full text-[13px]"
-                        >
-                            {importError}
-                        </p>
-                    )}
-                </CardContent>
-            </Card>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_300px]">
-                <div className="min-w-0 space-y-2">
-                    {design.pages > 1 && (
-                        <div
-                            className="flex flex-wrap gap-1"
-                            aria-label="Sheets"
+                    <div className="space-y-1.5">
+                        <Button
+                            type="button"
+                            size="lg"
+                            className="w-full"
+                            onClick={() => void print()}
+                            disabled={printing || grid.perPage === 0}
                         >
-                            {Array.from({ length: design.pages }, (_, p) => (
-                                <button
-                                    key={p}
-                                    type="button"
-                                    onClick={() => setSelected(p * perPage)}
-                                    aria-current={
-                                        p === page ? 'page' : undefined
-                                    }
-                                    className={
-                                        p === page
-                                            ? 'bg-foreground text-background rounded px-2 py-0.5 text-[12px]'
-                                            : 'text-muted-foreground hover:text-foreground rounded border px-2 py-0.5 text-[12px]'
-                                    }
-                                >
-                                    Sheet {p + 1}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                    <PreviewPane
-                        design={design}
-                        page={page}
-                        selectedIndex={sel}
-                        onSelect={setSelected}
-                    />
-                    <p className="text-muted-foreground text-[12px]">
-                        Click a card to edit it.
-                    </p>
+                            {printing ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <Printer className="size-4" />
+                            )}
+                            Print{' '}
+                            {design.pages === 1
+                                ? 'sheet'
+                                : `${design.pages} sheets`}
+                        </Button>
+                        <p className="text-muted-foreground text-center text-[12px]">
+                            Print on{' '}
+                            <strong className="text-foreground">A4</strong> at{' '}
+                            <strong className="text-foreground">
+                                100% scale
+                            </strong>
+                            , not &quot;Fit to page&quot;.
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    {card && (
-                        <CardEditor
-                            card={card}
+
+                {/* Editing steps. */}
+                <div className="min-w-0">
+                    <Step
+                        number={1}
+                        title="Text"
+                        summary={
+                            design.sameText ? 'Same on every card' : undefined
+                        }
+                        open={openSteps.text}
+                        onToggle={() => toggleStep('text')}
+                    >
+                        <TextStep
+                            sameText={design.sameText}
+                            value={cardText}
                             index={sel}
                             total={total}
-                            baseStyle={design.textStyle}
-                            onChange={(patch) => updateCard(sel, patch)}
-                            onSelect={(i) =>
-                                setSelected(Math.max(0, Math.min(total - 1, i)))
+                            onSelect={selectCard}
+                            onChange={changeText}
+                            onSameTextChange={setSameText}
+                            onApplyList={applyList}
+                            onClearAll={clearAllTexts}
+                        />
+                    </Step>
+                    <Step
+                        number={2}
+                        title="Background"
+                        summary={bgSummary}
+                        open={openSteps.background}
+                        onToggle={() => toggleStep('background')}
+                    >
+                        <BackgroundStep
+                            scope={bgScope}
+                            onScopeChange={setBgScope}
+                            cardNumber={sel + 1}
+                            bg={editedBg}
+                            ownCount={cardsWithOwnBackground(design)}
+                            ownImages={design.cards
+                                .slice(0, total)
+                                .flatMap((c) =>
+                                    c.background?.image
+                                        ? [c.background.image]
+                                        : []
+                                )
+                                .slice(0, 4)}
+                            cardHasOwn={Boolean(card?.background)}
+                            pixelSize={pixels}
+                            onPick={pickImage}
+                            onPatch={patchBackground}
+                            onFillMany={fillWithPhotos}
+                            onRandomEach={randomPhotoEach}
+                            onResetCard={() =>
+                                updateCard(sel, { background: undefined })
                             }
-                            onCopyTextToAll={copyCardTextToAll}
-                        >
-                            {individual && (
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setTab('background')}
-                                >
-                                    Change this card&apos;s photo
-                                </Button>
+                        />
+                    </Step>
+                    <Step
+                        number={3}
+                        title="Text style"
+                        open={openSteps.style}
+                        onToggle={() => toggleStep('style')}
+                    >
+                        <StyleStep
+                            scope={styleScope}
+                            onScopeChange={setStyleScope}
+                            cardNumber={sel + 1}
+                            style={editedStyle}
+                            cardHasOwn={Boolean(
+                                card?.style && Object.keys(card.style).length
                             )}
-                        </CardEditor>
-                    )}
-                </div>
-            </div>
-
-            <Tabs value={tab} onValueChange={setTab}>
-                <TabsList className="w-full sm:w-auto">
-                    <TabsTrigger value="text">Text</TabsTrigger>
-                    <TabsTrigger value="background">Background</TabsTrigger>
-                    <TabsTrigger value="layout">
-                        Layout &amp; borders
-                    </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="text" className="mt-4 space-y-6">
-                    <BulkTextInput
-                        totalCards={total}
-                        onApply={fillFromList}
-                        onSameForAll={sameTextForAll}
-                        onClearAll={clearAllTexts}
-                    />
-                    <div className="space-y-3">
-                        <h3 className="text-sm font-semibold">
-                            Text style for all cards
-                        </h3>
-                        <TextStylePanel
-                            style={design.textStyle}
+                            onChange={changeStyle}
+                            onResetCard={() =>
+                                updateCard(sel, { style: undefined })
+                            }
+                        />
+                    </Step>
+                    <Step
+                        number={4}
+                        title="Size & cutting"
+                        summary={`${grid.perPage} per sheet`}
+                        open={openSteps.layout}
+                        onToggle={() => toggleStep('layout')}
+                    >
+                        <LayoutPanel
+                            layout={design.layout}
+                            grid={grid}
                             onChange={(patch) =>
                                 update((d) => ({
                                     ...d,
-                                    textStyle: { ...d.textStyle, ...patch },
+                                    layout: { ...d.layout, ...patch },
                                 }))
                             }
                         />
-                    </div>
-                </TabsContent>
+                    </Step>
 
-                <TabsContent value="background" className="mt-4 space-y-5">
-                    <Segmented<BackgroundMode>
-                        label="Backgrounds"
-                        value={design.backgroundMode}
-                        options={[
-                            { value: 'same', label: 'Same for all cards' },
-                            {
-                                value: 'individual',
-                                label: 'Individual per card',
-                            },
-                        ]}
-                        onChange={(backgroundMode) =>
-                            update((d) => ({ ...d, backgroundMode }))
-                        }
-                    />
-                    {individual && (
-                        <p className="text-muted-foreground text-[13px]">
-                            Editing{' '}
-                            <strong className="text-foreground">
-                                card {sel + 1}
-                            </strong>
-                            . Click another card in the preview to change its
-                            photo. Cards without their own photo use the shared
-                            background.
+                    <div className="border-border space-y-1 border-t pt-4">
+                        <div className="text-muted-foreground flex flex-wrap items-center gap-x-1 text-[12px]">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-[12px]"
+                                onClick={exportDesign}
+                            >
+                                <Download className="size-3.5" />
+                                Save design
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-[12px]"
+                                onClick={() => importRef.current?.click()}
+                            >
+                                <FileUp className="size-3.5" />
+                                Open design
+                            </Button>
+                            <input
+                                ref={importRef}
+                                type="file"
+                                accept="application/json,.json"
+                                className="hidden"
+                                aria-label="Open design file"
+                                onChange={(e) =>
+                                    void importDesign(e.target.files?.[0])
+                                }
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-[12px]"
+                                onClick={reset}
+                            >
+                                <RotateCcw className="size-3.5" />
+                                {confirmReset
+                                    ? 'Click again to start over'
+                                    : 'Start over'}
+                            </Button>
+                        </div>
+                        <p className="text-muted-foreground px-3 text-[12px]">
+                            {saveFailed
+                                ? 'Could not save in this browser - use "Save design" to keep your work.'
+                                : 'Your work is saved in this browser automatically.'}
                         </p>
-                    )}
-                    <ImagePicker
-                        targetLabel={
-                            individual ? `card ${sel + 1}` : 'all cards'
-                        }
-                        pixelSize={pixels}
-                        onPick={pickImage}
-                        onFillMany={individual ? fillWithPhotos : undefined}
-                        onRandomEach={individual ? randomPhotoEach : undefined}
-                    />
-                    <div className="space-y-3">
-                        <h3 className="text-sm font-semibold">
-                            {individual
-                                ? `Background of card ${sel + 1}`
-                                : 'Background for all cards'}
-                        </h3>
-                        <BackgroundControls
-                            bg={individual ? cardBg : design.background}
-                            onChange={patchBackground}
-                        />
-                        {individual && (
-                            <div className="flex flex-wrap gap-2">
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={applyCardBgToAll}
-                                >
-                                    Use this background on all cards
-                                </Button>
-                                {card?.background && (
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() =>
-                                            updateCard(sel, {
-                                                background: undefined,
-                                            })
-                                        }
-                                    >
-                                        Reset to shared background
-                                    </Button>
-                                )}
-                            </div>
+                        {fileError && (
+                            <p
+                                role="alert"
+                                className="text-destructive px-3 text-[13px]"
+                            >
+                                {fileError}
+                            </p>
                         )}
                     </div>
-                </TabsContent>
+                </div>
+            </div>
 
-                <TabsContent value="layout" className="mt-4">
-                    <LayoutPanel
-                        layout={design.layout}
-                        grid={grid}
-                        onChange={(patch) =>
-                            update((d) => ({
-                                ...d,
-                                layout: { ...d.layout, ...patch },
-                            }))
-                        }
-                    />
-                </TabsContent>
-            </Tabs>
-
-            <ToolInfoSection title="Printing tips">
+            <ToolInfoSection title="Tips for good cards" className="mt-16">
                 <div className="text-muted-foreground space-y-2 text-[14px] leading-relaxed">
                     <p>
-                        In the print dialog choose paper size{' '}
-                        <strong className="text-foreground">A4</strong> and
-                        scale{' '}
+                        Print at{' '}
                         <strong className="text-foreground">
                             100% / Actual size
-                        </strong>{' '}
-                        (not &quot;Fit to page&quot;), otherwise the cards
-                        won&apos;t be business-card size.
+                        </strong>
+                        , never &quot;Fit to page&quot; - otherwise the cards
+                        come out smaller than business-card size.
                     </p>
                     <p>
-                        Margins are already part of the design - leave them on
-                        &quot;Default&quot; or &quot;None&quot;. To get a PDF,
-                        pick &quot;Save as PDF&quot; as the printer.
+                        Thick paper (250-300 g/m²) makes sturdy cards. Try one
+                        sheet on normal paper first.
                     </p>
                 </div>
                 <div className="text-muted-foreground space-y-2 text-[14px] leading-relaxed">
                     <p>
-                        Most home printers can&apos;t print right to the paper
-                        edge, so keep the minimum page margin at 5 mm or more.
-                        Use 250-300 g/m² card stock for sturdy cards.
+                        Cut along the thin lines with a paper cutter or a craft
+                        knife and a ruler. For photos that fill the whole card,
+                        add a little space between cards and turn on crop marks.
                     </p>
                     <p>
-                        Photos that fill the whole card are easiest to cut
-                        cleanly with a few millimetres of space between cards
-                        and crop marks turned on.
+                        Photos from the search are openly licensed; check the
+                        licence if you sell the cards.
                     </p>
                 </div>
             </ToolInfoSection>

@@ -26,10 +26,10 @@ import type { ImageCredit } from './types'
 type Source = 'search' | 'picsum' | 'upload' | 'link'
 
 const SOURCES: { id: Source; label: string; icon: typeof Search }[] = [
-    { id: 'search', label: 'Search photos', icon: Search },
+    { id: 'search', label: 'Search', icon: Search },
     { id: 'picsum', label: 'Lorem Picsum', icon: ImageIcon },
-    { id: 'upload', label: 'Upload', icon: Upload },
-    { id: 'link', label: 'Image link', icon: Link2 },
+    { id: 'upload', label: 'Your photo', icon: Upload },
+    { id: 'link', label: 'Link', icon: Link2 },
 ]
 
 const SUGGESTIONS = [
@@ -268,7 +268,7 @@ export default function ImagePicker({
                         disabled={loading}
                     >
                         <Upload className="size-4" />
-                        Choose image for {targetLabel}
+                        Choose a photo from your device
                     </Button>
                     <p className="text-muted-foreground text-[12px]">
                         The image stays in your browser. Large photos are scaled
@@ -317,7 +317,7 @@ export default function ImagePicker({
                                     variant="outline"
                                     onClick={() => onFillMany(results)}
                                 >
-                                    Fill cards with these photos
+                                    Different photo on every card
                                 </Button>
                             )}
                         </div>

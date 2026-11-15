@@ -4,6 +4,7 @@ import type {
     CardData,
     Design,
     LayoutSettings,
+    TextOverrides,
     TextStyle,
 } from './types'
 
@@ -125,10 +126,11 @@ export function createDefaultDesign(): Design {
     const design: Design = {
         version: 1,
         layout: { ...DEFAULT_LAYOUT, size: { ...DEFAULT_LAYOUT.size } },
-        backgroundMode: 'same',
         background: { ...DEFAULT_BACKGROUND },
         textStyle: { ...DEFAULT_TEXT_STYLE },
         pages: 1,
+        sameText: false,
+        sharedText: { text: '', reference: '' },
         cards: [],
     }
     return ensureCardCount(design)
@@ -439,24 +441,148 @@ export function normalizeDesign(input: unknown): Design {
     return ensureCardCount({
         version: 1,
         layout: normalizeLayout(input.layout),
-        backgroundMode: oneOf(
-            input.backgroundMode,
-            ['same', 'individual'] as const,
-            'same'
-        ),
         background,
         textStyle: normalizeTextStyle(input.textStyle),
         pages: num(input.pages, 1, 1, MAX_PAGES),
+        sameText: bool(input.sameText, false),
+        sharedText: {
+            text: str(isObj(input.sharedText) ? input.sharedText.text : '', ''),
+            reference: str(
+                isObj(input.sharedText) ? input.sharedText.reference : '',
+                '',
+                500
+            ),
+        },
         cards,
     })
 }
 
 /** The background a card is printed with. */
 export function backgroundFor(design: Design, card: CardData): Background {
-    if (design.backgroundMode === 'individual' && card.background) {
-        return card.background
+    return card.background ?? design.background
+}
+
+/** The text a card is printed with. */
+export function textFor(
+    design: Design,
+    card: CardData
+): { text: string; reference: string } {
+    return design.sameText ? design.sharedText : card
+}
+
+/** Text style keys that a single card may override. */
+export const OVERRIDABLE: (keyof TextOverrides)[] = [
+    'fontFamily',
+    'fontSize',
+    'refSize',
+    'color',
+    'align',
+    'vAlign',
+]
+
+/**
+ * Applies a text style change to every card: it becomes the shared style
+ * and any per-card override of the same keys is dropped.
+ */
+export function styleAllCards(
+    design: Design,
+    patch: Partial<TextStyle>
+): Design {
+    const keys = Object.keys(patch) as (keyof TextOverrides)[]
+    const cards = design.cards.map((c) => {
+        if (!c.style || !keys.some((k) => k in c.style!)) {
+            return c
+        }
+        const style = { ...c.style }
+        keys.forEach((k) => delete style[k])
+        return { ...c, style: Object.keys(style).length ? style : undefined }
+    })
+    return { ...design, textStyle: { ...design.textStyle, ...patch }, cards }
+}
+
+/**
+ * Applies a background change to every card. A new photo replaces the
+ * per-card photos; other changes (brightness, colour...) are applied to
+ * each card's own background too, so cards keep their individual photos.
+ */
+export function backgroundAllCards(
+    design: Design,
+    patch: Partial<Background>
+): Design {
+    const replacesPhoto = 'image' in patch
+    const cards = design.cards.map((c) => {
+        if (!c.background) {
+            return c
+        }
+        return replacesPhoto
+            ? { ...c, background: undefined }
+            : { ...c, background: { ...c.background, ...patch } }
+    })
+    return { ...design, background: { ...design.background, ...patch }, cards }
+}
+
+/** Number of visible cards that differ from the shared background. */
+export function cardsWithOwnBackground(design: Design): number {
+    const count = visibleCardCount(design)
+    return design.cards.slice(0, count).filter((c) => c.background).length
+}
+
+/**
+ * Photo brightness as one number: negative darkens (black overlay),
+ * positive lightens (white overlay), 0 leaves the photo as it is.
+ */
+export function brightnessOf(bg: Background): number {
+    if (bg.overlayOpacity === 0) {
+        return 0
     }
-    return design.background
+    return bg.overlayColor.toLowerCase() === '#ffffff'
+        ? bg.overlayOpacity
+        : -bg.overlayOpacity
+}
+
+export function brightnessPatch(value: number): Partial<Background> {
+    return {
+        overlayColor: value > 0 ? '#ffffff' : '#000000',
+        overlayOpacity: Math.min(0.9, Math.abs(value)),
+    }
+}
+
+/** One-click text looks that stay readable on different backgrounds. */
+export const TEXT_LOOKS: {
+    id: string
+    label: string
+    style: Partial<TextStyle>
+}[] = [
+    {
+        id: 'dark',
+        label: 'Dark text',
+        style: { color: '#1f2937', shadow: false, panel: false },
+    },
+    {
+        id: 'light',
+        label: 'White text',
+        style: { color: '#ffffff', shadow: true, panel: false },
+    },
+    {
+        id: 'panel',
+        label: 'On a panel',
+        style: {
+            color: '#1f2937',
+            shadow: false,
+            panel: true,
+            panelColor: '#ffffff',
+            panelOpacity: 0.8,
+        },
+    },
+]
+
+export function activeLook(style: TextStyle): string | null {
+    const look = TEXT_LOOKS.find((l) =>
+        Object.entries(l.style).every(
+            ([k, v]) => style[k as keyof TextStyle] === v
+        )
+    )
+    return look?.id ?? null
 }
 
 // ---------------------------------------------------------------------------

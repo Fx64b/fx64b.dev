@@ -38,8 +38,8 @@ export default function LayoutPanel({
     }
 
     return (
-        <div className="space-y-5">
-            <div className="grid gap-3 sm:grid-cols-2">
+        <>
+            <div className="grid gap-4 sm:grid-cols-2">
                 <SelectField
                     label="Card size"
                     value={layout.preset}
@@ -50,11 +50,11 @@ export default function LayoutPanel({
                     onChange={choosePreset}
                 />
                 <Segmented<Orientation>
-                    label="Orientation"
+                    label="Cards are"
                     value={layout.orientation}
                     options={[
-                        { value: 'landscape', label: 'Landscape' },
-                        { value: 'portrait', label: 'Portrait' },
+                        { value: 'landscape', label: 'Wide' },
+                        { value: 'portrait', label: 'Tall' },
                     ]}
                     onChange={(orientation) => onChange({ orientation })}
                 />
@@ -84,96 +84,72 @@ export default function LayoutPanel({
                         />
                     </>
                 )}
-                <RangeField
-                    label="Space between cards"
-                    value={layout.gap}
-                    min={0}
-                    max={10}
-                    step={0.5}
-                    unit=" mm"
-                    onChange={(gap) => onChange({ gap })}
-                />
-                <RangeField
-                    label="Minimum page margin"
-                    value={layout.minMargin}
-                    min={0}
-                    max={20}
-                    step={0.5}
-                    unit=" mm"
-                    onChange={(minMargin) => onChange({ minMargin })}
-                />
             </div>
 
-            <p
-                className="text-muted-foreground text-[13px]"
-                data-testid="grid-summary"
-            >
+            <p className="text-[13px]" data-testid="grid-summary">
                 {grid.perPage > 0 ? (
                     <>
-                        {grid.cols} × {grid.rows} ={' '}
-                        <strong className="text-foreground">
-                            {grid.perPage} cards
-                        </strong>{' '}
-                        per A4 sheet, each {fmt(grid.cardWidth)} ×{' '}
-                        {fmt(grid.cardHeight)} mm. Page margins{' '}
-                        {fmt(grid.marginX)} mm left/right, {fmt(grid.marginY)}{' '}
-                        mm top/bottom.
+                        <strong>{grid.perPage} cards</strong> of{' '}
+                        {fmt(grid.cardWidth)} × {fmt(grid.cardHeight)} mm fit on
+                        one A4 sheet.
                     </>
                 ) : (
                     <span className="text-destructive">
-                        No card fits on the page. Reduce the margin, the spacing
-                        or the card size.
+                        No card fits on the sheet. Make the space between cards,
+                        the printer margin or the card smaller.
                     </span>
                 )}
             </p>
 
             <div className="space-y-3">
-                <h3 className="text-sm font-semibold">Cutting guides</h3>
-                <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <h3 className="text-[13px] font-medium">Cutting</h3>
+                <div className="grid gap-2 sm:grid-cols-2">
                     <Toggle
-                        label="Line around every card"
+                        label="Thin line around each card"
                         checked={layout.outline}
                         onChange={(outline) => onChange({ outline })}
                     />
                     <Toggle
-                        label="Crop marks in the margin"
+                        label="Crop marks at the paper edge"
                         checked={layout.cropMarks}
                         onChange={(cropMarks) => onChange({ cropMarks })}
                     />
                 </div>
-                {layout.outline && (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                        <ColorField
-                            label="Line colour"
-                            value={layout.outlineColor}
-                            onChange={(outlineColor) =>
-                                onChange({ outlineColor })
-                            }
-                        />
-                        <RangeField
-                            label="Line width"
-                            value={layout.outlineWidth}
-                            min={0.1}
-                            max={1.5}
-                            step={0.05}
-                            unit=" mm"
-                            onChange={(outlineWidth) =>
-                                onChange({ outlineWidth })
-                            }
-                        />
-                    </div>
-                )}
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <RangeField
+                        label="Space between cards"
+                        value={layout.gap}
+                        min={0}
+                        max={10}
+                        step={0.5}
+                        unit=" mm"
+                        onChange={(gap) => onChange({ gap })}
+                    />
+                    <RangeField
+                        label="Printer margin"
+                        value={layout.minMargin}
+                        min={0}
+                        max={20}
+                        step={0.5}
+                        unit=" mm"
+                        onChange={(minMargin) => onChange({ minMargin })}
+                    />
+                </div>
+                <p className="text-muted-foreground text-[12px]">
+                    Space between cards makes photos easier to cut cleanly. Most
+                    printers can&apos;t print the outer 5 mm of the paper.
+                </p>
             </div>
 
             <div className="space-y-3">
-                <h3 className="text-sm font-semibold">Decorative frame</h3>
+                <h3 className="text-[13px] font-medium">Frame</h3>
                 <Toggle
-                    label="Draw a frame inside each card"
+                    label="Decorative frame inside each card"
                     checked={layout.frame}
                     onChange={(frame) => onChange({ frame })}
                 />
                 {layout.frame && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                         <ColorField
                             label="Frame colour"
                             value={layout.frameColor}
@@ -183,15 +159,15 @@ export default function LayoutPanel({
                             label="Frame style"
                             value={layout.frameStyle}
                             options={[
-                                { value: 'solid', label: 'Solid' },
-                                { value: 'double', label: 'Double' },
+                                { value: 'solid', label: 'Single line' },
+                                { value: 'double', label: 'Double line' },
                                 { value: 'dashed', label: 'Dashed' },
                                 { value: 'dotted', label: 'Dotted' },
                             ]}
                             onChange={(frameStyle) => onChange({ frameStyle })}
                         />
                         <RangeField
-                            label="Frame width"
+                            label="Thickness"
                             value={layout.frameWidth}
                             min={0.1}
                             max={3}
@@ -200,7 +176,7 @@ export default function LayoutPanel({
                             onChange={(frameWidth) => onChange({ frameWidth })}
                         />
                         <RangeField
-                            label="Distance from edge"
+                            label="Distance from card edge"
                             value={layout.frameInset}
                             min={0}
                             max={10}
@@ -208,20 +184,9 @@ export default function LayoutPanel({
                             unit=" mm"
                             onChange={(frameInset) => onChange({ frameInset })}
                         />
-                        <RangeField
-                            label="Corner radius"
-                            value={layout.frameRadius}
-                            min={0}
-                            max={8}
-                            step={0.25}
-                            unit=" mm"
-                            onChange={(frameRadius) =>
-                                onChange({ frameRadius })
-                            }
-                        />
                     </div>
                 )}
             </div>
-        </div>
+        </>
     )
 }

@@ -2,15 +2,23 @@ import { describe, expect, it } from 'vitest'
 
 import {
     MAX_PAGES,
+    TEXT_LOOKS,
     TEXT_PRESETS,
+    activeLook,
     applyEntries,
+    backgroundAllCards,
     backgroundFor,
+    brightnessOf,
+    brightnessPatch,
+    cardsWithOwnBackground,
     createDefaultDesign,
     ensureCardCount,
     formatBulkText,
     normalizeDesign,
     parseBulkText,
     safeImageSrc,
+    styleAllCards,
+    textFor,
     visibleCardCount,
 } from '@/components/tools/card-sheet-designer/design'
 
@@ -107,18 +115,75 @@ describe('card counts', () => {
     })
 })
 
-describe('backgroundFor', () => {
-    it('uses the card background only in individual mode', () => {
+describe('backgroundFor and textFor', () => {
+    it('prefers the card background over the shared one', () => {
         const d = createDefaultDesign()
         const own = { ...d.background, color: '#ff0000' }
-        const card = { ...d.cards[0], background: own }
-        expect(backgroundFor(d, card)).toBe(d.background)
-        expect(
-            backgroundFor({ ...d, backgroundMode: 'individual' }, card)
-        ).toBe(own)
-        expect(
-            backgroundFor({ ...d, backgroundMode: 'individual' }, d.cards[1])
-        ).toBe(d.background)
+        expect(backgroundFor(d, { ...d.cards[0], background: own })).toBe(own)
+        expect(backgroundFor(d, d.cards[1])).toBe(d.background)
+    })
+
+    it('uses the shared text while "same text" is on, keeping card texts', () => {
+        const d = createDefaultDesign()
+        d.cards[0].text = 'own'
+        d.sharedText = { text: 'shared', reference: 'ref' }
+        expect(textFor(d, d.cards[0]).text).toBe('own')
+        expect(textFor({ ...d, sameText: true }, d.cards[0])).toEqual({
+            text: 'shared',
+            reference: 'ref',
+        })
+    })
+})
+
+describe('changes for all cards', () => {
+    it('drops per-card style overrides for the changed keys only', () => {
+        const d = createDefaultDesign()
+        d.cards[0].style = { color: '#ff0000', fontSize: 20 }
+        d.cards[1].style = { color: '#00ff00' }
+        const next = styleAllCards(d, { color: '#123456' })
+        expect(next.textStyle.color).toBe('#123456')
+        expect(next.cards[0].style).toEqual({ fontSize: 20 })
+        expect(next.cards[1].style).toBeUndefined()
+    })
+
+    it('replaces individual photos when a new photo is chosen for all', () => {
+        const d = createDefaultDesign()
+        d.cards[2].background = { ...d.background, image: 'https://a/x.jpg' }
+        expect(cardsWithOwnBackground(d)).toBe(1)
+        const next = backgroundAllCards(d, { image: 'https://a/y.jpg' })
+        expect(next.background.image).toBe('https://a/y.jpg')
+        expect(next.cards[2].background).toBeUndefined()
+        expect(cardsWithOwnBackground(next)).toBe(0)
+    })
+
+    it('keeps individual photos when adjusting all cards', () => {
+        const d = createDefaultDesign()
+        d.cards[2].background = { ...d.background, image: 'https://a/x.jpg' }
+        const next = backgroundAllCards(d, brightnessPatch(-0.3))
+        expect(next.cards[2].background?.image).toBe('https://a/x.jpg')
+        expect(brightnessOf(next.cards[2].background!)).toBeCloseTo(-0.3)
+        expect(brightnessOf(next.background)).toBeCloseTo(-0.3)
+    })
+})
+
+describe('brightness and looks', () => {
+    it('maps brightness to a black or white overlay', () => {
+        const bg = createDefaultDesign().background
+        expect(brightnessOf(bg)).toBe(0)
+        expect(brightnessPatch(-0.4)).toEqual({
+            overlayColor: '#000000',
+            overlayOpacity: 0.4,
+        })
+        expect(brightnessOf({ ...bg, ...brightnessPatch(0.25) })).toBe(0.25)
+        expect(brightnessOf({ ...bg, ...brightnessPatch(-0.25) })).toBe(-0.25)
+    })
+
+    it('recognises the active look', () => {
+        const style = createDefaultDesign().textStyle
+        expect(activeLook(style)).toBe('dark')
+        const white = TEXT_LOOKS.find((l) => l.id === 'light')!.style
+        expect(activeLook({ ...style, ...white })).toBe('light')
+        expect(activeLook({ ...style, color: '#ff0000' })).toBeNull()
     })
 })
 
@@ -152,7 +217,8 @@ describe('normalizeDesign', () => {
                 outlineColor: 'red; x: y',
             },
             textStyle: { fontSize: 1000, align: 'justify' },
-            backgroundMode: 'chaos',
+            sameText: 'yes',
+            sharedText: { text: 7 },
         })
         expect(d.pages).toBe(MAX_PAGES)
         expect(d.layout.gap).toBe(0)
@@ -160,7 +226,8 @@ describe('normalizeDesign', () => {
         expect(d.layout.outlineColor).toBe('#9ca3af')
         expect(d.textStyle.fontSize).toBe(48)
         expect(d.textStyle.align).toBe('center')
-        expect(d.backgroundMode).toBe('same')
+        expect(d.sameText).toBe(false)
+        expect(d.sharedText).toEqual({ text: '', reference: '' })
         expect(d.cards[0].text).toBe('')
         expect(d.cards).toHaveLength(MAX_PAGES * 10)
     })
