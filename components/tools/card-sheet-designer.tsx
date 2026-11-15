@@ -20,16 +20,20 @@ import StyleStep from '@/components/tools/card-sheet-designer/StyleStep'
 import TextStep from '@/components/tools/card-sheet-designer/TextStep'
 import { Step } from '@/components/tools/card-sheet-designer/controls'
 import {
+    LIGHT_TEXT,
     MAX_PAGES,
+    MIN_TEXT_CONTRAST,
     applyEntries,
     backgroundAllCards,
     backgroundFor,
     cardsWithOwnBackground,
+    contrastRatio,
     createDefaultDesign,
     ensureCardCount,
     googleFontsUrl,
     normalizeDesign,
     parseBulkText,
+    readableTextOn,
     styleAllCards,
     textFor,
     visibleCardCount,
@@ -421,6 +425,33 @@ export default function CardSheetDesigner() {
         })
     }
 
+    const pickColour = (color: string): string | null => {
+        patchBackground({
+            color,
+            image: undefined,
+            credit: undefined,
+            overlayOpacity: 0,
+        })
+        // Keep the text readable on the new colour.
+        const current =
+            bgScope === 'card' && card
+                ? { ...design.textStyle, ...card.style }.color
+                : design.textStyle.color
+        if (contrastRatio(current, color) >= MIN_TEXT_CONTRAST) {
+            return null
+        }
+        const better = readableTextOn(color)
+        if (bgScope === 'card' && card) {
+            updateCard(sel, { style: { ...card.style, color: better } })
+        } else {
+            update((d) => ({
+                ...d,
+                textStyle: { ...d.textStyle, color: better },
+            }))
+        }
+        return `Text changed to ${better === LIGHT_TEXT ? 'white' : 'dark'} so it stays readable.`
+    }
+
     const fillWithPhotos = (results: ImageResult[]) => {
         if (results.length === 0) {
             return
@@ -721,6 +752,7 @@ export default function CardSheetDesigner() {
                             cardHasOwn={Boolean(card?.background)}
                             pixelSize={pixels}
                             onPick={pickImage}
+                            onPickColour={pickColour}
                             onPatch={patchBackground}
                             onFillMany={fillWithPhotos}
                             onRandomEach={randomPhotoEach}

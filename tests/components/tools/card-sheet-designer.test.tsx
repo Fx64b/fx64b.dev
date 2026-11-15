@@ -216,6 +216,62 @@ describe('CardSheetDesigner', () => {
         )
     })
 
+    it('gives all cards a plain colour and keeps the text readable', async () => {
+        const user = userEvent.setup()
+        render(<CardSheetDesigner />)
+        await useLink(user, 'https://example.com/tree.jpg')
+        expect(printedImages()).toHaveLength(10)
+
+        // A swatch replaces the photo on every card.
+        await user.click(screen.getByRole('radio', { name: 'Christmas red' }))
+        expect(printedImages()).toHaveLength(0)
+        expect(
+            printedCards().every((c) => c.style.backgroundColor === '#8c1d2c')
+        ).toBe(true)
+        expect(
+            screen.getByRole('radio', { name: 'Christmas red' })
+        ).toHaveAttribute('aria-checked', 'true')
+        // Dark text would be unreadable on red, so it turned white.
+        expect(screen.getByRole('status')).toHaveTextContent(
+            'Text changed to white'
+        )
+        await openStep(user, 'Text style')
+        expect(screen.getByLabelText(/Text colour/)).toHaveValue('#ffffff')
+
+        // A light colour for card 2 only switches that card back to dark.
+        await user.click(screen.getByRole('button', { name: 'Edit card 2' }))
+        await user.click(scopeIn('Background', /Only card 2/))
+        await user.click(screen.getByRole('radio', { name: 'Cream' }))
+        expect(printedCards()[1].style.backgroundColor).toBe('#f7f0e3')
+        expect(printedCards()[0].style.backgroundColor).toBe('#8c1d2c')
+        expect(screen.getByRole('status')).toHaveTextContent(
+            'Text changed to dark'
+        )
+    })
+
+    it('accepts a custom colour', async () => {
+        const user = userEvent.setup()
+        render(<CardSheetDesigner />)
+        const picker = screen.getByLabelText('Custom colour')
+        Object.getOwnPropertyDescriptor(
+            HTMLInputElement.prototype,
+            'value'
+        )!.set!.call(picker, '#123456')
+        picker.dispatchEvent(new Event('input', { bubbles: true }))
+        await waitFor(() =>
+            expect(printedCards()[0].style.backgroundColor).toBe('#123456')
+        )
+        expect(
+            screen
+                .getAllByRole('radio')
+                .filter(
+                    (r) =>
+                        r.closest('[aria-label="Plain colour"]') &&
+                        r.getAttribute('aria-checked') === 'true'
+                )
+        ).toHaveLength(0)
+    })
+
     it('changes photo brightness with one slider', async () => {
         const user = userEvent.setup()
         render(<CardSheetDesigner />)

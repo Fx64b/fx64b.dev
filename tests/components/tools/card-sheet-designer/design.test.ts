@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+    COLOR_PRESETS,
+    DARK_TEXT,
+    LIGHT_TEXT,
     MAX_PAGES,
+    MIN_TEXT_CONTRAST,
     TEXT_LOOKS,
     TEXT_PRESETS,
     activeLook,
@@ -11,11 +15,13 @@ import {
     brightnessOf,
     brightnessPatch,
     cardsWithOwnBackground,
+    contrastRatio,
     createDefaultDesign,
     ensureCardCount,
     formatBulkText,
     normalizeDesign,
     parseBulkText,
+    readableTextOn,
     safeImageSrc,
     styleAllCards,
     textFor,
@@ -253,5 +259,31 @@ describe('safeImageSrc', () => {
         expect(safeImageSrc('data:image/svg+xml;base64,AAAA')).toBeUndefined()
         expect(safeImageSrc('ftp://x')).toBeUndefined()
         expect(safeImageSrc(5)).toBeUndefined()
+    })
+})
+
+describe('plain colours', () => {
+    it('computes WCAG contrast ratios', () => {
+        expect(contrastRatio('#000000', '#ffffff')).toBeCloseTo(21)
+        expect(contrastRatio('#ffffff', '#ffffff')).toBeCloseTo(1)
+        expect(contrastRatio('#fff', '#000')).toBeCloseTo(21)
+    })
+
+    it('picks white text on dark colours and dark text on light ones', () => {
+        expect(readableTextOn('#8c1d2c')).toBe(LIGHT_TEXT)
+        expect(readableTextOn('#1d2a4a')).toBe(LIGHT_TEXT)
+        expect(readableTextOn('#f7f0e3')).toBe(DARK_TEXT)
+        expect(readableTextOn('#c8a24c')).toBe(DARK_TEXT)
+    })
+
+    it('offers presets that all have a readable text colour', () => {
+        const colors = COLOR_PRESETS.map((p) => p.color)
+        expect(new Set(colors).size).toBe(colors.length)
+        for (const { name, color } of COLOR_PRESETS) {
+            expect(
+                contrastRatio(readableTextOn(color), color),
+                name
+            ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST)
+        }
     })
 })

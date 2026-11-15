@@ -547,6 +547,65 @@ export function brightnessPatch(value: number): Partial<Background> {
     }
 }
 
+/** Plain card colours offered as one-click swatches. */
+export const COLOR_PRESETS: { name: string; color: string }[] = [
+    { name: 'White', color: '#ffffff' },
+    { name: 'Cream', color: '#f7f0e3' },
+    { name: 'Sand', color: '#e6d5b8' },
+    { name: 'Blush', color: '#f3d9d4' },
+    { name: 'Sage', color: '#cbd8c4' },
+    { name: 'Sky', color: '#d5e3ef' },
+    { name: 'Lavender', color: '#e2dcee' },
+    { name: 'Gold', color: '#c8a24c' },
+    { name: 'Christmas red', color: '#8c1d2c' },
+    { name: 'Forest green', color: '#1f4a37' },
+    { name: 'Navy', color: '#1d2a4a' },
+    { name: 'Charcoal', color: '#2b2b2e' },
+]
+
+function luminance(hex: string): number {
+    let h = hex.replace('#', '')
+    if (h.length === 3) {
+        h = h
+            .split('')
+            .map((c) => c + c)
+            .join('')
+    }
+    const n = parseInt(h.slice(0, 6), 16)
+    if (Number.isNaN(n)) {
+        return 0
+    }
+    const channel = (v: number) => {
+        const c = v / 255
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    }
+    return (
+        0.2126 * channel((n >> 16) & 255) +
+        0.7152 * channel((n >> 8) & 255) +
+        0.0722 * channel(n & 255)
+    )
+}
+
+/** WCAG contrast ratio between two hex colours (1 to 21). */
+export function contrastRatio(a: string, b: string): number {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+    return (hi + 0.05) / (lo + 0.05)
+}
+
+export const DARK_TEXT = '#1f2937'
+export const LIGHT_TEXT = '#ffffff'
+
+/** The better of dark or white text on the given colour. */
+export function readableTextOn(background: string): string {
+    return contrastRatio(DARK_TEXT, background) >=
+        contrastRatio(LIGHT_TEXT, background)
+        ? DARK_TEXT
+        : LIGHT_TEXT
+}
+
+/** Below this contrast, text on a plain colour is hard to read. */
+export const MIN_TEXT_CONTRAST = 3
+
 /** One-click text looks that stay readable on different backgrounds. */
 export const TEXT_LOOKS: {
     id: string
