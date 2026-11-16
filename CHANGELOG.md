@@ -28,6 +28,14 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.3.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.2.0...fx64b.dev-v5.3.0) (2026-11-16)
+
+
+### Features
+
+* **tools:** add card sheet designer ([6f672f3](https://github.com/Fx64b/fx64b.dev/commit/6f672f3f32d9e79ab11ce564836b8cf9a13b6d13))
+* **tools:** add plain colour backgrounds to card sheet designer ([0a08a99](https://github.com/Fx64b/fx64b.dev/commit/0a08a9933b6d561d6bab25f617fe7f5e2da89502))
+
 ## [5.2.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.1.0...fx64b.dev-v5.2.0) (2026-09-23)
 
 
