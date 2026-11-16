@@ -42,7 +42,7 @@ export default function ToolDetail() {
                 }}
             />
 
-            <Page className="max-w-[860px]">
+            <Page className={tool.wide ? 'max-w-[1180px]' : 'max-w-[860px]'}>
                 <BackLink href="/tools">Back to tools</BackLink>
 
                 <h1 className="mt-6 mb-2 text-[30px] font-extrabold tracking-[-0.02em] sm:text-[36px]">
