@@ -107,7 +107,7 @@ body{
 .c.lack{color:var(--madder); font-weight:600}
 
 #inspect{
-  position:absolute; z-index:2; left:12px; bottom:12px; width:320px; max-height:calc(100% - var(--bar-h) - 124px); overflow:auto;
+  position:absolute; z-index:2; left:12px; bottom:12px; width:320px; max-height:calc(100% - var(--bar-h) - 148px); overflow:auto;
   background:var(--surface); border:1px solid var(--line); border-radius:4px; box-shadow:var(--shadow); padding:12px 14px;
 }
 #inspect h2{margin:0; font-size:19px; font-weight:600; line-height:1.2; padding-right:28px}
@@ -152,11 +152,17 @@ body{
 .sheet li{margin:0 0 6px; max-width:60ch}
 .sheet .lead{font-size:16px}
 .sheet .note{color:var(--muted); font-size:13.5px}
+.diff{margin:14px 0 6px; padding:10px 12px 8px; background:var(--surface2); border:1px solid var(--line); border-radius:4px}
+.diff label{display:flex; gap:6px; align-items:baseline; font-size:15.5px; cursor:pointer}
+.diff input[type=range]{display:block; width:100%; margin:10px 0 2px; accent-color:var(--primary); cursor:pointer}
+.diff .ticks{display:flex; justify-content:space-between; font-size:12px; color:var(--muted)}
+.diff .note{margin:6px 0 0; min-height:2.7em}
+.sheet .row2{display:flex; gap:8px; flex-wrap:wrap}
 .sheet .foot{position:sticky; bottom:-22px; margin:12px -24px -22px; padding:4px 24px 16px; background:var(--surface); border-top:1px solid var(--line)}
 
-#mini{position:absolute; z-index:2; left:12px; top:calc(var(--bar-h) + 12px); width:176px; height:88px; image-rendering:pixelated;
+#mini{position:absolute; z-index:2; left:12px; top:calc(var(--bar-h) + 12px); width:224px; height:112px; image-rendering:pixelated;
   background:var(--surface); border:1px solid var(--line); border-radius:4px; box-shadow:var(--shadow); cursor:pointer; touch-action:none}
-#event{position:absolute; z-index:3; left:12px; top:calc(var(--bar-h) + 112px); width:300px;
+#event{position:absolute; z-index:3; left:12px; top:calc(var(--bar-h) + 136px); width:300px;
   background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:4px; box-shadow:var(--shadow); padding:10px 14px 12px}
 #event h2{margin:0; font-size:18px; font-weight:600; line-height:1.2}
 #event p{margin:6px 0 8px; font-size:14.5px}
@@ -164,8 +170,8 @@ body{
 #event .ttl{height:3px; background:var(--gold); margin-top:10px; border-radius:2px}
 #clock{font-weight:400 !important; font-style:italic; color:var(--muted)}
 @media (max-width:720px){
-  #mini{left:6px; top:calc(var(--bar-h) + 6px); width:100px; height:50px}
-  #event{left:8px; right:8px; width:auto; top:calc(var(--bar-h) + 64px)}
+  #mini{left:6px; top:calc(var(--bar-h) + 6px); width:120px; height:60px}
+  #event{left:8px; right:8px; width:auto; top:calc(var(--bar-h) + 74px)}
   #bar{padding:6px 10px; gap:5px 10px}
   #bar h1{display:none}
   #res{gap:4px 12px}
@@ -234,7 +240,7 @@ body{
     </div>
     <div id="cards"></div>
   </aside>
-  <canvas id="mini" width="160" height="80" aria-label="Map of the realm. Tap to move the view."></canvas>
+  <canvas id="mini" width="320" height="160" aria-label="Map of the realm. Tap to move the view."></canvas>
   <section id="event" hidden aria-live="polite"></section>
   <section id="inspect" hidden aria-live="polite"></section>
   <div id="toast" role="status"></div>
@@ -245,12 +251,19 @@ body{
     <div class="sheet wide" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
       <h2 id="helpTitle">Hold the keep, take the realm</h2>
       <p class="lead">Grow a village around your keep, beat back the rival lords who attack it, and take every rival keep to win. If your keep falls, the game is over.</p>
+      <div id="helpDiff"><div class="diff">
+        <label for="helpDiffIn">Difficulty: <b data-diff-name></b></label>
+        <input type="range" id="helpDiffIn" min="0" max="4" step="1" value="2">
+        <div class="ticks" aria-hidden="true"><span>Gentle</span><span>Easy</span><span>Normal</span><span>Hard</span><span>Brutal</span></div>
+        <p class="note" data-diff-note></p>
+      </div></div>
+      <p class="note" id="helpDiffNow" hidden></p>
 
       <h3>Your first minutes</h3>
       <ol>
         <li><b>Food and wood first.</b> Build a farm and a lumber camp near the keep, then a quarry next to some rocks. Villagers take the jobs by themselves, farms first.</li>
         <li><b>Build cottages.</b> New villagers arrive only when there is free room in a home and at least 20 food in store. More people means more workers and soldiers. Put a well near the houses for 2 more places each.</li>
-        <li><b>Watch the pennant.</b> The banner at the top counts down to the next attack. The first one comes after about three and a half minutes. Before it runs out, put one or two watchtowers next to the keep, or ring it with a palisade. The keep shoots too. Later, a barracks trains swordsmen for gold.</li>
+        <li><b>Watch the pennant.</b> The banner at the top counts down to the next attack. On Normal, the first one comes after about three and a half minutes. Before it runs out, put one or two watchtowers next to the keep, or ring it with a palisade. The keep shoots too. Later, a barracks trains swordsmen for gold.</li>
         <li><b>Rebuild the keep.</b> Tap the keep when you have 150 wood, 120 stone and 60 gold. A stone keep holds more people and opens the windmill, tavern, stone walls, towers and more.</li>
       </ol>
 
@@ -282,7 +295,7 @@ body{
         <li>You only own the land around your keep. Build an outpost on the dim land at your border to claim that region and all the trees and rocks on it. Each outpost costs more gold than the last.</li>
         <li>Tap the fog to send a scout. Some lands hold ruins, gold mines, standing stones or empty hamlets. Claim the land to get their reward.</li>
         <li>Plant the rally flag to gather your army. Tap a rival castle and choose "Lay siege" to attack it. Rams and catapults from a siege workshop break walls fast.</li>
-        <li>Take every rival keep to win.</li>
+        <li>The realm is large. The first rival lord lives a good march away, the others further out, each with open land around them. Take every rival keep to win.</li>
       </ul>
 
       <h3>Controls</h3>
@@ -290,10 +303,26 @@ body{
         <li>Drag a building card onto the map, or tap a card and then tap tiles. Walls, moats and stakes: drag to paint a line.</li>
         <li>Tap a building to see what it does, how well it works and what you can do with it.</li>
         <li>Drag the map to move. Scroll, pinch or press + and − to zoom. Esc cancels. Use the speed buttons to pause or go faster.</li>
+        <li>Tap or drag on the small map in the corner to jump across the realm.</li>
       </ul>
       <p class="note">Your kingdom is saved in this browser and is there when you come back.</p>
 
       <div class="foot"><button class="btn primary" id="helpGo">Start building</button></div>
+    </div>
+  </div>
+
+  <div class="veil" id="newk" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="newkTitle">
+      <h2 id="newkTitle">Found a new kingdom</h2>
+      <p>A new realm, with new land and new rivals. Choose how hard the rival lords fight.</p>
+      <div class="diff">
+        <label for="newkDiff">Difficulty: <b data-diff-name></b></label>
+        <input type="range" id="newkDiff" min="0" max="4" step="1" value="2">
+        <div class="ticks" aria-hidden="true"><span>Gentle</span><span>Easy</span><span>Normal</span><span>Hard</span><span>Brutal</span></div>
+        <p class="note" data-diff-note></p>
+      </div>
+      <p class="note" id="newkWarn">This erases your current kingdom.</p>
+      <div class="row2"><button class="btn primary" id="newkGo">Found kingdom</button><button class="btn" id="newkCancel">Cancel</button></div>
     </div>
   </div>
 
@@ -311,9 +340,23 @@ body{
 (() => {
 'use strict';
 const $ = s => document.querySelector(s);
-const N = 80, NN = N*N, KX = 39, KY = 39, STEP = 1/30, GRID = 6, HOME = 14, NRIV = 5;
+const N = 160, NN = N*N, KX = 79, KY = 79, STEP = 1/30, GRID = 11, HOME = 60, NRIV = 5;
 const OX = N*16, OY = 12, GW = N*32, GH = N*16 + OY + 30;
-const FIRST_RAID = 210, SAVE_KEY = 'thornwick-save-4';
+const FIRST_RAID = 210, SAVE_KEY = 'thornwick-save-5';
+/* Difficulty mainly changes the rival lords: how often and how hard they attack,
+   how tough their soldiers are and how fast their economy grows. */
+const DIFFS = [
+  {name:'Gentle', note:'Small raids that come rarely. Good for learning the game or for building in peace.', first:1.5, atk:1.6, pow:.5, hp:.75, dmg:.75, eco:.85, guard:.7},
+  {name:'Easy', note:'Smaller raids with more time between them.', first:1.25, atk:1.3, pow:.75, hp:.88, dmg:.88, eco:.95, guard:.85},
+  {name:'Normal', note:'The game as it is meant to be played.', first:1, atk:1, pow:1, hp:1, dmg:1, eco:1, guard:1},
+  {name:'Hard', note:'Bigger, tougher raids that come more often. Rivals build faster.', first:.85, atk:.82, pow:1.3, hp:1.12, dmg:1.12, eco:1.15, guard:1.2},
+  {name:'Brutal', note:'Large hosts, little rest between attacks and rivals that grow quickly. Walls first, or fall.', first:.72, atk:.68, pow:1.6, hp:1.25, dmg:1.25, eco:1.3, guard:1.4},
+];
+const DIFF_KEY = 'thornwick-difficulty';
+// Saves from the smaller map do not fit this world.
+try { localStorage.removeItem('thornwick-save-4'); } catch (e) {}
+const DF = () => DIFFS[S && S.diff >= 0 && S.diff < DIFFS.length ? S.diff : 2];
+let nextDiff = (() => { try { const v = localStorage.getItem(DIFF_KEY); return v !== null && +v >= 0 && +v < DIFFS.length ? +v : 2; } catch (e) { return 2; } })();
 const DAYLEN = 200, SEASONLEN = 150, SEASONS = ['Spring','Summer','Autumn','Winter'];
 const RES = ['food','wood','stone','gold'];
 const TIERS = ['Wooden hall','Stone keep','Great keep'];
@@ -1323,16 +1366,16 @@ function genWorld(seed){
     regs.push({id, gx, gy, sx:home ? KX + .5 : (gx + .5)*CS + (r() - .5)*4.5, sy:home ? KY + .5 : (gy + .5)*CS + (r() - .5)*4.5,
       type:home ? 'meadow' : TYPES[(r()*TYPES.length)|0], owner:-1, disc:false, adj:[], poi:null});
   }
-  const ring = [];
-  for (let i = 0; i < GRID; i++) ring.push(i);
-  for (let i = 1; i < GRID; i++) ring.push(GRID-1 + i*GRID);
-  for (let i = GRID-2; i >= 0; i--) ring.push(i + (GRID-1)*GRID);
-  for (let i = GRID-2; i > 0; i--) ring.push(i*GRID);
-  const st = (r()*ring.length)|0;
+  // Rival lords sit evenly round the keep, the first ones nearer, with open land behind them.
+  const st = r()*Math.PI*2, RAD = [.25, .3, .34, .37, .39];
   rivSpots = [];
   for (let k = 0; k < NRIV; k++){
-    const rg = regs[ring[(st + k*4) % ring.length]]; rg.type = 'meadow'; rg.riv = 1;
-    rivSpots.push({r:rg.id, kx:Math.max(10, Math.min(N-12, Math.round(rg.sx) - 1)), ky:Math.max(10, Math.min(N-12, Math.round(rg.sy) - 1))});
+    const a = st + k*Math.PI*2/NRIV + (r() - .5)*.3, d = RAD[k]*N;
+    const kx = Math.max(12, Math.min(N-14, Math.round(KX + .5 + Math.cos(a)*d) - 1)), ky = Math.max(12, Math.min(N-14, Math.round(KY + .5 + Math.sin(a)*d) - 1));
+    let rg = null, bd = 1e9;
+    for (const o of regs){ if (o.id === HOME || o.riv) continue; const dd = Math.hypot(o.sx - kx, o.sy - ky); if (dd < bd){ bd = dd; rg = o; } }
+    rg.type = 'meadow'; rg.riv = 1; rg.sx = kx + .5; rg.sy = ky + .5;
+    rivSpots.push({r:rg.id, kx, ky});
   }
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
     let best = 0, bd = 1e9;
@@ -1354,7 +1397,7 @@ function genWorld(seed){
     if (rg.type === 'lake' && Math.hypot(x - rg.sx, y - rg.sy) + (vnoise(x*.4, y*.4, sd + 3) - .5)*3 < 3.8) t = 3;
     baseTerr[i] = t;
   }
-  for (let k = 0; k < 5; k++){
+  for (let k = 0; k < Math.round(5*NN/6400); k++){
     const cx = 4 + r()*(N-8), cy = 4 + r()*(N-8), rad = 1.3 + r()*1.2;
     if (Math.hypot(cx - KX, cy - KY) < 9) continue;
     for (let y = 2; y < N-2; y++) for (let x = 2; x < N-2; x++) if (Math.hypot(x - cx, y - cy) + (vnoise(x*.5, y*.5, sd + 4 + k) - .5)*1.5 < rad) baseTerr[x + y*N] = 3;
@@ -1399,7 +1442,7 @@ function rebuildSites(){
 function blank(){
   return { seed:(Math.random()*1e9)|0, res:{food:90,wood:130,stone:40,gold:30}, b:[], vill:[], sold:[], en:[], shots:[], floats:[], tmod:{},
     riv:[], conq:{}, disc:{}, loot:{}, flag:null, capLvl:1, capXp:0, capDown:0, evCd:160, ev:null, stance:'charge', cry:0, cryCd:0, burnT:0, burnCd:0, scoutNote:'', mineCd:8,
-    t:0, wave:0, over:false, won:false, growCd:5, eatCd:8, tavCd:10, hungry:0 };
+    t:0, wave:0, over:false, won:false, growCd:5, eatCd:8, tavCd:10, hungry:0, diff:2 };
 }
 function addB(t, x, y, quiet, o){
   const d = DEF[t], s = d.size || 1, hp = Array.isArray(d.hp) ? d.hp[0] : d.hp;
@@ -1418,7 +1461,7 @@ function makeRival(k){
     out:false, q:[], scd:0, bcd:2, gcd:5, nh:0, nf:0, nb:0, pw:0, keepB:null, plan:null};
 }
 function newGame(){
-  S = blank(); bmap.fill(null); genWorld(S.seed); applyTerrain(); parts = []; capU = null;
+  S = blank(); S.diff = nextDiff; bmap.fill(null); genWorld(S.seed); applyTerrain(); parts = []; capU = null;
   keep = addB('keep', KX, KY, true, 0);
   for (let k = 0; k < NRIV; k++){
     const rv = makeRival(k); S.riv.push(rv);
@@ -1427,7 +1470,7 @@ function newGame(){
     for (let n = 0; n < 400; n++){ const res = rivalStep(rv, true); if (res === rv.tier || res === false) break; }
   }
   S.disc[HOME] = 1; S.disc[S.riv[0].r] = 1;
-  S.riv[0].atkIn = FIRST_RAID;
+  S.riv[0].atkIn = FIRST_RAID*DF().first;
   refreshOwn(true);
   for (let i = 0; i < 6; i++) spawnVillager(true);
   addSoldier(keep, KX + .5, KY + 2.6, 'captain');
@@ -1435,18 +1478,18 @@ function newGame(){
   pathMap.fill(0); recomputePaths(true); drawGroundAll();
 }
 function snapshot(){
-  return JSON.stringify({ v:4, seed:S.seed, res:S.res, t:S.t, wave:S.wave, tmod:S.tmod, conq:S.conq, disc:S.disc, loot:S.loot, flag:S.flag,
-    capLvl:S.capLvl, capXp:S.capXp, capDown:capU ? 0 : Math.max(1, S.capDown), evCd:S.evCd, won:S.won,
+  return JSON.stringify({ v:5, seed:S.seed, res:S.res, t:S.t, wave:S.wave, tmod:S.tmod, conq:S.conq, disc:S.disc, loot:S.loot, flag:S.flag,
+    capLvl:S.capLvl, capXp:S.capXp, capDown:capU ? 0 : Math.max(1, S.capDown), evCd:S.evCd, won:S.won, diff:S.diff,
     riv:S.riv.map(r => ({awake:r.awake, dead:r.dead, wealth:Math.round(r.wealth), pi:r.pi, k:r.k, atkIn:r.out ? 45 : r.atkIn, truce:r.truce})),
     b:S.b.map(b => ({t:b.t, x:b.x, y:b.y, o:b.o, l:b.lvl, h:Math.round(b.hp), a:b.auto ? 1 : 0, s:DEF[b.t].garrison && b.o === 0 ? S.sold.filter(x => x.home === b && x.kind !== 'captain').map(x => x.kind) : 0, k:b.trainKind || 0})),
     vill:S.vill.length, stance:S.stance, mercs:S.sold.filter(s => s.home === keep && s.kind !== 'captain' && s.kind !== 'scout').map(s => s.kind) });
 }
 function loadFrom(o){
-  if (!o || o.v !== 4 || !Array.isArray(o.b) || !Array.isArray(o.riv)) throw new Error('bad save');
+  if (!o || o.v !== 5 || !Array.isArray(o.b) || !Array.isArray(o.riv)) throw new Error('bad save');
   S = blank(); bmap.fill(null); keep = null; parts = []; capU = null;
   S.seed = o.seed; for (const r of RES) S.res[r] = +o.res[r] || 0;
   S.t = o.t || 0; S.wave = o.wave || 0; S.tmod = o.tmod || {}; S.conq = o.conq || {}; S.disc = o.disc || {}; S.loot = o.loot || {}; S.flag = o.flag || null;
-  S.capLvl = o.capLvl || 1; S.capXp = o.capXp || 0; S.capDown = o.capDown || 0; S.evCd = o.evCd || 120; S.won = !!o.won;
+  S.capLvl = o.capLvl || 1; S.capXp = o.capXp || 0; S.capDown = o.capDown || 0; S.evCd = o.evCd || 120; S.won = !!o.won; S.diff = o.diff >= 0 && o.diff < DIFFS.length ? o.diff|0 : 2; nextDiff = S.diff;
   genWorld(S.seed); applyTerrain();
   for (let k = 0; k < NRIV; k++){ const rv = makeRival(k), q = o.riv[k] || {}; Object.assign(rv, {awake:!!q.awake, dead:!!q.dead, wealth:q.wealth || 0, pi:q.pi || 0, k:q.k || 0, atkIn:q.atkIn || 90, truce:q.truce || 0}); S.riv.push(rv); }
   for (const q of o.b){
@@ -1507,7 +1550,7 @@ function refreshOwn(quiet){
   }
   blessMul = 1 + .12*regs.reduce((n, rg) => n + (rg.owner === 0 && rg.poi === 'stones' ? 1 : 0), 0);
   for (const rv of S.riv) if (!rv.awake && !rv.dead && regs[rv.r].disc){
-    rv.awake = true; if (rv.id > 1) rv.atkIn = 100;
+    rv.awake = true; if (rv.id > 1) rv.atkIn = 100*DF().atk;
     if (!quiet) notes.push(rv.name + ' has noticed your banners. A new rival enters the war.');
   }
   if (notes.length) toast(notes.join(' '));
@@ -1659,7 +1702,7 @@ function recomputePaths(skipDraw){
   if (skipDraw || !gcv) return;
   const dirty = new Set();
   for (let i = 0; i < NN; i++) if (old[i] !== pathMap[i]){ const x = i % N, y = (i / N) | 0; for (const [a, b] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]) if (inMap(x+a, y+b)) dirty.add(x+a + (y+b)*N); }
-  for (const i of dirty) drawGroundTile(i % N, (i / N) | 0, true);
+  for (const i of dirty) groundTileChanged(i % N, (i / N) | 0);
 }
 function computeFlow(){
   flowDirty = false;
@@ -2003,6 +2046,7 @@ function rivalPlan(rv){
   const seg = ring.filter(p => !corner(p) && !(p[0] === gate[0] && p[1] === gate[1])).sort((p, q) => Math.hypot(p[0]-gate[0], p[1]-gate[1]) - Math.hypot(q[0]-gate[0], q[1]-gate[1]));
   const corners = ring.filter(corner);
   const H = [[-2,0],[3,1],[0,3],[1,-2],[-3,3],[4,-2],[-3,-3],[4,4]], F = [[-9,-1],[8,2],[-1,8],[2,-9]];
+  const H2 = [[-7,3],[8,-1],[3,8],[-2,-7]], F2 = [[-8,-6],[8,-5],[-6,8],[6,7]];
   const pal = () => { a('gate', gate[0], gate[1]); for (const p of seg) a('palisade', p[0], p[1]); for (const p of corners) a('palisade', p[0], p[1]); };
   const war = rv.pers === 'warlord';
   a('house', ...H[0]); a('farm', ...F[0]); a('house', ...H[1]); P.push(['mark', 1]);
@@ -2011,14 +2055,14 @@ function rivalPlan(rv){
   if (!war) pal();
   a('watch', ...w1); a('house', ...H[3]);
   if (war) pal();
-  a('farm', ...F[2]); a('smith', -1, -3); a('house', ...H[4]); P.push(['mark', 2]);
+  a('farm', ...F[2]); a('smith', -1, -3); a('house', ...H[4]); a('farm', ...F2[0]); a('house', ...H2[0]); P.push(['mark', 2]);
   P.push(['keep2']);
   for (const p of seg) a('wall', p[0], p[1]);
   for (const p of corners) a('tower', p[0], p[1]);
   P.push(['mark', 3]);
   if (!war) a('barracks', -2, 2);
-  a('range', 3, 3); a('house', ...H[5]); a('farm', ...F[3]); a('mangonel', -3, 0); P.push(['keep3']);
-  a('house', ...H[6]); a('house', ...H[7]); a('watch', ...w2); P.push(['mark', 4]);
+  a('range', 3, 3); a('house', ...H[5]); a('farm', ...F[3]); a('farm', ...F2[1]); a('house', ...H2[1]); a('mangonel', -3, 0); P.push(['keep3']);
+  a('house', ...H[6]); a('house', ...H[7]); a('watch', ...w2); a('farm', ...F2[2]); a('farm', ...F2[3]); a('house', ...H2[2]); a('house', ...H2[3]); P.push(['mark', 4]);
   return P;
 }
 const planCostOf = t => t === 'keep2' ? 250 : t === 'keep3' ? 500 : Object.values(DEF[t].cost).reduce((a, c) => a + c, 0);
@@ -2026,12 +2070,12 @@ function setTerr(x, y, type, draw){
   const i = x + y*N;
   terrain[i] = type;
   if (type === baseTerr[i]) delete S.tmod[i]; else S.tmod[i] = type;
-  if (draw){ rebuildProps(); flowDirty = pathsDirty = true; if (gcv) for (const [a, b] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]) if (inMap(x+a, y+b)) drawGroundTile(x+a, y+b, true); }
+  if (draw){ rebuildProps(); flowDirty = pathsDirty = true; if (gcv) for (const [a, b] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]) if (inMap(x+a, y+b)) groundTileChanged(x+a, y+b); }
 }
 function rivalStep(rv, free){
   const P = rv.plan; if (rv.pi >= P.length) return false;
   const [t, x, y] = P[rv.pi];
-  if (t === 'mark'){ if (!free && S.t < (x-1)*400/(1 + .35*(rv.tier-1))) return false; rv.pi++; return x; }
+  if (t === 'mark'){ if (!free && S.t < (x-1)*340/(1 + .35*(rv.tier-1))/DF().eco) return false; rv.pi++; return x; }
   const cost = planCostOf(t);
   if (!free && rv.wealth < cost) return false;
   rv.pi++;
@@ -2062,7 +2106,7 @@ function muster(rv){
 }
 function launch(rv){
   const se = season(), night = isNight();
-  const pw = rv.k*.7 + rv.tier*1.4 + rv.nb*.6;
+  const pw = (rv.k*.7 + rv.tier*1.4 + rv.nb*.6) * DF().pow;
   const mult = (se === 1 ? 1.25 : se === 3 ? .7 : 1) * (night ? 1.15 : 1) * (rv.pers === 'warlord' ? 1.15 : 1);
   const q = [], add = (t, n, tk) => { for (let i = 0; i < n; i++) q.push([t, tk]); };
   add('raider', Math.round((2 + pw)*mult));
@@ -2077,8 +2121,8 @@ function launch(rv){
   toast(rv.name + ' marches on Thornwick from the ' + compass(rv.kx - KX, rv.ky - KY) + ' with ' + q.length + ' men' + (eng.length ? ', bringing ' + eng.join(' and ') : '') + (night ? ', under cover of night.' : '.'));
 }
 function spawnEnemy(fac, type, tk, pw, x, y, mode){
-  const big = type === 'brute', hp = (24 + 5*pw) * (big ? 3 : type === 'ram' ? 5 : type === 'catapult' ? 3 : type === 'earcher' ? .7 : 1);
-  const e = {x, y, side:1, fac, mode:mode || 'atk', hp, max:hp, dmg:3 + .45*pw, bm:big ? 3 : type === 'looter' ? 2 : 1,
+  const D = DF(), big = type === 'brute', hp = (24 + 5*pw) * (big ? 3 : type === 'ram' ? 5 : type === 'catapult' ? 3 : type === 'earcher' ? .7 : 1) * D.hp;
+  const e = {x, y, side:1, fac, mode:mode || 'atk', hp, max:hp, dmg:(3 + .45*pw)*D.dmg, bm:big ? 3 : type === 'looter' ? 2 : 1,
     sp:big ? .6 : type === 'ram' ? .5 : type === 'catapult' ? .45 : type === 'ladder' ? .8 : type === 'looter' ? 1.15 : .95,
     type, v:(Math.random()*5)|0, tk:tk || null, ammo:type === 'catapult' ? 10 : 0, cd:Math.random(), next:null, target:null, tb:null, tbT:0, path:null, pi:0, think:Math.random(), hx:x, hy:y,
     ox:(Math.random()-.5)*.44, oy:(Math.random()-.5)*.44, walk:Math.random()*3, moving:true, dead:false, face:1, sw:0};
@@ -2100,11 +2144,11 @@ function rivalsTick(dt){
   if ((cntCd -= dt) <= 0){ cntCd = 3; countRivals(); }
   for (const rv of S.riv){
     if (rv.dead || !rv.awake) continue;
-    rv.wealth += dt*(.45 + .12*rv.nh + .25*rv.nf + .02*S.t/60) * [1, 1.25, 1.5, 1.8, 2.1][rv.tier-1] * (season() === 3 ? .6 : 1);
-    if ((rv.bcd -= dt) <= 0){ rv.bcd = 1.5; rivalStep(rv, false); }
+    rv.wealth += dt*(.55 + .15*rv.nh + .3*rv.nf + .025*S.t/60) * [1, 1.25, 1.5, 1.8, 2.1][rv.tier-1] * (season() === 3 ? .7 : 1) * DF().eco;
+    if ((rv.bcd -= dt) <= 0){ rv.bcd = 1.2; rivalStep(rv, false); }
     if ((rv.gcd -= dt) <= 0){
       rv.gcd = S.en.some(e => e.fac === rv.id && e.mode === 'guard' && e.hp < e.max) ? 30 : 9;
-      const want = 4 + rv.tier*2 + rv.nb*2, have = S.en.reduce((n, e) => n + (e.fac === rv.id && e.mode === 'guard' ? 1 : 0), 0);
+      const want = Math.round((4 + rv.tier*2 + rv.nb*2)*DF().guard), have = S.en.reduce((n, e) => n + (e.fac === rv.id && e.mode === 'guard' ? 1 : 0), 0);
       if (have < want){ const p = freeNear(rv.kx + .5, rv.ky + 2.5, 2.5); const g = spawnEnemy(rv.id, have % 3 === 2 ? 'earcher' : have % 5 === 4 ? 'brute' : 'raider', null, 4 + rv.tier*2.5 + S.t/150, p[0], p[1], 'guard'); g.hx = rv.kx + .5; g.hy = rv.ky + .5; }
     }
     if (rv.truce > 0) rv.truce -= dt;
@@ -2117,7 +2161,7 @@ function rivalsTick(dt){
       toast('The host of ' + rv.name + ' gives up the siege and withdraws.');
     } else if (rv.out && !S.en.some(e => e.fac === rv.id && (e.mode === 'atk' || e.mode === 'flee'))){
       rv.out = false; S.wave++;
-      rv.atkIn = (rv.pers === 'warlord' ? 115 : rv.pers === 'builder' ? 175 : 145) * (.85 + Math.random()*.3);
+      rv.atkIn = (rv.pers === 'warlord' ? 115 : rv.pers === 'builder' ? 175 : 145) * (.85 + Math.random()*.3) * DF().atk;
       const bonus = 10 + 5*Math.round(rv.pw); S.res.gold += bonus;
       toast('The host of ' + rv.name + ' is beaten back. Your people gather ' + bonus + ' gold from the field.');
       save();
@@ -2582,14 +2626,16 @@ function tick(dt){
 }
 
 /* ================= ground, seasons and fog ================= */
-let gcv = null, gctx = null, gbase = null, vcv = null, vctx = null, vim = null, glow = null, torch = null;
+/* The ground and the fog are cached in square chunks that are painted when they
+   first come into view, so a large map does not need one huge canvas. */
+let gcv = null, vcv = null, glow = null, torch = null;
 const GRASS = [0x4a7f35, 0x548a3a, 0x5e9540, 0x699f47], DIRT = [0x8f744d, 0x9d8158, 0xab8f64];
-const AW = GW*R, AH = GH*R;
+const AW = GW*R, AH = GH*R, CH = 512, PAD = 2, VCH = CH/R, VPAD = 1;
+const CW = Math.ceil(AW/CH), CHN = Math.ceil(AH/CH), MAXCH = 80;
+let gbuf = new Uint8ClampedArray(0), gbx = 0, gby = 0, gbw = 0, gbh = 0, gpainted = 0;
+let groundGen = 1, veilGen = 1, chunkUse = 0;
 function groundInit(){
-  gcv = document.createElement('canvas'); gcv.width = AW; gcv.height = AH;
-  gctx = gcv.getContext('2d'); gbase = new Uint8ClampedArray(AW*AH*4);
-  vcv = document.createElement('canvas'); vcv.width = GW; vcv.height = GH;
-  vctx = vcv.getContext('2d'); vim = vctx.createImageData(GW, GH);
+  gcv = new Map(); vcv = new Map();
   const gw = 48, gh = 32, px = new Uint8ClampedArray(gw*gh*4);
   for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++){
     const d = Math.hypot((x - 23.5)/24, (y - 15.5)/16), a = Math.max(0, 1 - d), j = (x + y*gw)*4;
@@ -2600,43 +2646,88 @@ function groundInit(){
   for (let y = 0; y < th3; y++) for (let x = 0; x < tw3; x++){ const d = Math.hypot((x - 10.5)/11, (y - 6.5)/7), a = Math.max(0, 1 - d), j = (x + y*tw3)*4; p2[j] = 255; p2[j+1] = 166; p2[j+2] = 76; p2[j+3] = Math.round(a*a*8)*15; }
   torch = toCanvas(tw3, th3, p2);
 }
-function tintRect(x0, y0, w, h){
-  x0 = Math.floor(x0); y0 = Math.floor(y0);
-  if (x0 < 0){ w += x0; x0 = 0; } if (y0 < 0){ h += y0; y0 = 0; }
-  if (x0 + w > AW) w = AW - x0; if (y0 + h > AH) h = AH - y0;
-  if (w <= 0 || h <= 0) return;
-  const s = curSeason < 0 ? 0 : curSeason, src = gbase, im = gctx.createImageData(w, h), d = im.data;
-  for (let y = y0; y < y0 + h; y++){
-    let j = (x0 + y*AW)*4, k = (y - y0)*w*4;
-    for (let x = 0; x < w; x++, j += 4, k += 4){
-      let r = src[j], g = src[j+1], b = src[j+2];
-      d[k+3] = src[j+3];
-      if (s !== 1 && src[j+3]){
-        const green = g > r + 10 && g > b + 18;
-        if (s === 3){
-          if (green){ const v = 182 + (g - 105)*.45; r = v - 10; g = v - 4; b = v + 7; }
-          else if (b > g && b > r + 16){ r = r*.42 + 96; g = g*.42 + 112; b = b*.42 + 126; }
-          else { r = r*.7 + 58; g = g*.7 + 61; b = b*.7 + 66; }
-        } else if (s === 2){ if (green){ r += 42; g -= 4; b -= 12; } }
-        else if (green){ g += 6; r += 2; }
-      }
-      d[k] = r; d[k+1] = g; d[k+2] = b;
+/* Season tint of an untinted ground buffer, into new image data. */
+function tintBuf(src, w, h){
+  const s = curSeason < 0 ? 0 : curSeason, im = new ImageData(w, h), d = im.data;
+  for (let j = 0; j < w*h*4; j += 4){
+    let r = src[j], g = src[j+1], b = src[j+2];
+    d[j+3] = src[j+3];
+    if (s !== 1 && src[j+3]){
+      const green = g > r + 10 && g > b + 18;
+      if (s === 3){
+        if (green){ const v = 182 + (g - 105)*.45; r = v - 10; g = v - 4; b = v + 7; }
+        else if (b > g && b > r + 16){ r = r*.42 + 96; g = g*.42 + 112; b = b*.42 + 126; }
+        else { r = r*.7 + 58; g = g*.7 + 61; b = b*.7 + 66; }
+      } else if (s === 2){ if (green){ r += 42; g -= 4; b -= 12; } }
+      else if (green){ g += 6; r += 2; }
+    }
+    d[j] = r; d[j+1] = g; d[j+2] = b;
+  }
+  return im;
+}
+/* Paint the ground of one rectangle (ground pixels) from scratch and return it tinted. */
+function paintGround(x0, y0, w, h){
+  if (gbuf.length < w*h*4) gbuf = new Uint8ClampedArray(w*h*4); else gbuf.fill(0, 0, w*h*4);
+  gbx = x0; gby = y0; gbw = w; gbh = h; gpainted = 0;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+    const cx = wx(x, y)*R, cy = wy(x, y)*R;
+    if (cx + 36 >= x0 && cx - 36 < x0 + w && cy + 20 >= y0 && cy - 20 < y0 + h) drawGroundTile(x, y);
+  }
+  const Lx = (wx(0, N-1) - 16)*R, Ly = wy(0, N-1)*R, Bx = wx(N-1, N-1)*R, By = (wy(N-1, N-1) + 8)*R, Rx = (wx(N-1, 0) + 16)*R;
+  for (let px = Math.max(Lx, x0); px < Math.min(Rx, x0 + w); px++){
+    const left = px < Bx, ey = Math.floor(left ? Ly + (px - Lx)/2 : By - (px - Bx)/2);
+    if (ey + 48 < y0 || ey >= y0 + h) continue;
+    for (let k = 0; k < 48; k++){
+      const py = ey + k; if (py >= AH) break;
+      const hh = hsh(px, py, 12), band = vnoise(px/16, k/6, 13), root = hsh(px, 7, 17);
+      let c;
+      if (k < 3) c = k === 0 ? 0x3d6a2e : 0x2f5224;
+      else if (k < 5 + root*7 && hsh(px, 9, 17) < .3) c = 0x3a2a1c;
+      else c = k < 8 + band*6 ? 0x56402b : band > .55 ? (hsh(px >> 2, k >> 1, 18) < .5 ? 0x79766d : 0x6c695f) : 0x64492f;
+      c = tw(c, (left ? 1 : .74) * (hh < .2 ? .86 : hh > .95 ? 1.12 : 1) * (1 - k*.007));
+      if (k >= 43) c = hh < .5 ? 0x9cc8d4 : 0x6fa3b6;
+      gput(px, py, c);
     }
   }
-  gctx.putImageData(im, x0, y0);
+  return gpainted ? tintBuf(gbuf, w, h) : null;
 }
-function tintAll(){ for (let y = 0; y < AH; y += 256) tintRect(0, y, AW, 256); }
+function makeChunk(i, j){
+  const S2 = CH + 2*PAD, im = paintGround(i*CH - PAD, j*CH - PAD, S2, S2);
+  let ch = gcv.get(i + j*CW);
+  if (!im){ ch = {empty:true, gen:groundGen, used:chunkUse}; gcv.set(i + j*CW, ch); return ch; }
+  if (!ch || ch.empty){ const c = document.createElement('canvas'); c.width = c.height = S2; ch = {cv:c, g:c.getContext('2d'), gen:0, used:0}; gcv.set(i + j*CW, ch); }
+  ch.g.putImageData(im, 0, 0); ch.gen = groundGen; ch.used = chunkUse;
+  return ch;
+}
+/* Repaint the ground around one tile in every chunk that is already painted. */
+function groundTileChanged(x, y){
+  if (!gcv) return;
+  const x0 = Math.floor(wx(x, y)*R - 36), y0 = Math.floor(wy(x, y)*R - 20), w = 72, h = 40;
+  let im = null;
+  for (let j = Math.floor((y0 + PAD)/CH) - 1; j <= Math.floor((y0 + h + PAD)/CH); j++) for (let i = Math.floor((x0 + PAD)/CH) - 1; i <= Math.floor((x0 + w + PAD)/CH); i++){
+    if (i < 0 || j < 0 || i >= CW || j >= CHN) continue;
+    const ch = gcv.get(i + j*CW);
+    if (!ch) continue;
+    const ox = i*CH - PAD, oy = j*CH - PAD;
+    if (x0 + w <= ox || y0 + h <= oy || x0 >= ox + CH + 2*PAD || y0 >= oy + CH + 2*PAD) continue;
+    if (ch.empty){ gcv.delete(i + j*CW); continue; }
+    if (!im) im = paintGround(x0, y0, w, h);
+    if (im) ch.g.putImageData(im, x0 - ox, y0 - oy);
+  }
+}
+function tintAll(){ groundGen++; }
 function pathLink(x, y){
   if (!inMap(x, y)) return false;
   const i = x + y*N; if (pathMap[i]) return true;
   const b = bmap[i]; return !!(b && b.o === 0 && (DEF[b.t].path || b === keep));
 }
 function gput(px, py, c){
-  if (px < 0 || py < 0 || px >= AW || py >= AH) return;
-  const j = (px + py*AW)*4, q = grade((c>>16)&255, (c>>8)&255, c&255);
-  gbase[j] = q[0]; gbase[j+1] = q[1]; gbase[j+2] = q[2]; gbase[j+3] = 255;
+  px -= gbx; py -= gby;
+  if (px < 0 || py < 0 || px >= gbw || py >= gbh) return;
+  const j = (px + py*gbw)*4, q = grade((c>>16)&255, (c>>8)&255, c&255);
+  gbuf[j] = q[0]; gbuf[j+1] = q[1]; gbuf[j+2] = q[2]; gbuf[j+3] = 255; gpainted = 1;
 }
-function drawGroundTile(x, y, flush){
+function drawGroundTile(x, y){
   const cx = wx(x, y)*R, cy = wy(x, y)*R, i = x + y*N, t = terrain[i];
   const isP = pathMap[i] === 1 && t !== 3;
   const lk = isP ? [pathLink(x+1, y), pathLink(x-1, y), pathLink(x, y+1), pathLink(x, y-1)] : null;
@@ -2718,50 +2809,65 @@ function drawGroundTile(x, y, flush){
       }
     }
   }
-  if (flush) tintRect(cx - 36, cy - 20, 72, 40);
 }
 function drawGroundAll(){
-  gbase.fill(0);
-  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) drawGroundTile(x, y, false);
-  const Lx = (wx(0, N-1) - 16)*R, Ly = wy(0, N-1)*R, Bx = wx(N-1, N-1)*R, By = (wy(N-1, N-1) + 8)*R, Rx = (wx(N-1, 0) + 16)*R;
-  for (let px = Lx; px < Rx; px++){
-    const left = px < Bx, ey = Math.floor(left ? Ly + (px - Lx)/2 : By - (px - Bx)/2);
-    for (let k = 0; k < 48; k++){
-      const py = ey + k; if (py >= AH) break;
-      const h = hsh(px, py, 12), band = vnoise(px/16, k/6, 13), root = hsh(px, 7, 17);
-      let c;
-      if (k < 3) c = k === 0 ? 0x3d6a2e : 0x2f5224;
-      else if (k < 5 + root*7 && hsh(px, 9, 17) < .3) c = 0x3a2a1c;
-      else c = k < 8 + band*6 ? 0x56402b : band > .55 ? (hsh(px >> 2, k >> 1, 18) < .5 ? 0x79766d : 0x6c695f) : 0x64492f;
-      c = tw(c, (left ? 1 : .74) * (h < .2 ? .86 : h > .95 ? 1.12 : 1) * (1 - k*.007));
-      if (k >= 43) c = h < .5 ? 0x9cc8d4 : 0x6fa3b6;
-      gput(px, py, c);
-    }
-  }
-  tintAll();
-  buildVeil();
+  if (!gcv) return;
+  gcv.clear(); vcv.clear(); groundGen++; veilGen++;
 }
-function buildVeil(){
-  const d = vim.data; d.fill(0);
+function buildVeil(){ veilGen++; }
+function makeVeil(i, j){
+  const S2 = VCH + 2*VPAD, x0 = i*VCH - VPAD, y0 = j*VCH - VPAD;
+  let ch = vcv.get(i + j*CW);
+  if (!ch){ const c = document.createElement('canvas'); c.width = c.height = S2; ch = {cv:c, g:c.getContext('2d'), im:null, gen:0}; vcv.set(i + j*CW, ch); }
+  if (!ch.im) ch.im = ch.g.createImageData(S2, S2);
+  const d = ch.im.data; d.fill(0);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
+    const cx = wx(x, y), cy = wy(x, y);
+    if (cx + 16 < x0 || cx - 16 >= x0 + S2 || cy + 8 < y0 || cy - 8 >= y0 + S2) continue;
     const rg = regs[reg[x + y*N]];
     if (rg.disc && rg.owner === 0) continue;
-    const fog = !rg.disc, cx = wx(x, y), cy = wy(x, y);
+    const fog = !rg.disc;
     let edge = false;
     if (fog) for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) if (inMap(x+a, y+b) && regs[reg[x+a + (y+b)*N]].disc) edge = true;
     const fc = rg.owner > 0 ? FCOL[rg.owner] : 0x0a0e16, al = rg.owner > 0 ? 62 : 78;
     for (let r = 0; r < 16; r++){
-      const hw = r < 8 ? 2*(r+1) : 2*(16-r);
+      const hw = r < 8 ? 2*(r+1) : 2*(16-r), py = cy - 8 + r, ly = py - y0;
+      if (ly < 0 || ly >= S2) continue;
       for (let dx = -hw; dx < hw; dx++){
-        const px = cx + dx, py = cy - 8 + r, j = (px + py*GW)*4;
+        const px = cx + dx, lx = px - x0;
+        if (lx < 0 || lx >= S2) continue;
+        const j2 = (lx + ly*S2)*4;
         if (fog){
           const n = vnoise(px/14, py/9, 40), n2 = vnoise(px/5, py/4, 41), v = 14 + n*18 + n2*6;
-          d[j] = v; d[j+1] = v + 7; d[j+2] = v + 18; d[j+3] = edge && ((px + py) & 1) ? 150 : 255;
-        } else { d[j] = (fc>>16)&255; d[j+1] = (fc>>8)&255; d[j+2] = fc&255; d[j+3] = al; }
+          d[j2] = v; d[j2+1] = v + 7; d[j2+2] = v + 18; d[j2+3] = edge && ((px + py) & 1) ? 150 : 255;
+        } else { d[j2] = (fc>>16)&255; d[j2+1] = (fc>>8)&255; d[j2+2] = fc&255; d[j2+3] = al; }
       }
     }
   }
-  vctx.putImageData(vim, 0, 0);
+  ch.g.putImageData(ch.im, 0, 0); ch.gen = veilGen;
+  return ch;
+}
+/* Chunks under the view rectangle (world units). New chunks are painted at once,
+   stale ones (after a season change) within a small time budget per frame. */
+function eachChunk(vx0, vy0, vx1, vy1, fn){
+  const i0 = Math.max(0, Math.floor(vx0*R/CH)), i1 = Math.min(CW-1, Math.floor(vx1*R/CH));
+  const j0 = Math.max(0, Math.floor(vy0*R/CH)), j1 = Math.min(CHN-1, Math.floor(vy1*R/CH));
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) fn(i, j);
+}
+function groundChunk(i, j, budget){
+  let ch = gcv.get(i + j*CW);
+  if (!ch || (ch.gen !== groundGen && budget.left())) ch = makeChunk(i, j);
+  ch.used = chunkUse;
+  return ch;
+}
+function trimChunks(){
+  if (gcv.size <= MAXCH) return;
+  const old = [...gcv.entries()].filter(([, c]) => c.used !== chunkUse).sort((a, b) => a[1].used - b[1].used);
+  for (let k = 0; k < old.length && gcv.size > MAXCH; k++){ gcv.delete(old[k][0]); vcv.delete(old[k][0]); }
+}
+function prefetchChunks(gx0, gy0, gx1, gy1, budget){
+  const m = VCH;
+  eachChunk(gx0 - m, gy0 - m, gx1 + m, gy1 + m, (i, j) => { if (!gcv.has(i + j*CW) && budget.left()) makeChunk(i, j).used = chunkUse; });
 }
 
 /* ================= rendering ================= */
@@ -2827,7 +2933,15 @@ function render(){
       if (hsh(gx2, gy2, sh >> 1) < .5) c.fillRect(px + (sh & 1)*.5, py, 6, .5);
     }
   }
-  c.drawImage(gcv, 0, 0, GW, GH);
+  chunkUse++;
+  const t0 = performance.now(), budget = {left: () => performance.now() - t0 < 6};
+  const gx0 = -cam.x/z, gy0 = -cam.y/z, gx1 = (W - cam.x)/z, gy1 = (H - cam.y)/z;
+  eachChunk(gx0, gy0, gx1, gy1, (i, j) => {
+    const ch = groundChunk(i, j, budget);
+    if (!ch.empty) c.drawImage(ch.cv, PAD, PAD, CH, CH, i*VCH, j*VCH, VCH, VCH);
+  });
+  prefetchChunks(gx0, gy0, gx1, gy1, budget);
+  trimChunks();
   const vx0 = -cam.x/z - 48, vy0 = -cam.y/z - 16, vx1 = (W - cam.x)/z + 48, vy1 = (H - cam.y)/z + 110;
   const vis = (x, y) => { const a = wx(x, y), b = wy(x, y); return a > vx0 && a < vx1 && b > vy0 && b < vy1 && regs[reg[tileI(x, y)]].disc; };
 
@@ -2839,7 +2953,12 @@ function render(){
       if (k < .45) c.fillRect(wx(x, y) - 8 + ((k2*28)|0)/2, wy(x, y) - 3 + ((k*24)|0)/2, 2, .5);
     }
   }
-  c.drawImage(vcv, 0, 0);
+  eachChunk(gx0, gy0, gx1, gy1, (i, j) => {
+    const g = gcv.get(i + j*CW); if (!g || g.empty) return;
+    let v = vcv.get(i + j*CW);
+    if (!v || v.gen !== veilGen) v = makeVeil(i, j);
+    c.drawImage(v.cv, VPAD, VPAD, VCH, VCH, i*VCH, j*VCH, VCH, VCH);
+  });
   const ghostT = drag && drag.active ? drag.t : armed;
   if (ghostT && ghostT !== 'flag'){
     c.strokeStyle = 'rgba(255,255,255,.14)'; c.lineWidth = 1/K; c.beginPath();
@@ -3014,9 +3133,9 @@ const mcv = $('#mini'), mctx = mcv.getContext('2d');
 let mim = null;
 function drawMini(){
   if (!S) return;
-  if (!mim) mim = mctx.createImageData(160, 80);
+  if (!mim) mim = mctx.createImageData(2*N, N);
   const d = mim.data; d.fill(0);
-  const set = (x, y, r, g, b) => { const px = 80 + (x - y), py = (x + y) >> 1; if (px < 0 || px > 158 || py < 0 || py > 79) return; for (let k = 0; k < 2; k++){ const j = (px + k + py*160)*4; d[j] = r; d[j+1] = g; d[j+2] = b; d[j+3] = 255; } };
+  const set = (x, y, r, g, b) => { const px = N + (x - y), py = (x + y) >> 1; if (px < 0 || px > 2*N - 2 || py < 0 || py > N - 1) return; for (let k = 0; k < 2; k++){ const j = (px + k + py*2*N)*4; d[j] = r; d[j+1] = g; d[j+2] = b; d[j+3] = 255; } };
   const winter = curSeason === 3;
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
     const i = x + y*N, rg = regs[reg[i]];
@@ -3036,11 +3155,11 @@ function drawMini(){
   mctx.putImageData(mim, 0, 0);
   const z = Z(), c0 = [((W/2 - cam.x)/z - OX), ((H/2 - cam.y)/z - OY)], gx = (c0[0]/16 + c0[1]/8)/2, gy = (c0[1]/8 - c0[0]/16)/2;
   const vw = W/z/16, vh = H/z/16;
-  mctx.strokeStyle = '#fff'; mctx.lineWidth = 1;
-  mctx.strokeRect(Math.round(80 + (gx - gy) - vw/2) + .5, Math.round((gx + gy)/2 - vh/2) + .5, Math.round(vw), Math.round(vh));
+  mctx.strokeStyle = '#fff'; mctx.lineWidth = 2;
+  mctx.strokeRect(Math.round(N + (gx - gy) - vw/2) + .5, Math.round((gx + gy)/2 - vh/2) + .5, Math.round(vw), Math.round(vh));
 }
 function miniGo(e){
-  const r = mcv.getBoundingClientRect(), px = (e.clientX - r.left)/r.width*160 - 80, py = (e.clientY - r.top)/r.height*80*2;
+  const r = mcv.getBoundingClientRect(), px = (e.clientX - r.left)/r.width*2*N - N, py = (e.clientY - r.top)/r.height*N*2;
   lookAt((px + py)/2, (py - px)/2);
 }
 mcv.addEventListener('pointerdown', e => { mcv.setPointerCapture(e.pointerId); mcv._d = true; miniGo(e); });
@@ -3229,7 +3348,7 @@ cv.addEventListener('keydown', e => {
   else if (e.key === '+' || e.key === '='){ setZoom(W/2, H/2, K + 1); }
   else if (e.key === '-'){ setZoom(W/2, H/2, K - 1); }
 });
-window.addEventListener('keydown', e => { if (e.key === 'Escape'){ armed = null; hover = null; selected = null; } });
+window.addEventListener('keydown', e => { if (e.key === 'Escape'){ armed = null; hover = null; selected = null; if (newOpen) $('#newkCancel').click(); } });
 
 /* ================= interface ================= */
 function costHTML(cost){
@@ -3493,7 +3612,7 @@ function inspectHTML(sel){
     h += '<label><input type="checkbox" data-act="auto"' + (b.auto ? ' checked' : '') + '> Recruit ' + UNITS[tk].plural + ' automatically</label>';
   }
   if (b === keep){
-    h += '<div class="row"><button class="btn" data-act="army">Army and orders</button></div>';
+    h += '<div class="row"><button class="btn" data-act="army">Army and orders</button><span class="note" style="margin:0">Difficulty: ' + DF().name + '</span></div>';
     if (b.lvl < 3){
       const uc = KEEP_UP[b.lvl-1];
       h += '<div class="row"><button class="btn primary" data-act="up"' + (afford(uc) ? '' : ' disabled') + '>Rebuild as ' + TIERS[b.lvl].toLowerCase() + '</button><span class="costs">' + costHTML(uc) + '</span></div>'
@@ -3604,17 +3723,41 @@ function hud(){
   drawMini();
 }
 document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => { speed = +b.dataset.speed; hud(); }));
-function showHelp(on){ helpOpen = on; $('#help').hidden = !on; if (on) $('#helpGo').focus(); }
+function bindDiff(input, onPick){
+  const box = input.closest('.diff');
+  input._show = () => { const d = DIFFS[+input.value]; box.querySelector('[data-diff-name]').textContent = d.name; box.querySelector('[data-diff-note]').textContent = d.note; };
+  input.addEventListener('input', () => { input._show(); if (onPick) onPick(+input.value); });
+}
+function rememberDiff(d){ nextDiff = d; try { localStorage.setItem(DIFF_KEY, String(d)); } catch (e) {} }
+// In a kingdom that has not started yet, the help sheet can still change its difficulty.
+bindDiff($('#helpDiffIn'), d => {
+  rememberDiff(d);
+  if (S && S.t < 1){ S.diff = d; if (!S.riv[0].out) S.riv[0].atkIn = FIRST_RAID*DF().first; hud(); }
+});
+bindDiff($('#newkDiff'));
+function showHelp(on){
+  helpOpen = on; $('#help').hidden = !on;
+  if (!on) return;
+  const fresh = !!S && S.t < 1;
+  $('#helpDiff').hidden = !fresh; $('#helpDiffNow').hidden = fresh;
+  if (fresh){ $('#helpDiffIn').value = S.diff; $('#helpDiffIn')._show(); }
+  else $('#helpDiffNow').textContent = 'Difficulty: ' + DF().name + '. You can choose another when you found a new kingdom.';
+  $('#helpGo').focus();
+}
+let newOpen = false;
+function showNew(on){
+  newOpen = on; $('#newk').hidden = !on;
+  if (!on) return;
+  const i = $('#newkDiff'); i.value = nextDiff; i._show();
+  $('#newkWarn').hidden = !S || S.over || S.won;
+  $('#newkGo').focus();
+}
 $('#helpBtn').addEventListener('click', () => showHelp(true));
 $('#helpGo').addEventListener('click', () => showHelp(false));
-let newArmed = 0;
-$('#newBtn').addEventListener('click', () => {
-  const btn = $('#newBtn');
-  if (Date.now() < newArmed){ newArmed = 0; btn.textContent = 'New kingdom'; btn.classList.remove('warn'); restart(); return; }
-  newArmed = Date.now() + 3500; btn.textContent = 'Erase this kingdom?'; btn.classList.add('warn');
-  setTimeout(() => { if (newArmed && Date.now() >= newArmed){ newArmed = 0; btn.textContent = 'New kingdom'; btn.classList.remove('warn'); } }, 3600);
-});
-$('#overGo').addEventListener('click', restart);
+$('#newBtn').addEventListener('click', () => showNew(true));
+$('#newkGo').addEventListener('click', () => { rememberDiff(+$('#newkDiff').value); showNew(false); restart(); });
+$('#newkCancel').addEventListener('click', () => { showNew(false); if (S && S.over){ $('#over').hidden = false; overOpen = true; } });
+$('#overGo').addEventListener('click', () => { $('#over').hidden = true; overOpen = false; showNew(true); });
 $('#overKeep').addEventListener('click', () => { $('#over').hidden = true; overOpen = false; });
 function restart(){ $('#over').hidden = true; overOpen = false; newGame(); buildCards(); centreCam(); clampCam(); wipeSave(); hud(); }
 
@@ -3625,7 +3768,7 @@ function step(real){
   animT += real;
   if (S && ownDirty) refreshOwn();
   if (S && pathsDirty) recomputePaths();
-  const run = S && !S.over && speed > 0 && !helpOpen && !overOpen;
+  const run = S && !S.over && speed > 0 && !helpOpen && !overOpen && !newOpen;
   if (run){
     acc += real*speed;
     let n = 0;
