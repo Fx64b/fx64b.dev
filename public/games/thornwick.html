@@ -107,7 +107,7 @@ body{
 .c.lack{color:var(--madder); font-weight:600}
 
 #inspect{
-  position:absolute; z-index:2; left:12px; bottom:12px; width:320px; max-height:calc(100% - var(--bar-h) - 148px); overflow:auto;
+  position:absolute; z-index:2; left:12px; bottom:12px; width:320px; max-height:calc(100% - var(--bar-h) - 164px); overflow:auto;
   background:var(--surface); border:1px solid var(--line); border-radius:4px; box-shadow:var(--shadow); padding:12px 14px;
 }
 #inspect h2{margin:0; font-size:19px; font-weight:600; line-height:1.2; padding-right:28px}
@@ -160,9 +160,9 @@ body{
 .sheet .row2{display:flex; gap:8px; flex-wrap:wrap}
 .sheet .foot{position:sticky; bottom:-22px; margin:12px -24px -22px; padding:4px 24px 16px; background:var(--surface); border-top:1px solid var(--line)}
 
-#mini{position:absolute; z-index:2; left:12px; top:calc(var(--bar-h) + 12px); width:224px; height:112px; image-rendering:pixelated;
+#mini{position:absolute; z-index:2; left:12px; top:calc(var(--bar-h) + 12px); width:256px; height:128px; image-rendering:auto;
   background:var(--surface); border:1px solid var(--line); border-radius:4px; box-shadow:var(--shadow); cursor:pointer; touch-action:none}
-#event{position:absolute; z-index:3; left:12px; top:calc(var(--bar-h) + 136px); width:300px;
+#event{position:absolute; z-index:3; left:12px; top:calc(var(--bar-h) + 152px); width:300px;
   background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:4px; box-shadow:var(--shadow); padding:10px 14px 12px}
 #event h2{margin:0; font-size:18px; font-weight:600; line-height:1.2}
 #event p{margin:6px 0 8px; font-size:14.5px}
@@ -240,7 +240,7 @@ body{
     </div>
     <div id="cards"></div>
   </aside>
-  <canvas id="mini" width="320" height="160" aria-label="Map of the realm. Tap to move the view."></canvas>
+  <canvas id="mini" width="448" height="224" aria-label="Map of the realm. Tap to move the view."></canvas>
   <section id="event" hidden aria-live="polite"></section>
   <section id="inspect" hidden aria-live="polite"></section>
   <div id="toast" role="status"></div>
@@ -295,7 +295,10 @@ body{
         <li>You only own the land around your keep. Build an outpost on the dim land at your border to claim that region and all the trees and rocks on it. Each outpost costs more gold than the last.</li>
         <li>Tap the fog to send a scout. Some lands hold ruins, gold mines, standing stones or empty hamlets. Claim the land to get their reward.</li>
         <li>Plant the rally flag to gather your army. Tap a rival castle and choose "Lay siege" to attack it. Rams and catapults from a siege workshop break walls fast.</li>
-        <li>The realm is large. The first rival lord lives a good march away, the others further out, each with open land around them. Take every rival keep to win.</li>
+        <li>The realm is large, and eight rival lords live in it, each with their own character. Tap a rival keep to read about its lord. The nearest lies a good march away, the others further out.</li>
+        <li>The lords do not sit still. They claim land with outposts, settle it, and go to war with each other. A lord who takes another's keep takes all their land with it.</li>
+        <li>If Thornwick grows far stronger than any of them, the lords turn on you together. The same happens to a lord who grows too strong.</li>
+        <li>Your soldiers and the raiders both go for people and buildings first. They only break walls when there is no other way in. Take every rival keep to win.</li>
       </ul>
 
       <h3>Controls</h3>
@@ -340,9 +343,9 @@ body{
 (() => {
 'use strict';
 const $ = s => document.querySelector(s);
-const N = 160, NN = N*N, KX = 79, KY = 79, STEP = 1/30, GRID = 11, HOME = 60, NRIV = 5;
+const N = 224, NN = N*N, KX = 111, KY = 111, STEP = 1/30, GRID = 15, HOME = 112, NRIV = 8;
 const OX = N*16, OY = 12, GW = N*32, GH = N*16 + OY + 30;
-const FIRST_RAID = 210, SAVE_KEY = 'thornwick-save-5';
+const FIRST_RAID = 210, SAVE_KEY = 'thornwick-save-6';
 /* Difficulty mainly changes the rival lords: how often and how hard they attack,
    how tough their soldiers are and how fast their economy grows. */
 const DIFFS = [
@@ -354,15 +357,35 @@ const DIFFS = [
 ];
 const DIFF_KEY = 'thornwick-difficulty';
 // Saves from the smaller map do not fit this world.
-try { localStorage.removeItem('thornwick-save-4'); } catch (e) {}
+try { localStorage.removeItem('thornwick-save-4'); localStorage.removeItem('thornwick-save-5'); } catch (e) {}
 const DF = () => DIFFS[S && S.diff >= 0 && S.diff < DIFFS.length ? S.diff : 2];
 let nextDiff = (() => { try { const v = localStorage.getItem(DIFF_KEY); return v !== null && +v >= 0 && +v < DIFFS.length ? +v : 2; } catch (e) { return 2; } })();
 const DAYLEN = 200, SEASONLEN = 150, SEASONS = ['Spring','Summer','Autumn','Winter'];
 const RES = ['food','wood','stone','gold'];
 const TIERS = ['Wooden hall','Stone keep','Great keep'];
 const KEEP_CAP = [8,12,16], KEEP_DMG = [8,12,16], KEEP_UP = [{wood:150,stone:120,gold:60},{wood:300,stone:300,gold:200}];
-const FCOL = [0x2f6a86, 0xb23b30, 0x7a4a9a, 0xc9772a, 0x33343c, 0x4f7a5e, 0x6a5a3a];
-const LORDS = [null, {name:'Aldric the Red', pers:'warlord'}, {name:'Lady Morwen', pers:'schemer'}, {name:'Baron Osric', pers:'builder'}, {name:'Queen Ysolde', pers:'warlord'}, {name:'Morcant the Pale', pers:'schemer'}];
+const FCOL = [0x2f6a86, 0xb23b30, 0x7a4a9a, 0xc9772a, 0x33343c, 0x4f7a5e, 0x9c3f78, 0xb59a2e, 0xc9c6bc, 0, 0x6a5a3a];
+/* Each lord has a character. agg: time between attacks (lower is more often), army: size of
+   their hosts, eco: income, expand: how fast they claim land, def: castle guards and towers,
+   food: farms in new land, focus: the land they want, target: whom they like to attack. */
+const LORDS = [null,
+  {name:'Aldric the Red', pers:'warlord', agg:.8, army:1.15, eco:.95, expand:.8, def:.85, food:1, focus:'meadow', target:'nearest',
+    desc:'A warlord. He attacks often and goes for whoever is closest, but neglects his walls.'},
+  {name:'Lady Morwen', pers:'schemer', agg:1, army:1, eco:1.05, expand:1.1, def:1, food:1, focus:'gold', target:'weakest',
+    desc:'A schemer. She hunts for gold mines, raids outposts and strikes at the weakest lord.'},
+  {name:'Baron Osric', pers:'builder', agg:1.3, army:1.15, eco:1.2, expand:1, def:1.4, food:1.4, focus:'meadow', target:'leader',
+    desc:'A builder. Full granaries and strong walls. He attacks rarely, but hard, and goes after the strongest realm.'},
+  {name:'Queen Ysolde', pers:'warlord', agg:.85, army:1.3, eco:1, expand:1.2, def:.9, food:1, focus:'any', target:'leader',
+    desc:'A conqueror. She raises great hosts and hunts down the strongest realm in the land.'},
+  {name:'Morcant the Pale', pers:'schemer', agg:1, army:.95, eco:1.1, expand:1.6, def:1.1, food:1.1, focus:'hills', target:'weakest',
+    desc:'A land-grabber. He spreads outposts fast, loves stony hills and preys on the weak.'},
+  {name:'Sir Gareth Vane', pers:'builder', agg:1.2, army:1, eco:1.3, expand:1.05, def:1.2, food:1.3, focus:'meadow', target:'nearest',
+    desc:'A merchant lord. Rich fields and a full treasury. He fights his neighbours to keep the roads his own.'},
+  {name:'The Iron Abbess', pers:'builder', agg:1.4, army:1.1, eco:1, expand:.8, def:1.6, food:1.2, focus:'hills', target:'leader',
+    desc:'A grim abbess behind thick stone. She seldom marches, and only against the strongest realm.'},
+  {name:'Rhodri Wolfsbane', pers:'warlord', agg:.75, army:.9, eco:.95, expand:1.3, def:.8, food:.9, focus:'any', target:'nearest',
+    desc:'A raider chief. Quick, frequent attacks on whoever is near, and little care for walls.'},
+];
 const WALLISH = {wall:1, palisade:1, gate:1, tower:1};
 const LIT = {house:1, shouse:1, tavern:1, keep:1, smith:1, chapel:1, gate:1, tower:1, watch:1, outpost:1, brazier:1, barracks:1, camp:1};
 
@@ -1337,7 +1360,7 @@ let S, keep, capU = null, flowDirty = true, pathsDirty = true, ownDirty = true, 
 let overOpen = false, ladderToast = 0;
 let helpOpen = false, jobCd = 0, trainCd = 0, flowCd = 0, gateCd = 0, cntCd = 0, animT = 0, lastInspect = '', lastEvent = '', tab = 0, fireToast = 0, curSeason = -1;
 const bmap = new Array(NN).fill(null);
-const terrain = new Uint8Array(NN), baseTerr = new Uint8Array(NN), pathMap = new Uint8Array(NN), reg = new Uint8Array(NN), bailey = new Uint8Array(NN);
+const terrain = new Uint8Array(NN), baseTerr = new Uint8Array(NN), pathMap = new Uint8Array(NN), reg = new Uint16Array(NN), bailey = new Uint8Array(NN);
 const flow = new Float32Array(NN);
 let regs = [], rivSpots = [], trees = [], rocks = [], myTrees = [], myRocks = [], props = [], parts = [];
 const reduceMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1350,7 +1373,7 @@ const regAt = (x, y) => regs[reg[tileI(x, y)]];
 const ownedT = (x, y) => inMap(x, y) && regs[reg[x + y*N]].owner === 0;
 const seenAt = (x, y) => regAt(x, y).disc;
 const mine = b => b.o === 0;
-const fcol = o => o === 9 ? 6 : o;
+const fcol = o => o === 9 ? 10 : o;
 const season = () => ((S.t / SEASONLEN) | 0) % 4;
 function nightF(){ const p = (S.t % DAYLEN) / DAYLEN; return p < .62 ? 0 : p < .68 ? (p - .62)/.06 : p < .95 ? 1 : (1 - p)/.05; }
 const isNight = () => nightF() > .5;
@@ -1367,10 +1390,10 @@ function genWorld(seed){
       type:home ? 'meadow' : TYPES[(r()*TYPES.length)|0], owner:-1, disc:false, adj:[], poi:null});
   }
   // Rival lords sit evenly round the keep, the first ones nearer, with open land behind them.
-  const st = r()*Math.PI*2, RAD = [.25, .3, .34, .37, .39];
+  const st = r()*Math.PI*2, RAD = [.2, .3, .26, .36, .33, .41, .39, .43], ORD = [0, 3, 6, 1, 4, 7, 2, 5];
   rivSpots = [];
   for (let k = 0; k < NRIV; k++){
-    const a = st + k*Math.PI*2/NRIV + (r() - .5)*.3, d = RAD[k]*N;
+    const a = st + ORD[k]*Math.PI*2/NRIV + (r() - .5)*.25, d = RAD[k]*N;
     const kx = Math.max(12, Math.min(N-14, Math.round(KX + .5 + Math.cos(a)*d) - 1)), ky = Math.max(12, Math.min(N-14, Math.round(KY + .5 + Math.sin(a)*d) - 1));
     let rg = null, bd = 1e9;
     for (const o of regs){ if (o.id === HOME || o.riv) continue; const dd = Math.hypot(o.sx - kx, o.sy - ky); if (dd < bd){ bd = dd; rg = o; } }
@@ -1442,7 +1465,7 @@ function rebuildSites(){
 function blank(){
   return { seed:(Math.random()*1e9)|0, res:{food:90,wood:130,stone:40,gold:30}, b:[], vill:[], sold:[], en:[], shots:[], floats:[], tmod:{},
     riv:[], conq:{}, disc:{}, loot:{}, flag:null, capLvl:1, capXp:0, capDown:0, evCd:160, ev:null, stance:'charge', cry:0, cryCd:0, burnT:0, burnCd:0, scoutNote:'', mineCd:8,
-    t:0, wave:0, over:false, won:false, growCd:5, eatCd:8, tavCd:10, hungry:0, diff:2 };
+    t:0, wave:0, over:false, won:false, growCd:5, eatCd:8, tavCd:10, hungry:0, diff:2, rconq:{} };
 }
 function addB(t, x, y, quiet, o){
   const d = DEF[t], s = d.size || 1, hp = Array.isArray(d.hp) ? d.hp[0] : d.hp;
@@ -1457,8 +1480,8 @@ function addB(t, x, y, quiet, o){
 const kMul = rv => 2 + .5*rv.tier;
 function makeRival(k){
   const sp = rivSpots[k], L = LORDS[k+1];
-  return {id:k+1, name:L.name, pers:L.pers, tier:k+1, r:sp.r, kx:sp.kx, ky:sp.ky, awake:false, dead:false, wealth:0, pi:0, k:0, atkIn:120, truce:0,
-    out:false, q:[], scd:0, bcd:2, gcd:5, nh:0, nf:0, nb:0, pw:0, keepB:null, plan:null};
+  return {id:k+1, name:L.name, pers:L.pers, prof:L, tier:[1, 2, 2, 3, 3, 4, 4, 5][k], r:sp.r, kx:sp.kx, ky:sp.ky, awake:false, dead:false, wealth:0, pi:0, k:0, atkIn:300 + k*45, truce:0,
+    out:false, q:[], scd:0, bcd:2, gcd:5, nh:0, nf:0, nb:0, nt:0, ng:1, pw:0, keepB:null, plan:null, foe:null, nextFoe:null, ecd:150 + k*20, route:null, outT:0};
 }
 function newGame(){
   S = blank(); S.diff = nextDiff; bmap.fill(null); genWorld(S.seed); applyTerrain(); parts = []; capU = null;
@@ -1470,7 +1493,7 @@ function newGame(){
     for (let n = 0; n < 400; n++){ const res = rivalStep(rv, true); if (res === rv.tier || res === false) break; }
   }
   S.disc[HOME] = 1; S.disc[S.riv[0].r] = 1;
-  S.riv[0].atkIn = FIRST_RAID*DF().first;
+  S.riv[0].atkIn = FIRST_RAID*DF().first; S.riv[0].nextFoe = 0;
   refreshOwn(true);
   for (let i = 0; i < 6; i++) spawnVillager(true);
   addSoldier(keep, KX + .5, KY + 2.6, 'captain');
@@ -1478,20 +1501,21 @@ function newGame(){
   pathMap.fill(0); recomputePaths(true); drawGroundAll();
 }
 function snapshot(){
-  return JSON.stringify({ v:5, seed:S.seed, res:S.res, t:S.t, wave:S.wave, tmod:S.tmod, conq:S.conq, disc:S.disc, loot:S.loot, flag:S.flag,
+  return JSON.stringify({ v:6, seed:S.seed, res:S.res, t:S.t, wave:S.wave, tmod:S.tmod, conq:S.conq, disc:S.disc, loot:S.loot, flag:S.flag,
     capLvl:S.capLvl, capXp:S.capXp, capDown:capU ? 0 : Math.max(1, S.capDown), evCd:S.evCd, won:S.won, diff:S.diff,
-    riv:S.riv.map(r => ({awake:r.awake, dead:r.dead, wealth:Math.round(r.wealth), pi:r.pi, k:r.k, atkIn:r.out ? 45 : r.atkIn, truce:r.truce})),
+    riv:S.riv.map(r => ({awake:r.awake, dead:r.dead, wealth:Math.round(r.wealth), pi:r.pi, k:r.k, atkIn:r.out ? 45 : r.atkIn, truce:r.truce, nf:r.out ? r.foe : r.nextFoe})), rc:S.rconq,
     b:S.b.map(b => ({t:b.t, x:b.x, y:b.y, o:b.o, l:b.lvl, h:Math.round(b.hp), a:b.auto ? 1 : 0, s:DEF[b.t].garrison && b.o === 0 ? S.sold.filter(x => x.home === b && x.kind !== 'captain').map(x => x.kind) : 0, k:b.trainKind || 0})),
     vill:S.vill.length, stance:S.stance, mercs:S.sold.filter(s => s.home === keep && s.kind !== 'captain' && s.kind !== 'scout').map(s => s.kind) });
 }
 function loadFrom(o){
-  if (!o || o.v !== 5 || !Array.isArray(o.b) || !Array.isArray(o.riv)) throw new Error('bad save');
+  if (!o || o.v !== 6 || !Array.isArray(o.b) || !Array.isArray(o.riv)) throw new Error('bad save');
   S = blank(); bmap.fill(null); keep = null; parts = []; capU = null;
   S.seed = o.seed; for (const r of RES) S.res[r] = +o.res[r] || 0;
   S.t = o.t || 0; S.wave = o.wave || 0; S.tmod = o.tmod || {}; S.conq = o.conq || {}; S.disc = o.disc || {}; S.loot = o.loot || {}; S.flag = o.flag || null;
   S.capLvl = o.capLvl || 1; S.capXp = o.capXp || 0; S.capDown = o.capDown || 0; S.evCd = o.evCd || 120; S.won = !!o.won; S.diff = o.diff >= 0 && o.diff < DIFFS.length ? o.diff|0 : 2; nextDiff = S.diff;
   genWorld(S.seed); applyTerrain();
-  for (let k = 0; k < NRIV; k++){ const rv = makeRival(k), q = o.riv[k] || {}; Object.assign(rv, {awake:!!q.awake, dead:!!q.dead, wealth:q.wealth || 0, pi:q.pi || 0, k:q.k || 0, atkIn:q.atkIn || 90, truce:q.truce || 0}); S.riv.push(rv); }
+  for (let k = 0; k < NRIV; k++){ const rv = makeRival(k), q = o.riv[k] || {}; Object.assign(rv, {awake:!!q.awake, dead:!!q.dead, wealth:q.wealth || 0, pi:q.pi || 0, k:q.k || 0, atkIn:q.atkIn || 90, truce:q.truce || 0, nextFoe:q.nf === undefined ? null : q.nf}); S.riv.push(rv); }
+  S.rconq = o.rc && typeof o.rc === 'object' ? o.rc : {};
   for (const q of o.b){
     if (!DEF[q.t] || !inMap(q.x, q.y)) continue;
     const b = addB(q.t, q.x, q.y, true, q.o || 0);
@@ -1534,6 +1558,8 @@ function refreshOwn(quiet){
   regs[HOME].owner = 0;
   for (const k in S.conq) if (regs[+k].owner === -1) regs[+k].owner = 0;
   for (const b of S.b) if (b.t === 'outpost' && b.o === 0){ const rg = regAt(b.x, b.y); if (rg.owner === -1) rg.owner = 0; }
+  for (const k in S.rconq){ const rv = rivById(S.rconq[k]); if (rv && !rv.dead && regs[+k] && regs[+k].owner === -1) regs[+k].owner = rv.id; }
+  for (const b of S.b) if (b.t === 'outpost' && b.o > 0 && b.o < 9){ const rv = rivById(b.o), rg = regAt(b.x, b.y); if (rv && !rv.dead && rg.owner === -1) rg.owner = b.o; }
   for (const rg of regs) if (rg.owner === 0){ S.disc[rg.id] = 1; for (const a of rg.adj) S.disc[a] = 1; }
   const notes = [];
   if (S.scoutNote){ notes.push(S.scoutNote); S.scoutNote = ''; }
@@ -1930,7 +1956,7 @@ function sUpdate(s, dt){
     s.tg = best; s.tb = null;
     if (!best && flag){
       let b2 = 1e9;
-      for (const b of S.b) if (b.o !== 0 && Math.hypot(b.cx-flag[0], b.cy-flag[1]) < 8){ const ds = Math.hypot(b.cx-s.x, b.cy-s.y); if (ds < b2){ b2 = ds; s.tb = b; } }
+      for (const b of S.b) if (b.o !== 0 && Math.hypot(b.cx-flag[0], b.cy-flag[1]) < 8){ const ds = Math.hypot(b.cx-s.x, b.cy-s.y) + (WALLISH[b.t] ? 10 : 0); if (ds < b2){ b2 = ds; s.tb = b; } }
     }
     if (arch && !flag) pickPost(s); else if (s.post){ if (s.post.arch === s) s.post.arch = null; s.post = null; }
   }
@@ -2096,17 +2122,147 @@ function rivalStep(rv, free){
   if (!free) rv.wealth -= cost;
   return true;
 }
-function countRivals(){
-  for (const rv of S.riv){ rv.nh = rv.nf = rv.nb = 0; }
-  for (const b of S.b) if (b.o > 0 && b.o < 9){ const rv = rivById(b.o); if (!rv) continue; if (b.t === 'house') rv.nh++; else if (b.t === 'farm') rv.nf++; else if (b.t === 'barracks') rv.nb++; }
+/* A free spot of size s in region rg, as near to (cx, cy) as possible. */
+function regionSpot(rg, s, cx, cy, maxR){
+  for (let r = 0; r <= (maxR || 7); r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++){
+    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+    const x = Math.round(cx) + dx, y = Math.round(cy) + dy;
+    let ok = x >= 2 && y >= 2 && x + s < N - 2 && y + s < N - 2;
+    for (let j = 0; ok && j < s; j++) for (let i = 0; ok && i < s; i++){
+      const t = (x+i) + (y+j)*N;
+      if (reg[t] !== rg.id || bmap[t] || terrain[t] >= 3) ok = false;
+    }
+    // Keep a free ring round it so lords do not wall in their own people.
+    for (let j = -1; ok && j <= s; j++) for (let i = -1; ok && i <= s; i++){ const b = bAt(x+i, y+j); if (b && !DEF[b.t].soft) ok = false; }
+    if (ok) return [x, y];
+  }
+  return null;
 }
-function muster(rv){
-  const dx = KX - rv.kx, dy = KY - rv.ky, d = Math.hypot(dx, dy) || 1;
+function rivalBuild(rv, t, rg, cx, cy, maxR){
+  const s = DEF[t].size || 1, sp = regionSpot(rg, s, cx, cy, maxR);
+  if (!sp) return null;
+  for (let j = 0; j < s; j++) for (let i = 0; i < s; i++) if (terrain[sp[0]+i + (sp[1]+j)*N]) setTerr(sp[0]+i, sp[1]+j, 0, true);
+  const b = addB(t, sp[0], sp[1], false, rv.id); puff(b.cx, b.cy, 6);
+  return b;
+}
+let claimToast = 0;
+/* Claim a free region next to the lord's land with an outpost, and settle it. */
+function rivalExpand(rv){
+  if (S.t < 240 || !rv.keepB || rv.keepB.dead) return false;
+  // Each new region costs more than the last, so no lord can swallow the realm quickly.
+  const P = rv.prof, cost = 160 + 90*rv.ng + 12*rv.ng*rv.ng;
+  if (rv.wealth < cost) return false;
+  const own = regs.filter(rg => rg.owner === rv.id);
+  let best = null, bs = -1e9;
+  for (const rg of own) for (const a of rg.adj){
+    const c = regs[a];
+    if (c.owner !== -1 || c.id === HOME) continue;
+    let sc = Math.random()*.8 - Math.hypot(c.sx - rv.kx, c.sy - rv.ky)/18;
+    if (P.focus === 'meadow') sc += c.type === 'meadow' ? 2 : c.type === 'lake' ? 1 : 0;
+    else if (P.focus === 'hills') sc += c.type === 'hills' ? 2.2 : 0;
+    else if (P.focus === 'gold') sc += c.poi === 'mine' ? 3.5 : c.poi === 'ruins' ? 1.5 : 0;
+    if (c.poi) sc += 1;
+    const dp = Math.hypot(c.sx - KX, c.sy - KY);
+    if (dp < 24) sc -= (24 - dp)/6 * (P.agg < 1 ? .5 : 1.2);
+    if (sc > bs){ bs = sc; best = c; }
+  }
+  if (!best) return false;
+  const op = rivalBuild(rv, 'outpost', best, best.sx, best.sy);
+  if (!op) return false;
+  rv.wealth -= cost;
+  // Settle the new land after the lord's own taste.
+  const list = ['farm', 'house'];
+  if (P.food >= 1.3) list.push('farm');
+  if (P.def >= 1.3 || Math.random() < P.def - .8) list.push('watch');
+  if (P.pers === 'warlord' && rv.ng >= 3) list.push('barracks');
+  for (const t of list) rivalBuild(rv, t, best, op.x, op.y, 5);
+  if (best.disc && S.t > claimToast){ claimToast = S.t + 25; toast(rv.name + ' claims the ' + best.type + ' lands to the ' + compass(best.sx - KX, best.sy - KY) + '.'); }
+  return true;
+}
+/* Once the castle is finished, keep building up the outer land. */
+function rivalGrow(rv){
+  const P = rv.prof, own = regs.filter(rg => rg.owner === rv.id && rg.id !== rv.r);
+  if (!own.length) return false;
+  const rg = own[(Math.random()*own.length)|0];
+  const op = S.b.find(b => b.t === 'outpost' && b.o === rv.id && reg[b.x + b.y*N] === rg.id);
+  const cx = op ? op.x : rg.sx, cy = op ? op.y : rg.sy;
+  if (S.b.filter(b => b.o === rv.id && reg[b.x + b.y*N] === rg.id).length >= 7) return false;
+  const w = {farm:1.2*P.food, house:1, watch:.5*P.def, barracks:P.pers === 'warlord' ? .7 : .35, tower:P.def >= 1.3 ? .4 : 0};
+  let r = Math.random()*Object.values(w).reduce((a, c) => a + c, 0), t = 'farm';
+  for (const k in w){ r -= w[k]; if (r <= 0){ t = k; break; } }
+  if (DEF[t].tier > (rv.keepB ? rv.keepB.lvl : 1)) t = 'farm';
+  const cost = planCostOf(t);
+  if (rv.wealth < cost) return false;
+  if (!rivalBuild(rv, t, rg, cx, cy, 6)) return false;
+  rv.wealth -= cost;
+  return true;
+}
+function countRivals(){
+  for (const rv of S.riv){ rv.nh = rv.nf = rv.nb = rv.nt = 0; rv.ng = 0; }
+  for (const b of S.b) if (b.o > 0 && b.o < 9){ const rv = rivById(b.o); if (!rv) continue; if (b.t === 'house') rv.nh++; else if (b.t === 'farm') rv.nf++; else if (b.t === 'barracks') rv.nb++; else if (b.t === 'watch' || b.t === 'tower') rv.nt++; }
+  for (const rg of regs) if (rg.owner > 0 && rg.owner < 9){ const rv = rivById(rg.owner); if (rv) rv.ng++; }
+}
+const known = rv => regs[rv.r].disc;
+const keepOf = id => id === 0 ? keep : (rivById(id) || {}).keepB;
+/* A rough measure of strength, used by the lords to pick fights. */
+function power(id){
+  if (id === 0){
+    const land = regs.reduce((n, rg) => n + (rg.owner === 0 ? 1 : 0), 0);
+    return land + S.sold.length/5 + keep.lvl + pop()/15;
+  }
+  const rv = rivById(id);
+  return rv.ng + rv.nb*.8 + rv.nt*.3 + rv.tier*.5 + (rv.keepB ? rv.keepB.lvl : 1);
+}
+function chooseFoe(rv){
+  const me = power(rv.id), opts = [];
+  if (rv.awake && rv.truce <= 0) opts.push(0);
+  if (S.t > 600) for (const o of S.riv) if (o !== rv && !o.dead && o.keepB && !o.keepB.dead) opts.push(o.id);
+  if (!opts.length) return null;
+  const pp = power(0), top = Math.max(0, ...S.riv.filter(o => !o.dead).map(o => power(o.id)));
+  let best = null, bs = -1;
+  for (const id of opts){
+    const k = keepOf(id), d = Math.hypot(k.x - rv.kx, k.y - rv.ky), them = power(id);
+    let sc = 1/(1 + d/40);
+    const mode = rv.prof.target;
+    if (mode === 'nearest') sc *= sc*2.2;
+    else if (mode === 'weakest') sc *= (me + 1)/(them + 1);
+    else sc *= (them + 1)/(me + 1) * 1.2;
+    // A lord who grows far ahead of the others draws them all against him.
+    if (id > 0){ const others = S.riv.filter(o => !o.dead && o.id !== id); const avg = others.reduce((a, o) => a + power(o.id), 0)/(others.length || 1); if (them > avg*1.4) sc *= 1.6 + (them/(avg + 1) - 1.4); }
+    if (id === 0){
+      sc *= 1.25;
+      // When Thornwick outgrows every rival, the lords turn on it together.
+      if (pp > top*1.4) sc *= 2 + (pp/(top + 1) - 1.4)*2;
+    }
+    sc *= .75 + Math.random()*.5;
+    if (sc > bs){ bs = sc; best = id; }
+  }
+  return best;
+}
+function muster(rv, foe){
+  const k = keepOf(foe || 0) || keep, dx = k.x - rv.kx, dy = k.y - rv.ky, d = Math.hypot(dx, dy) || 1;
   return [rv.kx + .5 + dx/d*8.5, rv.ky + .5 + dy/d*8.5];
 }
-function launch(rv){
+/* A route for a host marching on another lord. It goes round other buildings and
+   breaks through the target's walls where that is cheapest. */
+function warRoute(rv, foe){
+  const k = keepOf(foe); if (!k || k.dead) return null;
+  const m = muster(rv, foe), sx = clampN(m[0]), sy = clampN(m[1]);
+  const cost = i => {
+    const b = bmap[i];
+    if (b){ if (b.o === foe) return DEF[b.t].walk ? terrCost(i, b) : 3 + b.hp/12; if (!DEF[b.t].walk) return Infinity; }
+    return terrCost(i, b);
+  };
+  const src = sx + sy*N, tgt = k.x + k.y*N;
+  if (!search([src], tgt, cost)) return null;
+  return [[sx, sy], ...trace(src, tgt).map(i => [i % N, (i / N) | 0])];
+}
+function launch(rv, foe){
+  foe = foe || 0;
+  if (foe !== 0) return launchWar(rv, foe);
+  rv.foe = 0;
   const se = season(), night = isNight();
-  const pw = (rv.k*.7 + rv.tier*1.4 + rv.nb*.6) * DF().pow;
+  const pw = hostPower(rv);
   const mult = (se === 1 ? 1.25 : se === 3 ? .7 : 1) * (night ? 1.15 : 1) * (rv.pers === 'warlord' ? 1.15 : 1);
   const q = [], add = (t, n, tk) => { for (let i = 0; i < n; i++) q.push([t, tk]); };
   add('raider', Math.round((2 + pw)*mult));
@@ -2116,9 +2272,22 @@ function launch(rv){
   const rams = pw >= 5 ? 1 + Math.floor((pw - 5)/5) : 0, ladders = (rv.tier >= 2 || pw >= 7) ? Math.floor(pw/5) : 0, cats = (rv.tier >= 3 || pw >= 10) ? 1 + Math.floor(Math.max(0, pw - 10)/6) : 0;
   add('ladder', ladders); add('ram', rams); add('catapult', cats);
   if (rv.pers === 'schemer' && S.b.some(b => b.t === 'outpost' && b.o === 0)) add('raider', 2 + Math.floor(pw/3), 'outpost');
+  if (q.length > 60) q.length = 60;
   rv.q = q; rv.pw = pw; rv.out = true; rv.outT = 0; rv.k++; rv.scd = 0; flowDirty = true;
   const eng = [rams ? 'a battering ram' : '', ladders ? 'ladders' : '', cats ? 'a catapult' : ''].filter(Boolean);
   toast(rv.name + ' marches on Thornwick from the ' + compass(rv.kx - KX, rv.ky - KY) + ' with ' + q.length + ' men' + (eng.length ? ', bringing ' + eng.join(' and ') : '') + (night ? ', under cover of night.' : '.'));
+}
+/* Hosts grow with every attack, with barracks and land, and slowly with time. */
+const hostPower = rv => (rv.k*.7 + rv.tier*1.4 + rv.nb*.6 + Math.max(0, rv.ng - 1)*.5 + S.t/600) * DF().pow * rv.prof.army;
+function launchWar(rv, foe){
+  const tr = rivById(foe), route = warRoute(rv, foe);
+  if (!tr || !route){ rv.atkIn = 60; rv.nextFoe = null; return; }
+  const pw = hostPower(rv)*.65, q = [], add = (t, n) => { for (let i = 0; i < n; i++) q.push([t, null]); };
+  add('raider', Math.round(3 + pw*1.1)); add('brute', Math.floor(pw/4)); add('earcher', pw >= 3 ? Math.floor((pw - 1)/2.5) : 0);
+  add('ram', pw >= 4 ? 1 + Math.floor((pw - 4)/6) : 0); add('catapult', pw >= 9 ? 1 + Math.floor((pw - 9)/7) : 0);
+  if (q.length > 60) q.length = 60;
+  rv.q = q; rv.pw = pw; rv.out = true; rv.outT = 0; rv.k++; rv.scd = 0; rv.foe = foe; rv.route = route;
+  if (known(rv) || known(tr)) toast((known(rv) ? rv.name : 'A lord in the unknown') + ' marches on ' + (known(tr) ? tr.name : 'a lord in the unknown') + ' with ' + q.length + ' men.');
 }
 function spawnEnemy(fac, type, tk, pw, x, y, mode){
   const D = DF(), big = type === 'brute', hp = (24 + 5*pw) * (big ? 3 : type === 'ram' ? 5 : type === 'catapult' ? 3 : type === 'earcher' ? .7 : 1) * D.hp;
@@ -2129,7 +2298,23 @@ function spawnEnemy(fac, type, tk, pw, x, y, mode){
   S.en.push(e);
   return e;
 }
-function rivalFall(rv){
+function rivalFall(rv, by){
+  const cq = by > 0 && by < 9 ? rivById(by) : null;
+  if (cq && !cq.dead){
+    // One lord takes another: the castle, the land and the people change hands.
+    rv.dead = true; rv.out = false; rv.q = [];
+    for (const e of S.en) if (e.fac === rv.id){ e.dead = true; puff(e.x, e.y, 3, '#b9b0a0'); }
+    for (const b of S.b) if (b.o === rv.id){ b.o = cq.id; b.fire = 0; b.hp = Math.max(1, b.hp*.5); }
+    S.rconq[rv.r] = cq.id;
+    for (const k in S.rconq) if (S.rconq[k] === rv.id) S.rconq[k] = cq.id;
+    cq.wealth += 100*rv.tier; cq.k++; cq.atkIn = Math.max(cq.atkIn, 240);
+    for (const e of S.en) if (e.fac === cq.id && e.mode === 'war'){ e.mode = 'flee'; e.path = null; }
+    ownDirty = flowDirty = pathsDirty = true;
+    if (known(rv) || known(cq)) toast((known(cq) ? cq.name : 'A lord from the unknown') + ' has taken the keep of ' + (known(rv) ? rv.name : 'a distant lord') + ' and all their land.');
+    save();
+    return;
+  }
+  for (const k in S.rconq) if (S.rconq[k] === rv.id){ S.conq[k] = 1; delete S.rconq[k]; }
   rv.dead = true; rv.out = false; rv.q = [];
   for (const e of S.en) if (e.fac === rv.id){ e.dead = true; puff(e.x, e.y, 3, '#b9b0a0'); }
   for (const b of S.b) if (b.o === rv.id){ b.o = 0; b.fire = 0; b.auto = true; }
@@ -2143,38 +2328,67 @@ function rivalFall(rv){
 function rivalsTick(dt){
   if ((cntCd -= dt) <= 0){ cntCd = 3; countRivals(); }
   for (const rv of S.riv){
-    if (rv.dead || !rv.awake) continue;
-    rv.wealth += dt*(.55 + .15*rv.nh + .3*rv.nf + .025*S.t/60) * [1, 1.25, 1.5, 1.8, 2.1][rv.tier-1] * (season() === 3 ? .7 : 1) * DF().eco;
+    if (rv.dead) continue;
+    // Lords only march on Thornwick once they know of it: when their land is found, it borders yours, or word spreads.
+    if (!rv.awake && (S.t > 900 + rv.id*150 || regs[rv.r].disc || regs.some(rg => rg.owner === rv.id && rg.adj.some(a => regs[a].owner === 0)))){
+      rv.awake = true;
+      if (!rv.out){ rv.nextFoe = chooseFoe(rv); if (rv.nextFoe === 0) rv.atkIn = Math.min(rv.atkIn, 100*DF().atk); }
+    }
+    const P = rv.prof;
+    rv.wealth += dt*(.55 + .15*rv.nh + .3*rv.nf + .2*Math.max(0, rv.ng - 1) + .025*S.t/60) * [1, 1.25, 1.5, 1.8, 2.1][rv.tier-1] * (season() === 3 ? .7 : 1) * DF().eco * P.eco;
     if ((rv.bcd -= dt) <= 0){ rv.bcd = 1.2; rivalStep(rv, false); }
+    if ((rv.ecd -= dt) <= 0){
+      rv.ecd = (70 + Math.random()*50)/P.expand;
+      if (!rivalExpand(rv) && rv.pi >= rv.plan.length) rivalGrow(rv);
+    }
     if ((rv.gcd -= dt) <= 0){
       rv.gcd = S.en.some(e => e.fac === rv.id && e.mode === 'guard' && e.hp < e.max) ? 30 : 9;
-      const want = Math.round((4 + rv.tier*2 + rv.nb*2)*DF().guard), have = S.en.reduce((n, e) => n + (e.fac === rv.id && e.mode === 'guard' ? 1 : 0), 0);
-      if (have < want){ const p = freeNear(rv.kx + .5, rv.ky + 2.5, 2.5); const g = spawnEnemy(rv.id, have % 3 === 2 ? 'earcher' : have % 5 === 4 ? 'brute' : 'raider', null, 4 + rv.tier*2.5 + S.t/150, p[0], p[1], 'guard'); g.hx = rv.kx + .5; g.hy = rv.ky + .5; }
+      const want = Math.round((4 + rv.tier*2 + rv.nb*2)*DF().guard*P.def), have = S.en.reduce((n, e) => n + (e.fac === rv.id && e.mode === 'guard' ? 1 : 0), 0);
+      if (have < want && rv.keepB && !rv.keepB.dead){ const p = freeNear(rv.kx + .5, rv.ky + 2.5, 2.5); const g = spawnEnemy(rv.id, have % 3 === 2 ? 'earcher' : have % 5 === 4 ? 'brute' : 'raider', null, 4 + rv.tier*2.5 + S.t/150, p[0], p[1], 'guard'); g.hx = rv.kx + .5; g.hy = rv.ky + .5; }
     }
     if (rv.truce > 0) rv.truce -= dt;
-    else if (!rv.out){ rv.atkIn -= dt; if (rv.atkIn <= 0){ if (S.riv.some(o => o.out && o !== rv)) rv.atkIn = 35; else launch(rv); } }
+    if (!rv.out){
+      rv.atkIn -= dt;
+      if (rv.atkIn <= 0){
+        let foe = rv.nextFoe;
+        if (foe === null || (foe === 0 && (!rv.awake || rv.truce > 0)) || (foe > 0 && (!rivById(foe) || rivById(foe).dead))) foe = chooseFoe(rv);
+        if (foe === null) rv.atkIn = 60;
+        else if (foe === 0 && DF() !== DIFFS[3] && DF() !== DIFFS[4] && S.riv.some(o => o.out && o.foe === 0 && o !== rv)) rv.atkIn = 35;
+        else launch(rv, foe);
+      }
+    }
     if (rv.q.length){
-      if ((rv.scd -= dt) <= 0){ rv.scd = .45; const [t, tk] = rv.q.shift(), m = muster(rv), p = freeNear(m[0], m[1], 2); spawnEnemy(rv.id, t, tk, rv.pw, p[0], p[1]); }
-    } else if (rv.out && (rv.outT += dt) > 260){
-      for (const e of S.en) if (e.fac === rv.id && e.mode === 'atk'){ e.mode = 'flee'; e.next = null; e.path = null; }
+      if ((rv.scd -= dt) <= 0){
+        rv.scd = .45; const [t, tk] = rv.q.shift(), m = muster(rv, rv.foe), p = freeNear(m[0], m[1], 2), war = rv.foe > 0;
+        const e = spawnEnemy(rv.id, t, tk, rv.pw, p[0], p[1], war ? 'war' : 'atk');
+        if (war){ e.foe = rv.foe; e.route = rv.route; e.ri = 0; e.tbT = 0; }
+      }
+    } else if (rv.out && (rv.outT += dt) > (rv.foe > 0 ? 480 : 260)){
+      for (const e of S.en) if (e.fac === rv.id && (e.mode === 'atk' || e.mode === 'war')){ e.mode = 'flee'; e.next = null; e.path = null; }
       rv.outT = -1e9;
-      toast('The host of ' + rv.name + ' gives up the siege and withdraws.');
-    } else if (rv.out && !S.en.some(e => e.fac === rv.id && (e.mode === 'atk' || e.mode === 'flee'))){
-      rv.out = false; S.wave++;
-      rv.atkIn = (rv.pers === 'warlord' ? 115 : rv.pers === 'builder' ? 175 : 145) * (.85 + Math.random()*.3) * DF().atk;
-      const bonus = 10 + 5*Math.round(rv.pw); S.res.gold += bonus;
-      toast('The host of ' + rv.name + ' is beaten back. Your people gather ' + bonus + ' gold from the field.');
-      save();
+      if (rv.foe === 0) toast('The host of ' + rv.name + ' gives up the siege and withdraws.');
+    } else if (rv.out && !S.en.some(e => e.fac === rv.id && (e.mode === 'atk' || e.mode === 'war' || e.mode === 'flee'))){
+      rv.out = false;
+      rv.atkIn = (rv.pers === 'warlord' ? 115 : rv.pers === 'builder' ? 175 : 145) * (.85 + Math.random()*.3) * DF().atk * P.agg;
+      if (rv.foe === 0){
+        S.wave++;
+        const bonus = 10 + 5*Math.round(rv.pw); S.res.gold += bonus;
+        toast('The host of ' + rv.name + ' is beaten back. Your people gather ' + bonus + ' gold from the field.');
+        save();
+      }
+      rv.foe = null; rv.route = null;
+      rv.nextFoe = chooseFoe(rv);
     }
   }
   for (const b of S.b) if (b.t === 'camp'){
     if ((b.cd -= dt) <= 0){ b.cd = 50; for (let k = 0; k < 2; k++) spawnEnemy(9, k ? 'looter' : 'raider', 'loot', 2 + S.wave*.3, b.x + .6, b.y + .6 + k*.3); }
   }
 }
-function hitEnemy(e, dmg){
+function hitEnemy(e, dmg, by){
   if (e.dead) return;
   e.hp -= dmg;
   if (e.hp <= 0){
+    if (by){ e.dead = true; puff(e.x, e.y, 4, '#b9b0a0'); return; }
     e.dead = true; gain('gold', e.type === 'brute' ? 6 : e.type === 'ram' ? 8 : e.type === 'catapult' ? 12 : 2, e.x, e.y); puff(e.x, e.y, 4, '#b9b0a0');
     if (capU && !capU.dead && Math.hypot(capU.x - e.x, capU.y - e.y) < 5 && ++S.capXp >= S.capLvl*5){
       S.capXp = 0; S.capLvl++; capU.max += 30; capU.hp = capU.max;
@@ -2187,14 +2401,14 @@ function ignite(b){
   b.fire = 20; b.spread = 1.5;
   if (b.o === 0 && S.t > fireToast){ fireToast = S.t + 20; toast('Fire! The ' + DEF[b.t].name.toLowerCase() + ' is burning. A well nearby puts fires out fast.'); }
 }
-function damageB(b, dmg, raw){
+function damageB(b, dmg, raw, by){
   if (b.dead) return;
   if (b.o === 0 && !raw){ const d = baileyOf(b); dmg *= d >= 2 ? .6 : d === 1 ? .8 : 1; if (b.t === 'gate' && b.shut) dmg *= .7; }
   b.hp -= dmg; if (!raw) b.hit = .15;
   if (b.hp <= 0){
     if (b === keep){ b.hp = 0; endScreen(false); return; }
     puff(b.cx, b.cy, 12, '#8a7f70');
-    if (b.t === 'keep'){ const rv = rivById(b.o); removeB(b); if (rv) rivalFall(rv); return; }
+    if (b.t === 'keep'){ const rv = rivById(b.o); removeB(b); if (rv) rivalFall(rv, by); return; }
     if (b.o === 0 && b.t !== 'stakes') toast((b.fire > 0 ? 'Fire consumed the ' : 'Raiders destroyed the ') + DEF[b.t].name.toLowerCase() + '.' + (b.t === 'outpost' ? ' The land it held is lost.' : ''));
     if (b.t === 'camp'){ S.res.gold += 60; toast('The bandit camp is burned out. You take 60 gold from their hoard.'); for (const e of S.en) if (e.fac === 9) e.tk = e.tk || 'loot'; }
     removeB(b);
@@ -2219,27 +2433,125 @@ function flowNext(cx, cy){
   }
   return opts.length ? opts[(Math.random()*opts.length)|0] : [KX, KY];
 }
+/* Units of other lords that march on lord `fac`, or that lord's own units when marching on it. */
+function warFoes(fac, x, y, maxD){
+  let best = null, bd = maxD;
+  for (const o of S.en){
+    if (o.dead || o.fac === fac || o.fac === 9) continue;
+    if (o.mode !== 'war' || o.foe !== fac) continue;
+    const d = Math.hypot(o.x - x, o.y - y); if (d < bd){ bd = d; best = o; }
+  }
+  return best;
+}
 function guardUpdate(e, dt){
-  const s = nearestSold(e.x, e.y, e.type === 'earcher' ? 4 : .9, e.type === 'earcher');
-  if (s){
+  const r0 = e.type === 'earcher' ? 4 : .9;
+  let s = nearestSold(e.x, e.y, r0, e.type === 'earcher'), w = null;
+  if (!s){ w = warFoes(e.fac, e.x, e.y, r0); }
+  if (s || w){
     if (e.cd <= 0){
-      if (e.type === 'earcher'){ e.cd = 1.3; S.shots.push({x:e.x, y:e.y, z:9, e:s, t:0, dur:.3, dmg:e.dmg}); }
-      else { e.cd = 1; e.walk += .3; hitSold(s, e.dmg); }
+      const tg = s || w;
+      if (e.type === 'earcher'){ e.cd = 1.3; S.shots.push({x:e.x, y:e.y, z:9, e:tg, t:0, dur:.3, dmg:e.dmg, by:e.fac}); }
+      else { e.cd = 1; e.walk += .3; if (s) hitSold(s, e.dmg); else hitEnemy(w, e.dmg, e.fac); }
     }
     return;
   }
   if ((e.think -= dt) <= 0){
     e.think = .8;
-    const t = nearestSold(e.hx, e.hy, 9, false);
+    const t = nearestSold(e.hx, e.hy, 9, false) || warFoes(e.fac, e.hx, e.hy, 9);
     if (t) goTo(e, clampN(t.x), clampN(t.y), t.x, t.y, rivWalk);
     else if (!e.path && (Math.random() < .12 || Math.hypot(e.x - e.hx, e.y - e.hy) > 5)){ const p = freeNear(e.hx, e.hy + 1, 3); goTo(e, p[0], p[1], p[0], p[1], rivWalk); }
   }
   if (e.path) follow(e, dt, 1.1);
 }
+/* Step straight toward (tx, ty). Returns the building in the way, or null. */
+function stepToward(e, tx, ty, dt, sp){
+  const dx = tx - e.x, dy = ty - e.y, d = Math.hypot(dx, dy);
+  if (d < .05) return null;
+  const st = Math.min(d, sp*dt*(wet(clampN(e.x), clampN(e.y)) ? .3 : 1)), nx = e.x + dx/d*st, ny = e.y + dy/d*st;
+  const b = bAt(clampN(nx), clampN(ny));
+  if (b && !DEF[b.t].walk && b !== bAt(clampN(e.x), clampN(e.y))) return b;
+  if (terrain[tileI(nx, ny)] === 4) return null;
+  e.x = nx; e.y = ny; e.walk += dt; e.moving = true;
+  if (Math.abs(dx - dy) > .01) e.face = dx - dy > 0 ? 1 : -1;
+  return null;
+}
+/* The nearest building of `foe`, with walls counted as much further away: a host
+   breaks in where it must, then goes for the buildings and people inside. */
+function warTarget(e, foe, rad){
+  let best = null, bs = 1e9;
+  for (const b of S.b){
+    if (b.o !== foe || b.dead) continue;
+    const d = Math.hypot(b.cx - e.x, b.cy - e.y);
+    if (d > rad) continue;
+    const sc = d + (WALLISH[b.t] ? 8 : 0) + (b.t === 'keep' ? -1 : 0);
+    if (sc < bs){ bs = sc; best = b; }
+  }
+  return best;
+}
+function hitBuildingWar(e, b){
+  if (e.cd > 0) return;
+  const T = e.type;
+  e.cd = T === 'ram' ? 1.6 : 1; e.walk += .3;
+  damageB(b, e.dmg * (T === 'ram' ? (WALLISH[b.t] ? 7 : b.t === 'keep' ? 4 : 1) : T === 'earcher' ? .6 : e.bm) * .6, false, e.fac);
+}
+function warUpdate(e, dt){
+  const T = e.type, foe = e.foe, tr = rivById(foe);
+  if (!tr || tr.dead || !tr.keepB || tr.keepB.dead){ e.mode = 'flee'; e.path = null; return; }
+  const sp = e.sp*1.05;
+  if (T !== 'ram' && T !== 'catapult'){
+    if ((e.think -= dt) <= 0){
+      e.think = .5;
+      // Fight the guards and hosts of the lord they march on, and any of your soldiers that come close.
+      let best = null, bd = T === 'earcher' ? 4.2 : 2.6;
+      for (const o of S.en){ if (o.dead || o.fac !== foe) continue; const d = Math.hypot(o.x - e.x, o.y - e.y); if (d < bd){ bd = d; best = o; } }
+      const s = nearestSold(e.x, e.y, 1.4, false); if (s && Math.hypot(s.x - e.x, s.y - e.y) < bd) best = s;
+      e.tg = best;
+    }
+    const h = e.tg && !e.tg.dead ? e.tg : null;
+    if (h){
+      const d = Math.hypot(h.x - e.x, h.y - e.y), rng = T === 'earcher' ? 4.2 : .9;
+      if (d <= rng){
+        if (e.cd <= 0){
+          if (T === 'earcher'){ e.cd = 1.3; S.shots.push({x:e.x, y:e.y, z:9, e:h, t:0, dur:.3, dmg:e.dmg, by:e.fac}); }
+          else { e.cd = 1; e.walk += .3; if (h.side) hitEnemy(h, e.dmg*(T === 'brute' ? 1.6 : 1), e.fac); else hitSold(h, e.dmg); }
+        }
+        return;
+      }
+      const blk = stepToward(e, h.x, h.y, dt, sp);
+      if (!blk) return;
+      if (blk.o === foe){ hitBuildingWar(e, blk); return; }
+      e.tg = null;
+    }
+  }
+  if ((e.tbT -= dt) <= 0 || (e.tb && e.tb.dead)){ e.tbT = 1.5; e.tb = warTarget(e, foe, T === 'catapult' ? 9.5 : 4); }
+  const tb = e.tb && !e.tb.dead ? e.tb : null;
+  if (tb){
+    if (T === 'catapult'){
+      if (e.ammo > 0){ if (e.cd <= 0){ e.cd = 4.5; e.ammo--; S.shots.push({x:e.x, y:e.y, z:14, tx:tb.cx, ty:tb.cy, t:0, dur:Math.max(.7, Math.hypot(tb.cx-e.x, tb.cy-e.y)/6), dmg:30, stone:1, side:1, war:foe, by:e.fac, dmgB:.6}); } return; }
+    } else {
+      const d = Math.hypot(tb.cx - e.x, tb.cy - e.y), reach = .8 + tb.s*.45;
+      if (d <= reach){ hitBuildingWar(e, tb); return; }
+      const blk = stepToward(e, tb.cx, tb.cy + (tb.s > 1 ? .6 : 0), dt, sp);
+      if (!blk) return;
+      if (blk.o === foe){ hitBuildingWar(e, blk); return; }
+      e.tb = null; e.tbT = 2;
+    }
+  }
+  // March along the lord's route, breaking what blocks it.
+  const R = e.route;
+  if (!R || e.ri >= R.length){ e.tb = tr.keepB; return; }
+  if (e.ri === 0){ let bd = 1e9; for (let i = 0; i < Math.min(R.length, 30); i++){ const d = Math.hypot(R[i][0] - e.x, R[i][1] - e.y); if (d < bd){ bd = d; e.ri = i; } } if (e.ri === 0) e.ri = 1; }
+  const [tx, ty] = R[Math.min(e.ri, R.length - 1)], b = bAt(tx, ty);
+  if (b && b.o === foe && !DEF[b.t].walk){ if (Math.hypot(b.cx - e.x, b.cy - e.y) <= .8 + b.s*.45) hitBuildingWar(e, b); else stepToward(e, tx, ty, dt, sp); return; }
+  const blk = stepToward(e, tx + e.ox*.5, ty + e.oy*.5, dt, sp);
+  if (blk){ if (blk.o === foe) hitBuildingWar(e, blk); else e.ri++; return; }
+  if (Math.hypot(tx - e.x, ty - e.y) < .35) e.ri++;
+}
 function eUpdate(e, dt){
   e.cd -= dt; e.moving = false;
   if (e.burn > 0){ e.burn -= dt; hitEnemy(e, 7*dt); if (e.dead) return; }
   if (e.mode === 'guard') return guardUpdate(e, dt);
+  if (e.mode === 'war') return warUpdate(e, dt);
   if (e.mode === 'flee'){
     const rv = rivById(e.fac);
     if (!rv || rv.dead){ e.dead = true; return; }
@@ -2269,6 +2581,20 @@ function eUpdate(e, dt){
       return;
     }
   }
+  if (!e.tk && T !== 'ram' && T !== 'catapult' && T !== 'ladder' && (e.nearT = (e.nearT || 0) - dt) <= 0){
+    e.nearT = 1;
+    let best = null, bd = 2.8;
+    for (const b of S.b){
+      if (b.o !== 0 || WALLISH[b.t] || b.t === 'stakes' || b.t === 'bridge') continue;
+      const d = Math.hypot(b.cx - e.x, b.cy - e.y);
+      if (d >= bd) continue;
+      let clear = true;
+      for (let k = 1; k < 6 && clear; k++){ const q = bAt(clampN(e.x + (b.cx - e.x)*k/6), clampN(e.y + (b.cy - e.y)*k/6)); if (q && q !== b && q.o === 0 && WALLISH[q.t]) clear = false; }
+      if (clear){ bd = d; best = b; }
+    }
+    if (best){ e.tk = 'near'; e.target = best; e.next = null; }
+  }
+  if (e.tk === 'near' && (!e.target || e.target.dead || e.target.o !== 0)){ e.tk = null; e.target = null; e.next = null; }
   if (e.tk){
     if (!e.target || e.target.dead || e.target.o !== 0){
       let best = null, bd = 1e9;
@@ -2571,7 +2897,7 @@ function tick(dt){
     const d = DEF[b.t], isKeep = b.t === 'keep';
     if (d.range || isKeep){
       b.cd -= dt;
-      const targets = b.o === 0 ? S.en : S.sold;
+      const targets = b.o === 0 ? S.en : S.en.some(x => x.mode === 'war' && x.foe === b.o) ? S.sold.concat(S.en.filter(x => x.mode === 'war' && x.foe === b.o)) : S.sold;
       if (b.cd <= 0 && targets.length){
         let range = isKeep ? 4.5 : d.range;
         if (night && b.o === 0 && !isKeep && !near(b, 'brazier', 4.5)) range *= .75;
@@ -2583,7 +2909,7 @@ function tick(dt){
         }
         if (e){
           if (mang){ b.cd = d.rate; S.shots.push({x:b.cx, y:b.cy, z:16, tx:e.x, ty:e.y, t:0, dur:Math.max(.6, Math.hypot(e.x-b.cx, e.y-b.cy)/6), dmg:d.dmg, stone:1}); }
-          else { b.cd = isKeep ? 1 : d.rate; S.shots.push({x:b.cx, y:b.cy, z:isKeep ? 30 + b.lvl*8 : b.t === 'tower' ? 24 : 18, e, t:0, dur:.28, burn:b.o === 0 && S.burnT > 0, dmg:isKeep ? KEEP_DMG[b.lvl-1] : b.t === 'mangonel' ? 14 : d.dmg}); }
+          else { b.cd = isKeep ? 1 : d.rate; S.shots.push({x:b.cx, y:b.cy, z:isKeep ? 30 + b.lvl*8 : b.t === 'tower' ? 24 : 18, e, t:0, dur:.28, by:b.o, burn:b.o === 0 && S.burnT > 0, dmg:isKeep ? KEEP_DMG[b.lvl-1] : b.t === 'mangonel' ? 14 : d.dmg}); }
         } else b.cd = .25;
       } else if (b.cd <= 0) b.cd = .25;
     }
@@ -2606,7 +2932,10 @@ function tick(dt){
     a.done = true;
     if (a.stone){
       const hb = bAt(clampN(a.tx), clampN(a.ty));
-      if (a.side){
+      if (a.war){
+        if (hb && hb.o === a.war){ damageB(hb, a.dmg*(a.dmgB || 1), false, a.by); if (!hb.dead && Math.random() < .3) ignite(hb); }
+        for (const e of S.en) if (e.fac === a.war && Math.hypot(e.x-a.tx, e.y-a.ty) <= 1.4) hitEnemy(e, 12, a.by);
+      } else if (a.side){
         if (hb && hb.o === 0){ damageB(hb, a.dmg); if (!hb.dead && Math.random() < .35) ignite(hb); }
         for (const s of S.sold) if (Math.hypot(s.x-a.tx, s.y-a.ty) <= 1.3) hitSold(s, 12);
       } else {
@@ -2616,7 +2945,7 @@ function tick(dt){
       puff(a.tx, a.ty, 8, '#a89f8c');
       if (S.over) return;
     } else if (a.b){ if (!a.b.dead){ damageB(a.b, a.dmg); if (a.burn && !a.b.dead && a.b.o !== 0 && Math.random() < .25) ignite(a.b); } }
-    else if (a.e && !a.e.dead){ if (a.e.side){ hitEnemy(a.e, a.dmg); if (a.burn) a.e.burn = 4; } else hitSold(a.e, a.dmg); }
+    else if (a.e && !a.e.dead){ if (a.e.side){ hitEnemy(a.e, a.dmg, a.by); if (a.burn) a.e.burn = 4; } else hitSold(a.e, a.dmg); }
   }
   S.shots = S.shots.filter(a => !a.done);
   S.en = S.en.filter(e => !e.dead);
@@ -3149,13 +3478,13 @@ function drawMini(){
     else set(x, y, own ? 118 : 74, own ? 180 : 122, own ? 78 : 60);
   }
   for (const p of props) if (p.k === 4 && seenAt(p.x, p.y)) set(p.x, p.y, 236, 196, 80);
-  for (const e of S.en) if (seenAt(e.x, e.y) && e.mode === 'atk') set(clampN(e.x), clampN(e.y), 240, 60, 50);
+  for (const e of S.en) if (seenAt(e.x, e.y) && (e.mode === 'atk' || e.mode === 'war')){ if (e.mode === 'atk') set(clampN(e.x), clampN(e.y), 240, 60, 50); else { const c = FCOL[fcol(e.fac)]; set(clampN(e.x), clampN(e.y), (c>>16)&255, (c>>8)&255, c&255); } }
   for (const s of S.sold) set(clampN(s.x), clampN(s.y), 90, 190, 250);
   if (S.flag) set(S.flag[0], S.flag[1], 255, 220, 60);
   mctx.putImageData(mim, 0, 0);
   const z = Z(), c0 = [((W/2 - cam.x)/z - OX), ((H/2 - cam.y)/z - OY)], gx = (c0[0]/16 + c0[1]/8)/2, gy = (c0[1]/8 - c0[0]/16)/2;
   const vw = W/z/16, vh = H/z/16;
-  mctx.strokeStyle = '#fff'; mctx.lineWidth = 2;
+  mctx.strokeStyle = '#fff'; mctx.lineWidth = 3;
   mctx.strokeRect(Math.round(N + (gx - gy) - vw/2) + .5, Math.round((gx + gy)/2 - vh/2) + .5, Math.round(vw), Math.round(vh));
 }
 function miniGo(e){
@@ -3574,13 +3903,13 @@ function inspectHTML(sel){
   }
   if (sel.kind === 'unit'){
     const u = sel.u, rv = rivById(u.fac);
-    return close + '<h2>' + ENAME[u.type] + '</h2>' + hpBarH(u.hp/u.max) + '<p>' + (u.fac === 9 ? 'An outlaw from the bandit camp.' : 'Fights for ' + (rv ? rv.name : 'a rival lord') + (u.mode === 'guard' ? ', guarding their castle.' : '.')) + '</p>'
+    return close + '<h2>' + ENAME[u.type] + '</h2>' + hpBarH(u.hp/u.max) + '<p>' + (u.fac === 9 ? 'An outlaw from the bandit camp.' : 'Fights for ' + (rv ? rv.name : 'a rival lord') + (u.mode === 'guard' ? ', guarding their castle.' : u.mode === 'war' && rivById(u.foe) ? ', marching on ' + rivById(u.foe).name + '.' : '.')) + '</p>'
       + (BIG[u.type] ? '<p class="note">Pikemen deal heavy damage to it.</p>' : '');
   }
   const b = sel, d = DEF[b.t], f = b.hp / b.max, bar = hpBarH(f);
   if (b.o !== 0){
     if (b.t === 'camp') return close + '<h2>Bandit camp</h2>' + bar + '<p>Outlaws raid from here. Plant the rally flag on it to send your soldiers and burn it out.</p>';
-    const rv = rivById(b.o), kind = {warlord:'A warlord who attacks often and in force.', schemer:'A schemer who sends raiders after outposts and villages.', builder:'A builder who walls up first and strikes later.'}[rv.pers];
+    const rv = rivById(b.o), kind = rv.prof.desc + ' Holds ' + rv.ng + (rv.ng === 1 ? ' region.' : ' regions.') + (rv.out && rv.foe > 0 ? ' At war with ' + (rivById(rv.foe) ? rivById(rv.foe).name : 'a rival') + '.' : '');
     return close + '<h2>' + (b.t === 'keep' ? 'Keep of ' + rv.name : d.name + ' of ' + rv.name) + '</h2>' + bar + '<p>' + kind + (rv.truce > 0 ? ' You are at truce for ' + fmtTime(rv.truce) + '.' : '') + '</p>'
       + '<p class="note">Plant the rally flag here to lay siege. Rams and catapults from a siege workshop make short work of walls. ' + (b.t === 'keep' ? 'When this keep falls, the lord is beaten and the land is yours.' : 'Their keep must fall to end them.') + '</p>'
       + '<div class="row"><button class="btn primary" data-act="siege">Lay siege here</button></div>';
@@ -3678,15 +4007,16 @@ function hud(){
   $('#r-pop').textContent = pop() + '/' + cap();
   $('#r-sold').textContent = S.sold.filter(x => x.kind !== 'scout').length;
   $('#r-clock').textContent = SEASONS[season()] + ', ' + (isNight() ? 'night' : 'day');
-  const live = S.riv.filter(r => r.awake && !r.dead), atk = live.filter(r => r.out);
+  const live = S.riv.filter(r => r.awake && !r.dead), atk = live.filter(r => r.out && r.foe === 0);
   let p1, p2, p3, soon = false;
   if (atk.length){
     const left = S.en.reduce((n, e) => n + (e.mode === 'atk' && e.fac < 9 ? 1 : 0), 0) + atk.reduce((n, r) => n + r.q.length, 0);
     p1 = atk[0].name; p2 = 'Attack'; p3 = left + (left === 1 ? ' raider left' : ' raiders left'); soon = true;
   } else {
-    const next = live.filter(r => r.truce <= 0).sort((a, b) => a.atkIn - b.atkIn)[0];
+    const next = live.filter(r => r.truce <= 0 && !r.out && r.nextFoe === 0).sort((a, b) => a.atkIn - b.atkIn)[0];
     if (next){ p1 = next.name; p2 = fmtTime(next.atkIn); p3 = 'from the ' + compass(next.kx - KX, next.ky - KY); soon = next.atkIn < 30; }
-    else if (live.length){ p1 = 'Truce'; p2 = fmtTime(Math.min(...live.map(r => r.truce))); p3 = 'peace holds'; }
+    else if (live.some(r => r.truce > 0)){ p1 = 'Truce'; p2 = fmtTime(Math.min(...live.filter(r => r.truce > 0).map(r => r.truce))); p3 = 'peace holds'; }
+    else if (live.length){ p1 = 'Thornwick'; p2 = 'Calm'; p3 = 'the lords look elsewhere'; }
     else { p1 = 'Thornwick'; p2 = 'Peace'; p3 = S.won ? 'the realm is yours' : 'no rival in sight'; }
   }
   $('#p1').textContent = p1; $('#p2').textContent = p2; $('#p3').textContent = p3;
@@ -3817,7 +4147,7 @@ async function boot(){
   window.addEventListener('pagehide', save);
   requestAnimationFrame(frame);
 }
-window.__thornwick = { get S(){ return S; }, tick, step, tryPlace, newGame, snapshot, loadFrom, render, hud, sprite, propSprite, unitSprite, upgradeKeep, cam, DEF, resize, lookAt, launch, startEvent, pickEvent, ignite, EVENTS, get regs(){ return regs; }, get riv(){ return S.riv; },
+window.__thornwick = { get S(){ return S; }, tick, damageB, chooseFoe, power, countRivals, step, tryPlace, newGame, snapshot, loadFrom, render, hud, sprite, propSprite, unitSprite, upgradeKeep, cam, DEF, resize, lookAt, launch, startEvent, pickEvent, ignite, EVENTS, get regs(){ return regs; }, get riv(){ return S.riv; },
   setK(k){ K = k; }, showHelp, markOwn(){ ownDirty = true; }, placeErr, train, sendScout, warCry, fireArrows, rebuildStone, palLine, pick, UNITS, get capU(){ return capU; }, inspectHTML, flowAt(x, y){ return flow[x + y*N]; }, get terrAt(){ return (x,y)=>terrain[x+y*N]; }, get keep(){ return keep; }, terrain, bmap, reg };
 boot();
 })();
