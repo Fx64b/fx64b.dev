@@ -28,6 +28,13 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.4.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.3.0...fx64b.dev-v5.4.0) (2026-11-17)
+
+
+### Features
+
+* **tools:** add Thornwick castle and village builder game ([f44972b](https://github.com/Fx64b/fx64b.dev/commit/f44972b7f20281f4b736f24cd9b1dce910f1a364))
+
 ## [5.3.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.2.0...fx64b.dev-v5.3.0) (2026-11-16)
 
 
