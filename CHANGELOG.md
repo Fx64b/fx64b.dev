@@ -28,6 +28,13 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.5.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.4.0...fx64b.dev-v5.5.0) (2026-11-17)
+
+
+### Features
+
+* **thornwick:** add difficulty setting, 4x larger map and stronger rivals ([d3d0f4d](https://github.com/Fx64b/fx64b.dev/commit/d3d0f4dd9945d7881ff5ba5a49197227523a34cb))
+
 ## [5.4.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.3.0...fx64b.dev-v5.4.0) (2026-11-17)
 
 
