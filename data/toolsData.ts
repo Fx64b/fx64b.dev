@@ -65,6 +65,15 @@ const toolsData: Tool[] = [
         ],
         wide: true,
     },
+    {
+        slug: 'thornwick',
+        title: 'Thornwick',
+        description:
+            'A small castle and village builder: grow a village, hold your keep against raids and take the keeps of rival lords',
+        category: 'games',
+        tags: ['game', 'strategy', 'castle', 'city builder', 'medieval'],
+        wide: true,
+    },
 ]
 
 export default toolsData

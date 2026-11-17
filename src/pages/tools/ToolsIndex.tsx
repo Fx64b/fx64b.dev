@@ -15,6 +15,7 @@ const categories: { name: string; tools: Tool[] }[] = [
     { name: 'Formatting', tools: getToolsByCategory('formatting') },
     { name: 'Generators', tools: getToolsByCategory('generators') },
     { name: 'Utilities', tools: getToolsByCategory('utilities') },
+    { name: 'Games', tools: getToolsByCategory('games') },
 ]
 
 export default function ToolsIndex() {

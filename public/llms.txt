@@ -19,6 +19,7 @@
 - [Color Converter](https://fx64b.dev/tools/color-converter): Convert between HEX, RGB, and HSL.
 - [Hour to Decimal Converter](https://fx64b.dev/tools/hour-decimal-converter): Convert hours and minutes to decimal time.
 - [Character & Word Counter](https://fx64b.dev/tools/character-word-counter): Count characters, words, sentences, and reading time.
+- [Thornwick](https://fx64b.dev/tools/thornwick): A small castle and village builder game that runs in the browser.
 
 ## Contact
 
