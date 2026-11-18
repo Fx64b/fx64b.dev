@@ -5,12 +5,14 @@ import { DEF, N, WALLISH } from './config'
 import { GOOD, GOODS, amountText } from './goods'
 import { groundTileChanged } from './ground'
 import { afford, gain, pay, pop, puff, toast } from './helpers'
+import { moodBonus } from './livingworld'
 import { setTerr } from './lords'
 import { hsh } from './noise'
 import { door, frontTile, search, terrCost, trace } from './path'
 import { follow, goTo } from './people'
 import { bmap, regAt, rivById, terrain } from './state'
 import { GV } from './vars'
+import { harvestMul } from './weather'
 
 /* ---------- state ---------- */
 /** Adds the economy's fields to a fresh game state. */
@@ -296,22 +298,34 @@ export function farmYield(b?, se?, millNear?) {
     }
     const base = millNear ? 4.5 : 3,
         sea = se === 2 ? 1.5 : se === 3 ? 1 / 3 : 1
-    return Math.max(1, Math.round(base * sea * (GV.S.tech.crop ? 1.25 : 1)))
+    return Math.max(
+        1,
+        Math.round(base * sea * (GV.S.tech.crop ? 1.25 : 1) * harvestMul())
+    )
 }
 
 /* ---------- eating, taverns and needs ---------- */
 /** Feed `need` mouths: bread first for up to half, then food. True when all are fed. */
 export function eat(need?) {
     const r = GV.S.res
-    let bread = Math.min(Math.floor(r.bread), Math.floor(need / 2))
-    let rest = need - bread
+    // Meat for up to a quarter of the meal and bread for up to half, more when food runs short.
+    let meat = Math.min(Math.floor(r.meat || 0), Math.floor(need / 4))
+    let bread = Math.min(Math.floor(r.bread), Math.floor(need / 2), need - meat)
+    let rest = need - meat - bread
     if (r.food < rest) {
         const more = Math.min(Math.floor(r.bread) - bread, rest - r.food)
         bread += Math.max(0, more)
         rest -= Math.max(0, more)
     }
+    if (r.food < rest) {
+        const more = Math.min(Math.floor(r.meat || 0) - meat, rest - r.food)
+        meat += Math.max(0, more)
+        rest -= Math.max(0, more)
+    }
     r.bread -= bread
+    r.meat = (r.meat || 0) - meat
     GV.S.ateBread = bread > 0
+    GV.S.ateMeat = meat > 0
     if (r.food >= rest) {
         r.food -= rest
         return true
@@ -319,8 +333,9 @@ export function eat(need?) {
     r.food = 0
     return false
 }
-/** Food and bread together, for growth checks. */
-export const stores = () => GV.S.res.food + GV.S.res.bread
+/** Food, bread and meat together, for growth checks. */
+export const stores = () =>
+    GV.S.res.food + GV.S.res.bread + (GV.S.res.meat || 0)
 /** Every 10 seconds: taverns earn gold, more when they pour ale. */
 export function tavernTick() {
     const v = GV.S.vill.length
@@ -353,7 +368,15 @@ export function needsTick() {
         r = S.res,
         n = S.need
     const fish = S.b.some((b?) => b.o === 0 && b.t === 'fisher' && b.w > 0)
-    n.food = ((r.food > 0 ? 1 : 0) + (fish ? 1 : 0) + (S.ateBread ? 1 : 0)) / 3
+    // Grain, fish, bread and meat: any three fill the table.
+    n.food = Math.min(
+        1,
+        ((r.food > 0 ? 1 : 0) +
+            (fish ? 1 : 0) +
+            (S.ateBread ? 1 : 0) +
+            (S.ateMeat ? 1 : 0)) /
+            3
+    )
     n.ale = S.aleCov
     n.cloth = S.clothCov
     const hs = homes(),
@@ -363,7 +386,15 @@ export function needsTick() {
               ch.some((c?) => Math.hypot(c.cx - h.cx, c.cy - h.cy) <= CHAPEL_R)
           ).length / hs.length
         : 0
-    n.sat = S.vill.length ? (n.food + n.ale + n.cloth + n.chapel) / 4 : 0
+    n.sat = S.vill.length
+        ? Math.max(
+              0,
+              Math.min(
+                  1,
+                  (n.food + n.ale + n.cloth + n.chapel) / 4 + moodBonus()
+              )
+          )
+        : 0
 }
 /** Growth: content villagers draw settlers up to 35% faster. Only a town of
     40 or more slows down, and only while less than 40% of the needs are met. */
@@ -708,7 +739,7 @@ function caravanTick(rt?, rv?, dt?) {
             for (const e of S.en) {
                 if (
                     !e.dead &&
-                    (e.fac === 9 || e.mode === 'atk') &&
+                    ((e.fac === 9 && e.mode !== 'wild') || e.mode === 'atk') &&
                     Math.hypot(e.x - c.x, e.y - c.y) < 1.4
                 ) {
                     const who =

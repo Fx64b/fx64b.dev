@@ -1,11 +1,14 @@
 import { placeErr, tryPlace } from './build'
 import { $, DEF, KX, KY, N, OX, OY, PAINT, cv } from './config'
+import { livingPick } from './livingworld'
 import { UNITS } from './people'
 import { Z, bParams, cam } from './render'
 import { R, sprite } from './sprites'
 import { bAt, inMap, reg, seenAt, terrain, wx, wy } from './state'
+import { isRow, rowEnd, rowMove, rowStart } from './tools'
 import { hud } from './ui'
 import { GV } from './vars'
+import { fogHides } from './weather'
 
 /* The middle of the view stays over the open land (with a little of the mist round it). */
 export function clampCam() {
@@ -197,10 +200,16 @@ export function pick(clientX?, clientY?) {
         tryU(u, false)
     }
     for (const u of GV.S.en) {
-        tryU(u, true)
+        if (!fogHides(u)) {
+            tryU(u, true)
+        }
     }
     if (best) {
         return best
+    }
+    const wp = livingPick(X, Y)
+    if (wp) {
+        return wp
     }
     const bs = GV.S.b
         .filter((b?) => seenAt(b.cx, b.cy))
@@ -296,6 +305,10 @@ cv.addEventListener('pointerdown', (e?) => {
             cy: cam.y,
             moved: false,
             paint: !!GV.armed && PAINT(GV.armed),
+            row: !!GV.armed && isRow(GV.armed),
+        }
+        if (GV.down.row) {
+            rowStart(GV.armed, anchor(GV.armed, tileAt(e.clientX, e.clientY)))
         }
         if (GV.down.paint) {
             GV.hover = tileAt(e.clientX, e.clientY)
@@ -340,6 +353,11 @@ cv.addEventListener('pointermove', (e?) => {
     }
     const dx = e.clientX - GV.down.x,
         dy = e.clientY - GV.down.y
+    if (GV.down.row && !GV.down.moved) {
+        GV.hover = anchor(GV.armed, tileAt(e.clientX, e.clientY))
+        rowMove(GV.hover)
+        return
+    }
     if (GV.down.paint) {
         const t = tileAt(e.clientX, e.clientY)
         if (!GV.hover || t[0] !== GV.hover[0] || t[1] !== GV.hover[1]) {
@@ -371,6 +389,19 @@ export function ptrEnd(e?) {
         GV.pinch = null
     }
     if (GV.down && !ptrs.size) {
+        // A row of houses or farms dragged out: build them all, stay armed for more.
+        if (
+            GV.down.row &&
+            !GV.down.moved &&
+            e.type === 'pointerup' &&
+            rowEnd()
+        ) {
+            GV.down = null
+            setCursor()
+            hud()
+            return
+        }
+        GV.row = null
         if (!GV.down.moved && !GV.down.paint && e.type === 'pointerup') {
             const t = tileAt(e.clientX, e.clientY)
             if (GV.armed) {

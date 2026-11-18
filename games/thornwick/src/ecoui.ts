@@ -32,6 +32,7 @@ import {
 } from './eco'
 import { GOOD, GOODS, amountText } from './goods'
 import { pop } from './helpers'
+import { moodBonus } from './livingworld'
 import { power } from './lords'
 import { rivById } from './state'
 import { costHTML, fmtTime, hud } from './ui'
@@ -54,6 +55,7 @@ const MAKER = {
     ale: 'brewery',
     wool: 'sheep',
     cloth: 'weaver',
+    meat: 'lodge',
 }
 GV.goodsEls = null
 function goodsRow() {
@@ -536,6 +538,7 @@ function peopleHTML() {
             S.res.food > 0 ? 'grain' : '',
             fish ? 'fish' : '',
             S.ateBread ? 'bread' : '',
+            S.ateMeat ? 'meat' : '',
         ].filter(Boolean)
     const wm = 0.25 * n.sat,
         gm = growMul()
@@ -548,7 +551,7 @@ function peopleHTML() {
     h += needRow(
         'Food on the table',
         n.food,
-        'Grain from farms, fish and bread: each fills a third. ' +
+        'Grain from farms, fish, bread and meat from a hunter&#39;s lodge: any three fill the table. ' +
             (kinds.length ? 'Now: ' + list(kinds) + '.' : 'Now: nothing.')
     )
     h += needRow(
@@ -568,6 +571,16 @@ function peopleHTML() {
         n.chapel,
         'Homes within ' + CHAPEL_R + ' tiles of a chapel.'
     )
+    const mb = moodBonus()
+    if (mb) {
+        h +=
+            '<p class="note">' +
+            (mb > 0
+                ? 'Merrymaking (a minstrel or a feast) adds '
+                : 'Gloom over a bad omen takes away ') +
+            pct(Math.abs(mb)) +
+            ' for a while.</p>'
+    }
     h +=
         '<h3>What it does</h3><ul class="facts"><li>Workers are ' +
         Math.round(wm * 100) +

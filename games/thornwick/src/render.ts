@@ -19,6 +19,12 @@ import {
 import { afford, wet } from './helpers'
 import { samePick } from './input'
 import { costOf } from './land'
+import {
+    LIVING_KINDS,
+    drawLivingItem,
+    drawLivingOver,
+    livingDrawList,
+} from './livingworld'
 import { hsh } from './noise'
 import { R, propSprite, sprite, unitSprite } from './sprites'
 import {
@@ -36,7 +42,9 @@ import {
     wx,
     wy,
 } from './state'
+import { drawReach, drawToolGhost } from './tools'
 import { GV } from './vars'
+import { drawWeather, fogHides } from './weather'
 
 GV.W = 0
 GV.H = 0
@@ -386,10 +394,7 @@ export function render() {
             diamondPath(c, sel.x, sel.y, sel.s)
             c.stroke()
             if (!faint) {
-                const d = DEF[sel.t]
-                if (d.range || sel.t === 'keep') {
-                    ring(c, sel.cx, sel.cy, sel.t === 'keep' ? 4.5 : d.range)
-                }
+                drawReach(c, sel.t, sel.cx, sel.cy, sel)
             }
         } else if (sel.kind === 'army') {
             if (faint && sel.u) {
@@ -415,6 +420,8 @@ export function render() {
             }
         } else if (sel.kind === 'unit') {
             selRing(sel.u, true, col)
+        } else if (LIVING_KINDS[sel.kind]) {
+            selRing(sel.u, false, col)
         } else if (sel.kind === 'poi') {
             c.strokeStyle = col
             c.lineWidth = faint ? 0.75 : 1
@@ -462,7 +469,11 @@ export function render() {
         }
     }
     for (const u of GV.S.en) {
-        if (vis(u.x, u.y)) {
+        if (vis(u.x, u.y) && !fogHides(u)) {
+            if (u.type === 'wolf') {
+                list.push([u.x + u.ox + u.y + u.oy + 0.02, 7, u, 'wolf'])
+                continue
+            }
             list.push([
                 u.x + u.ox + u.y + u.oy + 0.02,
                 3,
@@ -477,6 +488,7 @@ export function render() {
             list.push([c.x + c.y + 0.02, 6, c])
         }
     }
+    livingDrawList(list, vis)
     for (const bn of GV.S.banners) {
         if (vis(bn.x, bn.y)) {
             list.push([bn.x + bn.y + 0.03, 5, bn])
@@ -530,6 +542,8 @@ export function render() {
                     c.fillRect(lx + 0.5, ly - k, 4, 0.5)
                 }
             }
+        } else if (d[1] === 7) {
+            drawLivingItem(c, d)
         } else if (d[1] === 6) {
             const u = d[2],
                 sp = sprite('caravan', {
@@ -630,7 +644,9 @@ export function render() {
                         ? '#8a6038'
                         : u.carry === 'stone'
                           ? '#a9a79c'
-                          : '#d4a537'
+                          : u.carry === 'meat'
+                            ? '#b8503e'
+                            : '#d4a537'
                 c.fillRect(bx + 0.5, by + 0.5, 4, 3.5)
                 c.fillStyle = 'rgba(255,255,255,.25)'
                 c.fillRect(bx + 0.5, by + 0.5, 4, 0.5)
@@ -686,6 +702,7 @@ export function render() {
         c.fillRect(Math.round(p.x * 2) / 2, Math.round(p.y * 2) / 2, p.s, p.s)
     }
     c.globalAlpha = 1
+    drawLivingOver(c)
     for (const a of GV.S.shots) {
         if (!seenAt(a.x, a.y)) {
             continue
@@ -737,7 +754,12 @@ export function render() {
             }
         }
     }
-    if (ghostT && GV.hover && inMap(GV.hover[0], GV.hover[1])) {
+    if (
+        ghostT &&
+        !drawToolGhost(c, ghostT) &&
+        GV.hover &&
+        inMap(GV.hover[0], GV.hover[1])
+    ) {
         const [x, y] = GV.hover
         if (ghostT === 'flag') {
             c.fillStyle = seenAt(x, y)
@@ -786,9 +808,7 @@ export function render() {
                 )
             }
             c.globalAlpha = 1
-            if (d.range) {
-                ring(c, x, y, d.range)
-            }
+            drawReach(c, ghostT, x + (s - 1) / 2, y + (s - 1) / 2)
         }
     }
     if (nf > 0) {
@@ -876,6 +896,7 @@ export function render() {
             )
         }
     }
+    drawWeather(c, GV.W, GV.H)
     c.font =
         '600 13px "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif'
     c.textAlign = 'center'

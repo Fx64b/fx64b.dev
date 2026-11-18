@@ -15,6 +15,7 @@ import {
     shadow,
     surf,
 } from './sprites'
+import { lodgeRecipe } from './sprites-wild'
 
 /* A barrel standing up, with dark hoops. */
 function barrel(x?, y?, z0?, r?, h?) {
@@ -71,6 +72,9 @@ function wheel(x?, y?, r?, f?) {
     plot(x, y + 0.1, r, 0x2a2018, LL, 0.8)
 }
 export function ecoRecipe(t?, o?) {
+    if (t === 'lodge') {
+        return lodgeRecipe()
+    }
     const st = TX.stone(C.stone, 1),
         plank = TX.plank(C.wood, 4),
         plankD = TX.plank(C.woodD, 5),
@@ -409,4 +413,5 @@ export const ECO_SPRITES = {
     brewery: 1,
     scriptorium: 1,
     caravan: 1,
+    lodge: 1,
 }

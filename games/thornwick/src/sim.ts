@@ -24,6 +24,7 @@ import {
     toast,
 } from './helpers'
 import { refreshOwn } from './land'
+import { livingTick } from './livingworld'
 import { damageB, eUpdate, hitEnemy, ignite, rivalsTick } from './lords'
 import { computeFlow } from './path'
 import {
@@ -37,6 +38,7 @@ import {
 } from './people'
 import { bAt, clampN, isNight, season, wx, wy } from './state'
 import { GV } from './vars'
+import { rangeMul } from './weather'
 import { worldTick } from './world'
 
 export function tick(dt?) {
@@ -121,6 +123,7 @@ export function tick(dt?) {
         tavernTick()
     }
     ecoTick(dt)
+    livingTick(dt)
     if ((GV.trainCd -= dt) <= 0) {
         GV.trainCd = 2
         for (const b of GV.S.b) {
@@ -300,6 +303,7 @@ export function tick(dt?) {
                 if (!isKeep && highAt(b.cx, b.cy)) {
                     range += 1
                 }
+                range *= rangeMul()
                 let e = nearest(targets, b.cx, b.cy, range)
                 const mang = b.t === 'mangonel' && b.o === 0
                 if (e && mang && Math.hypot(e.x - b.cx, e.y - b.cy) < 2.5) {

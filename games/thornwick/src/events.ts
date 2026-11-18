@@ -4,6 +4,7 @@ import { lookAt } from './input'
 import { ignite, setTerr } from './lords'
 import { addSoldier, spawnVillager } from './people'
 import { addB, bmap, reg, season, terrain } from './state'
+import { TALES } from './tales'
 import { GV } from './vars'
 
 export const EVENTS = {
@@ -224,7 +225,7 @@ export const EVENTS = {
     },
 }
 export function startEvent() {
-    const ids = [
+    const base = [
         'merchant',
         'merchant',
         'mercs',
@@ -235,8 +236,13 @@ export function startEvent() {
         'lightning',
         'harvest',
     ]
+    // The living world adds its own tales, and tells the lightning story as a storm.
+    const ids = base.concat(
+        Object.keys(TALES).filter((k?) => !base.includes(k))
+    )
     for (let k = 0; k < 4; k++) {
-        const ev = EVENTS[ids[(Math.random() * ids.length) | 0]]()
+        const id = ids[(Math.random() * ids.length) | 0],
+            ev = (TALES[id] || EVENTS[id])()
         if (ev) {
             ev.ttl = ev.max = 45
             GV.S.ev = ev

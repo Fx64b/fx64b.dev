@@ -22,7 +22,8 @@ export const FIRST_RAID = 210,
     LEGACY_SAVE_KEYS = ['thornwick-save-6'],
     BACKUP_SAVE_KEY = 'thornwick-save-backup'
 /* Difficulty mainly changes the rival lords: how often and how hard they attack,
-   how tough their soldiers are and how fast their economy grows. */
+   how tough their soldiers are and how fast their economy grows.
+   wx: how hard the weather bites. wolf: how many wolves come in winter, and how bold. */
 export const DIFFS = [
     {
         name: 'Gentle',
@@ -34,6 +35,8 @@ export const DIFFS = [
         dmg: 0.75,
         eco: 0.85,
         guard: 0.7,
+        wx: 0.4,
+        wolf: 0.4,
     },
     {
         name: 'Easy',
@@ -45,6 +48,8 @@ export const DIFFS = [
         dmg: 0.88,
         eco: 0.95,
         guard: 0.85,
+        wx: 0.7,
+        wolf: 0.7,
     },
     {
         name: 'Normal',
@@ -56,6 +61,8 @@ export const DIFFS = [
         dmg: 1,
         eco: 1,
         guard: 1,
+        wx: 1,
+        wolf: 1,
     },
     {
         name: 'Hard',
@@ -67,6 +74,8 @@ export const DIFFS = [
         dmg: 1.12,
         eco: 1.15,
         guard: 1.2,
+        wx: 1.15,
+        wolf: 1.25,
     },
     {
         name: 'Brutal',
@@ -78,6 +87,8 @@ export const DIFFS = [
         dmg: 1.25,
         eco: 1.3,
         guard: 1.4,
+        wx: 1.3,
+        wolf: 1.5,
     },
 ]
 export const DIFF_KEY = 'thornwick-difficulty'
@@ -433,6 +444,20 @@ export const DEF = {
         plural: 'fisher',
         water: 1,
         tip: 'Must touch a lake or moat. One fisher brings in food, less in winter.',
+    },
+    lodge: {
+        name: "Hunter's lodge",
+        tab: 0,
+        tier: 1,
+        cost: { wood: 30 },
+        hp: 60,
+        path: 1,
+        loot: 1,
+        flam: 1,
+        role: 'hunter',
+        slots: 2,
+        plural: 'hunters',
+        tip: 'Two hunters stalk deer and boar within 14 tiles and bring home meat. People like meat on the table.',
     },
     well: {
         name: 'Well',
@@ -798,6 +823,7 @@ export const BUILD = Object.keys(DEF).filter((t?) => DEF[t].tab !== undefined)
 export const ORDER = [
     'farm',
     'fisher',
+    'lodge',
     'lumber',
     'quarry',
     'market',

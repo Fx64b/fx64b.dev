@@ -17,6 +17,7 @@ import {
     seenAt,
     terrain,
 } from './state'
+import { isTool, placeTool } from './tools'
 import { buildCards } from './ui'
 import { GV } from './vars'
 
@@ -176,6 +177,9 @@ export function removeAt(x?, y?, loud?) {
 export function tryPlace(t?, x?, y?, loud?) {
     if (GV.S.over) {
         return false
+    }
+    if (isTool(t)) {
+        return placeTool(t, x, y)
     }
     if (t === 'flag') {
         if (!inMap(x, y) || !seenAt(x, y)) {

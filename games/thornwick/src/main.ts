@@ -17,6 +17,7 @@ import { groundInit } from './ground'
 import { toast } from './helpers'
 import { lookAt, pick, readTheme, resize } from './input'
 import { refreshOwn } from './land'
+import * as LIVING from './livingworld'
 import {
     chooseFoe,
     countRivals,
@@ -53,6 +54,9 @@ import {
     wx,
     wy,
 } from './state'
+import { TALES } from './tales'
+import * as TOOLS from './tools'
+import * as TRAVEL from './travel'
 import {
     buildCards,
     hud,
@@ -62,6 +66,8 @@ import {
     showHelp,
 } from './ui'
 import { GV } from './vars'
+import * as WEATHER from './weather'
+import * as WILD from './wildlife'
 import * as WORLD from './world'
 
 GV.last = 0
@@ -326,6 +332,8 @@ export async function boot() {
     get GV() {
         return GV
     },
+    // The living world: weather, wildlife, travellers, tales and build helpers.
+    living: { ...WEATHER, ...WILD, ...TRAVEL, ...TOOLS, ...LIVING, TALES },
     world: WORLD,
 }
 boot()

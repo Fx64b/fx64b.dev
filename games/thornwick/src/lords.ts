@@ -38,6 +38,8 @@ import {
     wipeSave,
 } from './state'
 import { GV } from './vars'
+import { moveMul } from './weather'
+import { wolfUpdate } from './wildlife'
 import { VOID, worldDone } from './world'
 
 export function rivalPlan(rv?) {
@@ -1581,6 +1583,7 @@ export function stepToward(e?, tx?, ty?, dt?, sp?) {
             d,
             sp *
                 dt *
+                moveMul(clampN(e.x), clampN(e.y)) *
                 (wet(clampN(e.x), clampN(e.y))
                     ? 0.3
                     : inWood(e.x, e.y)
@@ -1892,6 +1895,9 @@ export function eUpdate(e?, dt?) {
         // Broken men run back the way they came.
         fleeStep(e, e.hx, e.hy, dt, e.sp * 1.15)
         return
+    }
+    if (e.mode === 'wild') {
+        return wolfUpdate(e, dt)
     }
     if (e.mode === 'scout') {
         return scoutRide(e, dt)
@@ -2231,7 +2237,7 @@ export function eUpdate(e?, dt?) {
         }
         return
     }
-    let sp = e.sp
+    let sp = e.sp * moveMul(cx, cy)
     if (wet(cx, cy)) {
         sp *= 0.3
     } else if (terrain[cx + cy * N] === 1) {

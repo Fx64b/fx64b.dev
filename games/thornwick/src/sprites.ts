@@ -2297,6 +2297,15 @@ export const UP = {
     raider: { tunic: 0x342b30, legs: 0x2a2426, hat: 0x4f545a },
     brute: { tunic: 0x6a2822, legs: 0x2a2224, hat: 0x454a50 },
     looter: { tunic: 0x4d4028, legs: 0x2e2a22, hat: 0x2c2628 },
+    hunter: { tunic: 0x4e5e32, legs: 0x3e3a2c, hat: 0x3a4a26 },
+    pilgrim: { tunic: 0x7a6a56, legs: 0x4a4036, hat: 0x5e5040 },
+    minstrel: { tunic: 0xb0402e, legs: 0x3a5a7a, hat: 0x2e5a3a },
+}
+/* New people wear the headgear and carry the tools of an existing look. */
+export const ALIAS = {
+    hunter: 'archer',
+    pilgrim: 'shepherd',
+    minstrel: 'merchant',
 }
 export const HAIR = [0x2a1e16, 0x5a3a22, 0x8a4a26, 0xa88a52, 0x6e6a64],
     SKIN = [0xd6aa82, 0xc4946a, 0x9c6e4a, 0xe0b894, 0xb88460]
@@ -2715,7 +2724,7 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
     }
     const rx = tx1 + 1 + aW,
         hy = ay + al
-    switch (role) {
+    switch (ALIAS[role] || role) {
         case 'idle':
             hairTop(hair)
             break

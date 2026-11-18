@@ -11,6 +11,7 @@ export const GOODS = [
     'ale',
     'wool',
     'cloth',
+    'meat',
 ]
 /* name: shown in lists. one: the word after a count of 1. price: worth in gold
    when trading. col: colour of the floating number. */
@@ -27,6 +28,7 @@ export const GOOD = {
     ale: { name: 'Ale', one: 'ale', price: 1.4, col: '#f0c060' },
     wool: { name: 'Wool', one: 'wool', price: 1.2, col: '#f2ecdc' },
     cloth: { name: 'Cloth', one: 'cloth', price: 3, col: '#e08a7a' },
+    meat: { name: 'Meat', one: 'meat', price: 0.8, col: '#e8a08a' },
 }
 /** "1 weapon", "3 weapons", "12 iron". */
 export const amountText = (r?, n?) =>
@@ -47,5 +49,6 @@ Object.assign(ICON, {
     ale: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5h7.5v9H3z" fill="#d9a12e" stroke="#6b4a1a"/><path d="M10.5 7h2v4.6h-2" fill="none" stroke="#6b4a1a" stroke-width="1.2"/><path d="M2.6 5.4c0-2 8.4-2 8.4 0z" fill="#f6efe0" stroke="#8a7d62" stroke-width=".7"/></svg>',
     wool: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="5.2" cy="9" r="3.4" fill="#f2ecdc" stroke="#9a8f78"/><circle cx="10.6" cy="9" r="3.4" fill="#f2ecdc" stroke="#9a8f78"/><circle cx="8" cy="6" r="3.4" fill="#f2ecdc" stroke="#9a8f78"/></svg>',
     cloth: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5h10.5v8H2z" fill="#9e3129" stroke="#5a1a14"/><path d="M12.5 4.5c1.6 0 1.6 8 0 8" fill="#c0564a" stroke="#5a1a14"/><path d="M2 7.2h10.5M2 9.8h10.5" stroke="#d27a6a" stroke-width=".7"/></svg>',
+    meat: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 12.5c-1.6-3 0-8.2 4.4-9.4 3-.8 5.8 1 5.6 3.8-.2 3-3.4 5.6-6.8 5.8z" fill="#b8503e" stroke="#5e2018"/><path d="M5.6 9.4c-.4-2 1-4 3.4-4.4" fill="none" stroke="#f0c8b0" stroke-width="1.2"/><path d="M3.4 12.2l-1.6 2" stroke="#efe6d4" stroke-width="1.8"/></svg>',
     mood: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.4" fill="currentColor" opacity=".18" stroke="currentColor"/><circle cx="5.8" cy="6.6" r="1" fill="currentColor"/><circle cx="10.2" cy="6.6" r="1" fill="currentColor"/><path d="M5 9.6c1.6 2 4.4 2 6 0" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
 })

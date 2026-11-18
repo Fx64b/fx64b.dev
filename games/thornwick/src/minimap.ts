@@ -4,6 +4,7 @@ import { lookAt } from './input'
 import { Z, cam } from './render'
 import { bmap, clampN, fcol, reg, seenAt, terrain } from './state'
 import { GV } from './vars'
+import { fogHides } from './weather'
 
 export const mcv = $('#mini'),
     mctx = mcv.getContext('2d')
@@ -101,6 +102,9 @@ export function drawMini() {
         }
     }
     for (const e of GV.S.en) {
+        if (fogHides(e)) {
+            continue
+        }
         if (
             seenAt(e.x, e.y) &&
             (e.mode === 'atk' || e.mode === 'war' || e.mode === 'scout')

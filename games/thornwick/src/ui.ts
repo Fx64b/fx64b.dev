@@ -54,6 +54,16 @@ import {
     tileAt,
 } from './input'
 import { POI, baileyOf, costOf } from './land'
+import {
+    livingAct,
+    livingClock,
+    livingGone,
+    livingHow,
+    livingHowMore,
+    livingInspect,
+    livingInspectB,
+    weatherTip,
+} from './livingworld'
 import { removeB } from './lords'
 import { drawMini } from './minimap'
 import {
@@ -78,6 +88,7 @@ import {
     season,
     wipeSave,
 } from './state'
+import { toolText } from './tools'
 import { GV } from './vars'
 
 export function costHTML(cost?) {
@@ -302,6 +313,10 @@ $('#placingDone').addEventListener('click', () => {
     hud()
 })
 export function placingText() {
+    const tt = toolText()
+    if (tt) {
+        return tt
+    }
     if (GV.armed === 'remove') {
         return '<b>Removing</b><span> · tap or drag over what to clear</span>'
     }
@@ -843,9 +858,12 @@ export function howHTML(b?) {
             P.push('Only for looks. It has no effect on the game.')
             break
         default:
-            ecoHow(b, P, now)
+            if (!livingHow(b, P, now)) {
+                ecoHow(b, P, now)
+            }
     }
     ecoHowMore(b, P, now)
+    livingHowMore(b, P, now)
     if (!P.length && !now.length) {
         return ''
     }
@@ -865,6 +883,10 @@ export function inspectHTML(sel?) {
         '" style="width:' +
         Math.round(Math.max(0, f) * 100) +
         '%"></i></div>'
+    const wh = livingInspect(sel, close)
+    if (wh !== null) {
+        return wh
+    }
     if (sel.kind === 'army') {
         return armyHTML(close)
     }
@@ -1084,6 +1106,7 @@ export function inspectHTML(sel?) {
             '</p>'
     }
     h += ecoInspect(b)
+    h += livingInspectB(b)
     if (b.t === 'gate') {
         h +=
             '<div class="row"><button class="btn primary" data-act="shut">' +
@@ -1270,6 +1293,10 @@ $('#inspect').addEventListener('click', (e?) => {
         hud()
         return
     }
+    if (livingAct(act, b)) {
+        hud()
+        return
+    }
     switch (act) {
         case 'close':
             GV.selected = null
@@ -1411,7 +1438,8 @@ export function hud() {
         (x?) => x.kind !== 'scout'
     ).length
     $('#r-clock').textContent =
-        SEASONS[season()] + ', ' + (isNight() ? 'night' : 'day')
+        SEASONS[season()] + ', ' + (isNight() ? 'night' : 'day') + livingClock()
+    $('#clock').title = weatherTip()
     const live = GV.S.riv.filter((r?) => r.awake && !r.dead),
         atk = live.filter((r?) => r.out && r.foe === 0)
     alertsHud()
@@ -1482,6 +1510,7 @@ export function hud() {
         }
     }
     $('#rm').setAttribute('aria-pressed', String(GV.armed === 'remove'))
+    $('#ringBtn').setAttribute('aria-pressed', String(GV.armed === 'ring'))
     const fb = $('#flagBtn'),
         ft = 'Banner ' + GV.S.banners.length + '/' + MAX_BANNERS
     fb.setAttribute('aria-pressed', String(GV.armed === 'flag'))
@@ -1495,7 +1524,8 @@ export function hud() {
             (GV.selected.u.dead || !GV.S.en.includes(GV.selected.u))) ||
             (GV.selected.kind === 'banner' &&
                 !GV.S.banners.includes(GV.selected.bn)) ||
-            (GV.selected.kind === 'fog' && GV.selected.rg.disc))
+            (GV.selected.kind === 'fog' && GV.selected.rg.disc) ||
+            livingGone(GV.selected))
     ) {
         GV.selected = null
     }

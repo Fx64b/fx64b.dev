@@ -47,6 +47,8 @@ import {
     tileI,
 } from './state'
 import { GV } from './vars'
+import { moveMul, rangeMul } from './weather'
+import { hunterUpdate } from './wildlife'
 
 export function spawnVillager(nearKeep?) {
     const [x, y] = freeNear(KX + 0.5, KY + 2.5, nearKeep ? 2.5 : 5.5)
@@ -355,6 +357,7 @@ export function follow(u?, dt?, sp?) {
     const tx = clampN(u.x),
         ty = clampN(u.y),
         ti = tx + ty * N
+    sp *= moveMul(tx, ty)
     if (wet(tx, ty)) {
         sp *= 0.45
     } else if (u.side !== undefined && terrain[ti] === 1) {
@@ -403,6 +406,10 @@ export function vUpdate(u?, dt?) {
     const b = u.job
     if (b && isCraft(u.role)) {
         craftUpdate(u, dt)
+        return
+    }
+    if (b && u.role === 'hunter') {
+        hunterUpdate(u, dt)
         return
     }
     if (!b) {
@@ -990,7 +997,8 @@ export function sUpdate(s?, dt?) {
     if (e) {
         const d = Math.hypot(e.x - s.x, e.y - s.y),
             rng = arch
-                ? (s.onWall ? U.rng + 1.8 : U.rng) + hi + reachBonus()
+                ? ((s.onWall ? U.rng + 1.8 : U.rng) + hi + reachBonus()) *
+                  rangeMul()
                 : U.rng
         if (Math.abs(e.x - e.y - (s.x - s.y)) > 0.05) {
             s.face = e.x - e.y > s.x - s.y ? 1 : -1

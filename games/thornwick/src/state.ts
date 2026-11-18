@@ -21,6 +21,7 @@ import {
 import { ecoInit, ecoLoad, ecoSave } from './eco'
 import { drawGroundAll } from './ground'
 import { refreshOwn } from './land'
+import { livingInit, livingLoad, livingSave } from './livingworld'
 import { rivalPlan, rivalStep } from './lords'
 import { hsh } from './noise'
 import { recomputePaths } from './path'
@@ -199,6 +200,7 @@ export function blank() {
         rconq: {},
     }
     ecoInit(s)
+    livingInit(s)
     worldInit(s)
     return s
 }
@@ -401,6 +403,7 @@ export function snapshot() {
         w: worldSave(),
         rc: GV.S.rconq,
         eco: ecoSave(),
+        wld: livingSave(),
         b: GV.S.b.map((b?) => ({
             t: b.t,
             x: b.x,
@@ -579,6 +582,7 @@ export function loadFrom(o?) {
     }
     GV.S.stance = o.stance === 'hold' ? 'hold' : 'charge'
     ecoLoad(o)
+    livingLoad(o)
     if (!GV.S.capDown) {
         addSoldier(GV.keep, KX + 0.5, KY + 2.6, 'captain')
     }

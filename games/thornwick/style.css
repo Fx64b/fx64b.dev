@@ -487,6 +487,11 @@ input:focus-visible {
     line-height: 1.3;
     color: var(--muted);
 }
+#placingText .ringctl {
+    display: flex;
+    width: max-content;
+    margin: 4px 0 2px;
+}
 /* Messages from the realm: a short stack of notes under the pennant. */
 #toasts {
     position: absolute;

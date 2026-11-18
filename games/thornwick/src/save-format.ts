@@ -7,7 +7,7 @@
 
 export type Save = Record<string, any> & { v: number }
 
-export const SAVE_VERSION = 8
+export const SAVE_VERSION = 10
 /** Oldest version that can still be migrated. Older saves used a smaller map. */
 export const OLDEST_SUPPORTED = 6
 
@@ -42,6 +42,13 @@ export const MIGRATIONS: Record<number, (o: Save) => Save> = {
         ...o,
         res: { weapons: 20, ...(o.res || {}) },
         eco: o.eco || {},
+    }),
+    // placeholder: replaced by the growing-world phase's v8->v9 step on merge
+    8: (o) => o,
+    // v10: weather, wildlife, travellers and tales. Old kingdoms start in clear weather.
+    9: (o) => ({
+        ...o,
+        wld: o.wld && typeof o.wld === 'object' ? o.wld : {},
     }),
 }
 
