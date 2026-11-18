@@ -80,7 +80,7 @@
                         Army
                     </button>
                     <button class="btn" id="flagBtn" aria-pressed="false">
-                        Rally flag
+                        Banner
                     </button>
                     <button class="btn" id="rm" aria-pressed="false">
                         Remove
@@ -94,6 +94,61 @@
                 height="224"
                 aria-label="Map of the realm. Tap to move the view."
             ></canvas>
+            <div id="alerts" role="group" aria-label="Alerts">
+                <button
+                    class="btn"
+                    id="al-idle"
+                    title="Jump to idle villagers (I)"
+                    disabled
+                >
+                    Idle
+                </button>
+                <button
+                    class="btn"
+                    id="al-empty"
+                    title="Jump to workplaces with no workers (E)"
+                    disabled
+                >
+                    Empty
+                </button>
+                <button
+                    class="btn"
+                    id="al-fire"
+                    title="Jump to buildings on fire (F)"
+                    disabled
+                >
+                    Fire
+                </button>
+                <button
+                    class="btn"
+                    id="al-atk"
+                    title="Jump to the latest attack (A)"
+                    disabled
+                >
+                    Attack
+                </button>
+                <button
+                    class="btn"
+                    id="al-log"
+                    title="Message log (L)"
+                    aria-pressed="false"
+                >
+                    Log
+                </button>
+            </div>
+            <section id="log" hidden aria-label="Message log">
+                <div class="head">
+                    <h2>Messages</h2>
+                    <button
+                        class="btn x"
+                        id="logClose"
+                        aria-label="Close the log"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <ol id="logList"></ol>
+            </section>
             <section id="event" hidden aria-live="polite"></section>
             <section id="inspect" hidden aria-live="polite"></section>
             <div id="toasts" role="status" aria-live="polite"></div>
@@ -296,7 +351,12 @@
                         </li>
                         <li>
                             Pikemen are the answer to brutes, rams and
-                            catapults. Tap any enemy to see what it is.
+                            catapults. Crossbowmen pierce armour. Tap any enemy
+                            to see what it is.
+                        </li>
+                        <li>
+                            Shield-bearers hold the line in front of a banner
+                            and shelter the archers behind them from arrows.
                         </li>
                         <li>
                             Thatch burns. Keep a well within 4 tiles of thatched
@@ -322,10 +382,18 @@
                             the land to get their reward.
                         </li>
                         <li>
-                            Plant the rally flag to gather your army. Tap a
-                            rival castle and choose "Lay siege" to attack it.
-                            Rams and catapults from a siege workshop break walls
-                            fast.
+                            Plant war banners to send your army out. Up to four
+                            can fly at once, and the army splits between them by
+                            itself, more to where the fight is bigger. Tap a
+                            banner to give its squad a fixed size, or to choose
+                            Charge or Hold. Soldiers in no squad guard home.
+                        </li>
+                        <li>
+                            Tap a rival castle and choose "Lay siege" to plant a
+                            banner there. Rams and catapults from a siege
+                            workshop break walls fast. Engineers raise a siege
+                            tower to climb the wall, or dig a tunnel that brings
+                            it down.
                         </li>
                         <li>
                             The realm is large, and eight rival lords live in
@@ -351,6 +419,38 @@
                         </li>
                     </ul>
 
+                    <h3>Battle</h3>
+                    <ul>
+                        <li>
+                            <b>Morale.</b> Soldiers who see their comrades fall
+                            around them, or who are badly outnumbered, lose
+                            heart and run for a few seconds. The captain, the
+                            war cry, their own banner and home ground keep them
+                            steady. Raiders break the same way.
+                        </li>
+                        <li>
+                            <b>Flanks.</b> A unit already fighting someone else,
+                            or struck from behind, takes more damage.
+                        </li>
+                        <li>
+                            <b>Woods and hills.</b> Everyone moves slowly
+                            through trees, and trees catch many of the arrows
+                            shot at those among them. Archers and towers on high
+                            ground (hills lands, or next to rocks) reach one
+                            tile further.
+                        </li>
+                        <li>
+                            <b>The lords learn.</b> Later in the game a rival
+                            sends a scout before an attack, then strikes from
+                            your weakest side. Kill the scout and they come in
+                            blind. Their rams look for your gates and their
+                            catapults for your towers. Larger hosts are led by a
+                            champion: cut him down and his men waver. A beaten
+                            host now breaks and flees instead of dying to the
+                            last man.
+                        </li>
+                    </ul>
+
                     <h3>Controls</h3>
                     <ul>
                         <li>
@@ -369,7 +469,14 @@
                         </li>
                         <li>
                             Tap or drag on the small map in the corner to jump
-                            across the realm.
+                            across the realm. Red rings mark where an attack
+                            begins, orange rings a fire.
+                        </li>
+                        <li>
+                            The buttons under the small map jump to idle
+                            villagers (key I), workplaces with no one at work
+                            (E), fires (F) and the latest attack (A). Press
+                            again for the next one. Log (L) keeps every message.
                         </li>
                     </ul>
                     <p class="note">

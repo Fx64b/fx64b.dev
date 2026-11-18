@@ -1,3 +1,4 @@
+import { BCOL } from './army'
 import { placeErr } from './build'
 import { DEF, LIT, N, OX, OY, ctx, cv } from './config'
 import { caravans } from './eco'
@@ -134,18 +135,75 @@ export function ring(c?, gx?, gy?, r?) {
     c.stroke()
     c.setLineDash([])
 }
-export function drawFlag(c?, x?, y?, col?) {
-    const w = reduceMotion ? 0 : ((GV.animT * 4) | 0) % 2
+/* Pixel digits for the numbered war banners. */
+const DIGITS = {
+    1: ['010', '110', '010', '010', '111'],
+    2: ['111', '001', '111', '100', '111'],
+    3: ['111', '001', '011', '001', '111'],
+    4: ['101', '101', '111', '001', '001'],
+}
+export function drawBanner(c?, x?, y?, col?, id?) {
+    const w = reduceMotion ? 0 : ((GV.animT * 4 + id) | 0) % 2
     c.fillStyle = '#1c1a22'
-    c.fillRect(x - 1, y - 25, 3, 26)
+    c.fillRect(x - 1, y - 27, 3, 28)
     c.fillStyle = '#e6d3a4'
-    c.fillRect(x, y - 24, 1, 24)
-    c.fillStyle = '#1c1a22'
-    c.fillRect(x + 1, y - 25 + w, 11, 9)
-    c.fillStyle = col
-    c.fillRect(x + 1, y - 24 + w, 10, 7)
+    c.fillRect(x, y - 26, 1, 26)
     c.fillStyle = '#e6b83e'
-    c.fillRect(x + 1, y - 21 + w, 10, 2)
+    c.fillRect(x - 1, y - 29, 3, 2)
+    c.fillStyle = '#1c1a22'
+    c.fillRect(x + 1, y - 27 + w, 11, 10)
+    c.fillStyle = col
+    c.fillRect(x + 1, y - 26 + w, 10, 8)
+    c.fillStyle = '#f6eed6'
+    const g = DIGITS[id]
+    if (g) {
+        for (let j = 0; j < 5; j++) {
+            for (let i = 0; i < 3; i++) {
+                if (g[j][i] === '1') {
+                    c.fillRect(x + 5 + i, y - 25 + w + j, 1, 1)
+                }
+            }
+        }
+    }
+}
+/* A timber siege tower against a rival wall, or the spoil heap of a tunnel under it. */
+export function drawSiegeWork(c?, b?) {
+    const x = wx(b.x, b.y),
+        y = wy(b.x, b.y)
+    if (b.dig > 0) {
+        const r = 2 + Math.round(b.dig * 5)
+        c.fillStyle = '#4a3622'
+        c.fillRect(x - 12 - r, y + 5, r * 2, 3)
+        c.fillStyle = '#6e5234'
+        c.fillRect(x - 11 - r, y + 4, r * 2 - 2, 2)
+        c.fillStyle = '#16120e'
+        c.fillRect(x - 13, y + 3, 4, 3)
+        c.fillStyle = '#8a6a42'
+        c.fillRect(x - 14, y + 2, 6, 1)
+    }
+    if (b.stw > 0) {
+        const h = 6 + Math.round(b.stw * 26),
+            tx = x - 9,
+            ty = y + 10
+        c.fillStyle = '#2e2216'
+        c.fillRect(tx - 5, ty - h, 2, h)
+        c.fillRect(tx + 4, ty - h, 2, h)
+        c.fillStyle = '#7a5a36'
+        c.fillRect(tx - 4.5, ty - h, 1, h)
+        c.fillRect(tx + 4.5, ty - h, 1, h)
+        c.fillStyle = '#9a7648'
+        for (let k = 3; k < h; k += 5) {
+            c.fillRect(tx - 4, ty - k, 9, 1)
+        }
+        if (b.stw >= 1) {
+            c.fillStyle = '#5e4428'
+            c.fillRect(tx - 6, ty - h - 2, 13, 2)
+            c.fillStyle = '#1c1a22'
+            c.fillRect(tx, ty - h - 9, 1, 7)
+            c.fillStyle = BCOL[0]
+            c.fillRect(tx + 1, ty - h - 9, 4, 3)
+        }
+    }
 }
 export const TOPH = {
     keep: 70,
@@ -340,7 +398,19 @@ export function render() {
             } else {
                 for (const s of GV.S.sold) {
                     if (s.kind !== 'scout' && vis(s.x, s.y)) {
-                        selRing(s, false, col)
+                        selRing(s, false, s.sq && !faint ? BCOL[s.sq - 1] : col)
+                    }
+                }
+            }
+        } else if (sel.kind === 'banner') {
+            c.strokeStyle = col
+            c.lineWidth = faint ? 0.75 : 1
+            diamondPath(c, sel.bn.x, sel.bn.y, 1)
+            c.stroke()
+            if (!faint) {
+                for (const s of GV.S.sold) {
+                    if (s.sq === sel.bn.id && vis(s.x, s.y)) {
+                        selRing(s, false, BCOL[s.sq - 1])
                     }
                 }
             }
@@ -408,8 +478,10 @@ export function render() {
             list.push([c.x + c.y + 0.02, 6, c])
         }
     }
-    if (GV.S.flag && vis(GV.S.flag[0], GV.S.flag[1])) {
-        list.push([GV.S.flag[0] + GV.S.flag[1] + 0.03, 5])
+    for (const bn of GV.S.banners) {
+        if (vis(bn.x, bn.y)) {
+            list.push([bn.x + bn.y + 0.03, 5, bn])
+        }
     }
     list.sort((a?, b?) => a[0] - b[0])
     for (const d of list) {
@@ -442,6 +514,9 @@ export function render() {
                 wy(b.x, b.y) - sp.oy / R - Math.round(b.drop * b.drop * 36) / 2
             )
             c.globalAlpha = 1
+            if (b.stw > 0 || b.dig > 0) {
+                drawSiegeWork(c, b)
+            }
             if (b.ladder > 0) {
                 const lx = wx(b.x, b.y) - 4,
                     ly = wy(b.x, b.y) + 7
@@ -470,11 +545,13 @@ export function render() {
                 Math.round(wy(u.x, u.y)) - sp.oy / R
             )
         } else if (d[1] === 5) {
-            drawFlag(
+            const bn = d[2]
+            drawBanner(
                 c,
-                wx(GV.S.flag[0], GV.S.flag[1]),
-                wy(GV.S.flag[0], GV.S.flag[1]),
-                '#2f6a86'
+                wx(bn.x, bn.y),
+                wy(bn.x, bn.y),
+                BCOL[bn.id - 1],
+                bn.id
             )
         } else {
             const u = d[2],
@@ -485,7 +562,13 @@ export function render() {
             const tX = clampN(gx),
                 tY = clampN(gy),
                 tb = bmap[tX + tY * N]
-            const lift = u.onWall ? 12 : en && tb && tb.ladder > 0 ? 11 : 0
+            const lift = u.onWall
+                ? 12
+                : en && tb && tb.ladder > 0
+                  ? 11
+                  : !en && tb && tb.o !== 0 && tb.stw >= 1
+                    ? 11
+                    : 0
             const sr =
                 role === 'pram' ? 'ram' : role === 'pcat' ? 'catapult' : role
             if (sr === 'ram' || sr === 'catapult') {
@@ -553,17 +636,18 @@ export function render() {
                 c.fillStyle = 'rgba(255,255,255,.25)'
                 c.fillRect(bx + 0.5, by + 0.5, 4, 0.5)
             }
+            const lead = role === 'captain' || role === 'hero'
             if (u.max && u.hp < u.max - 0.5) {
-                hpBar(
-                    c,
-                    px + iw / 2,
-                    py - 3,
-                    u.hp / u.max,
-                    role === 'captain' ? 14 : 10
-                )
-            } else if (role === 'captain') {
+                hpBar(c, px + iw / 2, py - 3, u.hp / u.max, lead ? 14 : 10)
+            } else if (lead) {
                 c.fillStyle = '#d4a537'
                 c.fillRect(px + iw / 2 - 1, py - 4, 2.5, 1.5)
+            }
+            if (u.rout > 0 && ((GV.animT * 4) | 0) % 2) {
+                // Broken: a pale mark over the head while they run.
+                c.fillStyle = '#f4f0e0'
+                c.fillRect(px + iw / 2 - 0.5, py - 8, 1, 3)
+                c.fillRect(px + iw / 2 - 0.5, py - 4, 1, 1)
             }
             if (
                 !en &&
@@ -663,7 +747,11 @@ export function render() {
             diamondPath(c, x, y, 1)
             c.fill()
             c.globalAlpha = 0.75
-            drawFlag(c, wx(x, y), wy(x, y), '#2f6a86')
+            let id = GV.moveBn || 1
+            while (!GV.moveBn && GV.S.banners.some((b?) => b.id === id)) {
+                id++
+            }
+            drawBanner(c, wx(x, y), wy(x, y), BCOL[(id - 1) % 4], id)
             c.globalAlpha = 1
         } else if (ghostT === 'remove') {
             const b = bAt(x, y)

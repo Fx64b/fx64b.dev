@@ -1,3 +1,4 @@
+import { MAX_BANNERS } from './army'
 import {
     DAYLEN,
     DEF,
@@ -53,6 +54,7 @@ GV.lastEvent = ''
 GV.tab = 0
 GV.fireToast = 0
 GV.curSeason = -1
+GV.sqCd = 0
 export const bmap = new Array(NN).fill(null)
 export const terrain = new Uint8Array(NN),
     baseTerr = new Uint8Array(NN),
@@ -434,7 +436,7 @@ export function blank() {
         conq: {},
         disc: {},
         loot: {},
-        flag: null,
+        banners: [],
         capLvl: 1,
         capXp: 0,
         capDown: 0,
@@ -491,6 +493,8 @@ export function addB(t?, x?, y?, quiet?, o?) {
         cx: x + (s - 1) / 2,
         cy: y + (s - 1) / 2,
         seed: hsh(x, y, 92),
+        stw: 0,
+        dig: 0,
     }
     GV.S.b.push(b)
     for (let j = 0; j < s; j++) {
@@ -542,6 +546,14 @@ export function makeRival(k?) {
         ecd: 150 + k * 20,
         route: null,
         outT: 0,
+        heroCd: 0,
+        hp0: 0,
+        heroFell: false,
+        atkDir: null,
+        wp: null,
+        scoutOut: false,
+        broke: false,
+        rcd: 0,
     }
 }
 export function newGame() {
@@ -593,7 +605,14 @@ export function snapshot() {
         conq: GV.S.conq,
         disc: GV.S.disc,
         loot: GV.S.loot,
-        flag: GV.S.flag,
+        banners: GV.S.banners.map((b?) => ({
+            id: b.id,
+            x: b.x,
+            y: b.y,
+            n: b.n === undefined ? null : b.n,
+            st: b.st,
+            eng: b.eng,
+        })),
         capLvl: GV.S.capLvl,
         capXp: GV.S.capXp,
         capDown: GV.capU ? 0 : Math.max(1, GV.S.capDown),
@@ -609,6 +628,7 @@ export function snapshot() {
             atkIn: r.out ? 45 : r.atkIn,
             truce: r.truce,
             nf: r.out ? r.foe : r.nextFoe,
+            hc: Math.round(r.heroCd || 0),
         })),
         rc: GV.S.rconq,
         eco: ecoSave(),
@@ -630,6 +650,10 @@ export function snapshot() {
             // Left out of the save unless set (undefined is not written).
             f: b.off ? 1 : undefined,
             m: b.mk || undefined,
+            g:
+                b.stw > 0 || b.dig > 0
+                    ? [+(b.stw || 0).toFixed(2), +(b.dig || 0).toFixed(2)]
+                    : undefined,
         })),
         vill: GV.S.vill.length,
         stance: GV.S.stance,
@@ -663,7 +687,21 @@ export function loadFrom(o?) {
     GV.S.conq = o.conq || {}
     GV.S.disc = o.disc || {}
     GV.S.loot = o.loot || {}
-    GV.S.flag = o.flag || null
+    GV.S.banners = (Array.isArray(o.banners) ? o.banners : [])
+        .filter(
+            (b?) =>
+                b && b.id >= 1 && b.id <= MAX_BANNERS && inMap(b.x | 0, b.y | 0)
+        )
+        .slice(0, MAX_BANNERS)
+        .map((b?) => ({
+            id: b.id | 0,
+            x: b.x | 0,
+            y: b.y | 0,
+            n: typeof b.n === 'number' && b.n >= 1 ? b.n | 0 : null,
+            st: b.st === 'hold' ? 'hold' : 'charge',
+            eng: b.eng === 'tunnel' ? 'tunnel' : 'tower',
+        }))
+        .filter((b?, i?, all?) => all.findIndex((o?) => o.id === b.id) === i)
     GV.S.capLvl = o.capLvl || 1
     GV.S.capXp = o.capXp || 0
     GV.S.capDown = o.capDown || 0
@@ -685,6 +723,7 @@ export function loadFrom(o?) {
             atkIn: q.atkIn || 90,
             truce: q.truce || 0,
             nextFoe: q.nf === undefined ? null : q.nf,
+            heroCd: q.hc || 0,
         })
         GV.S.riv.push(rv)
     }
@@ -717,6 +756,10 @@ export function loadFrom(o?) {
         }
         if (q.m === 'weapons' || q.m === 'tools') {
             b.mk = q.m
+        }
+        if (Array.isArray(q.g)) {
+            b.stw = +q.g[0] || 0
+            b.dig = +q.g[1] || 0
         }
         if (Array.isArray(q.s)) {
             for (const kd of q.s) {

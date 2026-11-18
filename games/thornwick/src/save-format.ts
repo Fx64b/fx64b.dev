@@ -13,8 +13,29 @@ export const OLDEST_SUPPORTED = 6
 
 /** MIGRATIONS[n] turns a save of version n into version n + 1. */
 export const MIGRATIONS: Record<number, (o: Save) => Save> = {
-    // placeholder: replaced by the combat phase's v6->v7 step on merge
-    6: (o) => o,
+    // 6 -> 7: the single rally flag becomes the first of up to four war banners.
+    6: (o) => {
+        const { flag, ...rest } = o
+        const ok =
+            Array.isArray(flag) &&
+            typeof flag[0] === 'number' &&
+            typeof flag[1] === 'number'
+        return {
+            ...rest,
+            banners: ok
+                ? [
+                      {
+                          id: 1,
+                          x: flag[0],
+                          y: flag[1],
+                          n: null,
+                          st: o.stance === 'hold' ? 'hold' : 'charge',
+                          eng: 'tower',
+                      },
+                  ]
+                : [],
+        } as Save
+    },
     // v8: goods, research, trade routes, charts and finite trees and rocks.
     // Old kingdoms get the starting stock of weapons so their barracks keep training.
     7: (o) => ({

@@ -1,3 +1,4 @@
+import { BCOL } from './army'
 import { $, FCOL, N, OX, OY } from './config'
 import { lookAt } from './input'
 import { Z, cam } from './render'
@@ -80,8 +81,11 @@ export function drawMini() {
         }
     }
     for (const e of GV.S.en) {
-        if (seenAt(e.x, e.y) && (e.mode === 'atk' || e.mode === 'war')) {
-            if (e.mode === 'atk') {
+        if (
+            seenAt(e.x, e.y) &&
+            (e.mode === 'atk' || e.mode === 'war' || e.mode === 'scout')
+        ) {
+            if (e.mode !== 'war') {
                 set(clampN(e.x), clampN(e.y), 240, 60, 50)
             } else {
                 const c = FCOL[fcol(e.fac)]
@@ -98,10 +102,38 @@ export function drawMini() {
     for (const s of GV.S.sold) {
         set(clampN(s.x), clampN(s.y), 90, 190, 250)
     }
-    if (GV.S.flag) {
-        set(GV.S.flag[0], GV.S.flag[1], 255, 220, 60)
+    for (const bn of GV.S.banners) {
+        const c = parseInt(BCOL[bn.id - 1].slice(1), 16)
+        for (const [a, b] of [
+            [0, 0],
+            [1, 0],
+            [0, 1],
+            [-1, 0],
+            [0, -1],
+        ]) {
+            set(bn.x + a, bn.y + b, 255, 220, 60)
+        }
+        set(bn.x, bn.y, (c >> 16) & 255, (c >> 8) & 255, c & 255)
     }
     mctx.putImageData(GV.mim, 0, 0)
+    // Rings where an attack or a fire has just started.
+    for (const p of GV.pings) {
+        const age = GV.animT - p.t
+        if (age > 6 || age < 0) {
+            continue
+        }
+        const px = N + (p.x - p.y),
+            py = (p.x + p.y) / 2
+        mctx.globalAlpha = Math.max(0, 1 - age / 6)
+        mctx.strokeStyle = p.kind === 'fire' ? '#ff9a2a' : '#ff3c30'
+        mctx.lineWidth = 3
+        for (const r of [6 + ((age * 14) % 28), 4]) {
+            mctx.beginPath()
+            mctx.arc(px, py, r, 0, 7)
+            mctx.stroke()
+        }
+    }
+    mctx.globalAlpha = 1
     const z = Z(),
         c0 = [(GV.W / 2 - cam.x) / z - OX, (GV.H / 2 - cam.y) / z - OY],
         gx = (c0[0] / 16 + c0[1] / 8) / 2,
