@@ -131,12 +131,36 @@ body{
 #placing .btn{min-height:30px; padding:4px 12px}
 #placingText{font-size:14.5px}
 #placingText small{display:block; margin-top:2px; font-size:13px; line-height:1.3; color:var(--muted)}
-#toast{
+/* Messages from the realm: a short stack of notes under the pennant. */
+#toasts{
   position:absolute; z-index:4; left:50%; top:calc(var(--bar-h) + 92px); transform:translateX(-50%);
-  max-width:min(90vw,440px); padding:7px 14px; text-align:center; pointer-events:none;
-  background:var(--ink); color:var(--surface); border-radius:3px; opacity:0; transition:opacity .25s;
+  width:min(92vw,440px); display:flex; flex-direction:column; gap:6px; pointer-events:none;
 }
-#toast.on{opacity:1}
+.msg{
+  position:relative; pointer-events:auto; cursor:pointer; overflow:hidden;
+  display:flex; align-items:flex-start; gap:8px; padding:9px 6px 11px 12px;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line); border-left:4px solid var(--primary); border-radius:4px;
+  box-shadow:var(--shadow), 0 8px 22px rgba(17,37,45,.22); font-size:14.5px; line-height:1.35;
+  animation:msgIn .28s ease-out; transition:opacity .25s, transform .25s;
+}
+.msg.warn{border-left-color:var(--madder)}
+.msg.good{border-left-color:var(--gold)}
+.msg p{margin:0; flex:1; padding-top:1px}
+.msg .n{margin-left:6px; font-weight:600; color:var(--muted)}
+.msg .x{flex:none; min-height:24px; padding:0 7px; font-size:13px; line-height:22px; border-color:transparent; color:var(--muted)}
+.msg .x:hover{color:var(--ink)}
+.msg::after{
+  content:''; position:absolute; left:0; bottom:0; height:3px; width:100%;
+  background:var(--line); transform-origin:left; animation:msgTime var(--d, 8s) linear forwards;
+}
+.msg.warn::after{background:var(--madder); opacity:.55}
+.msg.good::after{background:var(--gold); opacity:.6}
+.msg:hover::after{animation-play-state:paused}
+.msg.out{opacity:0; transform:translateY(-6px)}
+@keyframes msgIn{from{opacity:0; transform:translateY(-8px)}}
+@keyframes msgTime{to{transform:scaleX(0)}}
+@keyframes msgTime2{to{transform:scaleX(0)}}
+.msg.again::after{animation-name:msgTime2}
 
 .veil{position:absolute; inset:0; z-index:5; display:grid; place-items:center; padding:16px; background:rgba(17,37,45,.55)}
 .sheet{
@@ -196,7 +220,7 @@ body{
   #pennant{width:122px}
   #pennant b{font-size:21px}
 }
-@media (prefers-reduced-motion:reduce){ #toast{transition:none} }
+@media (prefers-reduced-motion:reduce){ .msg{animation:none; transition:none} .msg::after{animation:none; display:none} }
 </style>
 </head>
 <body>
@@ -243,7 +267,7 @@ body{
   <canvas id="mini" width="448" height="224" aria-label="Map of the realm. Tap to move the view."></canvas>
   <section id="event" hidden aria-live="polite"></section>
   <section id="inspect" hidden aria-live="polite"></section>
-  <div id="toast" role="status"></div>
+  <div id="toasts" role="status" aria-live="polite"></div>
   <div id="placing" hidden><span id="placingText"></span><button class="btn primary" id="placingDone">Done</button></div>
 
   <div class="veil" id="loading"><div class="sheet" style="width:auto"><p style="margin:0; font-style:italic">Raising the realm…</p></div></div>
@@ -1644,8 +1668,42 @@ function puff(x, y, n, col){
   if (!seenAt(x, y)) return;
   for (let i = 0; i < n; i++) parts.push({x:wx(x, y) + (Math.random()-.5)*22, y:wy(x, y) + (Math.random()-.5)*10, vx:(Math.random()-.5)*14, vy:-6 - Math.random()*10, t:0, life:.5 + Math.random()*.5, c:col || '#d9cdb0', s:1});
 }
-let toastT = 0;
-function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 4200); }
+/* Messages stay long enough to read (longer for longer text), pause while hovered,
+   and close on click. A repeated message counts up instead of stacking. */
+const MSG_MAX = 4;
+const MSG_WARN = /fire|burn|fallen|marches on thornwick|destroyed|consumed|lost|leave|left|run out|empty|ladders|fever|bandits|anger|sooner|turn on|claims the/i;
+const MSG_GOOD = /gold|beaten back|joins|harvest|are yours|is yours|renown|claimed for thornwick|breaks|unloads|agrees/i;
+function msgTimer(el, ms){
+  clearTimeout(el._t); el._left = ms; el._at = Date.now();
+  el._t = setTimeout(() => dismissMsg(el), ms);
+}
+function dismissMsg(el){
+  if (el._gone) return; el._gone = true; clearTimeout(el._t);
+  el.classList.add('out'); setTimeout(() => el.remove(), reduceMotion ? 0 : 260);
+}
+function toast(msg){
+  const box = $('#toasts');
+  for (const el of box.children) if (el._msg === msg && !el._gone){
+    el._n++; el.querySelector('.n').textContent = '×' + el._n;
+    el.classList.toggle('again');
+    msgTimer(el, el._ms); return;
+  }
+  const ms = Math.min(16000, 6500 + msg.length*55);
+  const el = document.createElement('div');
+  el.className = 'msg' + (MSG_WARN.test(msg) ? ' warn' : MSG_GOOD.test(msg) ? ' good' : '');
+  el.style.setProperty('--d', ms + 'ms');
+  el.innerHTML = '<p></p><button class="btn x" type="button" aria-label="Close message">✕</button>';
+  el.querySelector('p').textContent = msg;
+  el.querySelector('p').insertAdjacentHTML('beforeend', '<span class="n"></span>');
+  el._msg = msg; el._n = 1; el._ms = ms;
+  el.addEventListener('click', () => dismissMsg(el));
+  el.addEventListener('mouseenter', () => { clearTimeout(el._t); el._left -= Date.now() - el._at; });
+  el.addEventListener('mouseleave', () => msgTimer(el, Math.max(1500, el._left)));
+  box.appendChild(el);
+  msgTimer(el, ms);
+  const live = [...box.children].filter(e => !e._gone);
+  if (live.length > MSG_MAX) dismissMsg(live[0]);
+}
 function compass(dx, dy){
   const a = Math.atan2(dx + dy, dx - dy), k = ((Math.round(a / .7854) % 8) + 8) % 8;
   return ['east','south-east','south','south-west','west','north-west','north','north-east'][k];
