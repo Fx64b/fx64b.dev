@@ -1,20 +1,11 @@
 import { jump, showLog } from './alerts'
 import { assignSquads, plantBanner, removeBanner } from './army'
 import { placeErr, tryPlace, upgradeKeep } from './build'
-import {
-    $,
-    BACKUP_SAVE_KEY,
-    DEF,
-    LEGACY_SAVE_KEYS,
-    N,
-    SAVE_KEY,
-    STEP,
-} from './config'
+import { $, DEF, N, STEP } from './config'
 import * as ECO from './eco'
 import { closeRealm, openRealm } from './ecoui'
 import { EVENTS, pickEvent, startEvent } from './events'
 import { groundInit } from './ground'
-import { toast } from './helpers'
 import { lookAt, pick, readTheme, resize } from './input'
 import { refreshOwn } from './land'
 import * as LIVING from './livingworld'
@@ -40,20 +31,7 @@ import {
 import { cam, render } from './render'
 import { tick } from './sim'
 import { propSprite, sprite, unitSprite } from './sprites'
-import {
-    bmap,
-    flow,
-    loadFrom,
-    newGame,
-    reg,
-    save,
-    seenAt,
-    snapshot,
-    store,
-    terrain,
-    wx,
-    wy,
-} from './state'
+import { bmap, flow, newGame, reg, seenAt, terrain, wx, wy } from './state'
 import { TALES } from './tales'
 import * as TOOLS from './tools'
 import * as TRAVEL from './travel'
@@ -186,51 +164,8 @@ export async function boot() {
     await new Promise((r?) => setTimeout(r, 40))
     groundInit()
     readTheme()
-    let loaded = false
-    if (store) {
-        // The current key first, then keys of older versions.
-        for (const key of [SAVE_KEY, ...LEGACY_SAVE_KEYS]) {
-            let raw = null
-            try {
-                const r = await Promise.race([
-                    store.get(key, false),
-                    new Promise((_?, rej?) =>
-                        setTimeout(() => rej(new Error('slow')), 3000)
-                    ),
-                ])
-                raw = r && r.value
-            } catch {
-                // storage can be blocked (private mode); the game runs without it
-            }
-            if (!raw) {
-                continue
-            }
-            try {
-                loadFrom(JSON.parse(raw))
-                loaded = true
-                if (key !== SAVE_KEY) {
-                    await store.set(SAVE_KEY, raw, false)
-                    await store.delete(key, false)
-                }
-            } catch {
-                // Keep a copy of a save this version cannot read, instead of losing it.
-                try {
-                    await store.set(BACKUP_SAVE_KEY, raw, false)
-                    await store.delete(key, false)
-                } catch {
-                    // nothing more to do without storage
-                }
-                toast(
-                    'Your earlier kingdom could not be loaded in this version. A copy of it is kept, and a new realm begins.'
-                )
-            }
-            break
-        }
-    }
-    if (!loaded) {
-        newGame()
-        showHelp(true)
-    }
+    newGame()
+    showHelp(true)
     buildCards()
     resize()
     hud()
@@ -238,13 +173,6 @@ export async function boot() {
     if (window.ResizeObserver) {
         new ResizeObserver(resize).observe($('#palette'))
     }
-    setInterval(save, 20000)
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            save()
-        }
-    })
-    window.addEventListener('pagehide', save)
     requestAnimationFrame(frame)
 }
 ;(window as any).__thornwick = {
@@ -259,8 +187,6 @@ export async function boot() {
     step,
     tryPlace,
     newGame,
-    snapshot,
-    loadFrom,
     render,
     hud,
     sprite,

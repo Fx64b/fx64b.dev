@@ -1,9 +1,7 @@
-import { MAX_BANNERS } from './army'
 import {
     DAYLEN,
     DEF,
     DF,
-    DIFFS,
     FIRST_RAID,
     HOME,
     KX,
@@ -11,31 +9,20 @@ import {
     LORDS,
     N,
     NN,
-    NRIV,
     OX,
     OY,
-    RES,
-    SAVE_KEY,
     SEASONLEN,
 } from './config'
-import { ecoInit, ecoLoad, ecoSave } from './eco'
+import { ecoInit } from './eco'
 import { drawGroundAll } from './ground'
 import { refreshOwn } from './land'
-import { livingInit, livingLoad, livingSave } from './livingworld'
+import { livingInit } from './livingworld'
 import { rivalPlan, rivalStep } from './lords'
 import { hsh } from './noise'
 import { recomputePaths } from './path'
-import { UNITS, addSoldier, spawnVillager } from './people'
-import { SAVE_VERSION, migrateSave } from './save-format'
+import { addSoldier, spawnVillager } from './people'
 import { GV } from './vars'
-import {
-    closeUnopened,
-    genWorld,
-    lordCols,
-    worldInit,
-    worldLoad,
-    worldSave,
-} from './world'
+import { closeUnopened, genWorld, lordCols, worldInit } from './world'
 
 GV.S = undefined
 GV.keep = undefined
@@ -353,288 +340,4 @@ export function newGame() {
     pathMap.fill(0)
     recomputePaths(true)
     drawGroundAll()
-}
-export function snapshot() {
-    return JSON.stringify({
-        v: SAVE_VERSION,
-        seed: GV.S.seed,
-        res: GV.S.res,
-        t: GV.S.t,
-        wave: GV.S.wave,
-        tmod: GV.S.tmod,
-        conq: GV.S.conq,
-        disc: GV.S.disc,
-        loot: GV.S.loot,
-        banners: GV.S.banners.map((b?) => ({
-            id: b.id,
-            x: b.x,
-            y: b.y,
-            n: b.n === undefined ? null : b.n,
-            st: b.st,
-            eng: b.eng,
-        })),
-        capLvl: GV.S.capLvl,
-        capXp: GV.S.capXp,
-        capDown: GV.capU ? 0 : Math.max(1, GV.S.capDown),
-        evCd: GV.S.evCd,
-        won: GV.S.won,
-        diff: GV.S.diff,
-        riv: GV.S.riv.map((r?) => ({
-            awake: r.awake,
-            dead: r.dead,
-            wealth: Math.round(r.wealth),
-            pi: r.pi,
-            k: r.k,
-            atkIn: r.out ? 45 : r.atkIn,
-            truce: r.truce,
-            nf: r.out ? r.foe : r.nextFoe,
-            hc: Math.round(r.heroCd || 0),
-            id: r.id,
-            lp: r.lp,
-            r: r.r,
-            kx: r.kx,
-            ky: r.ky,
-            tr: r.tier,
-            nw: r.nw || undefined,
-            bt: r.nw ? Math.round(r.born) : undefined,
-            an: r.ann || undefined,
-            dt: r.dead ? Math.round(r.deadT || 0) : undefined,
-        })),
-        w: worldSave(),
-        rc: GV.S.rconq,
-        eco: ecoSave(),
-        wld: livingSave(),
-        b: GV.S.b.map((b?) => ({
-            t: b.t,
-            x: b.x,
-            y: b.y,
-            o: b.o,
-            l: b.lvl,
-            h: Math.round(b.hp),
-            a: b.auto ? 1 : 0,
-            s:
-                DEF[b.t].garrison && b.o === 0
-                    ? GV.S.sold
-                          .filter((x?) => x.home === b && x.kind !== 'captain')
-                          .map((x?) => x.kind)
-                    : 0,
-            k: b.trainKind || 0,
-            // Left out of the save unless set (undefined is not written).
-            f: b.off ? 1 : undefined,
-            m: b.mk || undefined,
-            g:
-                b.stw > 0 || b.dig > 0
-                    ? [+(b.stw || 0).toFixed(2), +(b.dig || 0).toFixed(2)]
-                    : undefined,
-        })),
-        vill: GV.S.vill.length,
-        stance: GV.S.stance,
-        mercs: GV.S.sold
-            .filter(
-                (s?) =>
-                    s.home === GV.keep &&
-                    s.kind !== 'captain' &&
-                    s.kind !== 'scout'
-            )
-            .map((s?) => s.kind),
-    })
-}
-export function loadFrom(o?) {
-    o = migrateSave(o)
-    // Saves from before the world could grow do not fit it.
-    if (!o || !Array.isArray(o.b) || !Array.isArray(o.riv) || !o.w) {
-        throw new Error('bad save')
-    }
-    GV.S = blank()
-    bmap.fill(null)
-    GV.keep = null
-    GV.parts = []
-    GV.capU = null
-    GV.S.seed = o.seed
-    for (const r of RES) {
-        GV.S.res[r] = +o.res[r] || 0
-    }
-    GV.S.t = o.t || 0
-    GV.S.wave = o.wave || 0
-    GV.S.tmod = o.tmod || {}
-    GV.S.conq = o.conq || {}
-    GV.S.disc = o.disc || {}
-    GV.S.loot = o.loot || {}
-    GV.S.banners = (Array.isArray(o.banners) ? o.banners : [])
-        .filter(
-            (b?) =>
-                b && b.id >= 1 && b.id <= MAX_BANNERS && inMap(b.x | 0, b.y | 0)
-        )
-        .slice(0, MAX_BANNERS)
-        .map((b?) => ({
-            id: b.id | 0,
-            x: b.x | 0,
-            y: b.y | 0,
-            n: typeof b.n === 'number' && b.n >= 1 ? b.n | 0 : null,
-            st: b.st === 'hold' ? 'hold' : 'charge',
-            eng: b.eng === 'tunnel' ? 'tunnel' : 'tower',
-        }))
-        .filter((b?, i?, all?) => all.findIndex((o?) => o.id === b.id) === i)
-    GV.S.capLvl = o.capLvl || 1
-    GV.S.capXp = o.capXp || 0
-    GV.S.capDown = o.capDown || 0
-    GV.S.evCd = o.evCd || 120
-    GV.S.won = !!o.won
-    GV.S.diff = o.diff >= 0 && o.diff < DIFFS.length ? o.diff | 0 : 2
-    GV.nextDiff = GV.S.diff
-    worldLoad(o)
-    applyTerrain()
-    const nr = Math.min(NRIV, o.riv.length)
-    for (let k = 0; k < nr; k++) {
-        const q = o.riv[k] || {},
-            fine =
-                LORDS[q.lp] &&
-                q.id >= 1 &&
-                q.id <= NRIV &&
-                GV.regs[q.r] &&
-                inMap(q.kx, q.ky),
-            rv = fine
-                ? makeRival(k, {
-                      id: q.id,
-                      sp: { r: q.r, kx: q.kx, ky: q.ky },
-                      lp: q.lp,
-                      tier: Math.min(5, Math.max(1, q.tr | 0)),
-                      nw: q.nw,
-                  })
-                : makeRival(k)
-        Object.assign(rv, {
-            born: q.bt || 0,
-            ann: q.an ? 1 : 0,
-            deadT: q.dt || 0,
-            awake: !!q.awake,
-            dead: !!q.dead,
-            wealth: q.wealth || 0,
-            pi: q.pi || 0,
-            k: q.k || 0,
-            atkIn: q.atkIn || 90,
-            truce: q.truce || 0,
-            nextFoe: q.nf === undefined ? null : q.nf,
-            heroCd: q.hc || 0,
-        })
-        GV.S.riv.push(rv)
-    }
-    GV.S.rconq = o.rc && typeof o.rc === 'object' ? o.rc : {}
-    lordCols()
-    for (const q of o.b) {
-        if (!DEF[q.t] || !inMap(q.x, q.y)) {
-            continue
-        }
-        const b = addB(q.t, q.x, q.y, true, q.o || 0)
-        if (q.t === 'keep') {
-            b.lvl = Math.min(3, Math.max(1, q.l | 0))
-            b.max = DEF.keep.hp[b.lvl - 1]
-            if (b.o === 0) {
-                GV.keep = b
-            } else {
-                const rv = rivById(b.o)
-                if (rv) {
-                    rv.keepB = b
-                    b.max = Math.round(b.max * kMul(rv))
-                }
-            }
-        }
-        b.hp = Math.min(b.max, q.h || b.max)
-        b.auto = !!q.a
-        if (q.k) {
-            b.trainKind = q.k
-        }
-        if (q.f) {
-            b.off = true
-        }
-        if (q.m === 'weapons' || q.m === 'tools') {
-            b.mk = q.m
-        }
-        if (Array.isArray(q.g)) {
-            b.stw = +q.g[0] || 0
-            b.dig = +q.g[1] || 0
-        }
-        if (Array.isArray(q.s)) {
-            for (const kd of q.s) {
-                if (UNITS[kd]) {
-                    addSoldier(b, b.x + 0.5, b.y + 0.6, kd)
-                }
-            }
-        }
-    }
-    if (!GV.keep) {
-        throw new Error('no keep')
-    }
-    for (const rv of GV.S.riv) {
-        rv.plan = rivalPlan(rv)
-        if (!rv.keepB) {
-            rv.dead = true
-        }
-    }
-    for (let i = 0; i < (o.vill | 0); i++) {
-        spawnVillager(true)
-    }
-    if (Array.isArray(o.mercs)) {
-        for (const kd of o.mercs) {
-            if (UNITS[kd]) {
-                addSoldier(GV.keep, KX + 0.5, KY + 2.6, kd)
-            }
-        }
-    }
-    GV.S.stance = o.stance === 'hold' ? 'hold' : 'charge'
-    ecoLoad(o)
-    livingLoad(o)
-    if (!GV.S.capDown) {
-        addSoldier(GV.keep, KX + 0.5, KY + 2.6, 'captain')
-    }
-    refreshOwn(true)
-    GV.curSeason = -1
-    pathMap.fill(0)
-    recomputePaths(true)
-    drawGroundAll()
-}
-GV.saveBusy = false
-export const store =
-    (window as any).storage ||
-    (() => {
-        try {
-            const k = '__thornwick_probe'
-            localStorage.setItem(k, '1')
-            localStorage.removeItem(k)
-        } catch (e) {
-            return null
-        }
-        return {
-            async get(key?) {
-                const v = localStorage.getItem(key)
-                return v === null ? null : { key, value: v }
-            },
-            async set(key?, value?) {
-                localStorage.setItem(key, value)
-            },
-            async delete(key?) {
-                localStorage.removeItem(key)
-            },
-        }
-    })()
-export async function save() {
-    if (!store || !GV.S || GV.S.over || GV.saveBusy) {
-        return
-    }
-    GV.saveBusy = true
-    try {
-        await store.set(SAVE_KEY, snapshot(), false)
-    } catch {
-        // storage can be blocked (private mode); the game runs without it
-    }
-    GV.saveBusy = false
-}
-export async function wipeSave() {
-    if (!store) {
-        return
-    }
-    try {
-        await store.delete(SAVE_KEY, false)
-    } catch {
-        // storage can be blocked (private mode); the game runs without it
-    }
 }

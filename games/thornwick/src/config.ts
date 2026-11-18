@@ -18,9 +18,14 @@ export const OX = N * 16,
     GW = N * 32,
     GH = N * 16 + OY + 30
 export const FIRST_RAID = 210,
-    SAVE_KEY = 'thornwick-save',
-    LEGACY_SAVE_KEYS = ['thornwick-save-6'],
-    BACKUP_SAVE_KEY = 'thornwick-save-backup'
+    // The game keeps no saves: each visit starts a new realm.
+    OLD_SAVE_KEYS = [
+        'thornwick-save',
+        'thornwick-save-4',
+        'thornwick-save-5',
+        'thornwick-save-6',
+        'thornwick-save-backup',
+    ]
 /* Difficulty mainly changes the rival lords: how often and how hard they attack,
    how tough their soldiers are and how fast their economy grows.
    wx: how hard the weather bites. wolf: how many wolves come in winter, and how bold. */
@@ -94,8 +99,10 @@ export const DIFFS = [
 export const DIFF_KEY = 'thornwick-difficulty'
 // Saves from the smaller map do not fit this world.
 try {
-    localStorage.removeItem('thornwick-save-4')
-    localStorage.removeItem('thornwick-save-5')
+    // Clear saves left by earlier versions of the game.
+    for (const k of OLD_SAVE_KEYS) {
+        localStorage.removeItem(k)
+    }
 } catch {
     // storage can be blocked (private mode); the game runs without it
 }

@@ -8,7 +8,6 @@
  * there, the regions beyond it open as well, up to the full size of the grid.
  * New lords rise in the newly opened land. Land that has not opened has terrain
  * VOID: it is drawn under a pale mist and nothing can walk into it.
- * (worldSave/worldLoad only exist for the save code and go with it.)
  */
 import { CS, GRID, HOME, KX, KY, LORDS, N, NN, NRIV } from './config'
 import { buildVeil, staleGround } from './ground'
@@ -737,50 +736,4 @@ export function worldTick(dt?) {
         S.won = true
         endScreen(true)
     }
-}
-
-/* ---------- saves ---------- */
-/** The world's part of a save. */
-export function worldSave() {
-    const S = GV.S
-    return {
-        wo: S.wo,
-        ls: S.ls,
-        lp: S.lp,
-        lc: S.lc,
-        nl: Math.round(S.nlCd),
-        gc: Math.round(S.gcd),
-    }
-}
-/** Make the world of a save: its land, the open regions and the keeps of the new lords. */
-export function worldLoad(o?) {
-    const S = GV.S,
-        w = o.w || {}
-    genWorld(S.seed)
-    const ok = (sp?) =>
-        sp &&
-        GV.regs[sp.r] &&
-        sp.kx >= 12 &&
-        sp.ky >= 12 &&
-        sp.kx < N - 14 &&
-        sp.ky < N - 14
-    S.ls = (Array.isArray(w.ls) ? w.ls : [])
-        .filter(ok)
-        .map((sp?) => ({ r: sp.r | 0, kx: sp.kx | 0, ky: sp.ky | 0 }))
-    for (const sp of S.ls) {
-        stampLord(sp)
-    }
-    S.wo = []
-    for (const id of Array.isArray(w.wo) ? w.wo : []) {
-        const rg = GV.regs[id]
-        if (rg && !rg.gen) {
-            rg.gen = true
-            S.wo.push(id)
-        }
-    }
-    computeAdj()
-    S.lp = Array.isArray(w.lp) ? w.lp.filter((p?) => LORDS[p]) : []
-    S.lc = w.lc | 0
-    S.nlCd = typeof w.nl === 'number' ? w.nl : FIRST_NEW_LORD
-    S.gcd = typeof w.gc === 'number' ? w.gc : LORD_GROW_GAP
 }

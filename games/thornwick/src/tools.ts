@@ -10,7 +10,7 @@ import { setCursor } from './input'
 import { costOf } from './land'
 import { blit, diamondPath } from './render'
 import { R, sprite } from './sprites'
-import { bAt, inMap, save, wx, wy } from './state'
+import { bAt, inMap, wx, wy } from './state'
 import { hud } from './ui'
 import { GV } from './vars'
 import { rangeMul } from './weather'
@@ -294,8 +294,6 @@ export function placeTool(t?, x?, y?) {
               ? 'Stone walls and towers need a stone keep.'
               : 'Nothing could be built there.'
     )
-    clearTimeout(GV.placeTm)
-    GV.placeTm = setTimeout(save, 1500)
     return n > 0
 }
 export function toolText() {

@@ -13,7 +13,6 @@ import {
     reg,
     regAt,
     rivById,
-    save,
     seenAt,
     terrain,
 } from './state'
@@ -208,12 +207,7 @@ export function tryPlace(t?, x?, y?, loud?) {
         return true
     }
     if (t === 'remove') {
-        const ok = removeAt(x, y, loud)
-        if (ok) {
-            clearTimeout(GV.placeTm)
-            GV.placeTm = setTimeout(save, 1500)
-        }
-        return ok
+        return removeAt(x, y, loud)
     }
     const d = DEF[t]
     if (d.tier > GV.keep.lvl) {
@@ -265,8 +259,6 @@ export function tryPlace(t?, x?, y?, loud?) {
             )
         }
     }
-    clearTimeout(GV.placeTm)
-    GV.placeTm = setTimeout(save, 1500)
     return true
 }
 export function upgradeKeep() {
@@ -292,7 +284,6 @@ export function upgradeKeep() {
             '. New buildings are open.'
     )
     buildCards()
-    save()
 }
 export function demolish(b?) {
     if (b === GV.keep || b.o !== 0) {
@@ -305,5 +296,4 @@ export function demolish(b?) {
     }
     puff(b.cx, b.cy, 6)
     removeB(b)
-    save()
 }

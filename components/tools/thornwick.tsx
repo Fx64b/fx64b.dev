@@ -93,7 +93,7 @@ export default function Thornwick() {
             <p className="text-muted-foreground mt-3 text-[13.5px] leading-[1.7]">
                 Press <strong>How to play</strong> in the game for a short
                 guide. Tap any building to see what it does and how well it
-                works. Your kingdom is saved in this browser.
+                works. The game keeps no saves: each visit starts a new realm.
             </p>
         </div>
     )

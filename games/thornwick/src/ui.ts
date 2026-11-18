@@ -84,9 +84,7 @@ import {
     newGame,
     regAt,
     rivById,
-    save,
     season,
-    wipeSave,
 } from './state'
 import { toolText } from './tools'
 import { GV } from './vars'
@@ -1250,8 +1248,6 @@ export function rebuildStone(b?, all?) {
             ? list.length + ' sections of palisade are rebuilt in stone.'
             : 'Rebuilt in stone.'
     )
-    clearTimeout(GV.placeTm)
-    GV.placeTm = setTimeout(save, 1500)
 }
 export function toggleFlag() {
     GV.moveBn = 0
@@ -1713,6 +1709,5 @@ export function restart() {
     buildCards()
     centreCam()
     clampCam()
-    wipeSave()
     hud()
 }

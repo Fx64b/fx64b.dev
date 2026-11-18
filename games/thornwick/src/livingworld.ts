@@ -52,54 +52,6 @@ export function livingInit(s?) {
     GV.wArrows = []
 }
 const num = (v?, d?) => (typeof v === 'number' && isFinite(v) ? v : d)
-export function livingSave() {
-    const w = GV.S.wld
-    return {
-        wx: {
-            k: w.wx.k,
-            t: Math.round(w.wx.t),
-            cd: Math.round(w.wx.cd),
-            h: w.wx.hits,
-        },
-        joy: w.joy,
-        joyT: Math.round(w.joyT),
-        gloom: w.gloom,
-        gloomT: Math.round(w.gloomT),
-        bountyT: Math.round(w.bountyT),
-        later: w.later,
-        wolfSeen: w.wolfSeen,
-        hired: w.hired,
-        grown: w.grown,
-    }
-}
-export function livingLoad(o?) {
-    const q = (o && o.wld) || {},
-        w = GV.S.wld,
-        x = q.wx || {}
-    if (WX[x.k]) {
-        w.wx.k = x.k
-        w.wx.t = num(x.t, 0)
-        w.wx.cd = num(x.cd, 120)
-        w.wx.hits = num(x.h, 0)
-    }
-    for (const k of [
-        'joy',
-        'joyT',
-        'gloom',
-        'gloomT',
-        'bountyT',
-        'wolfSeen',
-        'hired',
-        'grown',
-    ]) {
-        w[k] = Math.max(0, num(q[k], w[k]))
-    }
-    w.later = Array.isArray(q.later)
-        ? q.later.filter(
-              (l?) => l && typeof l.t === 'number' && typeof l.k === 'string'
-          )
-        : []
-}
 /** Joy from a minstrel or a feast, gloom from a bad omen: added to the needs met. */
 export function moodBonus() {
     const w = GV.S && GV.S.wld

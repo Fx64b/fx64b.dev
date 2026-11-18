@@ -31,11 +31,9 @@ import {
     rebuildProps,
     reg,
     rivById,
-    save,
     season,
     terrain,
     tileI,
-    wipeSave,
 } from './state'
 import { GV } from './vars'
 import { moveMul } from './weather'
@@ -962,7 +960,6 @@ export function rivalFall(rv?, by?) {
                     ' and all their land.'
             )
         }
-        save()
         return
     }
     for (const k in GV.S.rconq) {
@@ -1009,7 +1006,6 @@ export function rivalFall(rv?, by?) {
             )
         }
     }
-    save()
 }
 export function rivalsTick(dt?) {
     if ((GV.cntCd -= dt) <= 0) {
@@ -1252,7 +1248,6 @@ export function rivalsTick(dt?) {
                         ' gold from the field.'
                 )
                 rv.broke = false
-                save()
             }
             rv.foe = null
             rv.route = null
@@ -2292,7 +2287,4 @@ export function endScreen(won?) {
     $('#overKeep').hidden = !won
     $('#over').hidden = false
     GV.overOpen = true
-    if (!won) {
-        wipeSave()
-    }
 }

@@ -33,48 +33,6 @@ export function ecoInit(s?) {
     s.clothCov = 0
     s.ecoT = { need: 0, cloth: 10, tools: 10, hist: 10, warn: 0 }
 }
-/** The economy's part of a save. */
-export function ecoSave() {
-    const S = GV.S
-    return {
-        tech: S.tech,
-        rs: S.rs ? { id: S.rs.id, p: Math.round(S.rs.p) } : null,
-        tr: S.trade.map((r?) => ({ r: r.r, s: r.s, b: r.b })),
-        h: S.hist,
-        am: S.amt,
-        ac: S.acc,
-    }
-}
-export function ecoLoad(o?) {
-    const S = GV.S,
-        e = o.eco || {}
-    for (const g of GOODS) {
-        S.res[g] = Math.max(0, +(o.res && o.res[g]) || 0)
-    }
-    S.tech = e.tech && typeof e.tech === 'object' ? e.tech : {}
-    S.rs =
-        e.rs && RES_BY[e.rs.id] && !S.tech[e.rs.id]
-            ? { id: e.rs.id, p: +e.rs.p || 0 }
-            : null
-    S.trade = Array.isArray(e.tr)
-        ? e.tr
-              .filter(
-                  (r?) =>
-                      r &&
-                      rivById(r.r) &&
-                      !rivById(r.r).dead &&
-                      TRADE_GOODS.includes(r.s) &&
-                      TRADE_GOODS.includes(r.b)
-              )
-              .map((r?) => newRoute(r.r, r.s, r.b))
-        : []
-    S.hist = Array.isArray(e.h) ? e.h.slice(-HIST_MAX) : []
-    S.amt = e.am && typeof e.am === 'object' ? e.am : {}
-    if (e.ac) {
-        S.acc = { cloth: +e.ac.cloth || 0, tools: +e.ac.tools || 0 }
-    }
-    needsTick()
-}
 
 /* ---------- finite trees and rocks ---------- */
 /** How much a fresh tree (120 to 180 wood) or rock (120 to 200 stone) holds. */
