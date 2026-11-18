@@ -931,12 +931,15 @@ export function sUpdate(s?, dt?) {
         hold = (bn ? bn.st : GV.S.stance) === 'hold',
         hi = arch ? s.hi || 0 : 0
     const [ax, ay] = anchorOf(s)
+    if (s.hunt && (s.hunt.dead || (s.huntT -= dt) <= 0)) {
+        s.hunt = null
+    }
     if (s.think <= 0) {
         s.think = 0.4
-        let best = null,
-            bd = 1e9
+        let best = s.hunt || null,
+            bd = s.hunt ? -1 : 1e9
         for (const e of GV.S.en) {
-            if (e.dead) {
+            if (e.dead || s.hunt) {
                 continue
             }
             const d = Math.hypot(e.x - s.x, e.y - s.y)
@@ -1033,7 +1036,11 @@ export function sUpdate(s?, dt?) {
             }
             return
         }
-        if (hold && Math.hypot(s.x - ax, s.y - ay) > (shield ? 3 : 5.5)) {
+        if (
+            !s.hunt &&
+            hold &&
+            Math.hypot(s.x - ax, s.y - ay) > (shield ? 3 : 5.5)
+        ) {
             s.tg = null
         } else if (!s.onWall && !(arch && s.post && !flag)) {
             s.rep -= dt
@@ -1262,4 +1269,29 @@ export function fireArrows() {
     toast(
         'Braziers are lit along the walls. For twelve seconds every arrow flies burning.'
     )
+}
+
+/* Send the nearest free soldiers after an enemy rider: knights first, then the rest. */
+export function huntDown(e?) {
+    const pool = GV.S.sold.filter(
+        (s?) =>
+            !s.dead &&
+            s.kind !== 'scout' &&
+            s.kind !== 'captain' &&
+            !UNITS[s.kind].siege &&
+            s.kind !== 'engineer'
+    )
+    pool.sort(
+        (a?, b?) =>
+            (b.kind === 'knight' ? 1 : 0) - (a.kind === 'knight' ? 1 : 0) ||
+            Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y)
+    )
+    const go = pool.slice(0, 4)
+    for (const s of go) {
+        s.hunt = e
+        s.huntT = 90
+        s.think = 0
+        s.path = null
+    }
+    return go.length
 }

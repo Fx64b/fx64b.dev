@@ -545,6 +545,13 @@ input:focus-visible {
     font-weight: 600;
     color: var(--muted);
 }
+.msg .go {
+    flex: none;
+    min-height: 26px;
+    padding: 2px 9px;
+    font-size: 13px;
+    align-self: center;
+}
 .msg .x {
     flex: none;
     min-height: 24px;

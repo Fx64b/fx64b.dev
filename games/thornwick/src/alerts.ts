@@ -105,7 +105,20 @@ export function attackPing(e?) {
             toast(
                 'A rider of ' +
                     rv.name +
-                    ' is spying on your defences. Cut him down before he rides home.'
+                    ' is spying on your defences. Hunt him down before he rides home.',
+                {
+                    label: 'Show me',
+                    go: () => {
+                        if (e.dead) {
+                            toast('The rider is gone.')
+                            return
+                        }
+                        lookAt(e.x, e.y)
+                        GV.selected = { kind: 'unit', u: e }
+                        GV.armed = null
+                        hud()
+                    },
+                }
             )
         }
         return

@@ -148,7 +148,8 @@ export function dismissMsg(el?) {
     el.classList.add('out')
     setTimeout(() => el.remove(), reduceMotion ? 0 : 260)
 }
-export function toast(msg?) {
+/** opts.go (with opts.label) adds a button that runs it, e.g. to show where something is. */
+export function toast(msg?, opts?) {
     logMsg(msg, MSG_WARN.test(msg) ? 'warn' : MSG_GOOD.test(msg) ? 'good' : '')
     const box = $('#toasts')
     for (const el of box.children) {
@@ -173,6 +174,18 @@ export function toast(msg?) {
         'beforeend',
         '<span class="n"></span>'
     )
+    if (opts && opts.go) {
+        const go = document.createElement('button')
+        go.className = 'btn go'
+        go.type = 'button'
+        go.textContent = opts.label || 'Show me'
+        go.addEventListener('click', (ev) => {
+            ev.stopPropagation()
+            opts.go()
+            dismissMsg(el)
+        })
+        el.querySelector('p').after(go)
+    }
     el._msg = msg
     el._n = 1
     el._ms = ms

@@ -1866,7 +1866,7 @@ export function scoutRide(e?, dt?) {
         e.mode = 'flee'
         return
     }
-    follow(e, dt, e.sp)
+    follow(e, dt, e.inLand ? e.sp * 0.7 : e.sp)
     if (Math.hypot(e.x - e.goal[0], e.y - e.goal[1]) < 1.5) {
         rv.atkDir = weakSide(rv)
         e.mode = 'flee'

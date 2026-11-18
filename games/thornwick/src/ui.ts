@@ -71,6 +71,7 @@ import {
     UNITS,
     costText,
     fireArrows,
+    huntDown,
     sendScout,
     train,
     warCry,
@@ -962,7 +963,16 @@ export function inspectHTML(sel?) {
                 : u.type === 'scout'
                   ? 'Rides ahead for ' +
                     (rv ? rv.name : 'a rival lord') +
-                    ' to find the weak side of your defences.'
+                    ' to find the weak side of your defences. If he gets home, the next attack comes from your weakest side. Towers, archers and fast knights can catch him.' +
+                    (u.mode === 'scout'
+                        ? '</p><div class="row"><button class="btn primary" data-act="hunt">Hunt him down</button>' +
+                          (GV.S.sold.some((s?) => s.hunt === u)
+                              ? '<span class="note" style="margin:0">' +
+                                GV.S.sold.filter((s?) => s.hunt === u).length +
+                                ' on his trail</span>'
+                              : '') +
+                          '</div><p class="note">Sends your 4 nearest soldiers after him, knights first.'
+                        : '')
                   : u.fac === 9
                     ? 'An outlaw from the bandit camp.'
                     : 'Fights for ' +
@@ -1338,6 +1348,17 @@ $('#inspect').addEventListener('click', (e?) => {
         case 'fire':
             fireArrows()
             break
+        case 'hunt': {
+            const n = b.u && !b.u.dead ? huntDown(b.u) : 0
+            toast(
+                n
+                    ? n +
+                          (n === 1 ? ' soldier rides' : ' soldiers ride') +
+                          ' after the rider.'
+                    : 'You have no soldiers to send after him.'
+            )
+            break
+        }
         case 'scout':
             if (sendScout(b.rg.id)) {
                 GV.selected = null

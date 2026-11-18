@@ -430,6 +430,28 @@ export function render() {
         }
     }
     drawSel(GV.selected, '#f2c84a', false)
+    // Enemy riders spying on your land get a pulsing red ring, so they are easy to find.
+    for (const e of GV.S.en) {
+        if (e.dead || e.mode !== 'scout' || !e.inLand || !vis(e.x, e.y)) {
+            continue
+        }
+        const pulse = 0.5 + 0.5 * Math.sin(GV.animT * 5),
+            gx = e.x + e.ox,
+            gy = e.y + e.oy
+        c.strokeStyle = 'rgba(226,64,48,' + (0.55 + 0.4 * pulse) + ')'
+        c.lineWidth = 1.2
+        c.beginPath()
+        c.ellipse(
+            wx(gx, gy),
+            wy(gx, gy),
+            7 + pulse * 3,
+            3.5 + pulse * 1.5,
+            0,
+            0,
+            7
+        )
+        c.stroke()
+    }
     if (GV.hoverPick && !GV.armed && !samePick(GV.hoverPick, GV.selected)) {
         drawSel(GV.hoverPick, 'rgba(255,248,220,.6)', true)
     }
