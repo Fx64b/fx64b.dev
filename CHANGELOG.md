@@ -28,6 +28,24 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.7.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.6.0...fx64b.dev-v5.7.0) (2026-11-18)
+
+
+### Features
+
+* **thornwick:** a world that grows as it is explored, with new lords ([fb957b8](https://github.com/Fx64b/fx64b.dev/commit/fb957b8303c5717dea08f18fc4c3c7e62b570cca))
+* **thornwick:** find and hunt down enemy riders ([bf2062f](https://github.com/Fx64b/fx64b.dev/commit/bf2062f077809be3df715c2bf1f23b9c5438fdab))
+* **thornwick:** production chains, needs, research, trade, charts and finite resources ([6245d0c](https://github.com/Fx64b/fx64b.dev/commit/6245d0cbec1e61ea13db5d7b2557d8eb12edf3fa))
+* **thornwick:** remove saves, each visit starts a new realm ([bb29365](https://github.com/Fx64b/fx64b.dev/commit/bb29365a255cd1c76f1d96e1056b39edbd222e27))
+* **thornwick:** war banners, morale, new units, smarter lords and alerts ([79075e4](https://github.com/Fx64b/fx64b.dev/commit/79075e43d39edf472b18a376e5711f7f42b93151))
+* **thornwick:** weather, travellers, wildlife, regrowing forests, events and build helpers ([b2afcf1](https://github.com/Fx64b/fx64b.dev/commit/b2afcf11d08bb808cf9307b16c0ba4bfe64e1f03))
+
+
+### Bug Fixes
+
+* **thornwick:** readable message cards that stay longer ([5020e4c](https://github.com/Fx64b/fx64b.dev/commit/5020e4cd66faf356f33a2fb0419117121d7300a9))
+* **thornwick:** soldiers reveal unknown land they march into ([7d33147](https://github.com/Fx64b/fx64b.dev/commit/7d3314701ea07095aab986a76d1bea1d880e5ebc))
+
 ## [5.6.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.5.0...fx64b.dev-v5.6.0) (2026-11-17)
 
 
