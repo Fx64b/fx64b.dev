@@ -9,13 +9,16 @@
   },
   "scripts": {
     "dev": "vite-react-ssg dev",
-    "build": "vite-react-ssg build",
+    "build": "pnpm build:game && vite-react-ssg build",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "build:game": "tsc -p games/thornwick && vite build -c games/thornwick/vite.config.ts",
+    "dev:game": "vite -c games/thornwick/vite.config.ts",
+    "predev": "pnpm build:game"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
+        <title>Thornwick: castle and village builder</title>
+        <script>
+            // The host page passes its theme as ?theme=light|dark and sends updates with postMessage.
+            ;(function () {
+                var t = new URLSearchParams(location.search).get('theme')
+                if (t === 'light' || t === 'dark')
+                    document.documentElement.dataset.theme = t
+            })()
+        </script>
+        <link rel="stylesheet" href="./style.css" />
+    </head>
+    <body>
+        <div id="app">
+            <canvas
+                id="world"
+                tabindex="0"
+                aria-label="Kingdom map. With a building chosen, use the arrow keys to move and Enter to build."
+            ></canvas>
+
+            <header id="bar">
+                <h1>Thornwick</h1>
+                <ul id="res" aria-label="Stores">
+                    <li title="Food">
+                        <span data-ic="food"></span><span id="r-food">0</span>
+                    </li>
+                    <li title="Wood">
+                        <span data-ic="wood"></span><span id="r-wood">0</span>
+                    </li>
+                    <li title="Stone">
+                        <span data-ic="stone"></span><span id="r-stone">0</span>
+                    </li>
+                    <li title="Gold">
+                        <span data-ic="gold"></span><span id="r-gold">0</span>
+                    </li>
+                    <li title="People, out of housing">
+                        <span data-ic="people"></span
+                        ><span id="r-pop">0/0</span>
+                    </li>
+                    <li title="Soldiers">
+                        <span data-ic="shield"></span><span id="r-sold">0</span>
+                    </li>
+                    <li id="clock" title="Season and time of day">
+                        <span id="r-clock"></span>
+                    </li>
+                </ul>
+                <div id="ctl">
+                    <div class="seg" role="group" aria-label="Game speed">
+                        <button class="btn" data-speed="0">Pause</button>
+                        <button class="btn" data-speed="1">1×</button>
+                        <button class="btn" data-speed="2">2×</button>
+                        <button class="btn" data-speed="3">3×</button>
+                    </div>
+                    <button class="btn grow" id="helpBtn">How to play</button>
+                    <button class="btn" id="newBtn">New kingdom</button>
+                </div>
+            </header>
+
+            <div id="pennant">
+                <span id="p1"></span><b id="p2"></b><span id="p3"></span>
+            </div>
+            <aside id="palette" aria-label="Buildings">
+                <div id="tabs">
+                    <button class="btn" data-tab="0">Village</button>
+                    <button class="btn" data-tab="1">Castle</button>
+                    <button class="btn" data-tab="2">Decor</button>
+                </div>
+                <div id="tools">
+                    <button class="btn" id="armyBtn" aria-pressed="false">
+                        Army
+                    </button>
+                    <button class="btn" id="flagBtn" aria-pressed="false">
+                        Rally flag
+                    </button>
+                    <button class="btn" id="rm" aria-pressed="false">
+                        Remove
+                    </button>
+                </div>
+                <div id="cards"></div>
+            </aside>
+            <canvas
+                id="mini"
+                width="448"
+                height="224"
+                aria-label="Map of the realm. Tap to move the view."
+            ></canvas>
+            <section id="event" hidden aria-live="polite"></section>
+            <section id="inspect" hidden aria-live="polite"></section>
+            <div id="toasts" role="status" aria-live="polite"></div>
+            <div id="placing" hidden>
+                <span id="placingText"></span
+                ><button class="btn primary" id="placingDone">Done</button>
+            </div>
+
+            <div class="veil" id="loading">
+                <div class="sheet" style="width: auto">
+                    <p style="margin: 0; font-style: italic">
+                        Raising the realm…
+                    </p>
+                </div>
+            </div>
+            <div class="veil" id="help" hidden>
+                <div
+                    class="sheet wide"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="helpTitle"
+                >
+                    <h2 id="helpTitle">Hold the keep, take the realm</h2>
+                    <p class="lead">
+                        Grow a village around your keep, beat back the rival
+                        lords who attack it, and take every rival keep to win.
+                        If your keep falls, the game is over.
+                    </p>
+                    <div id="helpDiff">
+                        <div class="diff">
+                            <label for="helpDiffIn"
+                                >Difficulty: <b data-diff-name></b
+                            ></label>
+                            <input
+                                type="range"
+                                id="helpDiffIn"
+                                min="0"
+                                max="4"
+                                step="1"
+                                value="2"
+                            />
+                            <div class="ticks" aria-hidden="true">
+                                <span>Gentle</span><span>Easy</span
+                                ><span>Normal</span><span>Hard</span
+                                ><span>Brutal</span>
+                            </div>
+                            <p class="note" data-diff-note></p>
+                        </div>
+                    </div>
+                    <p class="note" id="helpDiffNow" hidden></p>
+
+                    <h3>Your first minutes</h3>
+                    <ol>
+                        <li>
+                            <b>Food and wood first.</b> Build a farm and a
+                            lumber camp near the keep, then a quarry next to
+                            some rocks. Villagers take the jobs by themselves,
+                            farms first.
+                        </li>
+                        <li>
+                            <b>Build cottages.</b> New villagers arrive only
+                            when there is free room in a home and at least 20
+                            food in store. More people means more workers and
+                            soldiers. Put a well near the houses for 2 more
+                            places each.
+                        </li>
+                        <li>
+                            <b>Watch the pennant.</b> The banner at the top
+                            counts down to the next attack. On Normal, the first
+                            one comes after about three and a half minutes.
+                            Before it runs out, put one or two watchtowers next
+                            to the keep, or ring it with a palisade. The keep
+                            shoots too. Later, a barracks trains swordsmen for
+                            gold.
+                        </li>
+                        <li>
+                            <b>Rebuild the keep.</b> Tap the keep when you have
+                            150 wood, 120 stone and 60 gold. A stone keep holds
+                            more people and opens the windmill, tavern, stone
+                            walls, towers and more.
+                        </li>
+                    </ol>
+
+                    <h3>Keep everyone fed</h3>
+                    <ul>
+                        <li>
+                            Each person, soldiers too, eats 1 food every 8
+                            seconds. One farmer feeds about 4 people, a fisher
+                            about 6.
+                        </li>
+                        <li>
+                            Farms give nothing in winter but half again in
+                            autumn. Fill your stores before the snow. Fishers
+                            still work in winter.
+                        </li>
+                        <li>
+                            When the food runs out, villagers leave one by one.
+                        </li>
+                    </ul>
+
+                    <h3>Gold</h3>
+                    <ul>
+                        <li>
+                            Markets sell your spare goods for gold. Taverns earn
+                            gold from the villagers. Every 10 villagers also pay
+                            1 gold in tax.
+                        </li>
+                        <li>
+                            You also get gold for each raider you kill and for
+                            each attack you beat back.
+                        </li>
+                        <li>
+                            Gold pays for soldiers, scouts, new outposts and the
+                            keep.
+                        </li>
+                    </ul>
+
+                    <h3>Defend the keep</h3>
+                    <ul>
+                        <li>
+                            Paint a ring of palisade or stone wall around the
+                            keep and put a gatehouse in it, so your villagers
+                            can still get out.
+                        </li>
+                        <li>
+                            Towers and the keep shoot at raiders. Archers stand
+                            on stone walls by themselves. Braziers keep towers
+                            at full reach at night.
+                        </li>
+                        <li>
+                            Pikemen are the answer to brutes, rams and
+                            catapults. Tap any enemy to see what it is.
+                        </li>
+                        <li>
+                            Thatch burns. Keep a well within 4 tiles of thatched
+                            buildings so fires go out fast.
+                        </li>
+                        <li>
+                            Buildings repair by themselves when no raiders are
+                            near.
+                        </li>
+                    </ul>
+
+                    <h3>Grow and win</h3>
+                    <ul>
+                        <li>
+                            You only own the land around your keep. Build an
+                            outpost on the dim land at your border to claim that
+                            region and all the trees and rocks on it. Each
+                            outpost costs more gold than the last.
+                        </li>
+                        <li>
+                            Tap the fog to send a scout. Some lands hold ruins,
+                            gold mines, standing stones or empty hamlets. Claim
+                            the land to get their reward.
+                        </li>
+                        <li>
+                            Plant the rally flag to gather your army. Tap a
+                            rival castle and choose "Lay siege" to attack it.
+                            Rams and catapults from a siege workshop break walls
+                            fast.
+                        </li>
+                        <li>
+                            The realm is large, and eight rival lords live in
+                            it, each with their own character. Tap a rival keep
+                            to read about its lord. The nearest lies a good
+                            march away, the others further out.
+                        </li>
+                        <li>
+                            The lords do not sit still. They claim land with
+                            outposts, settle it, and go to war with each other.
+                            A lord who takes another's keep takes all their land
+                            with it.
+                        </li>
+                        <li>
+                            If Thornwick grows far stronger than any of them,
+                            the lords turn on you together. The same happens to
+                            a lord who grows too strong.
+                        </li>
+                        <li>
+                            Your soldiers and the raiders both go for people and
+                            buildings first. They only break walls when there is
+                            no other way in. Take every rival keep to win.
+                        </li>
+                    </ul>
+
+                    <h3>Controls</h3>
+                    <ul>
+                        <li>
+                            Drag a building card onto the map, or tap a card and
+                            then tap tiles. Walls, moats and stakes: drag to
+                            paint a line.
+                        </li>
+                        <li>
+                            Tap a building to see what it does, how well it
+                            works and what you can do with it.
+                        </li>
+                        <li>
+                            Drag the map to move. Scroll, pinch or press + and −
+                            to zoom. Esc cancels. Use the speed buttons to pause
+                            or go faster.
+                        </li>
+                        <li>
+                            Tap or drag on the small map in the corner to jump
+                            across the realm.
+                        </li>
+                    </ul>
+                    <p class="note">
+                        Your kingdom is saved in this browser and is there when
+                        you come back.
+                    </p>
+
+                    <div class="foot">
+                        <button class="btn primary" id="helpGo">
+                            Start building
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="veil" id="newk" hidden>
+                <div
+                    class="sheet"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="newkTitle"
+                >
+                    <h2 id="newkTitle">Found a new kingdom</h2>
+                    <p>
+                        A new realm, with new land and new rivals. Choose how
+                        hard the rival lords fight.
+                    </p>
+                    <div class="diff">
+                        <label for="newkDiff"
+                            >Difficulty: <b data-diff-name></b
+                        ></label>
+                        <input
+                            type="range"
+                            id="newkDiff"
+                            min="0"
+                            max="4"
+                            step="1"
+                            value="2"
+                        />
+                        <div class="ticks" aria-hidden="true">
+                            <span>Gentle</span><span>Easy</span
+                            ><span>Normal</span><span>Hard</span
+                            ><span>Brutal</span>
+                        </div>
+                        <p class="note" data-diff-note></p>
+                    </div>
+                    <p class="note" id="newkWarn">
+                        This erases your current kingdom.
+                    </p>
+                    <div class="row2">
+                        <button class="btn primary" id="newkGo">
+                            Found kingdom</button
+                        ><button class="btn" id="newkCancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="veil" id="over" hidden>
+                <div class="sheet">
+                    <h2 id="overTitle">The keep has fallen</h2>
+                    <p id="overText"></p>
+                    <button class="btn primary" id="overGo">
+                        Found a new kingdom
+                    </button>
+                    <button class="btn" id="overKeep" hidden>
+                        Rule on in peace
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="./src/main.ts"></script>
+    </body>
+</html>

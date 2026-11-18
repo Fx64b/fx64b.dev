@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "strict": false,
+        "noImplicitAny": false,
+        "noEmit": true,
+        "isolatedModules": true,
+        "skipLibCheck": true,
+        "types": ["node"]
+    },
+    "include": ["src", "vite.config.ts"]
+}

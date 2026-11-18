@@ -13,6 +13,7 @@ export default tseslint.config(
             'coverage',
             'node_modules',
             'public/vendor',
+            'public/games',
         ],
     },
     js.configs.recommended,
