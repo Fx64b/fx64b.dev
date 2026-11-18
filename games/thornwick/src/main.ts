@@ -1,3 +1,5 @@
+import { jump, showLog } from './alerts'
+import { assignSquads, plantBanner, removeBanner } from './army'
 import { placeErr, tryPlace, upgradeKeep } from './build'
 import {
     $,
@@ -13,9 +15,25 @@ import { groundInit } from './ground'
 import { toast } from './helpers'
 import { lookAt, pick, readTheme, resize } from './input'
 import { refreshOwn } from './land'
-import { chooseFoe, countRivals, damageB, ignite, launch, power } from './lords'
+import {
+    chooseFoe,
+    countRivals,
+    damageB,
+    ignite,
+    launch,
+    power,
+    spawnEnemy,
+    weakSide,
+} from './lords'
 import { recomputePaths } from './path'
-import { UNITS, fireArrows, sendScout, train, warCry } from './people'
+import {
+    UNITS,
+    addSoldier,
+    fireArrows,
+    sendScout,
+    train,
+    warCry,
+} from './people'
 import { cam, render } from './render'
 import { tick } from './sim'
 import { propSprite, sprite, unitSprite } from './sprites'
@@ -284,5 +302,16 @@ export async function boot() {
     terrain,
     bmap,
     reg,
+    plantBanner,
+    removeBanner,
+    addSoldier,
+    assignSquads,
+    spawnEnemy,
+    weakSide,
+    jump,
+    showLog,
+    get GV() {
+        return GV
+    },
 }
 boot()

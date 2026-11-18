@@ -1,3 +1,4 @@
+import { logMsg } from './alerts'
 import { $, DEF, KEEP_CAP, N } from './config'
 import {
     bmap,
@@ -129,9 +130,9 @@ export function puff(x?, y?, n?, col?) {
    and close on click. A repeated message counts up instead of stacking. */
 export const MSG_MAX = 4
 export const MSG_WARN =
-    /fire|burn|fallen|marches on thornwick|destroyed|consumed|lost|leave|left|run out|empty|ladders|fever|bandits|anger|sooner|turn on|claims the/i
+    /fire|burn|fallen|marches on thornwick|destroyed|consumed|lost|leave|left|run out|empty|ladders|fever|bandits|anger|sooner|turn on|claims the|spying|lose heart/i
 export const MSG_GOOD =
-    /gold|beaten back|joins|harvest|are yours|is yours|renown|claimed for thornwick|breaks|unloads|agrees/i
+    /gold|beaten back|joins|harvest|are yours|is yours|renown|claimed for thornwick|breaks|unloads|agrees|flees|siege tower|bring down|waver/i
 export function msgTimer(el?: any, ms?) {
     clearTimeout(el._t)
     el._left = ms
@@ -148,6 +149,7 @@ export function dismissMsg(el?) {
     setTimeout(() => el.remove(), reduceMotion ? 0 : 260)
 }
 export function toast(msg?) {
+    logMsg(msg, MSG_WARN.test(msg) ? 'warn' : MSG_GOOD.test(msg) ? 'good' : '')
     const box = $('#toasts')
     for (const el of box.children) {
         if (el._msg === msg && !el._gone) {

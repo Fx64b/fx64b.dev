@@ -1,3 +1,5 @@
+import { attackPing, firePing } from './alerts'
+import { flankMul, fleeStep, inWood, shock } from './combat'
 import { $, DEF, DF, DIFFS, HOME, KX, KY, N, WALLISH } from './config'
 import { groundTileChanged } from './ground'
 import {
@@ -12,7 +14,7 @@ import {
     wet,
 } from './helpers'
 import { baileyOf } from './land'
-import { blocks, rivWalk, search, terrCost, trace } from './path'
+import { blocks, enemyCost, rivWalk, search, terrCost, trace } from './path'
 import { follow, goTo, hitSold } from './people'
 import {
     addB,
@@ -24,6 +26,7 @@ import {
     inMap,
     isNight,
     kMul,
+    ownedT,
     rebuildProps,
     reg,
     rivById,
@@ -637,12 +640,21 @@ export function launch(rv?, foe?) {
     if (q.length > 60) {
         q.length = 60
     }
+    const hero = addHero(rv, q, pw >= 7)
     rv.q = q
     rv.pw = pw
     rv.out = true
     rv.outT = 0
     rv.k++
     rv.scd = 0
+    rv.hp0 = 0
+    rv.heroFell = false
+    rv.broke = false
+    // What the scout saw: the host goes round to the weakest side first.
+    rv.wp = null
+    if (rv.atkDir !== null && rv.atkDir !== undefined) {
+        rv.wp = approachPoint(rv.atkDir)
+    }
     GV.flowDirty = true
     const eng = [
         rams ? 'a battering ram' : '',
@@ -657,8 +669,94 @@ export function launch(rv?, foe?) {
             q.length +
             ' men' +
             (eng.length ? ', bringing ' + eng.join(' and ') : '') +
-            (night ? ', under cover of night.' : '.')
+            (night ? ', under cover of night.' : '.') +
+            (hero ? ' ' + rv.prof.hero + ', their champion, leads them.' : '') +
+            (rv.wp
+                ? ' Their scout found your weak side: they will strike from the ' +
+                  compass(rv.wp[0] - KX, rv.wp[1] - KY) +
+                  '.'
+                : '')
     )
+}
+/* A champion leads the larger hosts, unless he fell in the last war and none has risen. */
+export function addHero(rv?, q?, big?) {
+    if (!big || rv.heroCd > 0 || !rv.prof.hero) {
+        return false
+    }
+    // He takes the place of two raiders, so the host is not much stronger for him.
+    for (let k = 0; k < 2; k++) {
+        const i = q.findIndex((e?) => e[0] === 'raider' && !e[1])
+        if (i >= 0) {
+            q.splice(i, 1)
+        }
+    }
+    q.splice(Math.min(q.length, 3), 0, ['hero', null])
+    return true
+}
+/* Where a host gathers before it strikes from direction a (an angle from the keep). */
+export function approachPoint(a?, rads?) {
+    for (const r of rads || [16, 14, 18, 12]) {
+        const x = KX + 0.5 + Math.cos(a) * r,
+            y = KY + 0.5 + Math.sin(a) * r
+        const p = freeNear(x, y, 2)
+        if (
+            inMap(p[0], p[1]) &&
+            !bmap[p[0] + p[1] * N] &&
+            !terrain[p[0] + p[1] * N]
+        ) {
+            return p
+        }
+    }
+    return null
+}
+/* The scout's report: the side of Thornwick with the least wall, towers and soldiers. */
+export function weakSide(rv?) {
+    const base = Math.atan2(rv.ky - KY, rv.kx - KX)
+    const shooters = GV.S.b.filter(
+        (b?) => b.o === 0 && (DEF[b.t].range || b.t === 'keep')
+    )
+    const guards = GV.S.sold.filter((s?) => !s.sq && s.kind !== 'scout')
+    let best = base,
+        bs = 1e9
+    for (let k = 0; k < 8; k++) {
+        const a = base + (k * Math.PI) / 4,
+            ca = Math.cos(a),
+            sa = Math.sin(a)
+        let sc = Math.min(k, 8 - k) * 0.8
+        for (let r = 3; r <= 15; r++) {
+            const x = clampN(KX + 0.5 + ca * r),
+                y = clampN(KY + 0.5 + sa * r),
+                b = bmap[x + y * N]
+            if (b && b.o === 0 && blocks(b)) {
+                sc += b.hp / 60
+            }
+            if (terrain[x + y * N] === 3) {
+                sc += 1.5
+            }
+        }
+        for (const r of [7, 11]) {
+            const px = KX + 0.5 + ca * r,
+                py = KY + 0.5 + sa * r
+            for (const t of shooters) {
+                const d = DEF[t.t],
+                    rg = t.t === 'keep' ? 4.5 : d.range
+                if (Math.hypot(t.cx - px, t.cy - py) < rg + 1) {
+                    sc += ((t.t === 'keep' ? 10 : d.dmg) / (d.rate || 1)) * 0.3
+                }
+            }
+            for (const s of guards) {
+                if (Math.hypot(s.x - px, s.y - py) < 6) {
+                    sc += 0.5
+                }
+            }
+        }
+        sc *= 0.85 + Math.random() * 0.3
+        if (sc < bs) {
+            bs = sc
+            best = a
+        }
+    }
+    return best
 }
 /* Hosts grow with every attack, with barracks and land, and slowly with time. */
 export const hostPower = (rv?) =>
@@ -692,12 +790,16 @@ export function launchWar(rv?, foe?) {
     if (q.length > 60) {
         q.length = 60
     }
+    addHero(rv, q, pw >= 5)
     rv.q = q
     rv.pw = pw
     rv.out = true
     rv.outT = 0
     rv.k++
     rv.scd = 0
+    rv.hp0 = 0
+    rv.heroFell = false
+    rv.wp = null
     rv.foe = foe
     rv.route = route
     if (known(rv) || known(tr)) {
@@ -714,18 +816,23 @@ export function launchWar(rv?, foe?) {
 export function spawnEnemy(fac?, type?, tk?, pw?, x?, y?, mode?) {
     const D = DF(),
         big = type === 'brute',
+        hero = type === 'hero',
         hp =
-            (24 + 5 * pw) *
-            (big
-                ? 3
-                : type === 'ram'
-                  ? 5
-                  : type === 'catapult'
-                    ? 3
-                    : type === 'earcher'
-                      ? 0.7
-                      : 1) *
-            D.hp
+            type === 'scout'
+                ? 45 * D.hp
+                : (24 + 5 * pw) *
+                  (big
+                      ? 3
+                      : hero
+                        ? 7
+                        : type === 'ram'
+                          ? 5
+                          : type === 'catapult'
+                            ? 3
+                            : type === 'earcher'
+                              ? 0.7
+                              : 1) *
+                  D.hp
     const e: any = {
         x,
         y,
@@ -734,19 +841,23 @@ export function spawnEnemy(fac?, type?, tk?, pw?, x?, y?, mode?) {
         mode: mode || 'atk',
         hp,
         max: hp,
-        dmg: (3 + 0.45 * pw) * D.dmg,
+        dmg: (3 + 0.45 * pw) * D.dmg * (hero ? 1.8 : 1),
         bm: big ? 3 : type === 'looter' ? 2 : 1,
         sp: big
             ? 0.6
-            : type === 'ram'
-              ? 0.5
-              : type === 'catapult'
-                ? 0.45
-                : type === 'ladder'
-                  ? 0.8
-                  : type === 'looter'
-                    ? 1.15
-                    : 0.95,
+            : hero
+              ? 0.95
+              : type === 'scout'
+                ? 2.4
+                : type === 'ram'
+                  ? 0.5
+                  : type === 'catapult'
+                    ? 0.45
+                    : type === 'ladder'
+                      ? 0.8
+                      : type === 'looter'
+                        ? 1.15
+                        : 0.95,
         type,
         v: (Math.random() * 5) | 0,
         tk: tk || null,
@@ -768,6 +879,28 @@ export function spawnEnemy(fac?, type?, tk?, pw?, x?, y?, mode?) {
         dead: false,
         face: 1,
         sw: 0,
+        // Every field a unit may get is set here, so all units share one shape.
+        mor: 100,
+        rout: 0,
+        mt: Math.random() * 0.5,
+        hi: 0,
+        lastA: null,
+        lastAT: 0,
+        landT: 0,
+        inLand: false,
+        wp: null,
+        wpT: 0,
+        gate: null,
+        gp: null,
+        gi: 0,
+        gT: 0,
+        goal: null,
+        nearT: 0,
+        burn: 0,
+        tg: null,
+        foe: null,
+        route: null,
+        ri: 0,
     }
     GV.S.en.push(e)
     return e
@@ -944,6 +1077,40 @@ export function rivalsTick(dt?) {
         if (rv.truce > 0) {
             rv.truce -= dt
         }
+        if (rv.heroCd > 0) {
+            rv.heroCd -= dt
+        }
+        // Before a host marches on Thornwick, a rider comes to look at its defences.
+        if (
+            !rv.out &&
+            !rv.scoutOut &&
+            rv.nextFoe === 0 &&
+            rv.awake &&
+            rv.truce <= 0 &&
+            GV.S.wave >= 2 &&
+            rv.atkIn < 55 &&
+            rv.atkIn > 15 &&
+            rv.keepB &&
+            !rv.keepB.dead
+        ) {
+            rv.scoutOut = true
+            const a = Math.atan2(rv.ky - KY, rv.kx - KX),
+                goal = approachPoint(a, [11, 13, 9]),
+                m = muster(rv, 0),
+                p = freeNear(m[0], m[1], 2)
+            if (goal) {
+                const sc = spawnEnemy(
+                    rv.id,
+                    'scout',
+                    null,
+                    0,
+                    p[0],
+                    p[1],
+                    'scout'
+                )
+                sc.goal = goal
+            }
+        }
         if (!rv.out) {
             rv.atkIn -= dt
             if (rv.atkIn <= 0) {
@@ -985,11 +1152,15 @@ export function rivalsTick(dt?) {
                     p[1],
                     war ? 'war' : 'atk'
                 )
+                rv.hp0 = (rv.hp0 || 0) + e.max
                 if (war) {
                     e.foe = rv.foe
                     e.route = rv.route
                     e.ri = 0
                     e.tbT = 0
+                } else if (rv.wp) {
+                    e.wp = rv.wp
+                    e.wpT = 0
                 }
             }
         } else if (rv.out && (rv.outT += dt) > (rv.foe > 0 ? 480 : 260)) {
@@ -1008,12 +1179,33 @@ export function rivalsTick(dt?) {
                         ' gives up the siege and withdraws.'
                 )
             }
+        } else if (rv.out && rv.outT > 0 && hostBroken(rv, dt)) {
+            for (const e of GV.S.en) {
+                if (e.fac === rv.id && (e.mode === 'atk' || e.mode === 'war')) {
+                    e.mode = 'flee'
+                    e.next = null
+                    e.path = null
+                    e.rout = 0
+                }
+            }
+            rv.outT = -1e9
+            const tr = rivById(rv.foe)
+            if (rv.foe === 0) {
+                rv.broke = true
+            } else if (known(rv) || (tr && known(tr))) {
+                toast(
+                    (known(rv) ? 'The host of ' + rv.name : 'A host') +
+                        ' falls back, beaten, from the walls of ' +
+                        (tr && known(tr) ? tr.name : 'a distant lord') +
+                        '.'
+                )
+            }
         } else if (
             rv.out &&
+            // Men walking home in defeat no longer count as an attack.
             !GV.S.en.some(
                 (e?) =>
-                    e.fac === rv.id &&
-                    (e.mode === 'atk' || e.mode === 'war' || e.mode === 'flee')
+                    e.fac === rv.id && (e.mode === 'atk' || e.mode === 'war')
             )
         ) {
             rv.out = false
@@ -1033,14 +1225,20 @@ export function rivalsTick(dt?) {
                 toast(
                     'The host of ' +
                         rv.name +
-                        ' is beaten back. Your people gather ' +
+                        (rv.broke
+                            ? ' has had enough and flees. Your people gather '
+                            : ' is beaten back. Your people gather ') +
                         bonus +
                         ' gold from the field.'
                 )
+                rv.broke = false
                 save()
             }
             rv.foe = null
             rv.route = null
+            rv.wp = null
+            rv.atkDir = null
+            rv.scoutOut = false
             rv.nextFoe = chooseFoe(rv)
         }
     }
@@ -1062,27 +1260,91 @@ export function rivalsTick(dt?) {
         }
     }
 }
+/* A host that has lost most of its strength, its champion or its nerve withdraws
+   instead of fighting to the last man. Checked about once a second. */
+export function hostBroken(rv?, dt?) {
+    if ((rv.rcd = (rv.rcd || 0) - dt) > 0 || !rv.hp0) {
+        return false
+    }
+    rv.rcd = 1
+    let hp = 0,
+        mor = 0,
+        n = 0
+    for (const e of GV.S.en) {
+        if (
+            e.fac === rv.id &&
+            (e.mode === 'atk' || e.mode === 'war') &&
+            e.type !== 'scout'
+        ) {
+            hp += e.hp
+            if (e.type !== 'ram' && e.type !== 'catapult') {
+                mor += e.rout > 0 ? 0 : e.mor
+                n++
+            }
+        }
+    }
+    if (hp <= 0) {
+        return false
+    }
+    const left = hp / rv.hp0,
+        avg = n ? mor / n : 100
+    return (
+        left < 0.3 || (rv.heroFell && left < 0.6) || (avg < 30 && left < 0.65)
+    )
+}
+/* When a champion falls, his host loses heart. */
+export function heroDown(e?, by?) {
+    const rv = rivById(e.fac)
+    shock(e.x, e.y, 1, e.fac, 50, 14)
+    if (!rv) {
+        return
+    }
+    rv.heroCd = 420
+    rv.heroFell = true
+    if (!by) {
+        toast(
+            'You have slain ' +
+                rv.prof.hero +
+                ', champion of ' +
+                rv.name +
+                '. The host wavers.'
+        )
+    } else if (known(rv)) {
+        toast(
+            rv.prof.hero +
+                ', champion of ' +
+                rv.name +
+                ', has fallen in battle.'
+        )
+    }
+}
 export function hitEnemy(e?, dmg?, by?) {
     if (e.dead) {
         return
     }
     e.hp -= dmg
     if (e.hp <= 0) {
+        e.dead = true
+        if (e.type === 'hero') {
+            heroDown(e, by)
+        } else if (e.type !== 'scout') {
+            shock(e.x, e.y, 1, e.fac, 10, 4)
+        }
         if (by) {
-            e.dead = true
             puff(e.x, e.y, 4, '#b9b0a0')
             return
         }
-        e.dead = true
         gain(
             'gold',
             e.type === 'brute'
                 ? 6
-                : e.type === 'ram'
-                  ? 8
-                  : e.type === 'catapult'
-                    ? 12
-                    : 2,
+                : e.type === 'hero'
+                  ? 30
+                  : e.type === 'ram'
+                    ? 8
+                    : e.type === 'catapult'
+                      ? 12
+                      : 2,
             e.x,
             e.y
         )
@@ -1111,6 +1373,9 @@ export function ignite(b?) {
     }
     b.fire = 20
     b.spread = 1.5
+    if (b.o === 0) {
+        firePing(b)
+    }
     if (b.o === 0 && GV.S.t > GV.fireToast) {
         GV.fireToast = GV.S.t + 20
         toast(
@@ -1214,6 +1479,10 @@ export function flowNext(cx?, cy?) {
 export function warFoes(fac?, x?, y?, maxD?) {
     let best = null,
         bd = maxD
+    // Most of the time no one marches on this lord at all.
+    if (!GV.warOn[fac]) {
+        return null
+    }
     for (const o of GV.S.en) {
         if (o.dead || o.fac === fac || o.fac === 9) {
             continue
@@ -1255,9 +1524,9 @@ export function guardUpdate(e?, dt?) {
                 e.cd = 1
                 e.walk += 0.3
                 if (s) {
-                    hitSold(s, e.dmg)
+                    hitSold(s, e.dmg, 'melee', e)
                 } else {
-                    hitEnemy(w, e.dmg, e.fac)
+                    hitEnemy(w, e.dmg * flankMul(e, w), e.fac)
                 }
             }
         }
@@ -1289,7 +1558,16 @@ export function stepToward(e?, tx?, ty?, dt?, sp?) {
     if (d < 0.05) {
         return null
     }
-    const st = Math.min(d, sp * dt * (wet(clampN(e.x), clampN(e.y)) ? 0.3 : 1)),
+    const st = Math.min(
+            d,
+            sp *
+                dt *
+                (wet(clampN(e.x), clampN(e.y))
+                    ? 0.3
+                    : inWood(e.x, e.y)
+                      ? 0.7
+                      : 1)
+        ),
         nx = e.x + (dx / d) * st,
         ny = e.y + (dy / d) * st
     const b = bAt(clampN(nx), clampN(ny))
@@ -1321,7 +1599,17 @@ export function warTarget(e?, foe?, rad?) {
         if (d > rad) {
             continue
         }
-        const sc = d + (WALLISH[b.t] ? 8 : 0) + (b.t === 'keep' ? -1 : 0)
+        // Rams look for the gate, catapults for the towers.
+        const pref =
+            e.type === 'ram'
+                ? b.t === 'gate'
+                    ? -4
+                    : 0
+                : e.type === 'catapult' &&
+                    (b.t === 'tower' || b.t === 'watch' || b.t === 'mangonel')
+                  ? -12
+                  : 0
+        const sc = d + (WALLISH[b.t] ? 8 : 0) + (b.t === 'keep' ? -1 : 0) + pref
         if (sc < bs) {
             bs = sc
             best = b
@@ -1409,11 +1697,21 @@ export function warUpdate(e?, dt?) {
                         if (h.side) {
                             hitEnemy(
                                 h,
-                                e.dmg * (T === 'brute' ? 1.6 : 1),
+                                e.dmg *
+                                    (T === 'brute' ? 1.6 : 1) *
+                                    flankMul(e, h),
                                 e.fac
                             )
                         } else {
-                            hitSold(h, e.dmg)
+                            hitSold(
+                                h,
+                                e.dmg *
+                                    (T === 'brute' && h.kind !== 'shield'
+                                        ? 1.6
+                                        : 1),
+                                'melee',
+                                e
+                            )
                         }
                     }
                 }
@@ -1529,6 +1827,35 @@ export function warUpdate(e?, dt?) {
         e.ri++
     }
 }
+/* An enemy scout rides to the edge of Thornwick, looks it over and rides home.
+   If it is cut down first, its lord attacks blind. */
+export function scoutRide(e?, dt?) {
+    const rv = rivById(e.fac)
+    if (!rv || rv.dead) {
+        e.dead = true
+        return
+    }
+    if ((e.landT = (e.landT || 0) - dt) <= 0) {
+        e.landT = 1
+        if (!e.inLand && ownedT(clampN(e.x), clampN(e.y))) {
+            e.inLand = true
+            attackPing(e)
+        }
+    }
+    if (
+        !e.path &&
+        !goTo(e, e.goal[0], e.goal[1], e.goal[0], e.goal[1], rivWalk)
+    ) {
+        e.mode = 'flee'
+        return
+    }
+    follow(e, dt, e.sp)
+    if (Math.hypot(e.x - e.goal[0], e.y - e.goal[1]) < 1.5) {
+        rv.atkDir = weakSide(rv)
+        e.mode = 'flee'
+        e.path = null
+    }
+}
 export function eUpdate(e?, dt?) {
     e.cd -= dt
     e.moving = false
@@ -1541,6 +1868,14 @@ export function eUpdate(e?, dt?) {
     }
     if (e.mode === 'guard') {
         return guardUpdate(e, dt)
+    }
+    if (e.rout > 0) {
+        // Broken men run back the way they came.
+        fleeStep(e, e.hx, e.hy, dt, e.sp * 1.15)
+        return
+    }
+    if (e.mode === 'scout') {
+        return scoutRide(e, dt)
     }
     if (e.mode === 'war') {
         return warUpdate(e, dt)
@@ -1578,11 +1913,18 @@ export function eUpdate(e?, dt?) {
         cx = clampN(e.x),
         cy = clampN(e.y),
         here = bmap[cx + cy * N]
+    if ((e.landT = (e.landT || 0) - dt) <= 0) {
+        e.landT = 1
+        if (!e.inLand && ownedT(cx, cy)) {
+            e.inLand = true
+            attackPing(e)
+        }
+    }
     if (T !== 'ram' && T !== 'catapult' && T !== 'ladder') {
         const s = nearestSold(
             e.x,
             e.y,
-            T === 'earcher' ? 4.2 : 0.9,
+            T === 'earcher' ? 4.2 + (e.hi || 0) : 0.9,
             T === 'earcher'
         )
         if (s) {
@@ -1601,22 +1943,61 @@ export function eUpdate(e?, dt?) {
                 } else {
                     e.cd = 1
                     e.walk += 0.3
-                    hitSold(s, e.dmg * (T === 'brute' ? 1.6 : 1))
+                    hitSold(
+                        s,
+                        e.dmg *
+                            (T === 'brute' && s.kind !== 'shield' ? 1.6 : 1),
+                        'melee',
+                        e
+                    )
                 }
             }
             return
+        }
+    }
+    // First ride round to the side the scout chose, then strike.
+    if (e.wp) {
+        e.wpT += dt
+        if (e.wpT > 60 || Math.hypot(e.x - e.wp[0], e.y - e.wp[1]) < 1.6) {
+            e.wp = null
+            e.path = null
+            e.next = null
+        } else {
+            if (
+                !e.path &&
+                !goTo(
+                    e,
+                    e.wp[0],
+                    e.wp[1],
+                    e.wp[0] + e.ox,
+                    e.wp[1] + e.oy,
+                    rivWalk
+                )
+            ) {
+                e.wp = null
+                e.next = null
+            }
+            if (e.path) {
+                follow(e, dt, e.sp)
+                return
+            }
         }
     }
     if (T === 'catapult') {
         if ((e.tbT -= dt) <= 0 || (e.tb && e.tb.dead)) {
             e.tbT = 3
             e.tb = null
-            let bd = 9.5
+            // Towers first: they are what keeps the host from the walls.
+            let bs = 1e9
             for (const b of GV.S.b) {
                 if (b.o === 0) {
                     const d = Math.hypot(b.cx - e.x, b.cy - e.y)
-                    if (d < bd) {
-                        bd = d
+                    if (d >= 9.5) {
+                        continue
+                    }
+                    const sc = d - (DEF[b.t].range ? 5 : b.t === 'gate' ? 2 : 0)
+                    if (sc < bs) {
+                        bs = sc
                         e.tb = b
                     }
                 }
@@ -1727,6 +2108,45 @@ export function eUpdate(e?, dt?) {
             return
         }
     }
+    // Rams make for a gate along their own road.
+    if (
+        T === 'ram' &&
+        (!e.gate || e.gate.dead) &&
+        (e.gT = (e.gT || 0) - dt) <= 0
+    ) {
+        e.gT = 5
+        e.gate = null
+        e.gp = null
+        let best = null,
+            bd = 40
+        for (const b of GV.S.b) {
+            if (b.o === 0 && b.t === 'gate') {
+                const d = Math.hypot(b.cx - e.x, b.cy - e.y)
+                if (d < bd) {
+                    bd = d
+                    best = b
+                }
+            }
+        }
+        if (best) {
+            const src = cx + cy * N,
+                tgt = best.x + best.y * N
+            if (src !== tgt && search([src], tgt, enemyCost)) {
+                e.gate = best
+                e.gp = trace(src, tgt).map((i?) => [i % N, (i / N) | 0])
+                e.gi = 0
+                e.next = null
+            }
+        }
+    }
+    if (!e.next && T === 'ram' && e.gp && e.gate && !e.gate.dead) {
+        if (e.gi < e.gp.length) {
+            e.next = e.gp[e.gi++]
+            e.sw = e.next[1] !== cy ? 1 : 0
+        } else {
+            e.gp = null
+        }
+    }
     if (!e.next) {
         if (e.tk && e.target) {
             const tx = Math.round(e.target.cx),
@@ -1795,6 +2215,8 @@ export function eUpdate(e?, dt?) {
     let sp = e.sp
     if (wet(cx, cy)) {
         sp *= 0.3
+    } else if (terrain[cx + cy * N] === 1) {
+        sp *= 0.7
     }
     if (here && here.o === 0) {
         if (here.t === 'stakes') {

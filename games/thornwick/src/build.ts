@@ -1,3 +1,4 @@
+import { plantBanner } from './army'
 import { DEF, KEEP_UP, KX, KY, N, TIERS } from './config'
 import { adjWater, afford, compass, gain, pay, puff, toast } from './helpers'
 import { costOf } from './land'
@@ -110,7 +111,7 @@ export function removeAt(x?, y?, loud?) {
         if (b.o !== 0) {
             if (loud) {
                 toast(
-                    'That is not yours to remove. Send your army with the rally flag.'
+                    'That is not yours to remove. Plant a war banner on it to send your army.'
                 )
             }
             return false
@@ -163,14 +164,22 @@ export function tryPlace(t?, x?, y?, loud?) {
             }
             return false
         }
-        GV.S.flag = [x, y]
+        const bn = plantBanner(x, y, GV.moveBn)
+        GV.moveBn = 0
         GV.armed = null
         GV.hover = null
+        if (!bn) {
+            return false
+        }
         const rg = regAt(x, y)
         toast(
             rg.owner > 0
-                ? 'Your army marches on ' + rivById(rg.owner).name + '.'
-                : 'Your soldiers gather at the rally flag.'
+                ? 'Banner ' +
+                      bn.id +
+                      ' flies in the lands of ' +
+                      rivById(rg.owner).name +
+                      '. Its squad marches.'
+                : 'Banner ' + bn.id + ' is planted. Its squad gathers there.'
         )
         return true
     }

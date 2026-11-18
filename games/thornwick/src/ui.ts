@@ -1,4 +1,16 @@
+import { alertsHud } from './alerts'
+import {
+    BCOL,
+    MAX_BANNERS,
+    bannerById,
+    bannerPlace,
+    moraleWord,
+    plantBanner,
+    recallAll,
+    removeBanner,
+} from './army'
 import { demolish, tryPlace, upgradeKeep } from './build'
+import { ARMOURED, highAt, noMorale } from './combat'
 import {
     $,
     BUILD,
@@ -30,7 +42,15 @@ import {
     puff,
     toast,
 } from './helpers'
-import { anchor, centreCam, clampCam, resize, setCursor, tileAt } from './input'
+import {
+    anchor,
+    centreCam,
+    clampCam,
+    lookAt,
+    resize,
+    setCursor,
+    tileAt,
+} from './input'
 import { POI, baileyOf, costOf } from './land'
 import { removeB } from './lords'
 import { drawMini } from './minimap'
@@ -264,6 +284,8 @@ $('#rm').addEventListener('click', () => {
     hud()
 })
 $('#flagBtn').addEventListener('click', toggleFlag)
+$('#flagBtn').title =
+    'Plant a war banner (up to four). Tap a banner on the map to set its squad.'
 $('#armyBtn').addEventListener('click', () => {
     GV.armed = null
     GV.hover = null
@@ -282,7 +304,12 @@ export function placingText() {
         return '<b>Removing</b><span> · tap or drag over what to clear</span>'
     }
     if (GV.armed === 'flag') {
-        return '<b>Rally flag</b><span> · tap where the army should gather, or on a rival castle</span>'
+        return GV.moveBn
+            ? '<b>Move banner ' +
+                  GV.moveBn +
+                  '</b><span> · tap where its squad should go</span>'
+            : '<b>War banner</b><span> · tap where a squad should gather, or on a rival castle</span>' +
+                  '<small>Up to four banners. The army splits between them.</small>'
     }
     const d = DEF[GV.armed],
         tip = d.tip ? '<small>' + d.tip + '</small>' : ''
@@ -319,6 +346,8 @@ export function placingText() {
     )
 }
 export const ENAME = {
+    hero: 'Champion',
+    scout: 'Scout',
     raider: 'Raider',
     brute: 'Brute',
     looter: 'Looter',
@@ -327,25 +356,123 @@ export const ENAME = {
     ram: 'Battering ram',
     catapult: 'Catapult',
 }
-export function armyHTML(close?) {
+const UNIT_ORDER = [
+    'sword',
+    'pike',
+    'shield',
+    'archer',
+    'xbow',
+    'knight',
+    'pram',
+    'pcat',
+    'eng',
+]
+export function unitList(list?) {
     const counts = {}
-    let n = 0
-    for (const s of GV.S.sold) {
-        if (s.kind !== 'scout') {
+    for (const s of list) {
+        if (s.kind !== 'scout' && s.kind !== 'captain') {
             counts[s.kind] = (counts[s.kind] || 0) + 1
-            n++
         }
     }
-    const parts = ['sword', 'pike', 'archer', 'knight', 'pram', 'pcat']
-        .filter((k?) => counts[k])
-        .map(
-            (k?) =>
-                counts[k] +
-                ' ' +
-                (counts[k] === 1
-                    ? UNITS[k].name.toLowerCase()
-                    : UNITS[k].plural)
-        )
+    return UNIT_ORDER.filter((k?) => counts[k]).map(
+        (k?) =>
+            counts[k] +
+            ' ' +
+            (counts[k] === 1 ? UNITS[k].name.toLowerCase() : UNITS[k].plural)
+    )
+}
+/* The controls of one war banner: squad size, stance, engineers, find and remove. */
+export function bannerBlock(b?, full?) {
+    const mem = GV.S.sold.filter((s?) => s.sq === b.id && !s.dead),
+        fighters = mem.filter(
+            (s?) =>
+                s.kind !== 'captain' && s.kind !== 'eng' && !UNITS[s.kind].siege
+        ).length,
+        auto = b.n === null || b.n === undefined,
+        mw = moraleWord(mem)
+    let h =
+        '<div class="bnr" style="--bc:' +
+        BCOL[b.id - 1] +
+        '"><div class="row"><b class="tag">' +
+        b.id +
+        '</b><span class="what">' +
+        (full ? '' : 'Banner ' + b.id + ': ') +
+        (auto
+            ? fighters + (fighters === 1 ? ' soldier' : ' soldiers')
+            : fighters +
+              ' of ' +
+              b.n +
+              (b.n === 1 ? ' soldier' : ' soldiers')) +
+        (mem.some((s?) => s.kind === 'captain') ? ', with the captain' : '') +
+        (mw ? ', ' + mw : '') +
+        '</span></div>'
+    if (full && mem.length) {
+        h += '<p class="note">' + unitList(mem).join(', ') + '.</p>'
+    }
+    h +=
+        '<div class="row"><span class="note lbl">Squad</span><div class="seg"><button class="btn" data-act="bn:less:' +
+        b.id +
+        '" aria-label="Smaller squad">−</button><button class="btn" data-act="bn:auto:' +
+        b.id +
+        '" aria-pressed="' +
+        auto +
+        '">Auto</button><button class="btn" data-act="bn:more:' +
+        b.id +
+        '" aria-label="Larger squad">+</button></div><div class="seg"><button class="btn" data-act="bn:st:' +
+        b.id +
+        ':charge" aria-pressed="' +
+        (b.st !== 'hold') +
+        '">Charge</button><button class="btn" data-act="bn:st:' +
+        b.id +
+        ':hold" aria-pressed="' +
+        (b.st === 'hold') +
+        '">Hold</button></div></div>'
+    if (b.siege) {
+        h +=
+            '<div class="row"><span class="note lbl">Engineers</span><div class="seg"><button class="btn" data-act="bn:eng:' +
+            b.id +
+            ':tower" aria-pressed="' +
+            (b.eng !== 'tunnel') +
+            '">Siege tower</button><button class="btn" data-act="bn:eng:' +
+            b.id +
+            ':tunnel" aria-pressed="' +
+            (b.eng === 'tunnel') +
+            '">Tunnel</button></div></div>'
+    }
+    h +=
+        '<div class="row"><button class="btn" data-act="bn:go:' +
+        b.id +
+        '">Find</button><button class="btn" data-act="bn:move:' +
+        b.id +
+        '">Move</button><button class="btn" data-act="bn:rm:' +
+        b.id +
+        '">Take down</button></div></div>'
+    return h
+}
+export function bannerHTML(close?, b?) {
+    return (
+        close +
+        '<h2>War banner ' +
+        b.id +
+        '</h2><p>Flies ' +
+        bannerPlace(b) +
+        '. ' +
+        (b.st === 'hold'
+            ? 'Its squad holds the ground around it and lets the enemy come.'
+            : 'Its squad attacks anything near it' +
+              (b.siege ? ', then the castle.' : '.')) +
+        '</p>' +
+        bannerBlock(b, true) +
+        '<p class="note">Auto shares the army out between the banners by the size of the fight at each. With + and − you set this squad to a fixed size; soldiers left over guard home.' +
+        (b.siege
+            ? ' Rams, catapults and engineers go with the nearest banner on a rival castle. Engineers raise a siege tower your soldiers can climb, or dig a tunnel that brings a stretch of wall down.'
+            : '') +
+        '</p><div class="row"><button class="btn" data-act="army">Army and orders</button></div>'
+    )
+}
+export function armyHTML(close?) {
+    const parts = unitList(GV.S.sold),
+        B = GV.S.banners
     let h =
         close +
         '<h2>Army of Thornwick</h2><p>' +
@@ -359,7 +486,34 @@ export function armyHTML(close?) {
               '.') +
         '</p>'
     h +=
-        '<div class="row"><span class="note" style="margin:0">Stance</span><div class="seg"><button class="btn" data-act="stance:charge" aria-pressed="' +
+        '<h3 class="sub">War banners (' +
+        B.length +
+        ' of ' +
+        MAX_BANNERS +
+        ')</h3>'
+    if (!B.length) {
+        h +=
+            '<p class="note">Plant a banner to send a squad somewhere. With two or more banners the army splits and fights in several places at once.</p>'
+    }
+    for (const b of B) {
+        h += bannerBlock(b, false)
+    }
+    h +=
+        '<div class="row"><button class="btn primary" data-act="flag"' +
+        (B.length >= MAX_BANNERS ? ' disabled' : '') +
+        '>Plant a banner</button>' +
+        (B.length
+            ? '<button class="btn" data-act="recall">Recall all</button>'
+            : '') +
+        '</div>'
+    const home = GV.S.sold.filter(
+        (s?) => !s.sq && s.kind !== 'scout' && !s.dead
+    ).length
+    h +=
+        '<h3 class="sub">Home guard</h3><div class="row"><span class="note lbl">' +
+        home +
+        (home === 1 ? ' soldier' : ' soldiers') +
+        '</span><div class="seg"><button class="btn" data-act="stance:charge" aria-pressed="' +
         (GV.S.stance === 'charge') +
         '">Charge</button><button class="btn" data-act="stance:hold" aria-pressed="' +
         (GV.S.stance === 'hold') +
@@ -367,13 +521,9 @@ export function armyHTML(close?) {
     h +=
         '<p class="note">' +
         (GV.S.stance === 'charge'
-            ? 'Soldiers ride out to meet raiders anywhere on your land.'
-            : 'Soldiers stay close to the keep or the rally flag and let raiders come to them.') +
-        '</p>'
-    h +=
-        '<div class="row"><button class="btn primary" data-act="flag">' +
-        (GV.S.flag ? 'Recall army' : 'Plant rally flag') +
-        '</button></div>'
+            ? 'Soldiers in no squad ride out to meet raiders anywhere on your land.'
+            : 'Soldiers in no squad stay close to their barracks and let raiders come to them.') +
+        ' Archers man the stone walls.</p>'
     const cs =
         GV.S.cry > 0
             ? 'Sounding'
@@ -403,7 +553,7 @@ export function armyHTML(close?) {
         fs +
         '</span></div>'
     h +=
-        '<p class="note">War cry: harder, faster blows for 15 seconds. Fire arrows: towers and archers set raiders and rival thatch alight.</p>'
+        '<p class="note">War cry: harder, faster blows and fresh courage for 15 seconds. Fire arrows: towers and archers set raiders and rival thatch alight.</p>'
     return h
 }
 /* Longer "how it works" text for the inspect panel, with live numbers where they help. */
@@ -651,17 +801,20 @@ export function howHTML(b?) {
             const desc = {
                 sword: '70 health, 9 damage. Good all round.',
                 pike: '85 health, 7 damage, but 2.6 times the damage against brutes, rams and catapults.',
+                shield: '150 health, 5 damage, slow. Takes little harm from arrows and cannot be flanked. Archers next to one take half harm from arrows. Stands in front of its banner and holds the line.',
                 archer: '40 health, 6 damage from 3.4 tiles. Goes up onto stone walls by itself.',
+                xbow: '55 health, 24 damage from 3.9 tiles, but slow to reload. Bolts go through armour: more damage to brutes, rams and champions, where arrows glance off.',
                 knight: '150 health, 13 damage, very fast. Hits hardest at the end of a charge.',
                 pram: '320 health. Slow, but batters rival walls and gates.',
                 pcat: '180 health. Throws stones up to 7.5 tiles for 42 damage. Best against walls and towers.',
+                eng: '60 health, weak in a fight. At a banner on a rival castle, raises a siege tower your soldiers can climb over the wall (16 seconds), or digs a tunnel that brings a stretch of wall down (30 seconds, faster with more engineers).',
             }
             for (const k of d.units) {
                 P.push('<b>' + UNITS[k].name + ':</b> ' + desc[k])
             }
             if (b.t !== 'workshop') {
                 P.push(
-                    'Use the Army button to choose Charge or Hold, and the rally flag to send them where you want.'
+                    'Use the Army button to choose Charge or Hold, and war banners to send squads where you want.'
                 )
             }
             break
@@ -711,6 +864,9 @@ export function inspectHTML(sel?) {
     if (sel.kind === 'army') {
         return armyHTML(close)
     }
+    if (sel.kind === 'banner') {
+        return bannerHTML(close, sel.bn)
+    }
     if (sel.kind === 'fog') {
         const rg = sel.rg,
             nearKnown = rg.adj.some((a?) => GV.regs[a].disc),
@@ -751,26 +907,50 @@ export function inspectHTML(sel?) {
     }
     if (sel.kind === 'unit') {
         const u = sel.u,
-            rv = rivById(u.fac)
+            rv = rivById(u.fac),
+            mor =
+                u.rout > 0
+                    ? 'Broken and running.'
+                    : noMorale(u)
+                      ? ''
+                      : u.mor > 70
+                        ? 'Steady.'
+                        : u.mor > 40
+                          ? 'Shaken.'
+                          : 'Wavering.'
         return (
             close +
             '<h2>' +
-            ENAME[u.type] +
+            (u.type === 'hero' && rv ? rv.prof.hero : ENAME[u.type]) +
             '</h2>' +
             hpBarH(u.hp / u.max) +
             '<p>' +
-            (u.fac === 9
-                ? 'An outlaw from the bandit camp.'
-                : 'Fights for ' +
-                  (rv ? rv.name : 'a rival lord') +
-                  (u.mode === 'guard'
-                      ? ', guarding their castle.'
-                      : u.mode === 'war' && rivById(u.foe)
-                        ? ', marching on ' + rivById(u.foe).name + '.'
-                        : '.')) +
+            (u.type === 'hero' && rv
+                ? 'Champion of ' +
+                  rv.name +
+                  '. Strong, and his men take heart from him. Kill him and they waver.'
+                : u.type === 'scout'
+                  ? 'Rides ahead for ' +
+                    (rv ? rv.name : 'a rival lord') +
+                    ' to find the weak side of your defences.'
+                  : u.fac === 9
+                    ? 'An outlaw from the bandit camp.'
+                    : 'Fights for ' +
+                      (rv ? rv.name : 'a rival lord') +
+                      (u.mode === 'guard'
+                          ? ', guarding their castle.'
+                          : u.mode === 'war' && rivById(u.foe)
+                            ? ', marching on ' + rivById(u.foe).name + '.'
+                            : u.mode === 'flee'
+                              ? ', falling back.'
+                              : '.')) +
+            (mor ? ' ' + mor : '') +
             '</p>' +
             (BIG[u.type]
                 ? '<p class="note">Pikemen deal heavy damage to it.</p>'
+                : '') +
+            (ARMOURED[u.type]
+                ? '<p class="note">Armoured: crossbow bolts hurt it most.</p>'
                 : '')
         )
     }
@@ -784,7 +964,8 @@ export function inspectHTML(sel?) {
                 close +
                 '<h2>Bandit camp</h2>' +
                 bar +
-                '<p>Outlaws raid from here. Plant the rally flag on it to send your soldiers and burn it out.</p>'
+                '<p>Outlaws raid from here. Plant a war banner on it to send a squad and burn it out.</p>' +
+                '<div class="row"><button class="btn primary" data-act="siege">Plant a banner here</button></div>'
             )
         }
         const rv = rivById(b.o),
@@ -812,7 +993,7 @@ export function inspectHTML(sel?) {
                 ? ' You are at truce for ' + fmtTime(rv.truce) + '.'
                 : '') +
             '</p>' +
-            '<p class="note">Plant the rally flag here to lay siege. Rams and catapults from a siege workshop make short work of walls. ' +
+            '<p class="note">Lay siege to plant a war banner here. Rams and catapults from a siege workshop make short work of walls, and engineers can climb or undermine them. ' +
             (b.t === 'keep'
                 ? 'When this keep falls, the lord is beaten and the land is yours.'
                 : 'Their keep must fall to end them.') +
@@ -864,7 +1045,10 @@ export function inspectHTML(sel?) {
             d.tip +
             ' Reach ' +
             d.range +
-            ' tiles, less at night without a brazier nearby.'
+            ' tiles, less at night without a brazier nearby.' +
+            (highAt(b.cx, b.cy)
+                ? ' It stands on high ground and reaches one tile further.'
+                : '')
     }
     let h =
         close +
@@ -1034,10 +1218,15 @@ export function rebuildStone(b?, all?) {
     GV.placeTm = setTimeout(save, 1500)
 }
 export function toggleFlag() {
-    if (GV.S.flag) {
-        GV.S.flag = null
+    GV.moveBn = 0
+    if (GV.armed === 'flag') {
         GV.armed = null
-        toast('Your soldiers return to their posts.')
+        GV.hover = null
+    } else if (GV.S.banners.length >= MAX_BANNERS) {
+        toast(
+            'Four banners fly already. Take one down or move one from the Army panel.'
+        )
+        GV.selected = { kind: 'army' }
     } else {
         GV.selected = null
         arm('flag')
@@ -1060,6 +1249,11 @@ $('#inspect').addEventListener('click', (e?) => {
     }
     if (act.startsWith('stance:')) {
         GV.S.stance = act.slice(7)
+        hud()
+        return
+    }
+    if (act.startsWith('bn:')) {
+        bannerAct(act)
         hud()
         return
     }
@@ -1098,6 +1292,10 @@ $('#inspect').addEventListener('click', (e?) => {
         case 'flag':
             toggleFlag()
             return
+        case 'recall':
+            recallAll()
+            toast('The banners come down. Your soldiers return to their posts.')
+            break
         case 'cry':
             warCry()
             break
@@ -1109,15 +1307,22 @@ $('#inspect').addEventListener('click', (e?) => {
                 GV.selected = null
             }
             break
-        case 'siege':
-            GV.S.flag = [clampN(b.cx), clampN(b.cy + b.s)]
-            GV.selected = null
-            toast(
-                'Your army marches on ' +
-                    (b.t === 'camp' ? 'the bandit camp' : rivById(b.o).name) +
-                    '.'
-            )
+        case 'siege': {
+            const bn = plantBanner(clampN(b.cx), clampN(b.cy + b.s))
+            if (bn) {
+                GV.selected = { kind: 'banner', bn }
+                toast(
+                    'Banner ' +
+                        bn.id +
+                        ' flies before ' +
+                        (b.t === 'camp'
+                            ? 'the bandit camp'
+                            : 'the walls of ' + rivById(b.o).name) +
+                        '. Its squad marches.'
+                )
+            }
             break
+        }
     }
     hud()
 })
@@ -1128,6 +1333,53 @@ $('#event').addEventListener('click', (e?) => {
         hud()
     }
 })
+export function bannerAct(act?) {
+    const [, op, idS, arg] = act.split(':'),
+        b = bannerById(+idS)
+    if (!b) {
+        return
+    }
+    const now = GV.S.sold.filter(
+        (s?) =>
+            s.sq === b.id &&
+            s.kind !== 'captain' &&
+            s.kind !== 'eng' &&
+            !UNITS[s.kind].siege
+    ).length
+    switch (op) {
+        case 'less':
+            b.n = Math.max(
+                1,
+                (b.n === null || b.n === undefined ? now : b.n) - 1
+            )
+            break
+        case 'more':
+            b.n = (b.n === null || b.n === undefined ? now : b.n) + 1
+            break
+        case 'auto':
+            b.n = null
+            break
+        case 'st':
+            b.st = arg === 'hold' ? 'hold' : 'charge'
+            break
+        case 'eng':
+            b.eng = arg === 'tunnel' ? 'tunnel' : 'tower'
+            break
+        case 'go':
+            lookAt(b.x, b.y)
+            break
+        case 'move':
+            GV.selected = null
+            arm('flag')
+            GV.moveBn = b.id
+            break
+        case 'rm':
+            removeBanner(b.id)
+            toast('Banner ' + b.id + ' is taken down. Its squad returns home.')
+            break
+    }
+    GV.sqCd = 0
+}
 export const fmtTime = (s?) => {
     s = Math.max(0, Math.ceil(s))
     return ((s / 60) | 0) + ':' + String(s % 60).padStart(2, '0')
@@ -1147,6 +1399,7 @@ export function hud() {
         SEASONS[season()] + ', ' + (isNight() ? 'night' : 'day')
     const live = GV.S.riv.filter((r?) => r.awake && !r.dead),
         atk = live.filter((r?) => r.out && r.foe === 0)
+    alertsHud()
     let p1,
         p2,
         p3,
@@ -1168,7 +1421,11 @@ export function hud() {
         if (next) {
             p1 = next.name
             p2 = fmtTime(next.atkIn)
-            p3 = 'from the ' + compass(next.kx - KX, next.ky - KY)
+            p3 =
+                'from the ' +
+                (next.atkDir !== null && next.atkDir !== undefined
+                    ? compass(Math.cos(next.atkDir), Math.sin(next.atkDir))
+                    : compass(next.kx - KX, next.ky - KY))
             soon = next.atkIn < 30
         } else if (live.some((r?) => r.truce > 0)) {
             p1 = 'Truce'
@@ -1210,13 +1467,19 @@ export function hud() {
         }
     }
     $('#rm').setAttribute('aria-pressed', String(GV.armed === 'remove'))
-    const fb = $('#flagBtn')
+    const fb = $('#flagBtn'),
+        ft = 'Banner ' + GV.S.banners.length + '/' + MAX_BANNERS
     fb.setAttribute('aria-pressed', String(GV.armed === 'flag'))
-    fb.textContent = GV.S.flag ? 'Recall army' : 'Rally flag'
+    if (fb._t !== ft) {
+        fb.textContent = ft
+        fb._t = ft
+    }
     if (
         GV.selected &&
         ((GV.selected.kind === 'unit' &&
             (GV.selected.u.dead || !GV.S.en.includes(GV.selected.u))) ||
+            (GV.selected.kind === 'banner' &&
+                !GV.S.banners.includes(GV.selected.bn)) ||
             (GV.selected.kind === 'fog' && GV.selected.rg.disc))
     ) {
         GV.selected = null

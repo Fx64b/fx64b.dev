@@ -26,4 +26,13 @@ describe('Thornwick save format', () => {
         expect(migrateSave({ v: 6 }, steps, 8)).toEqual({ v: 8, gold: 2 })
         expect(migrateSave({ v: 6 }, {}, 7)).toBeNull()
     })
+
+    it('turns the old rally flag into the first war banner', () => {
+        const out = migrateSave({ v: 6, flag: [10, 12], stance: 'hold' })
+        expect(out?.flag).toBeUndefined()
+        expect(out?.banners).toEqual([
+            { id: 1, x: 10, y: 12, n: null, st: 'hold', eng: 'tower' },
+        ])
+        expect(migrateSave({ v: 6, flag: null })?.banners).toEqual([])
+    })
 })

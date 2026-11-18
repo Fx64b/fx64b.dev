@@ -2277,6 +2277,10 @@ export const UP = {
     captain: { tunic: 0x2a587a, legs: 0x2f2e36, hat: 0xb9c2c8 },
     knight: { tunic: 0x2a587a, legs: 0x3b3a40, hat: 0xb0b8be },
     scout: { tunic: 0x3b5a3a, legs: 0x4a3e30, hat: 0x2f4a2e },
+    shield: { tunic: 0x5e6670, legs: 0x3b3a40, hat: 0x9aa2a8 },
+    xbow: { tunic: 0x7a5a3a, legs: 0x4a3e30, hat: 0x6d7278 },
+    eng: { tunic: 0x8a6a3a, legs: 0x4a3e30, hat: 0x5a4028 },
+    hero: { tunic: 0x2e2a30, legs: 0x26242a, hat: 0xc8ccd0 },
     earcher: { tunic: 0x3e3830, legs: 0x2e2a26, hat: 0x2e2a26 },
     ladder: { tunic: 0x5e5038, legs: 0x3a3228, hat: 0x3e3226 },
     raider: { tunic: 0x342b30, legs: 0x2a2426, hat: 0x4f545a },
@@ -2294,7 +2298,7 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
         return cv
     }
     const mounted = role === 'knight' || role === 'scout',
-        big = role === 'brute'
+        big = role === 'brute' || role === 'hero'
     const w = mounted ? 40 : big ? 30 : 24,
         h = mounted ? 38 : big ? 37 : 31,
         P0 = UP[role]
@@ -2306,6 +2310,10 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
             archer: 1,
             captain: 1,
             knight: 1,
+            shield: 1,
+            xbow: 1,
+            eng: 1,
+            hero: 1,
             earcher: 1,
             raider: 1,
             brute: 1,
@@ -2320,7 +2328,17 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
         : P0
     const trim = fac
         ? FCOL[fac]
-        : role in { sword: 1, pike: 1, archer: 1, captain: 1, knight: 1 }
+        : role in
+            {
+                sword: 1,
+                pike: 1,
+                archer: 1,
+                captain: 1,
+                knight: 1,
+                shield: 1,
+                xbow: 1,
+                eng: 1,
+            }
           ? FCOL[0]
           : tw(P.tunic, 0.7)
     const px = new Uint8ClampedArray(w * h * 4)
@@ -2491,6 +2509,17 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
         }
         R(tx0 - 1, ty0 + tH + 3, tW + 2, 1, 0x4e1414)
     }
+    if (role === 'hero') {
+        R(tx0 - 1, ty0 + 1, tW + 2, tH + 4, tw(trim, 0.62))
+        for (let y = ty0 + 3; y < ty0 + tH + 4; y += 2) {
+            set(tx0 - 1, y, tw(trim, 0.5))
+        }
+    }
+    if (role === 'xbow') {
+        R(tx0 - 2, ty0, 2, 7, 0x5e3e24)
+        set(tx0 - 2, ty0 - 1, 0xd8d0b8)
+        set(tx0 - 1, ty0 - 1, 0xd8d0b8)
+    }
     if (role === 'scout') {
         R(tx0 - 2, ty0 + 1, tW + 2, tH + 2, 0x2c4a2c)
         R(tx0 - 2, ty0 + tH + 2, tW + 2, 1, 0x223a22)
@@ -2525,7 +2554,7 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
         R(tx0 + 1, ty1, 2, 4, P.legs)
         R(tx0 + 1, ty1 + 3, 3, 2, boot)
     }
-    const mail = role in { sword: 1, captain: 1, knight: 1 }
+    const mail = role in { sword: 1, captain: 1, knight: 1, shield: 1, hero: 1 }
     for (let y = ty0; y <= ty1; y++) {
         for (let x = tx0; x <= tx1; x++) {
             let c = P.tunic
@@ -2793,6 +2822,77 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
                 R(hx0 - 1, hy0 + 1, hS + 2, 1, C.gold)
                 R(tx0, ty0, tW, 1, C.gold)
             }
+            break
+        }
+        case 'shield': {
+            coif()
+            helm(P.hat, true)
+            R(cx - 1, ty0 + 2, 2, tH - 4, trim)
+            line(rx, h - 3, rx, hy0 - 6, 0x6b4a2a)
+            R(rx - 1, hy0 - 9, 3, 3, 0xc8d0d4)
+            set(rx, hy0 - 10, 0xffffff)
+            // A tall kite shield covers the whole body.
+            const sx = tx0 - aW - 3,
+                sy = ty0 - 2
+            for (let j = 0; j < 14; j++) {
+                const ins = j > 9 ? j - 9 : 0
+                for (let i = ins; i < 8 - ins; i++) {
+                    const edge = i === ins || i === 7 - ins || j === 0
+                    set(
+                        sx + i,
+                        sy + j,
+                        edge ? 0x4a4f56 : i < 4 ? trim : tw(trim, 0.8)
+                    )
+                }
+            }
+            R(sx + 3, sy + 2, 2, 9, C.gold)
+            R(sx + 1, sy + 5, 6, 2, C.gold)
+            set(sx + 3, sy + 2, tw(C.gold, 1.25))
+            break
+        }
+        case 'xbow': {
+            R(hx0 - 2, hy0 - 1, hS + 4, 1, tw(P.hat, 0.85))
+            R(hx0 - 1, hy0 - 3, hS + 2, 2, P.hat)
+            R(hx0, hy0 - 4, hS, 1, tw(P.hat, 1.2))
+            R(cx - 1, ty0 + 2, 2, tH - 4, trim)
+            // The crossbow, held level across the chest.
+            const yb = by - 2
+            line(tx0 - 1, yb, rx + 3, yb, 0x6b4a2a)
+            line(tx0, yb + 1, rx + 1, yb + 1, 0x4a3018)
+            line(rx + 4, yb - 4, rx + 4, yb + 4, 0x8f979e)
+            set(rx + 3, yb - 4, 0x6d7278)
+            set(rx + 3, yb + 4, 0x6d7278)
+            line(rx + 3, yb - 3, rx, yb, 0xd8d0b8)
+            line(rx + 3, yb + 3, rx, yb, 0xd8d0b8)
+            break
+        }
+        case 'eng': {
+            R(hx0 - 1, hy0 - 2, hS + 2, 3, P.hat)
+            R(hx0, hy0 - 3, hS, 1, tw(P.hat, 1.2))
+            R(hx0 + hS, hy0, 1, 2, tw(P.hat, 0.75))
+            R(tx0 + 1, by + 1, tW - 2, ty1 - by - 1, 0x8c7a5a)
+            R(tx0 + 1, by + 1, tW - 2, 1, 0x6a5a40)
+            line(rx, hy + 1, rx, ay - 5, 0x6b4a2a)
+            line(rx - 3, ay - 6, rx + 3, ay - 4, 0x9aa0a6)
+            set(rx - 3, ay - 6, 0xd8e0e4)
+            set(rx + 3, ay - 4, 0xd8e0e4)
+            break
+        }
+        case 'hero': {
+            R(hx0 - 1, hy0 - 2, hS + 2, hS + 1, P.hat)
+            R(hx0 - 1, hy0 - 2, hS + 2, 1, tw(P.hat, 1.25))
+            R(hx0, hy0 + 2, hS + 1, 1, 0x101014)
+            R(hx0 + hS, hy0 - 2, 1, hS + 1, tw(P.hat, 0.72))
+            R(hx0 + 1, hy0 - 6, 3, 4, trim)
+            R(hx0 + 2, hy0 - 7, 2, 1, tw(trim, 1.25))
+            R(cx - 2, ty0 + 1, 4, tH - 2, trim)
+            R(cx - 2, ty0 + 1, 1, tH - 2, tw(trim, 1.15))
+            R(cx - 1, ty0 + 3, 2, 2, C.gold)
+            line(rx, hy + 1, rx, hy0 - 7, 0xd8e0e4)
+            line(rx + 1, hy, rx + 1, hy0 - 6, 0x9aa4ac)
+            set(rx, hy0 - 8, 0xffffff)
+            R(rx - 2, hy - 1, 5, 1, C.gold)
+            R(rx, hy, 1, 3, 0x4a3424)
             break
         }
         case 'pike':

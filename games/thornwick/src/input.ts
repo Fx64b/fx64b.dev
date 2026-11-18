@@ -147,9 +147,11 @@ export function unitBox(u?, en?) {
             (UNITS[u.kind] && UNITS[u.kind].siege) ||
             u.type === 'ram' ||
             u.type === 'catapult',
-        mounted = u.kind === 'knight' || u.kind === 'scout'
-    const w = big ? 22 : mounted ? 18 : 12,
-        h = big ? 18 : mounted ? 19 : 16
+        mounted =
+            u.kind === 'knight' || u.kind === 'scout' || u.type === 'scout',
+        large = u.type === 'hero' || u.type === 'brute'
+    const w = big ? 22 : mounted ? 18 : large ? 15 : 12,
+        h = big ? 18 : mounted ? 19 : large ? 20 : 16
     return [x - w / 2, y - h - (u.onWall ? 12 : 0), w, h + 2]
 }
 export function pick(clientX?, clientY?) {
@@ -170,6 +172,16 @@ export function pick(clientX?, clientY?) {
                 bd = d
                 best = en ? { kind: 'unit', u } : { kind: 'army', u }
             }
+        }
+    }
+    for (const bn of GV.S.banners) {
+        if (!seenAt(bn.x, bn.y)) {
+            continue
+        }
+        const x = wx(bn.x, bn.y),
+            y = wy(bn.x, bn.y)
+        if (X >= x - 2 && X <= x + 12 && Y >= y - 30 && Y <= y + 1) {
+            return { kind: 'banner', bn }
         }
     }
     for (const u of GV.S.sold) {
@@ -238,6 +250,7 @@ export const samePick = (a?, b?) =>
         a.kind &&
         a.kind === b.kind &&
         a.u === b.u &&
+        a.bn === b.bn &&
         a.p === b.p &&
         a.rg === b.rg)
 export function setCursor() {
@@ -254,6 +267,7 @@ cv.addEventListener('contextmenu', (e?) => {
     if (GV.armed) {
         GV.armed = null
         GV.hover = null
+        GV.moveBn = 0
     } else {
         GV.selected = null
     }
@@ -353,7 +367,14 @@ export function ptrEnd(e?) {
             if (GV.armed) {
                 GV.hover = anchor(GV.armed, t)
                 const was = GV.armed,
+                    moving = GV.moveBn,
                     ok = tryPlace(GV.armed, GV.hover[0], GV.hover[1], true)
+                if (ok && was === 'flag' && moving) {
+                    const bn = GV.S.banners.find((b?) => b.id === moving)
+                    if (bn) {
+                        GV.selected = { kind: 'banner', bn }
+                    }
+                }
                 if (
                     ok &&
                     was === GV.armed &&
@@ -436,6 +457,7 @@ window.addEventListener('keydown', (e?) => {
         GV.armed = null
         GV.hover = null
         GV.selected = null
+        GV.moveBn = 0
         if (GV.newOpen) {
             $('#newkCancel').click()
         }

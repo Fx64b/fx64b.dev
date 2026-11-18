@@ -1,3 +1,5 @@
+import { assignSquads, nearOwnBanner } from './army'
+import { buildGrid, highAt, inWood, moraleTick } from './combat'
 import { DEF, KEEP_DMG, KX, KY } from './config'
 import { startEvent } from './events'
 import { tintAll } from './ground'
@@ -217,13 +219,20 @@ export function tick(dt?) {
     for (const u of GV.S.vill) {
         vUpdate(u, dt)
     }
+    buildGrid()
+    if ((GV.sqCd -= dt) <= 0) {
+        GV.sqCd = 1
+        assignSquads()
+    }
     for (const s of GV.S.sold) {
         if (!s.dead) {
+            moraleTick(s, dt, nearOwnBanner)
             sUpdate(s, dt)
         }
     }
     for (const e of GV.S.en.slice()) {
         if (!e.dead) {
+            moraleTick(e, dt)
             eUpdate(e, dt)
         }
         if (GV.S.over) {
@@ -274,6 +283,9 @@ export function tick(dt?) {
                 let range = isKeep ? 4.5 : d.range
                 if (night && b.o === 0 && !isKeep && !near(b, 'brazier', 4.5)) {
                     range *= 0.75
+                }
+                if (!isKeep && highAt(b.cx, b.cy)) {
+                    range += 1
                 }
                 let e = nearest(targets, b.cx, b.cy, range)
                 const mang = b.t === 'mangonel' && b.o === 0
@@ -397,7 +409,7 @@ export function tick(dt?) {
                 }
                 for (const s of GV.S.sold) {
                     if (Math.hypot(s.x - a.tx, s.y - a.ty) <= 1.3) {
-                        hitSold(s, 12)
+                        hitSold(s, 12, 'stone')
                     }
                 }
             } else {
@@ -430,13 +442,17 @@ export function tick(dt?) {
                 }
             }
         } else if (a.e && !a.e.dead) {
+            // Trees catch many of the arrows shot at those standing among them.
+            if (inWood(a.e.x, a.e.y) && Math.random() < 0.35) {
+                continue
+            }
             if (a.e.side) {
                 hitEnemy(a.e, a.dmg, a.by)
                 if (a.burn) {
                     a.e.burn = 4
                 }
             } else {
-                hitSold(a.e, a.dmg)
+                hitSold(a.e, a.dmg, 'arrow')
             }
         }
     }

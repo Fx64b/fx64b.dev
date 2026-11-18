@@ -116,6 +116,7 @@ export const LORDS = [
     null,
     {
         name: 'Aldric the Red',
+        hero: 'Black Hal',
         pers: 'warlord',
         agg: 0.8,
         army: 1.15,
@@ -129,6 +130,7 @@ export const LORDS = [
     },
     {
         name: 'Lady Morwen',
+        hero: 'Sir Edric Thorne',
         pers: 'schemer',
         agg: 1,
         army: 1,
@@ -142,6 +144,7 @@ export const LORDS = [
     },
     {
         name: 'Baron Osric',
+        hero: 'Godwin Ironside',
         pers: 'builder',
         agg: 1.3,
         army: 1.15,
@@ -155,6 +158,7 @@ export const LORDS = [
     },
     {
         name: 'Queen Ysolde',
+        hero: 'Dame Ilsabet',
         pers: 'warlord',
         agg: 0.85,
         army: 1.3,
@@ -168,6 +172,7 @@ export const LORDS = [
     },
     {
         name: 'Morcant the Pale',
+        hero: 'Corvin the Grey',
         pers: 'schemer',
         agg: 1,
         army: 0.95,
@@ -181,6 +186,7 @@ export const LORDS = [
     },
     {
         name: 'Sir Gareth Vane',
+        hero: 'Sir Tobin Ashford',
         pers: 'builder',
         agg: 1.2,
         army: 1,
@@ -194,6 +200,7 @@ export const LORDS = [
     },
     {
         name: 'The Iron Abbess',
+        hero: 'Brother Wulfric',
         pers: 'builder',
         agg: 1.4,
         army: 1.1,
@@ -207,6 +214,7 @@ export const LORDS = [
     },
     {
         name: 'Rhodri Wolfsbane',
+        hero: 'Cadoc the Hound',
         pers: 'warlord',
         agg: 0.75,
         army: 0.9,
@@ -492,8 +500,8 @@ export const DEF = {
         hp: 200,
         path: 1,
         garrison: 6,
-        units: ['sword', 'pike'],
-        tip: 'Trains up to 6 swordsmen or pikemen. Pikemen hold steady against brutes, rams and catapults.',
+        units: ['sword', 'pike', 'shield'],
+        tip: 'Trains up to 6 swordsmen, pikemen or shield-bearers. Pikemen hold steady against brutes, rams and catapults.',
     },
     range: {
         name: 'Archery range',
@@ -503,9 +511,9 @@ export const DEF = {
         hp: 120,
         path: 1,
         garrison: 6,
-        units: ['archer'],
+        units: ['archer', 'xbow'],
         flam: 1,
-        tip: 'Trains up to 6 archers. They man your stone walls on their own.',
+        tip: 'Trains up to 6 archers or crossbowmen. They man your stone walls on their own.',
     },
     stables: {
         name: 'Stables',
@@ -526,10 +534,10 @@ export const DEF = {
         cost: { wood: 90, stone: 40 },
         hp: 160,
         path: 1,
-        garrison: 3,
-        units: ['pram', 'pcat'],
+        garrison: 4,
+        units: ['pram', 'pcat', 'eng'],
         flam: 1,
-        tip: 'Builds battering rams and catapults. They follow the rally flag and batter rival walls.',
+        tip: 'Builds battering rams and catapults and trains engineers. They follow a war banner planted on a rival castle.',
     },
     smith: {
         name: 'Blacksmith',
