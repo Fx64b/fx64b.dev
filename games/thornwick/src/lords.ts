@@ -1,4 +1,5 @@
 import { $, DEF, DF, DIFFS, HOME, KX, KY, N, WALLISH } from './config'
+import { wallDmgMul } from './eco'
 import { groundTileChanged } from './ground'
 import {
     compass,
@@ -1130,6 +1131,7 @@ export function damageB(b?, dmg?, raw?, by?) {
         if (b.t === 'gate' && b.shut) {
             dmg *= 0.7
         }
+        dmg *= wallDmgMul(b)
     }
     b.hp -= dmg
     if (!raw) {

@@ -1,5 +1,7 @@
 import { placeErr } from './build'
 import { DEF, LIT, N, OX, OY, ctx, cv } from './config'
+import { caravans } from './eco'
+import { GOOD } from './goods'
 import {
     CH,
     CW,
@@ -175,6 +177,12 @@ export const TOPH = {
     outpost: 34,
     brazier: 14,
     camp: 16,
+    ironmine: 18,
+    sheep: 12,
+    weaver: 24,
+    bakery: 26,
+    brewery: 26,
+    scriptorium: 34,
 }
 export const blit = (c?, img?, x?, y?) =>
     c.drawImage(img, x, y, img.width / R, img.height / R)
@@ -395,6 +403,11 @@ export function render() {
             ])
         }
     }
+    for (const c of caravans()) {
+        if (vis(c.x, c.y)) {
+            list.push([c.x + c.y + 0.02, 6, c])
+        }
+    }
     if (GV.S.flag && vis(GV.S.flag[0], GV.S.flag[1])) {
         list.push([GV.S.flag[0] + GV.S.flag[1] + 0.03, 5])
     }
@@ -443,6 +456,19 @@ export function render() {
                     c.fillRect(lx + 0.5, ly - k, 4, 0.5)
                 }
             }
+        } else if (d[1] === 6) {
+            const u = d[2],
+                sp = sprite('caravan', {
+                    sw: u.sw,
+                    v: u.rev || 0,
+                    f: u.moving && !reduceMotion ? ((u.walk * 4) | 0) % 2 : 0,
+                })
+            blit(
+                c,
+                sp.parts[0].cv,
+                Math.round(wx(u.x, u.y)) - sp.ox / R,
+                Math.round(wy(u.x, u.y)) - sp.oy / R
+            )
         } else if (d[1] === 5) {
             drawFlag(
                 c,
@@ -779,7 +805,7 @@ export function render() {
         c.lineWidth = 3
         c.strokeStyle = 'rgba(20,28,32,.85)'
         c.strokeText(f.txt, sx, sy)
-        c.fillStyle = FC[f.res]
+        c.fillStyle = FC[f.res] || (GOOD[f.res] ? GOOD[f.res].col : '#fff')
         c.fillText(f.txt, sx, sy)
     }
     c.globalAlpha = 1

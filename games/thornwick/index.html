@@ -51,6 +51,7 @@
                         <span id="r-clock"></span>
                     </li>
                 </ul>
+                <ul id="goods" aria-label="Goods"></ul>
                 <div id="ctl">
                     <div class="seg" role="group" aria-label="Game speed">
                         <button class="btn" data-speed="0">Pause</button>
@@ -58,7 +59,8 @@
                         <button class="btn" data-speed="2">2×</button>
                         <button class="btn" data-speed="3">3×</button>
                     </div>
-                    <button class="btn grow" id="helpBtn">How to play</button>
+                    <button class="btn grow" id="realmBtn">Realm</button>
+                    <button class="btn" id="helpBtn">How to play</button>
                     <button class="btn" id="newBtn">New kingdom</button>
                 </div>
             </header>
@@ -70,6 +72,7 @@
                 <div id="tabs">
                     <button class="btn" data-tab="0">Village</button>
                     <button class="btn" data-tab="1">Castle</button>
+                    <button class="btn" data-tab="3">Industry</button>
                     <button class="btn" data-tab="2">Decor</button>
                 </div>
                 <div id="tools">
@@ -191,20 +194,91 @@
                         </li>
                     </ul>
 
+                    <h3>Goods and crafts</h3>
+                    <ul>
+                        <li>
+                            The Industry tab holds the workshops. Each takes
+                            villagers like any other job, after the farms,
+                            fishers, woodcutters, quarries and markets.
+                        </li>
+                        <li>
+                            <b>Iron:</b> an iron mine next to rocks digs ore. A
+                            blacksmith forges it into weapons and tools. Every
+                            soldier but rams and catapults needs a weapon to
+                            train. You start with 20. Tools make farmers,
+                            fishers, woodcutters, masons, miners and shepherds a
+                            fifth faster.
+                        </li>
+                        <li>
+                            <b>Bread:</b> the windmill grinds spare food into
+                            flour, and a bakery bakes it into bread. People eat
+                            bread first, for up to half of each meal.
+                        </li>
+                        <li>
+                            <b>Ale and cloth:</b> a brewery brews spare food
+                            into ale for the taverns. A sheep farm shears wool
+                            and a weaver makes cloth.
+                        </li>
+                        <li>
+                            Trees and rocks run out. A tree holds 120 to 180
+                            wood, a rock 120 to 200 stone. Plant trees on the
+                            Decor tab, or claim new land.
+                        </li>
+                        <li>
+                            The goods you have show in the second row of the top
+                            bar. Tap "Realm" for charts of your stores, an
+                            overview of all known lords, your villagers' needs
+                            and trade.
+                        </li>
+                    </ul>
+
+                    <h3>Needs of the people</h3>
+                    <ul>
+                        <li>
+                            Villagers want food on the table (grain, fish and
+                            bread), ale at a tavern, cloth, and a chapel within
+                            10 tiles of their home. The face in the top bar
+                            shows how much of that they have.
+                        </li>
+                        <li>
+                            Content villagers work up to a quarter faster and
+                            draw settlers up to a third faster. A village never
+                            suffers for unmet needs until it holds 40 people.
+                            From then on, while less than 40% of their needs are
+                            met, settlers come more slowly.
+                        </li>
+                    </ul>
+
+                    <h3>Study and trade</h3>
+                    <ul>
+                        <li>
+                            With a stone keep, build a scriptorium. Its scholar
+                            studies one upgrade at a time, such as crop
+                            rotation, masonry or longbows. Tap it to choose.
+                        </li>
+                        <li>
+                            Tap a market and choose "Trade routes" to send
+                            caravans to a lord who is not at war with you. They
+                            sell what you send and bring back what you ask for.
+                            Each lord sells some goods cheaply. Bandits and
+                            raiders rob caravans on the road.
+                        </li>
+                    </ul>
+
                     <h3>Gold</h3>
                     <ul>
                         <li>
                             Markets sell your spare goods for gold. Taverns earn
-                            gold from the villagers. Every 10 villagers also pay
-                            1 gold in tax.
+                            gold from the villagers, more when they pour ale.
+                            Every 10 villagers also pay 1 gold in tax.
                         </li>
                         <li>
                             You also get gold for each raider you kill and for
                             each attack you beat back.
                         </li>
                         <li>
-                            Gold pays for soldiers, scouts, new outposts and the
-                            keep.
+                            Gold pays for soldiers, scouts, new outposts, the
+                            keep, studies and trade.
                         </li>
                     </ul>
 
@@ -307,6 +381,32 @@
                         <button class="btn primary" id="helpGo">
                             Start building
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="veil" id="realm" hidden>
+                <div
+                    class="sheet wide"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="realmTitle"
+                >
+                    <h2 id="realmTitle">The realm</h2>
+                    <div class="seg rtabs" role="group" aria-label="Pages">
+                        <button class="btn" data-rtab="over">Overview</button>
+                        <button class="btn" data-rtab="charts">Charts</button>
+                        <button class="btn" data-rtab="people">Needs</button>
+                        <button class="btn" data-rtab="trade">Trade</button>
+                    </div>
+                    <div id="realmBody"></div>
+                    <div class="foot">
+                        <button class="btn primary" id="realmGo">
+                            Back to the realm
+                        </button>
+                        <span class="note"
+                            >The game waits while this is open.</span
+                        >
                     </div>
                 </div>
             </div>

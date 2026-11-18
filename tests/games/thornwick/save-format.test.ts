@@ -18,6 +18,13 @@ describe('Thornwick save format', () => {
         expect(migrateSave(null)).toBeNull()
     })
 
+    it('brings an old save up to date with a stock of weapons', () => {
+        const o = migrateSave({ v: 6, res: { food: 5, gold: 9 }, b: [] })
+        expect(o?.v).toBe(SAVE_VERSION)
+        expect(o?.res).toEqual({ weapons: 20, food: 5, gold: 9 })
+        expect(o?.eco).toEqual({})
+    })
+
     it('runs every migration step in order up to the target version', () => {
         const steps: Record<number, (o: Save) => Save> = {
             6: (o) => ({ ...o, gold: 1 }),

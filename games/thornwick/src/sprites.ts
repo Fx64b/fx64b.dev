@@ -1,5 +1,6 @@
 import { DEF, FCOL } from './config'
 import { C, grade, hsh, tw } from './noise'
+import { ecoRecipe } from './sprites-eco'
 import { GV } from './vars'
 
 export const R = 2,
@@ -2119,6 +2120,8 @@ export function recipe(t?, o?) {
             )
             break
         }
+        default:
+            ecoRecipe(t, o)
     }
 }
 export function recipeProp(kind?, v?, se?) {
@@ -2271,6 +2274,14 @@ export const UP = {
     mason: { tunic: 0x687c8c, legs: 0x45403a, hat: 0x8e9aa3 },
     fisher: { tunic: 0x3a6f8c, legs: 0x4a4436, hat: 0xc4b98f },
     merchant: { tunic: 0x6f4688, legs: 0x3e3446, hat: 0x4c2f60 },
+    miner: { tunic: 0x5a4a40, legs: 0x3a3430, hat: 0x6a6a6e },
+    shepherd: { tunic: 0x8a9a5a, legs: 0x4a4436, hat: 0xb8a878 },
+    weaver: { tunic: 0x9e5a6a, legs: 0x4a3e44, hat: 0xd8c8a0 },
+    miller: { tunic: 0xd8d0bc, legs: 0x5a5046, hat: 0xece6d6 },
+    baker: { tunic: 0xc8b48a, legs: 0x4e4438, hat: 0xf2ece0 },
+    brewer: { tunic: 0x7a5a2a, legs: 0x3e3428, hat: 0x5a3e22 },
+    smith: { tunic: 0x3e3a38, legs: 0x2e2a28, hat: 0x2e2a28 },
+    scholar: { tunic: 0x3a3a5a, legs: 0x2e2e40, hat: 0x2a2a46 },
     sword: { tunic: 0x2a587a, legs: 0x3b3a40, hat: 0xa9b2b8 },
     pike: { tunic: 0x8a7a5a, legs: 0x3b3a40, hat: 0x8f979e },
     archer: { tunic: 0x5e4a30, legs: 0x4a3e30, hat: 0x2a5036 },
@@ -2743,6 +2754,60 @@ export function unitSprite(role?, frame?, flip?, fac?, vr?) {
             R(tx0 - 4, by - 1, 4, 1, 0x7c6744)
             set(tx0 - 2, by + 1, C.gold)
             set(tx0 - 3, by + 3, 0x7c6744)
+            break
+        case 'miner':
+            R(hx0 - 1, hy0 - 2, hS + 2, 3, P.hat)
+            R(hx0 - 1, hy0 - 2, hS + 2, 1, tw(P.hat, 1.25))
+            set(hx0 + hS - 1, hy0 - 1, 0xffd24a)
+            line(rx, hy + 1, rx + 1, ay - 3, 0x6b4a2a)
+            R(rx - 2, ay - 4, 5, 1, 0x8f979e)
+            set(rx - 2, ay - 3, 0x8f979e)
+            set(rx + 2, ay - 3, 0x8f979e)
+            break
+        case 'shepherd':
+            hood(P.hat)
+            line(rx + 1, hy + 2, rx + 1, hy0 - 4, 0x7a5a36)
+            set(rx + 2, hy0 - 5, 0x7a5a36)
+            set(rx + 3, hy0 - 4, 0x7a5a36)
+            break
+        case 'weaver':
+        case 'miller':
+        case 'baker':
+            hairTop(hair)
+            R(hx0, hy0 - 2, hS, 2, P.hat)
+            if (role === 'baker') {
+                R(hx0, hy0 - 4, hS, 2, P.hat)
+                R(hx0 - 1, hy0 - 4, hS + 2, 1, tw(P.hat, 1.05))
+            }
+            R(
+                tx0 + 1,
+                by + 1,
+                tW - 2,
+                ty1 - by - 1,
+                role === 'weaver' ? 0xd8c8a0 : 0xf2ece0
+            )
+            if (role === 'miller') {
+                R(tx0 - 3, by - 2, 3, 5, 0xefe8d6)
+                R(tx0 - 3, by - 2, 3, 1, 0xb8ac90)
+            }
+            break
+        case 'brewer':
+            hairTop(hair)
+            R(tx0 + 1, by + 1, tW - 2, ty1 - by - 1, 0x8a6a42)
+            R(rx - 1, hy - 3, 3, 4, 0xd9a12e)
+            R(rx - 1, hy - 4, 3, 1, 0xf6efe0)
+            break
+        case 'smith':
+            hairTop(hair)
+            R(tx0 + 1, ty0 + 2, tW - 2, ty1 - ty0 - 2, 0x6a4a2e)
+            line(rx, hy + 1, rx, ay - 2, 0x6b4a2a)
+            R(rx - 1, ay - 4, 4, 2, 0x55565a)
+            R(rx - 1, ay - 4, 4, 1, 0x8a8e94)
+            break
+        case 'scholar':
+            hood(P.hat)
+            R(tx0 - 2, by - 1, 3, 4, 0x7a2a24)
+            R(tx0 - 2, by - 1, 3, 1, 0xe8dcc0)
             break
         case 'sword':
         case 'captain':

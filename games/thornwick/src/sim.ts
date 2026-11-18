@@ -1,4 +1,13 @@
 import { DEF, KEEP_DMG, KX, KY } from './config'
+import {
+    eat,
+    ecoTick,
+    fireMul,
+    growMul,
+    reachBonus,
+    stores,
+    tavernTick,
+} from './eco'
 import { startEvent } from './events'
 import { tintAll } from './ground'
 import {
@@ -60,8 +69,9 @@ export function tick(dt?) {
     if ((GV.S.growCd -= dt) <= 0) {
         GV.S.growCd =
             (GV.S.b.some((b?) => b.t === 'chapel' && b.o === 0) ? 3.5 : 6) *
-            (se === 3 ? 1.6 : 1)
-        if (pop() < cap() && GV.S.res.food >= 20) {
+            (se === 3 ? 1.6 : 1) *
+            growMul()
+        if (pop() < cap() && stores() >= 20) {
             spawnVillager(false)
         }
     }
@@ -76,11 +86,9 @@ export function tick(dt?) {
         if (mines) {
             gain('gold', 4 * mines, KX + 0.5, KY + 0.5)
         }
-        if (GV.S.res.food >= need) {
-            GV.S.res.food -= need
+        if (eat(need)) {
             GV.S.hungry = 0
         } else {
-            GV.S.res.food = 0
             if (++GV.S.hungry >= 2 && GV.S.vill.length > 1) {
                 const u =
                     GV.S.vill.find((u?) => !u.job) ||
@@ -102,17 +110,9 @@ export function tick(dt?) {
     }
     if ((GV.S.tavCd -= dt) <= 0) {
         GV.S.tavCd = 10
-        let left = GV.S.vill.length
-        for (const b of GV.S.b) {
-            if (b.t === 'tavern' && b.o === 0 && left > 0) {
-                const g = Math.floor(Math.min(left, 12) / 3)
-                left -= 12
-                if (g > 0) {
-                    gain('gold', g, b.x, b.y)
-                }
-            }
-        }
+        tavernTick()
     }
+    ecoTick(dt)
     if ((GV.trainCd -= dt) <= 0) {
         GV.trainCd = 2
         for (const b of GV.S.b) {
@@ -271,7 +271,10 @@ export function tick(dt?) {
                         )
                       : GV.S.sold
             if (b.cd <= 0 && targets.length) {
-                let range = isKeep ? 4.5 : d.range
+                let range = isKeep
+                    ? 4.5
+                    : d.range +
+                      (b.o === 0 && b.t !== 'mangonel' ? reachBonus() : 0)
                 if (night && b.o === 0 && !isKeep && !near(b, 'brazier', 4.5)) {
                     range *= 0.75
                 }
@@ -336,7 +339,7 @@ export function tick(dt?) {
         }
         if (b.fire > 0) {
             const wellNear = near(b, 'well', 4.6)
-            b.fire -= dt * (wellNear ? 3.5 : 1)
+            b.fire -= dt * (wellNear ? 3.5 : 1) * (b.o === 0 ? fireMul() : 1)
             damageB(b, 4.2 * dt, true)
             if (GV.S.over) {
                 return

@@ -1,4 +1,5 @@
 import { DEF, KEEP_UP, KX, KY, N, TIERS } from './config'
+import { resetSite } from './eco'
 import { adjWater, afford, compass, gain, pay, puff, toast } from './helpers'
 import { costOf } from './land'
 import { removeB, setTerr } from './lords'
@@ -23,6 +24,20 @@ export const UPG = {
     tower: ['palisade', 'wall'],
     gate: ['palisade', 'wall'],
     shouse: ['house'],
+}
+/** Rocks on or next to the tile, or hill country: where iron is found. */
+export function rockyAt(x?, y?) {
+    if (regAt(x, y).type === 'hills') {
+        return true
+    }
+    for (let b = -1; b <= 1; b++) {
+        for (let a = -1; a <= 1; a++) {
+            if (inMap(x + a, y + b) && terrain[x + a + (y + b) * N] === 2) {
+                return true
+            }
+        }
+    }
+    return false
 }
 export function placeErr(t?, x?, y?) {
     const d = DEF[t],
@@ -98,6 +113,9 @@ export function placeErr(t?, x?, y?) {
     if (d.water && !adjWater(x, y)) {
         return "A fisher's hut must touch water."
     }
+    if (d.rock && !rockyAt(x, y)) {
+        return 'An iron mine must touch rocks, or stand in hill country.'
+    }
     return ''
 }
 export function removeAt(x?, y?, loud?) {
@@ -128,12 +146,14 @@ export function removeAt(x?, y?, loud?) {
         return false
     }
     if (terrain[i] === 1) {
+        resetSite(i)
         setTerr(x, y, 0, true)
         gain('wood', 4, x, y)
         puff(x, y, 5, '#6c9a4a')
         return true
     }
     if (terrain[i] === 2) {
+        resetSite(i)
         setTerr(x, y, 0, true)
         gain('stone', 4, x, y)
         puff(x, y, 5, '#b5b4aa')
@@ -211,6 +231,7 @@ export function tryPlace(t?, x?, y?, loud?) {
         setTerr(x, y, 3, true)
         puff(x, y, 5, '#9a7b52')
     } else if (t === 'grove') {
+        resetSite(x + y * N)
         setTerr(x, y, 1, true)
         puff(x, y, 4, '#6c9a4a')
     } else {

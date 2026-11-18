@@ -1,5 +1,15 @@
 import { DEF, KX, KY, N, ORDER, WALLISH } from './config'
 import {
+    craftUpdate,
+    farmYield,
+    harvest,
+    isCraft,
+    reachBonus,
+    siteLeft,
+    workMul,
+} from './eco'
+import { amountText } from './goods'
+import {
     afford,
     compass,
     freeNear,
@@ -46,7 +56,7 @@ export const UNITS = {
     sword: {
         name: 'Swordsman',
         plural: 'swordsmen',
-        cost: { gold: 25 },
+        cost: { gold: 25, weapons: 1 },
         hp: 70,
         dmg: 9,
         sp: 1.9,
@@ -56,7 +66,7 @@ export const UNITS = {
     pike: {
         name: 'Pikeman',
         plural: 'pikemen',
-        cost: { gold: 20, wood: 10 },
+        cost: { gold: 20, wood: 10, weapons: 1 },
         hp: 85,
         dmg: 7,
         sp: 1.7,
@@ -67,7 +77,7 @@ export const UNITS = {
     archer: {
         name: 'Archer',
         plural: 'archers',
-        cost: { gold: 25 },
+        cost: { gold: 25, weapons: 1 },
         hp: 40,
         dmg: 6,
         sp: 1.9,
@@ -78,7 +88,7 @@ export const UNITS = {
     knight: {
         name: 'Knight',
         plural: 'knights',
-        cost: { gold: 60, food: 20 },
+        cost: { gold: 60, food: 20, weapons: 1 },
         hp: 150,
         dmg: 13,
         sp: 3,
@@ -123,7 +133,7 @@ export const UNITS = {
 export const BIG = { brute: 1, ram: 1, catapult: 1 }
 export const costText = (cost?) =>
     Object.entries<any>(cost)
-        .map(([r, n]) => n + ' ' + r)
+        .map(([r, n]) => amountText(r, n))
         .join(' and ')
 GV.blessMul = 1
 export function addSoldier(home?, x?, y?, kind?) {
@@ -206,24 +216,28 @@ export function assignJobs() {
         b.w = 0
     }
     for (const u of GV.S.vill) {
-        if (u.job && (u.job.dead || u.job.o !== 0)) {
+        if (u.job && (u.job.dead || u.job.o !== 0 || u.job.off)) {
             setJob(u, null)
         }
         if (u.job) {
             u.job.w++
         }
     }
-    const works = GV.S.b.filter((b?) => b.o === 0 && DEF[b.t].role)
+    const works = GV.S.b.filter((b?) => b.o === 0 && DEF[b.t].role && !b.off)
     const idle = GV.S.vill.filter((u?) => !u.job)
-    let go = true
-    while (idle.length && go) {
-        go = false
-        for (const t of ORDER) {
-            for (const b of works) {
-                if (b.t === t && idle.length && b.w < DEF[t].slots) {
-                    setJob(idle.pop(), b)
-                    b.w++
-                    go = true
+    // The basic jobs (up to the market) are filled first, then the workshops.
+    const core = ORDER.indexOf('market') + 1
+    for (const group of [ORDER.slice(0, core), ORDER.slice(core)]) {
+        let go = true
+        while (idle.length && go) {
+            go = false
+            for (const t of group) {
+                for (const b of works) {
+                    if (b.t === t && idle.length && b.w < DEF[t].slots) {
+                        setJob(idle.pop(), b)
+                        b.w++
+                        go = true
+                    }
                 }
             }
         }
@@ -231,8 +245,13 @@ export function assignJobs() {
     if (!idle.length) {
         const empty = works.find((b?) => b.w === 0)
         if (empty) {
+            // Workshops do not pull farmers and fishers away from the food.
+            const shop = ORDER.indexOf(empty.t) >= core
             let rich = null
             for (const b of works) {
+                if (shop && (b.t === 'farm' || b.t === 'fisher')) {
+                    continue
+                }
                 if (b.w >= 2 && (!rich || b.w > rich.w)) {
                     rich = b
                 }
@@ -320,6 +339,10 @@ export function vUpdate(u?, dt?) {
     }
     u.moving = false
     const b = u.job
+    if (b && isCraft(u.role)) {
+        craftUpdate(u, dt)
+        return
+    }
     if (!b) {
         u.timer -= dt
         if (u.timer <= 0) {
@@ -352,23 +375,17 @@ export function vUpdate(u?, dt?) {
             goTo(u, Math.round(s[0]), Math.round(s[1]), s[0], s[1])
             return
         }
-        u.timer -= dt
-        if (!(farm && se === 3)) {
+        const idle = farm && se === 3 && !GV.S.tech.plough
+        u.timer -= dt * (idle ? 1 : workMul(u))
+        if (!idle) {
             u.walk += dt
         }
         if (u.timer <= 0) {
             if (farm) {
                 u.timer = 6
-                if (se !== 3) {
-                    gain(
-                        'food',
-                        Math.round(
-                            (near(b, 'mill', 4.5) ? 4.5 : 3) *
-                                (se === 2 ? 1.5 : 1)
-                        ),
-                        b.cx,
-                        b.cy
-                    )
+                const f = farmYield(b, se, near(b, 'mill', 4.5))
+                if (f > 0) {
+                    gain('food', f, b.cx, b.cy)
                 }
                 const s = spot()
                 u.path = [s]
@@ -395,6 +412,7 @@ export function vUpdate(u?, dt?) {
                     u.state = 'wait'
                     break
                 }
+                u.site = s
                 goTo(
                     u,
                     s[0],
@@ -416,7 +434,7 @@ export function vUpdate(u?, dt?) {
             u.timer = merchant ? 1.5 : u.role === 'mason' ? 4 : 3
             break
         case 'work':
-            u.timer -= dt
+            u.timer -= dt * (merchant ? 1 : workMul(u))
             u.walk += dt
             if (u.timer <= 0) {
                 u.carry = merchant
@@ -424,6 +442,19 @@ export function vUpdate(u?, dt?) {
                     : u.role === 'mason'
                       ? 'stone'
                       : 'wood'
+                if (!merchant && u.site) {
+                    u.carryN = u.role === 'mason' ? (GV.S.tech.deep ? 6 : 5) : 6
+                    // The tree or rock may be gone already; then come home with what is left.
+                    u.carryN = Math.min(
+                        u.carryN,
+                        siteLeft(u.site[0], u.site[1])
+                    )
+                    harvest(u.site[0], u.site[1], u.carryN)
+                    u.site = null
+                    if (!u.carryN) {
+                        u.carry = null
+                    }
+                }
                 goToB(u, b)
                 u.state = 'toHome'
             }
@@ -440,10 +471,11 @@ export function vUpdate(u?, dt?) {
                     g = 6
                 }
                 gain('gold', g, b.x, b.y)
-            } else {
-                gain(u.carry, u.role === 'mason' ? 5 : 6, b.x, b.y)
+            } else if (u.carryN) {
+                gain(u.carry, u.carryN, b.x, b.y)
             }
             u.carry = null
+            u.carryN = 0
             u.state = 'start'
             break
     }
@@ -715,7 +747,7 @@ export function sUpdate(s?, dt?) {
     const e = s.tg && !s.tg.dead ? s.tg : null
     if (e) {
         const d = Math.hypot(e.x - s.x, e.y - s.y),
-            rng = arch ? (s.onWall ? 5.2 : U.rng) : U.rng
+            rng = arch ? (s.onWall ? 5.2 : U.rng) + reachBonus() : U.rng
         if (Math.abs(e.x - e.y - (s.x - s.y)) > 0.05) {
             s.face = e.x - e.y > s.x - s.y ? 1 : -1
         }
@@ -856,9 +888,30 @@ export function train(b?, auto?, kind?) {
         return
     }
     if (!afford(U.cost)) {
+        if (
+            auto &&
+            U.cost.weapons &&
+            GV.S.res.weapons < U.cost.weapons &&
+            afford({ ...U.cost, weapons: 0 }) &&
+            GV.S.t > (GV.weapToast || 0)
+        ) {
+            GV.weapToast = GV.S.t + 120
+            toast(
+                'Your ' +
+                    d.name.toLowerCase() +
+                    ' cannot recruit: there are no weapons left. A blacksmith forges them from iron, or a caravan can buy them.'
+            )
+        }
         if (!auto) {
             toast(
-                'A ' + U.name.toLowerCase() + ' costs ' + costText(U.cost) + '.'
+                'A ' +
+                    U.name.toLowerCase() +
+                    ' costs ' +
+                    costText(U.cost) +
+                    '.' +
+                    (U.cost.weapons && GV.S.res.weapons < U.cost.weapons
+                        ? ' A blacksmith forges weapons from iron, or a caravan can buy them.'
+                        : '')
             )
         }
         return

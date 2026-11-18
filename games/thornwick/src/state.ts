@@ -18,6 +18,7 @@ import {
     SAVE_KEY,
     SEASONLEN,
 } from './config'
+import { ecoInit, ecoLoad, ecoSave } from './eco'
 import { drawGroundAll } from './ground'
 import { refreshOwn } from './land'
 import { rivalPlan, rivalStep } from './lords'
@@ -419,7 +420,7 @@ export function rebuildSites() {
     GV.myRocks = GV.rocks.filter((p?) => ownedT(p[0], p[1]))
 }
 export function blank() {
-    return {
+    const s = {
         seed: (Math.random() * 1e9) | 0,
         res: { food: 90, wood: 130, stone: 40, gold: 30 },
         b: [],
@@ -457,6 +458,8 @@ export function blank() {
         diff: 2,
         rconq: {},
     }
+    ecoInit(s)
+    return s
 }
 export function addB(t?, x?, y?, quiet?, o?) {
     const d = DEF[t],
@@ -608,6 +611,7 @@ export function snapshot() {
             nf: r.out ? r.foe : r.nextFoe,
         })),
         rc: GV.S.rconq,
+        eco: ecoSave(),
         b: GV.S.b.map((b?) => ({
             t: b.t,
             x: b.x,
@@ -623,6 +627,9 @@ export function snapshot() {
                           .map((x?) => x.kind)
                     : 0,
             k: b.trainKind || 0,
+            // Left out of the save unless set (undefined is not written).
+            f: b.off ? 1 : undefined,
+            m: b.mk || undefined,
         })),
         vill: GV.S.vill.length,
         stance: GV.S.stance,
@@ -705,6 +712,12 @@ export function loadFrom(o?) {
         if (q.k) {
             b.trainKind = q.k
         }
+        if (q.f) {
+            b.off = true
+        }
+        if (q.m === 'weapons' || q.m === 'tools') {
+            b.mk = q.m
+        }
         if (Array.isArray(q.s)) {
             for (const kd of q.s) {
                 if (UNITS[kd]) {
@@ -733,6 +746,7 @@ export function loadFrom(o?) {
         }
     }
     GV.S.stance = o.stance === 'hold' ? 'hold' : 'charge'
+    ecoLoad(o)
     if (!GV.S.capDown) {
         addSoldier(GV.keep, KX + 0.5, KY + 2.6, 'captain')
     }

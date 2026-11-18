@@ -18,6 +18,8 @@ import {
     TIERS,
     cv,
 } from './config'
+import { farmYield, workMul } from './eco'
+import { ecoAct, ecoHow, ecoHowMore, ecoHud, ecoInspect } from './ecoui'
 import { pickEvent } from './events'
 import {
     afford,
@@ -422,7 +424,7 @@ export function howHTML(b?) {
     switch (b.t) {
         case 'keep': {
             P.push(
-                'Every 8 seconds each person, soldiers too, eats 1 food, and every 10 villagers pay 1 gold in tax. A new villager arrives here every 6 seconds while homes have room and there are 20 food in store.'
+                'Every 8 seconds each person, soldiers too, eats 1 food (bread first, for up to half), and every 10 villagers pay 1 gold in tax. A new villager arrives here every 6 seconds while homes have room and there are 20 food and bread in store.'
             )
             P.push(
                 'It shoots the nearest raider within 4.5 tiles for ' +
@@ -446,7 +448,7 @@ export function howHTML(b?) {
         case 'house':
         case 'shouse':
             P.push(
-                'Homes set how many people the village can hold. Soldiers need a place too. While there is room and at least 20 food in store, a new villager arrives every 6 seconds: slower in winter, faster with a chapel.'
+                'Homes set how many people the village can hold. Soldiers need a place too. While there is room and at least 20 food in store, a new villager arrives every 6 seconds: slower in winter, faster with a chapel and content villagers.'
             )
             P.push('Upgrade the keep for more room in the keep itself.')
             now.push(
@@ -455,11 +457,10 @@ export function howHTML(b?) {
             break
         case 'farm': {
             const mill = near(b, 'mill', 4.5),
-                per =
-                    se === 3
-                        ? 0
-                        : Math.round((mill ? 4.5 : 3) * (se === 2 ? 1.5 : 1)),
-                fm = (b.w || 0) * perMin(per, 6)
+                per = farmYield(b, se, mill),
+                fm = Math.round(
+                    (b.w || 0) * perMin(per, 6) * workMul({ role: 'farmer' })
+                )
             P.push(
                 'Each farmer harvests 3 food every 6 seconds. Autumn gives half again, and so does a windmill within 4 tiles (both together: 7 food). In winter the fields give nothing.'
             )
@@ -467,7 +468,7 @@ export function howHTML(b?) {
                 'One person eats 7.5 food a minute, so one farmer feeds about 4 people in spring and summer.'
             )
             now.push(
-                se === 3
+                per === 0
                     ? 'Winter: this farm makes no food until spring.'
                     : 'This farm makes about ' +
                           fm +
@@ -490,7 +491,7 @@ export function howHTML(b?) {
                 'Each woodcutter walks to one of the nearest trees on your land, chops for 3 seconds and carries 6 wood home. Most of the time is the walk, so build the camp right next to the trees.'
             )
             P.push(
-                'Trees do not run out. Plant more with "Plant tree" on the Decor tab, or claim new land with an outpost.'
+                'Each tree holds 120 to 180 wood. When it is used up it is gone, and the woodcutters walk on to the next. Plant more with "Plant tree" on the Decor tab (3 wood each), or claim a forest with an outpost.'
             )
             break
         case 'quarry':
@@ -498,7 +499,7 @@ export function howHTML(b?) {
                 'Each mason walks to one of the nearest rocks on your land, cuts for 4 seconds and carries 5 stone home. Build the quarry right next to the rocks to cut the walk short.'
             )
             P.push(
-                'Rocks do not run out. If there are none on your land, claim a rocky region with an outpost.'
+                'Each rock holds 120 to 200 stone. When it is used up it is gone, and the masons walk on to the next. Claim rocky hills with an outpost for more.'
             )
             break
         case 'well': {
@@ -688,7 +689,10 @@ export function howHTML(b?) {
         case 'garden':
             P.push('Only for looks. It has no effect on the game.')
             break
+        default:
+            ecoHow(b, P, now)
     }
+    ecoHowMore(b, P, now)
     if (!P.length && !now.length) {
         return ''
     }
@@ -841,7 +845,9 @@ export function inspectHTML(sel?) {
                 : '') +
             ((b.t === 'lumber' && !GV.myTrees.length) ||
             (b.t === 'quarry' && !GV.myRocks.length)
-                ? ' Nothing left to gather on your land. Claim more with an outpost.'
+                ? b.t === 'lumber'
+                    ? ' No trees left on your land. Plant trees from the Decor tab, or claim a forest with an outpost.'
+                    : ' No rocks left on your land. Claim rocky hills with an outpost.'
                 : '')
     } else if (d.garrison) {
         info = garr(b) + ' of ' + d.garrison + ' places filled. ' + d.tip
@@ -887,6 +893,7 @@ export function inspectHTML(sel?) {
                 : 'Inside the outer bailey. Takes a fifth less damage.') +
             '</p>'
     }
+    h += ecoInspect(b)
     if (b.t === 'gate') {
         h +=
             '<div class="row"><button class="btn primary" data-act="shut">' +
@@ -1118,6 +1125,8 @@ $('#inspect').addEventListener('click', (e?) => {
                     '.'
             )
             break
+        default:
+            ecoAct(act, b, a)
     }
     hud()
 })
@@ -1298,6 +1307,7 @@ export function hud() {
                 String(+b.dataset.speed === GV.speed)
             )
         )
+    ecoHud()
     drawMini()
 }
 document.querySelectorAll<HTMLElement>('[data-speed]').forEach((b?) =>

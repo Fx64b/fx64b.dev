@@ -22,6 +22,14 @@ export const EVENTS = {
                     },
                 },
                 {
+                    label: 'Buy 10 weapons',
+                    cost: { gold: 45 },
+                    act() {
+                        GV.S.res.weapons += 10
+                        toast('The merchant unloads 10 weapons.')
+                    },
+                },
+                {
                     label: 'Sell 80 food',
                     cost: { food: 80 },
                     act() {
@@ -62,9 +70,14 @@ export const EVENTS = {
         if (GV.S.vill.length < 8) {
             return null
         }
-        if (GV.S.b.some((b?) => b.t === 'chapel' && b.o === 0)) {
+        if (
+            GV.S.b.some((b?) => b.t === 'chapel' && b.o === 0) ||
+            GV.S.tech.herbal
+        ) {
             toast(
-                'Fever is going round the valley, but the care of your chapel spares the village.'
+                'Fever is going round the valley, but the care of your ' +
+                    (GV.S.tech.herbal ? 'herbalists' : 'chapel') +
+                    ' spares the village.'
             )
             return null
         }

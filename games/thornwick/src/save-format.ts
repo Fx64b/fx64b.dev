@@ -7,12 +7,22 @@
 
 export type Save = Record<string, any> & { v: number }
 
-export const SAVE_VERSION = 6
+export const SAVE_VERSION = 8
 /** Oldest version that can still be migrated. Older saves used a smaller map. */
 export const OLDEST_SUPPORTED = 6
 
 /** MIGRATIONS[n] turns a save of version n into version n + 1. */
-export const MIGRATIONS: Record<number, (o: Save) => Save> = {}
+export const MIGRATIONS: Record<number, (o: Save) => Save> = {
+    // placeholder: replaced by the combat phase's v6->v7 step on merge
+    6: (o) => o,
+    // v8: goods, research, trade routes, charts and finite trees and rocks.
+    // Old kingdoms get the starting stock of weapons so their barracks keep training.
+    7: (o) => ({
+        ...o,
+        res: { weapons: 20, ...(o.res || {}) },
+        eco: o.eco || {},
+    }),
+}
 
 /** The save brought up to SAVE_VERSION, or null if it cannot be used. */
 export function migrateSave(

@@ -134,6 +134,43 @@ body {
     height: 16px;
     flex: none;
 }
+/* Goods: a compact second row under the four main stores. */
+#goods {
+    order: 5;
+    flex: 1 1 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 12px;
+    list-style: none;
+    margin: -2px 0 0;
+    padding: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+#goods li {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+#goods svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+}
+#goods .moodli {
+    margin-left: auto;
+}
+.btn.mood {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 24px;
+    padding: 1px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border-color: var(--line);
+}
 #ctl {
     margin-left: auto;
     display: flex;
@@ -227,7 +264,7 @@ input:focus-visible {
     z-index: 2;
     right: 12px;
     top: calc(var(--bar-h) + 12px);
-    width: 240px;
+    width: 262px;
     max-height: calc(100% - var(--bar-h) - 24px);
     display: flex;
     flex-direction: column;
@@ -244,7 +281,7 @@ input:focus-visible {
     flex-wrap: wrap;
 }
 #tabs .btn {
-    padding: 4px 8px;
+    padding: 4px 7px;
     min-height: 28px;
     font-size: 13.5px;
 }
@@ -716,6 +753,151 @@ input:focus-visible {
     margin-top: 10px;
     border-radius: 2px;
 }
+/* The realm sheet: overview, charts, needs and trade. */
+.rtabs {
+    margin: 0 0 12px;
+}
+.rtabs .btn {
+    font-size: 14px;
+    padding: 5px 12px;
+    margin-top: 0;
+}
+#realm .foot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+#realm .foot .note {
+    margin: 8px 0 0;
+}
+.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.tbl th,
+.tbl td {
+    text-align: left;
+    padding: 5px 6px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+.tbl th {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.tbl td:nth-child(2),
+.tbl td:nth-child(3),
+.tbl th:nth-child(2),
+.tbl th:nth-child(3) {
+    text-align: right;
+    white-space: nowrap;
+}
+.tbl tr.me td {
+    font-weight: 600;
+}
+.hostile {
+    color: var(--madder);
+    font-weight: 600;
+}
+.facts {
+    font-size: 14.5px;
+}
+.charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+.chart {
+    margin: 0;
+    padding: 6px 8px 4px;
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+}
+.chart figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 13.5px;
+}
+.chart figcaption b {
+    font-weight: 600;
+    white-space: nowrap;
+}
+.chart canvas {
+    display: block;
+    width: 100%;
+    height: 64px;
+    margin-top: 2px;
+    touch-action: none;
+}
+.need,
+.lord {
+    margin: 0 0 12px;
+}
+.lord {
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+}
+.need .nh,
+.lord .nh {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.lord p {
+    margin: 6px 0 0;
+}
+.lord .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+.lord .btn {
+    margin-top: 0;
+    font-size: 14px;
+    padding: 5px 10px;
+}
+.lord label {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 14px;
+}
+.lord select {
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 3px;
+    padding: 3px 4px;
+}
+.hp.prog i {
+    background: var(--primary);
+}
+#inspect .rsi {
+    margin-top: 8px;
+}
+#inspect .rsi p {
+    margin: 0;
+}
+#inspect .rsi.done {
+    opacity: 0.7;
+}
+#inspect .rsi .row {
+    margin-top: 4px;
+}
 #clock {
     font-weight: 400 !important;
     font-style: italic;
@@ -748,12 +930,21 @@ input:focus-visible {
         font-size: 15px;
         min-width: 0;
     }
+    #goods {
+        gap: 2px 9px;
+        font-size: 12.5px;
+    }
     #ctl {
         margin-left: 0;
         width: 100%;
     }
+    #ctl {
+        gap: 5px;
+    }
     #ctl .btn {
-        padding: 5px 9px;
+        padding: 5px 6px;
+        font-size: 13px;
+        white-space: nowrap;
     }
     #ctl .grow {
         margin-left: auto;

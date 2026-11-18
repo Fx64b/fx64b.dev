@@ -8,6 +8,8 @@ import {
     SAVE_KEY,
     STEP,
 } from './config'
+import * as ECO from './eco'
+import { closeRealm, openRealm } from './ecoui'
 import { EVENTS, pickEvent, startEvent } from './events'
 import { groundInit } from './ground'
 import { toast } from './helpers'
@@ -52,6 +54,8 @@ export const SMOKE = {
     tavern: [0, -24],
     smith: [7, -20],
     camp: [-8, -4],
+    bakery: [-3, -26],
+    brewery: [-3, -26],
 }
 export function step(real?) {
     GV.animT += real
@@ -67,7 +71,8 @@ export function step(real?) {
         GV.speed > 0 &&
         !GV.helpOpen &&
         !GV.overOpen &&
-        !GV.newOpen
+        !GV.newOpen &&
+        !GV.realmOpen
     if (run) {
         GV.acc += real * GV.speed
         let n = 0
@@ -284,5 +289,12 @@ export async function boot() {
     terrain,
     bmap,
     reg,
+    eco: ECO,
+    select(b?) {
+        GV.selected = b
+        hud()
+    },
+    openRealm,
+    closeRealm,
 }
 boot()
