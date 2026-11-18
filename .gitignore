@@ -43,3 +43,7 @@ repomix-output.xml
 
 .claude/
 CLAUDE.md
+
+# built game (from games/thornwick)
+/public/games/thornwick.html
+/public/games/thornwick/
