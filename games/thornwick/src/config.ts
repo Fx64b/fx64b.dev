@@ -1,13 +1,17 @@
 import { GV } from './vars'
 
 export const $ = (s: string): any => document.querySelector(s)
-export const N = 224,
+/* The world is a grid of GRID x GRID regions, each about CS tiles across. Only the
+   middle of it is open when a game begins; the rest opens as the realm is explored
+   (see world.ts). N is the largest the world can grow to. */
+export const N = 315,
     NN = N * N,
-    KX = 111,
-    KY = 111,
+    KX = 157,
+    KY = 157,
     STEP = 1 / 30,
-    GRID = 15,
-    HOME = 112,
+    GRID = 21,
+    CS = N / GRID,
+    HOME = 220,
     NRIV = 8
 export const OX = N * 16,
     OY = 12,
@@ -105,9 +109,12 @@ export const KEEP_CAP = [8, 12, 16],
         { wood: 150, stone: 120, gold: 60 },
         { wood: 300, stone: 300, gold: 200 },
     ]
+/* Banner colours. 0 is Thornwick, 1 to 8 the first lords, 10 the bandits and
+   11 on the lords who come later (each lord's `col`). */
 export const FCOL = [
     0x2f6a86, 0xb23b30, 0x7a4a9a, 0xc9772a, 0x33343c, 0x4f7a5e, 0x9c3f78,
-    0xb59a2e, 0xc9c6bc, 0, 0x6a5a3a,
+    0xb59a2e, 0xc9c6bc, 0, 0x6a5a3a, 0x2a8a84, 0xc4566c, 0x2f5a2e, 0x5a6a8c,
+    0x8a4a26, 0x8a78b8,
 ]
 /* Each lord has a character. agg: time between attacks (lower is more often), army: size of
    their hosts, eco: income, expand: how fast they claim land, def: castle guards and towers,
@@ -127,6 +134,7 @@ export const LORDS = [
         focus: 'meadow',
         target: 'nearest',
         desc: 'A warlord. He attacks often and goes for whoever is closest, but neglects his walls.',
+        col: 1,
     },
     {
         name: 'Lady Morwen',
@@ -141,6 +149,7 @@ export const LORDS = [
         focus: 'gold',
         target: 'weakest',
         desc: 'A schemer. She hunts for gold mines, raids outposts and strikes at the weakest lord.',
+        col: 2,
     },
     {
         name: 'Baron Osric',
@@ -155,6 +164,7 @@ export const LORDS = [
         focus: 'meadow',
         target: 'leader',
         desc: 'A builder. Full granaries and strong walls. He attacks rarely, but hard, and goes after the strongest realm.',
+        col: 3,
     },
     {
         name: 'Queen Ysolde',
@@ -169,6 +179,7 @@ export const LORDS = [
         focus: 'any',
         target: 'leader',
         desc: 'A conqueror. She raises great hosts and hunts down the strongest realm in the land.',
+        col: 4,
     },
     {
         name: 'Morcant the Pale',
@@ -183,6 +194,7 @@ export const LORDS = [
         focus: 'hills',
         target: 'weakest',
         desc: 'A land-grabber. He spreads outposts fast, loves stony hills and preys on the weak.',
+        col: 5,
     },
     {
         name: 'Sir Gareth Vane',
@@ -197,6 +209,7 @@ export const LORDS = [
         focus: 'meadow',
         target: 'nearest',
         desc: 'A merchant lord. Rich fields and a full treasury. He fights his neighbours to keep the roads his own.',
+        col: 6,
     },
     {
         name: 'The Iron Abbess',
@@ -211,6 +224,7 @@ export const LORDS = [
         focus: 'hills',
         target: 'leader',
         desc: 'A grim abbess behind thick stone. She seldom marches, and only against the strongest realm.',
+        col: 7,
     },
     {
         name: 'Rhodri Wolfsbane',
@@ -225,6 +239,98 @@ export const LORDS = [
         focus: 'any',
         target: 'nearest',
         desc: 'A raider chief. Quick, frequent attacks on whoever is near, and little care for walls.',
+        col: 8,
+    },
+    // Lords who rise later, in the land that opens as the realm is explored.
+    {
+        name: 'Hrolf Sea-King',
+        hero: 'Ulfar Grimsson',
+        pers: 'warlord',
+        agg: 0.85,
+        army: 1.2,
+        eco: 0.9,
+        expand: 1.3,
+        def: 0.8,
+        food: 0.9,
+        focus: 'lake',
+        target: 'nearest',
+        desc: 'A sea-raider come inland. He settles by the water and strikes at whoever is closest.',
+        col: 11,
+    },
+    {
+        name: 'Countess Rowena',
+        hero: 'Sir Aymer Blackwood',
+        pers: 'schemer',
+        agg: 1.1,
+        army: 0.95,
+        eco: 1.25,
+        expand: 1.2,
+        def: 1,
+        food: 1.1,
+        focus: 'gold',
+        target: 'leader',
+        desc: 'A rich countess. She buys land with gold and turns her hosts on whoever leads the realm.',
+        col: 12,
+    },
+    {
+        name: 'The Green Warden',
+        hero: 'Fenn the Bowman',
+        pers: 'builder',
+        agg: 1.25,
+        army: 1,
+        eco: 1.05,
+        expand: 1.1,
+        def: 1.3,
+        food: 1.2,
+        focus: 'forest',
+        target: 'weakest',
+        desc: 'A lord of the deep woods. He walls his hall well and waits for others to grow weak.',
+        col: 13,
+    },
+    {
+        name: 'Duke Malgar the Grim',
+        hero: 'Sir Brand of Hollow',
+        pers: 'warlord',
+        agg: 1,
+        army: 1.25,
+        eco: 1,
+        expand: 0.8,
+        def: 1.1,
+        food: 1,
+        focus: 'hills',
+        target: 'leader',
+        desc: 'An old war duke. Slow to claim land, but his hosts are the largest in the realm.',
+        col: 14,
+    },
+    {
+        name: 'Wenna of the Barrows',
+        hero: 'Gryff the Tall',
+        pers: 'schemer',
+        agg: 1.05,
+        army: 1,
+        eco: 1.15,
+        expand: 1.5,
+        def: 0.95,
+        food: 1.15,
+        focus: 'meadow',
+        target: 'weakest',
+        desc: 'A cunning widow-queen. She spreads across the open fields and preys on the weak.',
+        col: 15,
+    },
+    {
+        name: 'Prince Caradoc',
+        hero: 'Sir Lowen the Bold',
+        pers: 'warlord',
+        agg: 0.8,
+        army: 1.05,
+        eco: 1.05,
+        expand: 1,
+        def: 0.9,
+        food: 1,
+        focus: 'any',
+        target: 'nearest',
+        desc: 'A young prince hungry for glory. He fights often, and close to home.',
+        col: 16,
     },
 ]
 export const WALLISH = { wall: 1, palisade: 1, gate: 1, tower: 1 }

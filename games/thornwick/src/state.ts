@@ -5,7 +5,6 @@ import {
     DF,
     DIFFS,
     FIRST_RAID,
-    GRID,
     HOME,
     KX,
     KY,
@@ -23,11 +22,19 @@ import { ecoInit, ecoLoad, ecoSave } from './eco'
 import { drawGroundAll } from './ground'
 import { refreshOwn } from './land'
 import { rivalPlan, rivalStep } from './lords'
-import { hsh, mulberry, vnoise } from './noise'
+import { hsh } from './noise'
 import { recomputePaths } from './path'
 import { UNITS, addSoldier, spawnVillager } from './people'
 import { SAVE_VERSION, migrateSave } from './save-format'
 import { GV } from './vars'
+import {
+    closeUnopened,
+    genWorld,
+    lordCols,
+    worldInit,
+    worldLoad,
+    worldSave,
+} from './world'
 
 GV.S = undefined
 GV.keep = undefined
@@ -84,7 +91,7 @@ export const ownedT = (x?, y?) =>
     inMap(x, y) && GV.regs[reg[x + y * N]].owner === 0
 export const seenAt = (x?, y?) => regAt(x, y).disc
 export const mine = (b?) => b.o === 0
-export const fcol = (o?) => (o === 9 ? 10 : o)
+export const fcol = (o?) => (o === 9 ? 10 : GV.fcm[o] || o)
 export const season = () => ((GV.S.t / SEASONLEN) | 0) % 4
 export function nightF() {
     const p = (GV.S.t % DAYLEN) / DAYLEN
@@ -98,281 +105,12 @@ export function nightF() {
 }
 export const isNight = () => nightF() > 0.5
 export const rivById = (id?) => GV.S.riv.find((r?) => r.id === id)
-export function genWorld(seed?) {
-    const r = mulberry(seed),
-        sd = seed % 9973
-    GV.regs = []
-    const TYPES = [
-        'forest',
-        'forest',
-        'hills',
-        'hills',
-        'lake',
-        'meadow',
-        'meadow',
-        'ruins',
-    ]
-    const CS = N / GRID
-    for (let gy = 0; gy < GRID; gy++) {
-        for (let gx = 0; gx < GRID; gx++) {
-            const id = gx + gy * GRID,
-                home = id === HOME
-            GV.regs.push({
-                id,
-                gx,
-                gy,
-                sx: home ? KX + 0.5 : (gx + 0.5) * CS + (r() - 0.5) * 4.5,
-                sy: home ? KY + 0.5 : (gy + 0.5) * CS + (r() - 0.5) * 4.5,
-                type: home ? 'meadow' : TYPES[(r() * TYPES.length) | 0],
-                owner: -1,
-                disc: false,
-                adj: [],
-                poi: null,
-            })
-        }
-    }
-    // Rival lords sit evenly round the keep, the first ones nearer, with open land behind them.
-    const st = r() * Math.PI * 2,
-        RAD = [0.2, 0.3, 0.26, 0.36, 0.33, 0.41, 0.39, 0.43],
-        ORD = [0, 3, 6, 1, 4, 7, 2, 5]
-    GV.rivSpots = []
-    for (let k = 0; k < NRIV; k++) {
-        const a = st + (ORD[k] * Math.PI * 2) / NRIV + (r() - 0.5) * 0.25,
-            d = RAD[k] * N
-        const kx = Math.max(
-                12,
-                Math.min(N - 14, Math.round(KX + 0.5 + Math.cos(a) * d) - 1)
-            ),
-            ky = Math.max(
-                12,
-                Math.min(N - 14, Math.round(KY + 0.5 + Math.sin(a) * d) - 1)
-            )
-        let rg = null,
-            bd = 1e9
-        for (const o of GV.regs) {
-            if (o.id === HOME || o.riv) {
-                continue
-            }
-            const dd = Math.hypot(o.sx - kx, o.sy - ky)
-            if (dd < bd) {
-                bd = dd
-                rg = o
-            }
-        }
-        rg.type = 'meadow'
-        rg.riv = 1
-        rg.sx = kx + 0.5
-        rg.sy = ky + 0.5
-        GV.rivSpots.push({ r: rg.id, kx, ky })
-    }
-    for (let y = 0; y < N; y++) {
-        for (let x = 0; x < N; x++) {
-            let best = 0,
-                bd = 1e9
-            for (const rg of GV.regs) {
-                const d =
-                    Math.hypot(x - rg.sx, y - rg.sy) +
-                    (vnoise(x * 0.22, y * 0.22, sd + rg.id * 17) - 0.5) * 4.5
-                if (d < bd) {
-                    bd = d
-                    best = rg.id
-                }
-            }
-            if (Math.hypot(x - KX - 0.5, y - KY - 0.5) < 6.3) {
-                best = HOME
-            }
-            for (const sp of GV.rivSpots) {
-                if (Math.hypot(x - sp.kx - 0.5, y - sp.ky - 0.5) < 9) {
-                    best = sp.r
-                }
-            }
-            reg[x + y * N] = best
-        }
-    }
-    for (let y = 0; y < N; y++) {
-        for (let x = 0; x < N; x++) {
-            const a = reg[x + y * N]
-            for (const [dx, dy] of [
-                [1, 0],
-                [0, 1],
-            ]) {
-                if (inMap(x + dx, y + dy)) {
-                    const b = reg[x + dx + (y + dy) * N]
-                    if (a !== b) {
-                        if (!GV.regs[a].adj.includes(b)) {
-                            GV.regs[a].adj.push(b)
-                        }
-                        if (!GV.regs[b].adj.includes(a)) {
-                            GV.regs[b].adj.push(a)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    baseTerr.fill(0)
-    const TT = {
-        forest: 0.42,
-        meadow: 0.66,
-        hills: 0.7,
-        lake: 0.62,
-        ruins: 0.6,
-    }
-    for (let y = 1; y < N - 1; y++) {
-        for (let x = 1; x < N - 1; x++) {
-            const i = x + y * N,
-                rg = GV.regs[reg[i]],
-                tv = vnoise(x * 0.21, y * 0.21, sd + 1),
-                rv = vnoise(x * 0.33, y * 0.33, sd + 2)
-            let t = 0
-            if (rv > (rg.type === 'hills' ? 0.56 : 0.8)) {
-                t = 2
-            } else if (tv > TT[rg.type] && r() < 0.82) {
-                t = 1
-            }
-            if (
-                rg.type === 'lake' &&
-                Math.hypot(x - rg.sx, y - rg.sy) +
-                    (vnoise(x * 0.4, y * 0.4, sd + 3) - 0.5) * 3 <
-                    3.8
-            ) {
-                t = 3
-            }
-            baseTerr[i] = t
-        }
-    }
-    for (let k = 0; k < Math.round((5 * NN) / 6400); k++) {
-        const cx = 4 + r() * (N - 8),
-            cy = 4 + r() * (N - 8),
-            rad = 1.3 + r() * 1.2
-        if (Math.hypot(cx - KX, cy - KY) < 9) {
-            continue
-        }
-        for (let y = 2; y < N - 2; y++) {
-            for (let x = 2; x < N - 2; x++) {
-                if (
-                    Math.hypot(x - cx, y - cy) +
-                        (vnoise(x * 0.5, y * 0.5, sd + 4 + k) - 0.5) * 1.5 <
-                    rad
-                ) {
-                    baseTerr[x + y * N] = 3
-                }
-            }
-        }
-    }
-    for (const rg of GV.regs) {
-        if (rg.id === HOME || rg.riv) {
-            continue
-        }
-        if (rg.type === 'ruins') {
-            rg.poi = 'ruins'
-        } else {
-            const q = r()
-            rg.poi =
-                rg.type === 'hills'
-                    ? q < 0.55
-                        ? 'mine'
-                        : q < 0.7
-                          ? 'stones'
-                          : null
-                    : rg.type === 'lake'
-                      ? null
-                      : q < 0.22
-                        ? 'stones'
-                        : q < 0.44
-                          ? 'hamlet'
-                          : null
-        }
-        if (!rg.poi) {
-            continue
-        }
-        const pts =
-            rg.poi === 'ruins'
-                ? [
-                      [0, 0],
-                      [2, -1],
-                      [-1, 2],
-                  ]
-                : [[0, 0]]
-        for (const [dx, dy] of pts) {
-            const x = Math.round(rg.sx) + dx,
-                y = Math.round(rg.sy) + dy
-            if (x > 1 && y > 1 && x < N - 2 && y < N - 2) {
-                baseTerr[x + y * N] = 4
-                for (const [a, b] of [
-                    [1, 0],
-                    [-1, 0],
-                    [0, 1],
-                    [0, -1],
-                ]) {
-                    if (baseTerr[x + a + (y + b) * N] === 3) {
-                        baseTerr[x + a + (y + b) * N] = 0
-                    }
-                }
-            }
-        }
-    }
-    for (let y = 0; y < N; y++) {
-        for (let x = 0; x < N; x++) {
-            if (Math.hypot(x - KX - 0.5, y - KY - 0.5) < 4.7) {
-                baseTerr[x + y * N] = 0
-            }
-            for (const sp of GV.rivSpots) {
-                if (Math.hypot(x - sp.kx - 0.5, y - sp.ky - 0.5) < 10.8) {
-                    baseTerr[x + y * N] = 0
-                }
-            }
-        }
-    }
-    const count = (t?) => {
-        let n = 0
-        for (let i = 0; i < NN; i++) {
-            if (reg[i] === HOME && baseTerr[i] === t) {
-                n++
-            }
-        }
-        return n
-    }
-    const blobAt = (t?, rad?) => {
-        const a = r() * 6.28,
-            cx = KX + 0.5 + Math.cos(a) * 5.6,
-            cy = KY + 0.5 + Math.sin(a) * 5.6
-        for (let y = 1; y < N - 1; y++) {
-            for (let x = 1; x < N - 1; x++) {
-                const i = x + y * N
-                if (
-                    reg[i] === HOME &&
-                    !baseTerr[i] &&
-                    Math.hypot(x - cx, y - cy) < rad &&
-                    Math.hypot(x - KX - 0.5, y - KY - 0.5) >= 4.7
-                ) {
-                    baseTerr[i] = t
-                }
-            }
-        }
-    }
-    for (let k = 0; k < 6 && count(1) < 16; k++) {
-        blobAt(1, 2.1)
-    }
-    for (let k = 0; k < 6 && count(2) < 7; k++) {
-        blobAt(2, 1.5)
-    }
-    for (let i = 1; i < N - 1; i++) {
-        for (const j of [1, N - 2]) {
-            if (baseTerr[i + j * N] >= 3) {
-                baseTerr[i + j * N] = 0
-            }
-            if (baseTerr[j + i * N] >= 3) {
-                baseTerr[j + i * N] = 0
-            }
-        }
-    }
-}
 export function applyTerrain() {
     terrain.set(baseTerr)
     for (const k in GV.S.tmod) {
         terrain[+k] = GV.S.tmod[k]
     }
+    closeUnopened()
     rebuildProps()
 }
 export function rebuildProps() {
@@ -461,6 +199,7 @@ export function blank() {
         rconq: {},
     }
     ecoInit(s)
+    worldInit(s)
     return s
 }
 export function addB(t?, x?, y?, quiet?, o?) {
@@ -502,22 +241,40 @@ export function addB(t?, x?, y?, quiet?, o?) {
             bmap[x + i + (y + j) * N] = b
         }
     }
-    GV.flowDirty = GV.pathsDirty = true
+    // The lords build all the time across a large world: their buildings update
+    // the raiders' paths a few seconds later, in one go.
+    if (b.o === 0) {
+        GV.flowDirty = GV.pathsDirty = true
+    } else {
+        GV.flowLazy = true
+    }
     if (t === 'outpost') {
         GV.ownDirty = true
     }
     return b
 }
 export const kMul = (rv?) => 2 + 0.5 * rv.tier
-export function makeRival(k?) {
-    const sp = GV.rivSpots[k],
-        L = LORDS[k + 1]
+/* Lord number k of the world's first lords, or (with o) a lord with this id, spot,
+   profile (index into LORDS) and tier. */
+export function makeRival(k?, o?) {
+    o = o || {}
+    const sp = o.sp || GV.rivSpots[k],
+        lp = o.lp || k + 1,
+        L = LORDS[lp]
+    if (k < 0) {
+        k = 3
+    }
     return {
-        id: k + 1,
+        id: o.id || k + 1,
         name: L.name,
         pers: L.pers,
         prof: L,
-        tier: [1, 2, 2, 3, 3, 4, 4, 5][k],
+        lp,
+        nw: o.nw ? 1 : 0,
+        born: 0,
+        ann: 0,
+        deadT: 0,
+        tier: o.tier || [1, 2, 2, 3, 3, 4, 4, 5][k],
         r: sp.r,
         kx: sp.kx,
         ky: sp.ky,
@@ -565,7 +322,7 @@ export function newGame() {
     GV.parts = []
     GV.capU = null
     GV.keep = addB('keep', KX, KY, true, 0)
-    for (let k = 0; k < NRIV; k++) {
+    for (let k = 0; k < GV.rivSpots.length; k++) {
         const rv = makeRival(k)
         GV.S.riv.push(rv)
         rv.keepB = addB('keep', rv.kx, rv.ky, true, rv.id)
@@ -582,6 +339,7 @@ export function newGame() {
     GV.S.disc[GV.S.riv[0].r] = 1
     GV.S.riv[0].atkIn = FIRST_RAID * DF().first
     GV.S.riv[0].nextFoe = 0
+    lordCols()
     refreshOwn(true)
     for (let i = 0; i < 6; i++) {
         spawnVillager(true)
@@ -629,7 +387,18 @@ export function snapshot() {
             truce: r.truce,
             nf: r.out ? r.foe : r.nextFoe,
             hc: Math.round(r.heroCd || 0),
+            id: r.id,
+            lp: r.lp,
+            r: r.r,
+            kx: r.kx,
+            ky: r.ky,
+            tr: r.tier,
+            nw: r.nw || undefined,
+            bt: r.nw ? Math.round(r.born) : undefined,
+            an: r.ann || undefined,
+            dt: r.dead ? Math.round(r.deadT || 0) : undefined,
         })),
+        w: worldSave(),
         rc: GV.S.rconq,
         eco: ecoSave(),
         b: GV.S.b.map((b?) => ({
@@ -669,7 +438,8 @@ export function snapshot() {
 }
 export function loadFrom(o?) {
     o = migrateSave(o)
-    if (!o || !Array.isArray(o.b) || !Array.isArray(o.riv)) {
+    // Saves from before the world could grow do not fit it.
+    if (!o || !Array.isArray(o.b) || !Array.isArray(o.riv) || !o.w) {
         throw new Error('bad save')
     }
     GV.S = blank()
@@ -709,12 +479,30 @@ export function loadFrom(o?) {
     GV.S.won = !!o.won
     GV.S.diff = o.diff >= 0 && o.diff < DIFFS.length ? o.diff | 0 : 2
     GV.nextDiff = GV.S.diff
-    genWorld(GV.S.seed)
+    worldLoad(o)
     applyTerrain()
-    for (let k = 0; k < NRIV; k++) {
-        const rv = makeRival(k),
-            q = o.riv[k] || {}
+    const nr = Math.min(NRIV, o.riv.length)
+    for (let k = 0; k < nr; k++) {
+        const q = o.riv[k] || {},
+            fine =
+                LORDS[q.lp] &&
+                q.id >= 1 &&
+                q.id <= NRIV &&
+                GV.regs[q.r] &&
+                inMap(q.kx, q.ky),
+            rv = fine
+                ? makeRival(k, {
+                      id: q.id,
+                      sp: { r: q.r, kx: q.kx, ky: q.ky },
+                      lp: q.lp,
+                      tier: Math.min(5, Math.max(1, q.tr | 0)),
+                      nw: q.nw,
+                  })
+                : makeRival(k)
         Object.assign(rv, {
+            born: q.bt || 0,
+            ann: q.an ? 1 : 0,
+            deadT: q.dt || 0,
             awake: !!q.awake,
             dead: !!q.dead,
             wealth: q.wealth || 0,
@@ -728,6 +516,7 @@ export function loadFrom(o?) {
         GV.S.riv.push(rv)
     }
     GV.S.rconq = o.rc && typeof o.rc === 'object' ? o.rc : {}
+    lordCols()
     for (const q of o.b) {
         if (!DEF[q.t] || !inMap(q.x, q.y)) {
             continue

@@ -278,7 +278,7 @@ export function fleeStep(u?, hx?, hy?, dt?, sp?) {
             ny = u.y + Math.sin(a) * st,
             cx = clampN(nx),
             cy = clampN(ny)
-        if (!inMap(cx, cy) || terrain[cx + cy * N] === 4) {
+        if (!inMap(cx, cy) || terrain[cx + cy * N] >= 4) {
             continue
         }
         const b = bAt(cx, cy)

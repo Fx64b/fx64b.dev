@@ -38,6 +38,7 @@ import {
     wipeSave,
 } from './state'
 import { GV } from './vars'
+import { VOID, worldDone } from './world'
 
 export function rivalPlan(rv?) {
     const P = [],
@@ -241,7 +242,13 @@ export function rivalStep(rv?, free?) {
         const s = DEF[t].size || 1
         for (let j = 0; j < s; j++) {
             for (let i = 0; i < s; i++) {
-                if (x + i < 1 || y + j < 1 || x + i > N - 2 || y + j > N - 2) {
+                if (
+                    x + i < 1 ||
+                    y + j < 1 ||
+                    x + i > N - 2 ||
+                    y + j > N - 2 ||
+                    terrain[x + i + (y + j) * N] === VOID
+                ) {
                     return true
                 }
                 const o2 = bmap[x + i + (y + j) * N]
@@ -354,6 +361,8 @@ export function rivalExpand(rv?) {
                 sc += c.type === 'hills' ? 2.2 : 0
             } else if (P.focus === 'gold') {
                 sc += c.poi === 'mine' ? 3.5 : c.poi === 'ruins' ? 1.5 : 0
+            } else if (P.focus === 'forest' || P.focus === 'lake') {
+                sc += c.type === P.focus ? 2 : 0
             }
             if (c.poi) {
                 sc += 1
@@ -911,6 +920,7 @@ export function rivalFall(rv?, by?) {
     if (cq && !cq.dead) {
         // One lord takes another: the castle, the land and the people change hands.
         rv.dead = true
+        rv.deadT = GV.S.t
         rv.out = false
         rv.q = []
         for (const e of GV.S.en) {
@@ -960,6 +970,7 @@ export function rivalFall(rv?, by?) {
         }
     }
     rv.dead = true
+    rv.deadT = GV.S.t
     rv.out = false
     rv.q = []
     for (const e of GV.S.en) {
@@ -987,8 +998,14 @@ export function rivalFall(rv?, by?) {
             ' gold are yours.'
     )
     if (GV.S.riv.every((r?) => r.dead) && !GV.S.won) {
-        GV.S.won = true
-        endScreen(true)
+        if (worldDone()) {
+            GV.S.won = true
+            endScreen(true)
+        } else {
+            toast(
+                'Every known keep has fallen. Beyond the mist, other lords may yet rise.'
+            )
+        }
     }
     save()
 }
@@ -1004,7 +1021,7 @@ export function rivalsTick(dt?) {
         // Lords only march on Thornwick once they know of it: when their land is found, it borders yours, or word spreads.
         if (
             !rv.awake &&
-            (GV.S.t > 900 + rv.id * 150 ||
+            (GV.S.t > Math.max(900 + rv.id * 150, (rv.born || 0) + 600) ||
                 GV.regs[rv.r].disc ||
                 GV.regs.some(
                     (rg?) =>
@@ -1576,7 +1593,7 @@ export function stepToward(e?, tx?, ty?, dt?, sp?) {
     if (b && !DEF[b.t].walk && b !== bAt(clampN(e.x), clampN(e.y))) {
         return b
     }
-    if (terrain[tileI(nx, ny)] === 4) {
+    if (terrain[tileI(nx, ny)] >= 4) {
         return null
     }
     e.x = nx
@@ -2164,7 +2181,7 @@ export function eUpdate(e?, dt?) {
             const nb = bAt(nx[0], nx[1])
             if (
                 !inMap(nx[0], nx[1]) ||
-                terrain[nx[0] + nx[1] * N] === 4 ||
+                terrain[nx[0] + nx[1] * N] >= 4 ||
                 (nb && nb.o !== 0 && !DEF[nb.t].walk)
             ) {
                 nx = flowNext(cx, cy)

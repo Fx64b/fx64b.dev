@@ -37,6 +37,7 @@ import {
 } from './people'
 import { bAt, clampN, isNight, season, wx, wy } from './state'
 import { GV } from './vars'
+import { worldTick } from './world'
 
 export function tick(dt?) {
     GV.S.t += dt
@@ -59,6 +60,11 @@ export function tick(dt?) {
     }
     if (GV.ownDirty) {
         refreshOwn()
+    }
+    if (GV.flowLazy && (GV.flowCd -= dt) <= 0) {
+        GV.flowLazy = false
+        GV.flowCd = 3
+        GV.flowDirty = true
     }
     if (GV.flowDirty) {
         computeFlow()
@@ -144,6 +150,7 @@ export function tick(dt?) {
         startEvent()
     }
     rivalsTick(dt)
+    worldTick(dt)
 
     if ((GV.gateCd -= dt) <= 0) {
         GV.gateCd = 0.5
@@ -241,7 +248,17 @@ export function tick(dt?) {
     }
 
     const calm = !GV.S.en.some((e?) => e.mode === 'atk'),
-        night = isNight()
+        night = isNight(),
+        foeT = {},
+        targetsOf = (o?) => {
+            if (!foeT[o]) {
+                const w = GV.S.en.filter(
+                    (x?) => x.mode === 'war' && x.foe === o
+                )
+                foeT[o] = w.length ? GV.S.sold.concat(w) : GV.S.sold
+            }
+            return foeT[o]
+        }
     for (const b of GV.S.b.slice()) {
         if (b.dead) {
             continue
@@ -269,17 +286,10 @@ export function tick(dt?) {
             isKeep = b.t === 'keep'
         if (d.range || isKeep) {
             b.cd -= dt
+            // Only worked out when the building can shoot, and once per tick per lord.
             const targets =
-                b.o === 0
-                    ? GV.S.en
-                    : GV.S.en.some((x?) => x.mode === 'war' && x.foe === b.o)
-                      ? GV.S.sold.concat(
-                            GV.S.en.filter(
-                                (x?) => x.mode === 'war' && x.foe === b.o
-                            )
-                        )
-                      : GV.S.sold
-            if (b.cd <= 0 && targets.length) {
+                b.cd > 0 ? null : b.o === 0 ? GV.S.en : targetsOf(b.o)
+            if (targets && targets.length) {
                 let range = isKeep
                     ? 4.5
                     : d.range +

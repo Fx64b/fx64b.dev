@@ -100,7 +100,7 @@ export const terrCost = (i?, b?) => {
         ? b && b.t === 'bridge' && !b.up
             ? 0.6
             : 5
-        : t === 4
+        : t >= 4
           ? Infinity
           : pathMap[i]
             ? 0.55
@@ -144,7 +144,7 @@ export const planCost = (i?) => {
     if (t === 3) {
         return b ? 0.5 : 14
     }
-    if (t === 4) {
+    if (t >= 4) {
         return Infinity
     }
     if (pathMap[i]) {
@@ -157,8 +157,9 @@ export const blocks = (b?) =>
 export const enemyCost = (i?) => {
     const b = bmap[i],
         t = terrain[i]
-    if (t === 4) {
-        return 1e6
+    // Land that has not opened yet (terrain 5) cannot be crossed at all.
+    if (t >= 4) {
+        return t === 4 ? 1e6 : Infinity
     }
     let c =
         1 +
@@ -232,7 +233,7 @@ export function recomputePaths(skipDraw?) {
         }
     }
     for (let i = 0; i < NN; i++) {
-        if (terrain[i] === 1 || terrain[i] === 2 || terrain[i] === 4) {
+        if (terrain[i] === 1 || terrain[i] === 2 || terrain[i] >= 4) {
             pathMap[i] = 0
         }
     }

@@ -499,6 +499,8 @@ export const SPEC = {
     hills: ['stone', 'iron'],
     gold: ['cloth', 'ale'],
     any: ['weapons', 'tools'],
+    forest: ['wood', 'tools'],
+    lake: ['food', 'ale'],
 }
 export const specOf = (rv?) => SPEC[rv.prof.focus] || []
 export const capOf = (g?) =>

@@ -4,6 +4,7 @@ import { compass, toast } from './helpers'
 import { spawnVillager } from './people'
 import { bailey, bmap, rebuildSites, regAt, rivById } from './state'
 import { GV } from './vars'
+import { lordNews } from './world'
 
 export function refreshOwn(quiet?) {
     GV.ownDirty = false
@@ -89,12 +90,21 @@ export function refreshOwn(quiet?) {
                 0
             )
     for (const rv of GV.S.riv) {
+        // A lord who rose later is named the first time their land is found.
+        let news = false
+        if (rv.nw && !rv.ann && !rv.dead && GV.regs[rv.r].disc) {
+            rv.ann = 1
+            news = !quiet
+            if (news) {
+                notes.push(lordNews(rv))
+            }
+        }
         if (!rv.awake && !rv.dead && GV.regs[rv.r].disc) {
             rv.awake = true
             if (rv.id > 1) {
                 rv.atkIn = 100 * DF().atk
             }
-            if (!quiet) {
+            if (!quiet && !news) {
                 notes.push(
                     rv.name +
                         ' has noticed your banners. A new rival enters the war.'
@@ -106,7 +116,9 @@ export function refreshOwn(quiet?) {
         toast(notes.join(' '))
     }
     rebuildSites()
-    GV.pathsDirty = GV.flowDirty = true
+    // Who owns the land does not change the raiders' paths, only the village's.
+    GV.pathsDirty = true
+    GV.flowLazy = true
     if (GV.vcv) {
         buildVeil()
     }

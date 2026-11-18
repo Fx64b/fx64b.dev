@@ -8,23 +8,39 @@ import { GV } from './vars'
 export const mcv = $('#mini'),
     mctx = mcv.getContext('2d')
 GV.mim = null
+/* The small map shows a square round the open land, so it stays useful while the
+   world is still small. GV.mm is that square: its corner and its side in tiles. */
+function miniFrame() {
+    const b = GV.wb,
+        M = Math.min(N, Math.max(b.x1 - b.x0, b.y1 - b.y0) + 9),
+        x0 = Math.round((b.x0 + b.x1 - M) / 2),
+        y0 = Math.round((b.y0 + b.y1 - M) / 2)
+    if (!GV.mm || GV.mm.M !== M) {
+        mcv.width = 2 * M
+        mcv.height = M
+        GV.mim = null
+    }
+    GV.mm = { x0, y0, M }
+    return GV.mm
+}
 export function drawMini() {
     if (!GV.S) {
         return
     }
+    const { x0: mx0, y0: my0, M } = miniFrame()
     if (!GV.mim) {
-        GV.mim = mctx.createImageData(2 * N, N)
+        GV.mim = mctx.createImageData(2 * M, M)
     }
     const d = GV.mim.data
     d.fill(0)
     const set = (x?, y?, r?, g?, b?) => {
-        const px = N + (x - y),
-            py = (x + y) >> 1
-        if (px < 0 || px > 2 * N - 2 || py < 0 || py > N - 1) {
+        const px = M + (x - mx0 - (y - my0)),
+            py = (x - mx0 + (y - my0)) >> 1
+        if (px < 0 || px > 2 * M - 2 || py < 0 || py > M - 1) {
             return
         }
         for (let k = 0; k < 2; k++) {
-            const j = (px + k + py * 2 * N) * 4
+            const j = (px + k + py * 2 * M) * 4
             d[j] = r
             d[j + 1] = g
             d[j + 2] = b
@@ -32,12 +48,16 @@ export function drawMini() {
         }
     }
     const winter = GV.curSeason === 3
-    for (let y = 0; y < N; y++) {
-        for (let x = 0; x < N; x++) {
+    for (let y = Math.max(0, my0); y < Math.min(N, my0 + M); y++) {
+        for (let x = Math.max(0, mx0); x < Math.min(N, mx0 + M); x++) {
             const i = x + y * N,
                 rg = GV.regs[reg[i]]
             if (!rg.disc) {
-                set(x, y, 30, 40, 54)
+                if (rg.gen) {
+                    set(x, y, 30, 40, 54)
+                } else {
+                    set(x, y, 104, 114, 126)
+                }
                 continue
             }
             const t = terrain[i],
@@ -122,8 +142,8 @@ export function drawMini() {
         if (age > 6 || age < 0) {
             continue
         }
-        const px = N + (p.x - p.y),
-            py = (p.x + p.y) / 2
+        const px = M + (p.x - mx0 - (p.y - my0)),
+            py = (p.x - mx0 + (p.y - my0)) / 2
         mctx.globalAlpha = Math.max(0, 1 - age / 6)
         mctx.strokeStyle = p.kind === 'fire' ? '#ff9a2a' : '#ff3c30'
         mctx.lineWidth = 3
@@ -143,17 +163,18 @@ export function drawMini() {
     mctx.strokeStyle = '#fff'
     mctx.lineWidth = 3
     mctx.strokeRect(
-        Math.round(N + (gx - gy) - vw / 2) + 0.5,
-        Math.round((gx + gy) / 2 - vh / 2) + 0.5,
+        Math.round(M + (gx - mx0 - (gy - my0)) - vw / 2) + 0.5,
+        Math.round((gx - mx0 + (gy - my0)) / 2 - vh / 2) + 0.5,
         Math.round(vw),
         Math.round(vh)
     )
 }
 export function miniGo(e?) {
     const r = mcv.getBoundingClientRect(),
-        px = ((e.clientX - r.left) / r.width) * 2 * N - N,
-        py = ((e.clientY - r.top) / r.height) * N * 2
-    lookAt((px + py) / 2, (py - px) / 2)
+        f = GV.mm || { x0: 0, y0: 0, M: N },
+        px = ((e.clientX - r.left) / r.width) * 2 * f.M - f.M,
+        py = ((e.clientY - r.top) / r.height) * f.M * 2
+    lookAt((px + py) / 2 + f.x0, (py - px) / 2 + f.y0)
 }
 mcv.addEventListener('pointerdown', (e?) => {
     mcv.setPointerCapture(e.pointerId)

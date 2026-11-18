@@ -10,6 +10,7 @@ import {
     VCH,
     VPAD,
     eachChunk,
+    eachTileIn,
     groundChunk,
     makeVeil,
     prefetchChunks,
@@ -324,22 +325,20 @@ export function render() {
     if (!reduceMotion && se !== 3) {
         c.fillStyle = 'rgba(214,236,244,.75)'
         const ph = (GV.animT * 1.5) | 0
-        for (let y = 1; y < N - 1; y++) {
-            for (let x = 1; x < N - 1; x++) {
-                if (terrain[x + y * N] === 3 && vis(x, y)) {
-                    const k = hsh(x, y, ph),
-                        k2 = hsh(y, x, ph + 3)
-                    if (k < 0.45) {
-                        c.fillRect(
-                            wx(x, y) - 8 + ((k2 * 28) | 0) / 2,
-                            wy(x, y) - 3 + ((k * 24) | 0) / 2,
-                            2,
-                            0.5
-                        )
-                    }
+        eachTileIn(vx0, vy0, vx1, vy1, (x?, y?) => {
+            if (terrain[x + y * N] === 3 && vis(x, y)) {
+                const k = hsh(x, y, ph),
+                    k2 = hsh(y, x, ph + 3)
+                if (k < 0.45) {
+                    c.fillRect(
+                        wx(x, y) - 8 + ((k2 * 28) | 0) / 2,
+                        wy(x, y) - 3 + ((k * 24) | 0) / 2,
+                        2,
+                        0.5
+                    )
                 }
             }
-        }
+        })
     }
     eachChunk(gx0, gy0, gx1, gy1, (i?, j?) => {
         const g = GV.gcv.get(i + j * CW)

@@ -7,14 +7,23 @@ import { bAt, inMap, reg, seenAt, terrain, wx, wy } from './state'
 import { hud } from './ui'
 import { GV } from './vars'
 
+/* The middle of the view stays over the open land (with a little of the mist round it). */
 export function clampCam() {
     const z = Z(),
-        mx = wx(N / 2, N / 2) * z,
-        my = wy(N / 2, N / 2) * z,
-        hw = N * 16 * z,
-        hh = N * 8 * z
-    cam.x = Math.max(GV.W / 2 - hw - mx, Math.min(GV.W / 2 + hw - mx, cam.x))
-    cam.y = Math.max(GV.H / 2 - hh - my, Math.min(GV.H / 2 + hh - my, cam.y))
+        b = GV.wb,
+        m = 6,
+        x0 = Math.max(0, b.x0 - m),
+        y0 = Math.max(0, b.y0 - m),
+        x1 = Math.min(N - 1, b.x1 + m),
+        y1 = Math.min(N - 1, b.y1 + m)
+    cam.x = Math.max(
+        GV.W / 2 - wx(x1, y0) * z,
+        Math.min(GV.W / 2 - wx(x0, y1) * z, cam.x)
+    )
+    cam.y = Math.max(
+        GV.H / 2 - wy(x1, y1) * z,
+        Math.min(GV.H / 2 - wy(x0, y0) * z, cam.y)
+    )
 }
 export function lookAt(gx?, gy?) {
     const z = Z()

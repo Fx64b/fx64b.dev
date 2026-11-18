@@ -633,7 +633,7 @@ export function idleMove(s?, dt?) {
         slot = bn && s.slot !== undefined ? slotOf(s, bn) : null,
         si = slot ? clampN(slot[0]) + clampN(slot[1]) * N : -1
     // Shield-bearers form a line in front of the banner, archers stand behind it.
-    if (slot && !bmap[si] && terrain[si] !== 3 && terrain[si] !== 4) {
+    if (slot && !bmap[si] && terrain[si] !== 3 && terrain[si] < 4) {
         if (s.timer <= 0) {
             s.timer = 1.5
             if (Math.hypot(s.x - slot[0], s.y - slot[1]) > 0.45) {

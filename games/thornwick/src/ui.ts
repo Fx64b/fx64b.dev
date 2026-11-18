@@ -871,6 +871,12 @@ export function inspectHTML(sel?) {
     if (sel.kind === 'banner') {
         return bannerHTML(close, sel.bn)
     }
+    if (sel.kind === 'fog' && !sel.rg.gen) {
+        return (
+            close +
+            '<h2>Beyond the mist</h2><p>No one knows what lies out there. The mist draws back when your scouts or outposts reach the edge of the known land, and other lords may push it back too.</p>'
+        )
+    }
     if (sel.kind === 'fog') {
         const rg = sel.rg,
             nearKnown = rg.adj.some((a?) => GV.regs[a].disc),

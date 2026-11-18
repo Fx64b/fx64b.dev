@@ -1,8 +1,8 @@
-import { DEF, FCOL, GH, GW, N } from './config'
+import { DEF, FCOL, GH, GW, N, OX, OY } from './config'
 import { isWater } from './helpers'
 import { grade, hsh, mix, tw, vnoise } from './noise'
 import { R, toCanvas } from './sprites'
-import { bmap, inMap, pathMap, reg, terrain, wx, wy } from './state'
+import { bmap, fcol, inMap, pathMap, reg, terrain, wx, wy } from './state'
 import { GV } from './vars'
 
 /* The ground and the fog are cached in square chunks that are painted when they
@@ -109,6 +109,48 @@ export function tintBuf(src?, w?, h?) {
     }
     return im
 }
+/* Every tile whose centre lies in a rectangle of world pixels, row by row. */
+export function eachTileIn(px0?, py0?, px1?, py1?, fn?) {
+    const u0 = Math.ceil((px0 - OX) / 16),
+        u1 = Math.floor((px1 - OX) / 16),
+        s0 = Math.ceil((py0 - OY) / 8),
+        s1 = Math.floor((py1 - OY) / 8)
+    const ya = Math.max(0, Math.ceil((s0 - u1) / 2)),
+        yb = Math.min(N - 1, Math.floor((s1 - u0) / 2))
+    for (let y = ya; y <= yb; y++) {
+        const xa = Math.max(0, u0 + y, s0 - y),
+            xb = Math.min(N - 1, u1 + y, s1 - y)
+        for (let x = xa; x <= xb; x++) {
+            fn(x, y)
+        }
+    }
+}
+/** Repaint, a little at a time, the painted ground over a rectangle of tiles. */
+export function staleGround(x0?, y0?, x1?, y1?) {
+    if (!GV.gcv) {
+        return
+    }
+    const px0 = (wx(x0, y1) - 40) * R,
+        px1 = (wx(x1, y0) + 40) * R,
+        py0 = (wy(x0, y0) - 24) * R,
+        py1 = (wy(x1, y1) + 24) * R
+    for (const [k, ch] of GV.gcv) {
+        const i = k % CW,
+            j = (k / CW) | 0
+        if (
+            i * CH + CH >= px0 &&
+            i * CH <= px1 &&
+            j * CH + CH >= py0 &&
+            j * CH <= py1
+        ) {
+            if (ch.empty) {
+                GV.gcv.delete(k)
+            } else {
+                ch.gen = -1
+            }
+        }
+    }
+}
 /* Paint the ground of one rectangle (ground pixels) from scratch and return it tinted. */
 export function paintGround(x0?, y0?, w?, h?) {
     if (GV.gbuf.length < w * h * 4) {
@@ -121,20 +163,13 @@ export function paintGround(x0?, y0?, w?, h?) {
     GV.gbw = w
     GV.gbh = h
     GV.gpainted = 0
-    for (let y = 0; y < N; y++) {
-        for (let x = 0; x < N; x++) {
-            const cx = wx(x, y) * R,
-                cy = wy(x, y) * R
-            if (
-                cx + 36 >= x0 &&
-                cx - 36 < x0 + w &&
-                cy + 20 >= y0 &&
-                cy - 20 < y0 + h
-            ) {
-                drawGroundTile(x, y)
-            }
-        }
-    }
+    eachTileIn(
+        (x0 - 36) / R,
+        (y0 - 20) / R,
+        (x0 + w + 36) / R,
+        (y0 + h + 20) / R,
+        drawGroundTile
+    )
     const Lx = (wx(0, N - 1) - 16) * R,
         Ly = wy(0, N - 1) * R,
         Bx = wx(N - 1, N - 1) * R,
@@ -554,73 +589,73 @@ export function makeVeil(i?, j?) {
     }
     const d = ch.im.data
     d.fill(0)
-    for (let y = 0; y < N; y++) {
-        for (let x = 0; x < N; x++) {
-            const cx = wx(x, y),
-                cy = wy(x, y)
-            if (
-                cx + 16 < x0 ||
-                cx - 16 >= x0 + S2 ||
-                cy + 8 < y0 ||
-                cy - 8 >= y0 + S2
-            ) {
-                continue
-            }
-            const rg = GV.regs[reg[x + y * N]]
-            if (rg.disc && rg.owner === 0) {
-                continue
-            }
-            const fog = !rg.disc
-            let edge = false
-            if (fog) {
-                for (const [a, b] of [
-                    [1, 0],
-                    [-1, 0],
-                    [0, 1],
-                    [0, -1],
-                ]) {
-                    if (
-                        inMap(x + a, y + b) &&
-                        GV.regs[reg[x + a + (y + b) * N]].disc
-                    ) {
-                        edge = true
-                    }
-                }
-            }
-            const fc = rg.owner > 0 ? FCOL[rg.owner] : 0x0a0e16,
-                al = rg.owner > 0 ? 62 : 78
-            for (let r = 0; r < 16; r++) {
-                const hw = r < 8 ? 2 * (r + 1) : 2 * (16 - r),
-                    py = cy - 8 + r,
-                    ly = py - y0
-                if (ly < 0 || ly >= S2) {
-                    continue
-                }
-                for (let dx = -hw; dx < hw; dx++) {
-                    const px = cx + dx,
-                        lx = px - x0
-                    if (lx < 0 || lx >= S2) {
-                        continue
-                    }
-                    const j2 = (lx + ly * S2) * 4
-                    if (fog) {
-                        const n = vnoise(px / 14, py / 9, 40),
-                            n2 = vnoise(px / 5, py / 4, 41),
-                            v = 14 + n * 18 + n2 * 6
-                        d[j2] = v
-                        d[j2 + 1] = v + 7
-                        d[j2 + 2] = v + 18
-                        d[j2 + 3] = edge && (px + py) & 1 ? 150 : 255
-                    } else {
-                        d[j2] = (fc >> 16) & 255
-                        d[j2 + 1] = (fc >> 8) & 255
-                        d[j2 + 2] = fc & 255
-                        d[j2 + 3] = al
-                    }
+    eachTileIn(x0 - 16, y0 - 8, x0 + S2 + 16, y0 + S2 + 8, (x?, y?) => {
+        const cx = wx(x, y),
+            cy = wy(x, y)
+        const rg = GV.regs[reg[x + y * N]]
+        if (rg.disc && rg.owner === 0) {
+            return
+        }
+        const fog = !rg.disc,
+            // Land that has not opened yet lies under a darker mist.
+            mist = !rg.gen
+        let edge = false
+        if (fog && !mist) {
+            for (const [a, b] of [
+                [1, 0],
+                [-1, 0],
+                [0, 1],
+                [0, -1],
+            ]) {
+                if (
+                    inMap(x + a, y + b) &&
+                    GV.regs[reg[x + a + (y + b) * N]].disc
+                ) {
+                    edge = true
                 }
             }
         }
-    }
+        const fc = rg.owner > 0 ? FCOL[fcol(rg.owner)] : 0x0a0e16,
+            al = rg.owner > 0 ? 62 : 78
+        for (let r = 0; r < 16; r++) {
+            const hw = r < 8 ? 2 * (r + 1) : 2 * (16 - r),
+                py = cy - 8 + r,
+                ly = py - y0
+            if (ly < 0 || ly >= S2) {
+                continue
+            }
+            for (let dx = -hw; dx < hw; dx++) {
+                const px = cx + dx,
+                    lx = px - x0
+                if (lx < 0 || lx >= S2) {
+                    continue
+                }
+                const j2 = (lx + ly * S2) * 4
+                if (mist) {
+                    const n = vnoise(px / 26, py / 12, 42),
+                        n2 = vnoise(px / 9, py / 5, 43),
+                        v = 108 + n * 40 + n2 * 12
+                    d[j2] = v - 6
+                    d[j2 + 1] = v + 2
+                    d[j2 + 2] = v + 10
+                    d[j2 + 3] = 255
+                } else if (fog) {
+                    const n = vnoise(px / 14, py / 9, 40),
+                        n2 = vnoise(px / 5, py / 4, 41),
+                        v = 14 + n * 18 + n2 * 6
+                    d[j2] = v
+                    d[j2 + 1] = v + 7
+                    d[j2 + 2] = v + 18
+                    d[j2 + 3] = edge && (px + py) & 1 ? 150 : 255
+                } else {
+                    d[j2] = (fc >> 16) & 255
+                    d[j2 + 1] = (fc >> 8) & 255
+                    d[j2 + 2] = fc & 255
+                    d[j2 + 3] = al
+                }
+            }
+        }
+    })
     ch.g.putImageData(ch.im, 0, 0)
     ch.gen = GV.veilGen
     return ch

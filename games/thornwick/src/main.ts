@@ -62,6 +62,7 @@ import {
     showHelp,
 } from './ui'
 import { GV } from './vars'
+import * as WORLD from './world'
 
 GV.last = 0
 GV.acc = 0
@@ -325,5 +326,6 @@ export async function boot() {
     get GV() {
         return GV
     },
+    world: WORLD,
 }
 boot()
