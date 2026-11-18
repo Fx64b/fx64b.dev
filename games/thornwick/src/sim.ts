@@ -14,6 +14,7 @@ import { startEvent } from './events'
 import { tintAll } from './ground'
 import {
     cap,
+    compass,
     flam,
     gain,
     near,
@@ -36,7 +37,7 @@ import {
     train,
     vUpdate,
 } from './people'
-import { bAt, clampN, isNight, season, wx, wy } from './state'
+import { bAt, clampN, isNight, regAt, season, wx, wy } from './state'
 import { GV } from './vars'
 import { rangeMul } from './weather'
 import { worldTick } from './world'
@@ -74,6 +75,7 @@ export function tick(dt?) {
     if ((GV.jobCd -= dt) <= 0) {
         GV.jobCd = 1
         assignJobs()
+        revealBySoldiers()
     }
 
     if ((GV.S.growCd -= dt) <= 0) {
@@ -480,4 +482,28 @@ export function tick(dt?) {
         f.t += dt
     }
     GV.S.floats = GV.S.floats.filter((f?) => f.t < 1.2)
+}
+
+/* Soldiers who march into land no one has seen reveal it, as a scout would. */
+function revealBySoldiers() {
+    let found = null
+    for (const s of GV.S.sold) {
+        if (s.dead) {
+            continue
+        }
+        const rg = regAt(s.x, s.y)
+        if (rg && rg.gen !== false && !GV.S.disc[rg.id]) {
+            GV.S.disc[rg.id] = 1
+            GV.ownDirty = true
+            found = rg
+        }
+    }
+    if (found && GV.S.t > (GV.revealToast || 0)) {
+        GV.revealToast = GV.S.t + 20
+        toast(
+            'Your soldiers march into unknown land to the ' +
+                compass(found.sx - KX, found.sy - KY) +
+                '. It is now on your map.'
+        )
+    }
 }
