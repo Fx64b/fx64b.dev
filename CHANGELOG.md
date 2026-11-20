@@ -28,6 +28,14 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.8.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.7.0...fx64b.dev-v5.8.0) (2026-11-20)
+
+
+### Features
+
+* **thornwick:** a real Great keep, and deeds to aim for ([2e34757](https://github.com/Fx64b/fx64b.dev/commit/2e34757480d6bd60483302f227a20c1d5a64d9f7))
+* **thornwick:** strategy-game HUD and a phone-friendly layout ([514d84a](https://github.com/Fx64b/fx64b.dev/commit/514d84a3aa4c519dc33e1a0eb01509322f2ae93b))
+
 ## [5.7.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.6.0...fx64b.dev-v5.7.0) (2026-11-18)
 
 
