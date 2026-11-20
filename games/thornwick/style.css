@@ -714,6 +714,10 @@ button.pill:hover {
     color: var(--madder);
     font-weight: 600;
 }
+#inspect .note.lackn {
+    color: var(--madder);
+    font-weight: 600;
+}
 
 /* ---------- inspect panel ---------- */
 #inspect {
@@ -845,6 +849,113 @@ button.pill:hover {
     border-radius: var(--radius);
     box-shadow: var(--lift);
 }
+/* ---------- deed tracker ---------- */
+#deed {
+    position: absolute;
+    z-index: 2;
+    left: calc(var(--gap) + var(--safe-l));
+    top: calc(var(--bar-h) + 4px);
+    width: 264px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 7px 10px 8px;
+    font: inherit;
+    text-align: left;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--gold);
+    border-radius: var(--radius);
+    box-shadow: var(--lift);
+    cursor: pointer;
+}
+#deed:hover {
+    background: var(--surface2);
+}
+#deed .dh {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+#deed .dh svg {
+    width: 17px;
+    height: 17px;
+    color: var(--gold);
+}
+#deed .dn {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#deed .dp {
+    color: var(--muted);
+    font-size: 13px;
+}
+#deed .dt {
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: var(--muted);
+}
+#deed .bar {
+    display: block;
+    height: 4px;
+    margin-top: 2px;
+    border-radius: 2px;
+    background: var(--surface2);
+    overflow: hidden;
+}
+#deed .bar i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--gold);
+    transition: width 0.4s;
+}
+#deed.flash {
+    animation: deedFlash 0.9s ease-out infinite;
+}
+@keyframes deedFlash {
+    50% {
+        box-shadow: 0 0 0 6px rgba(224, 178, 58, 0.4);
+    }
+}
+#event {
+    z-index: 4;
+}
+.sheet .deeds {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.deeds li {
+    margin: 0 0 10px;
+    padding: 6px 0 8px 10px;
+    border-left: 4px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    max-width: none;
+}
+.deeds li.now {
+    border-left-color: var(--gold);
+}
+.deeds li.done {
+    opacity: 0.6;
+}
+.deeds .nh {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.deeds .note {
+    margin: 2px 0 0;
+}
+
 .wideonly {
 }
 .compactonly {
@@ -1572,9 +1683,27 @@ button.pill:hover {
         font-size: 11px;
     }
     #app.pal-open #dock,
+    #app.pal-open #deed,
+    #app[data-mode='inspect'] #deed,
+    #app[data-mode='placing'] #deed,
     #app[data-mode='inspect'] #dock,
     #app[data-mode='placing'] #dock {
         display: none;
+    }
+    /* On a phone the deed sits bottom left, next to the commands. */
+    #deed {
+        top: auto;
+        bottom: calc(var(--gap) + var(--safe-b));
+        width: auto;
+        max-width: calc(100% - 230px - var(--safe-r));
+        min-width: 140px;
+        padding: 6px 9px 7px;
+    }
+    #deed .dt {
+        display: none;
+    }
+    #deed .dh {
+        font-size: 13.5px;
     }
 
     /* Sheets that come up from the bottom edge. */

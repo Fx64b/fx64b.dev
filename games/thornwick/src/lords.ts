@@ -986,6 +986,7 @@ export function rivalFall(rv?, by?) {
         }
     }
     GV.S.conq[rv.r] = 1
+    GV.S.taken = (GV.S.taken || 0) + 1
     const g = 120 * rv.tier
     GV.S.res.gold += g
     GV.ownDirty = GV.flowDirty = GV.pathsDirty = true

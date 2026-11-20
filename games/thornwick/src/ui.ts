@@ -20,8 +20,10 @@ import {
     DIFF_KEY,
     FIRST_RAID,
     ICON,
+    KEEP3_PERKS,
     KEEP_CAP,
     KEEP_DMG,
+    KEEP_POP,
     KEEP_UP,
     KX,
     KY,
@@ -30,6 +32,7 @@ import {
     TIERS,
     cv,
 } from './config'
+import { checkDeeds, deedHud } from './deeds'
 import { farmYield, workMul } from './eco'
 import { ecoAct, ecoHow, ecoHowMore, ecoHud, ecoInspect } from './ecoui'
 import { pickEvent } from './events'
@@ -593,10 +596,14 @@ export function howHTML(b?) {
     switch (b.t) {
         case 'keep': {
             P.push(
-                'Every 8 seconds each person, soldiers too, eats 1 food (bread first, for up to half), and every 10 villagers pay 1 gold in tax. A new villager arrives here every 6 seconds while homes have room and there are 20 food and bread in store.'
+                'Every 8 seconds each person, soldiers too, eats 1 food (bread first, for up to half), and every 10 villagers pay ' +
+                    (b.lvl >= 3 ? '2 gold' : '1 gold') +
+                    ' in tax. A new villager arrives here every 6 seconds while homes have room and there are 20 food and bread in store.'
             )
             P.push(
-                'It shoots the nearest raider within 4.5 tiles for ' +
+                'It shoots the nearest raider within ' +
+                    (b.lvl >= 3 ? '5.5' : '4.5') +
+                    ' tiles for ' +
                     KEEP_DMG[b.lvl - 1] +
                     ' damage each second.'
             )
@@ -1192,10 +1199,22 @@ export function inspectHTML(sel?) {
             DF().name +
             '</span></div>'
         if (b.lvl < 3) {
-            const uc = KEEP_UP[b.lvl - 1]
+            const uc = KEEP_UP[b.lvl - 1],
+                need = KEEP_POP[b.lvl - 1],
+                popOk = pop() >= need
+            if (need) {
+                h +=
+                    '<p class="note' +
+                    (popOk ? '' : ' lackn') +
+                    '">Needs ' +
+                    need +
+                    ' people in the village (now ' +
+                    pop() +
+                    ').</p>'
+            }
             h +=
                 '<div class="row"><button class="btn primary" data-act="up"' +
-                (afford(uc) ? '' : ' disabled') +
+                (afford(uc) && popOk ? '' : ' disabled') +
                 '>Rebuild as ' +
                 TIERS[b.lvl].toLowerCase() +
                 '</button><span class="costs">' +
@@ -1205,7 +1224,9 @@ export function inspectHTML(sel?) {
                 BUILD.filter((t?) => DEF[t].tier === b.lvl + 1)
                     .map((t?) => DEF[t].name.toLowerCase())
                     .join(', ') +
-                '.</p>'
+                '.' +
+                (b.lvl === 2 ? ' ' + KEEP3_PERKS : '') +
+                '</p>'
         } else {
             h += '<p class="note">The greatest keep in the land.</p>'
         }
@@ -1700,6 +1721,8 @@ export function hud() {
         sc.setAttribute('aria-label', 'Game speed ' + st)
     }
     ecoHud()
+    checkDeeds()
+    deedHud()
     drawMini()
 }
 GV.hud = hud

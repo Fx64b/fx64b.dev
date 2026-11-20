@@ -1,7 +1,16 @@
 import { plantBanner } from './army'
-import { DEF, KEEP_UP, KX, KY, N, TIERS } from './config'
+import { DEF, KEEP_POP, KEEP_UP, KX, KY, N, TIERS } from './config'
 import { resetSite } from './eco'
-import { adjWater, afford, compass, gain, pay, puff, toast } from './helpers'
+import {
+    adjWater,
+    afford,
+    compass,
+    gain,
+    pay,
+    pop,
+    puff,
+    toast,
+} from './helpers'
 import { costOf } from './land'
 import { removeB, setTerr } from './lords'
 import {
@@ -265,7 +274,14 @@ export function upgradeKeep() {
     if (GV.keep.lvl >= 3) {
         return
     }
-    const c = KEEP_UP[GV.keep.lvl - 1]
+    const c = KEEP_UP[GV.keep.lvl - 1],
+        need = KEEP_POP[GV.keep.lvl - 1]
+    if (pop() < need) {
+        toast(
+            'The keep can only be rebuilt when ' + need + ' people live here.'
+        )
+        return
+    }
     if (!afford(c)) {
         toast('Not enough stores to rebuild the keep.')
         return
@@ -281,7 +297,10 @@ export function upgradeKeep() {
     toast(
         'The keep is now a ' +
             TIERS[GV.keep.lvl - 1].toLowerCase() +
-            '. New buildings are open.'
+            '. New buildings are open.' +
+            (GV.keep.lvl === 3
+                ? ' The royal court sits at Thornwick, and the tax is doubled.'
+                : '')
     )
     buildCards()
 }

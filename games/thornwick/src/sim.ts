@@ -90,7 +90,9 @@ export function tick(dt?) {
     if ((GV.S.eatCd -= dt) <= 0) {
         GV.S.eatCd = 8
         const need = pop()
-        GV.S.res.gold += Math.floor(GV.S.vill.length / 10)
+        // The royal court of a Great keep doubles the tax.
+        GV.S.res.gold +=
+            Math.floor(GV.S.vill.length / 10) * (GV.keep.lvl >= 3 ? 2 : 1)
         const mines = GV.regs.reduce(
             (n?, rg?) => n + (rg.owner === 0 && rg.poi === 'mine' ? 1 : 0),
             0
@@ -296,7 +298,9 @@ export function tick(dt?) {
                 b.cd > 0 ? null : b.o === 0 ? GV.S.en : targetsOf(b.o)
             if (targets && targets.length) {
                 let range = isKeep
-                    ? 4.5
+                    ? b.o === 0 && b.lvl >= 3
+                        ? 5.5
+                        : 4.5
                     : d.range +
                       (b.o === 0 && b.t !== 'mangonel' ? reachBonus() : 0)
                 if (night && b.o === 0 && !isKeep && !near(b, 'brazier', 4.5)) {

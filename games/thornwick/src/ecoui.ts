@@ -2,6 +2,7 @@
    sheet (overview, charts, needs, trade), and the parts of the inspect panel
    for workshops, the scriptorium and the market. */
 import { $, DEF, ICON } from './config'
+import { deedsHTML } from './deeds'
 import {
     BIG_TOWN,
     CHAPEL_R,
@@ -392,6 +393,7 @@ export function openRealm(tab?) {
     renderRealm()
     $('#realmGo').focus()
 }
+GV.openRealm = openRealm
 export function closeRealm() {
     GV.realmOpen = false
     $('#realm').hidden = true
@@ -415,7 +417,9 @@ function renderRealm() {
               ? peopleHTML()
               : t === 'trade'
                 ? tradeHTML()
-                : overHTML()
+                : t === 'deeds'
+                  ? deedsHTML()
+                  : overHTML()
     if (t === 'charts') {
         drawCharts()
     }

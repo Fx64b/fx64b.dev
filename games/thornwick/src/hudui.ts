@@ -62,6 +62,9 @@ export const HI = {
     ),
     ring: svg('<circle cx="12" cy="12" r="8"/><path d="M10 4.2v3.2h4V4.2"/>'),
     grip: svg('<path d="M6 15l6-6 6 6"/>'),
+    star: svg(
+        '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor" fill-opacity=".3"/>'
+    ),
 }
 document
     .querySelectorAll<HTMLElement>('[data-hi]')
@@ -158,6 +161,8 @@ document.addEventListener('pointerdown', (e) => {
         closeDrops()
     }
 })
+
+$('#deed').addEventListener('click', () => GV.openRealm?.('deeds'))
 
 /* ---------- inspect sheet ---------- */
 GV.inspBig = false
