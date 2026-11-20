@@ -5,16 +5,17 @@ import { caravans } from './eco'
 import { GOOD } from './goods'
 import {
     CH,
-    CW,
     PAD,
     VCH,
     VPAD,
+    chunkSrc,
     eachChunk,
     eachTileIn,
     groundChunk,
-    makeVeil,
     prefetchChunks,
     trimChunks,
+    trimVeils,
+    veilChunk,
 } from './ground'
 import { afford, wet } from './helpers'
 import { samePick } from './input'
@@ -301,19 +302,59 @@ export function render() {
     }
     GV.chunkUse++
     const t0 = performance.now(),
-        budget = { left: () => performance.now() - t0 < 6 }
+        budget = { left: () => performance.now() - t0 < 6 },
+        // Ground in view that is not painted yet may take a little longer.
+        vbudget = { left: () => performance.now() - t0 < 12 }
+    GV.bandDone = false
     const gx0 = -cam.x / z,
         gy0 = -cam.y / z,
         gx1 = (GV.W - cam.x) / z,
         gy1 = (GV.H - cam.y) / z
+    // The fog comes first: where it is solid, the ground under it is skipped.
+    const veils = []
     eachChunk(gx0, gy0, gx1, gy1, (i?, j?) => {
-        const ch = groundChunk(i, j, budget)
-        if (!ch.empty) {
-            c.drawImage(ch.cv, PAD, PAD, CH, CH, i * VCH, j * VCH, VCH, VCH)
+        const v = veilChunk(i, j, budget)
+        veils.push(i, j, v)
+        // Stale fog that was solid stays solid until it is rebuilt.
+        if (v.opaque) {
+            return
+        }
+        const ch = groundChunk(i, j, vbudget)
+        if (ch.partial) {
+            v.ground = true
+            c.drawImage(
+                ch.partial.cv,
+                PAD,
+                PAD,
+                CH,
+                CH,
+                i * VCH,
+                j * VCH,
+                VCH,
+                VCH
+            )
+        } else if (!ch.empty) {
+            v.ground = true
+            const src = chunkSrc(ch),
+                f = src === ch.cv ? 1 : 0.5
+            c.drawImage(
+                src,
+                PAD * f,
+                PAD * f,
+                CH * f,
+                CH * f,
+                i * VCH,
+                j * VCH,
+                VCH,
+                VCH
+            )
+        } else {
+            v.ground = false
         }
     })
     prefetchChunks(gx0, gy0, gx1, gy1, budget)
     trimChunks()
+    trimVeils()
     const vx0 = -cam.x / z - 48,
         vy0 = -cam.y / z - 16,
         vx1 = (GV.W - cam.x) / z + 48,
@@ -348,17 +389,16 @@ export function render() {
             }
         })
     }
-    eachChunk(gx0, gy0, gx1, gy1, (i?, j?) => {
-        const g = GV.gcv.get(i + j * CW)
-        if (!g || g.empty) {
-            return
-        }
-        let v = GV.vcv.get(i + j * CW)
-        if (!v || v.gen !== GV.veilGen) {
-            v = makeVeil(i, j)
+    for (let k = 0; k < veils.length; k += 3) {
+        const i = veils[k],
+            j = veils[k + 1],
+            v = veils[k + 2]
+        // Off the map there is neither ground nor fog to draw.
+        if (!v.opaque && !v.ground) {
+            continue
         }
         c.drawImage(v.cv, VPAD, VPAD, VCH, VCH, i * VCH, j * VCH, VCH, VCH)
-    })
+    }
     const ghostT = GV.drag && GV.drag.active ? GV.drag.t : GV.armed
     if (ghostT && ghostT !== 'flag') {
         c.strokeStyle = 'rgba(255,255,255,.14)'

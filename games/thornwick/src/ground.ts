@@ -21,7 +21,9 @@ export const AW = GW * R,
     VPAD = 1
 export const CW = Math.ceil(AW / CH),
     CHN = Math.ceil(AH / CH),
-    MAXCH = 80
+    MAXCH = 80,
+    // Fog chunks are smaller and many stand over land never painted: keep more.
+    MAXV = 220
 GV.gbuf = new Uint8ClampedArray(0)
 GV.gbx = 0
 GV.gby = 0
@@ -150,6 +152,7 @@ export function staleGround(x0?, y0?, x1?, y1?) {
             }
         }
     }
+    dropPend(px0, py0, px1, py1)
 }
 /* Paint the ground of one rectangle (ground pixels) from scratch and return it tinted. */
 export function paintGround(x0?, y0?, w?, h?) {
@@ -236,7 +239,26 @@ export function makeChunk(i?, j?) {
     ch.g.putImageData(im, 0, 0)
     ch.gen = GV.groundGen
     ch.used = GV.chunkUse
+    ch.mip = null
     return ch
+}
+/* A chunk drawn smaller than its pixels (zoomed out) is drawn from a copy at
+   half size, made once, instead of being shrunk again every frame. */
+export function chunkSrc(ch?) {
+    if (GV.K >= R) {
+        return ch.cv
+    }
+    if (!ch.mip) {
+        const S2 = CH + 2 * PAD,
+            m = document.createElement('canvas')
+        m.width = m.height = S2 / 2
+        const g = m.getContext('2d')
+        g.imageSmoothingEnabled = true
+        g.imageSmoothingQuality = 'medium'
+        g.drawImage(ch.cv, 0, 0, S2, S2, 0, 0, S2 / 2, S2 / 2)
+        ch.mip = m
+    }
+    return ch.mip
 }
 /* Repaint the ground around one tile in every chunk that is already painted. */
 export function groundTileChanged(x?, y?) {
@@ -247,6 +269,8 @@ export function groundTileChanged(x?, y?) {
         y0 = Math.floor(wy(x, y) * R - 20),
         w = 72,
         h = 40
+    // A half-painted chunk here starts over, so it shows the change.
+    dropPend(x0, y0, x0 + w, y0 + h)
     let im = null
     for (
         let j = Math.floor((y0 + PAD) / CH) - 1;
@@ -284,6 +308,7 @@ export function groundTileChanged(x?, y?) {
             }
             if (im) {
                 ch.g.putImageData(im, x0 - ox, y0 - oy)
+                ch.mip = null
             }
         }
     }
@@ -567,6 +592,7 @@ export function drawGroundAll() {
     }
     GV.gcv.clear()
     GV.vcv.clear()
+    GV.gpend.clear()
     GV.groundGen++
     GV.veilGen++
 }
@@ -587,6 +613,16 @@ export function makeVeil(i?, j?) {
     if (!ch.im) {
         ch.im = ch.g.createImageData(S2, S2)
     }
+    // The texture of the fog and the mist never changes, so it is worked out
+    // once per chunk (on 2 by 2 pixel blocks) and kept for later rebuilds.
+    // 0 means "not worked out yet": no shade of either is 0.
+    const H = (S2 + 1) >> 1
+    if (!ch.nm) {
+        ch.nm = new Uint8Array(H * H)
+        ch.nf = new Uint8Array(H * H)
+    }
+    const nm = ch.nm,
+        nf = ch.nf
     const d = ch.im.data
     d.fill(0)
     eachTileIn(x0 - 16, y0 - 8, x0 + S2 + 16, y0 + S2 + 8, (x?, y?) => {
@@ -630,19 +666,32 @@ export function makeVeil(i?, j?) {
                 if (lx < 0 || lx >= S2) {
                     continue
                 }
-                const j2 = (lx + ly * S2) * 4
+                const j2 = (lx + ly * S2) * 4,
+                    q = (lx >> 1) + (ly >> 1) * H
                 if (mist) {
-                    const n = vnoise(px / 26, py / 12, 42),
-                        n2 = vnoise(px / 9, py / 5, 43),
-                        v = 108 + n * 40 + n2 * 12
+                    let v = nm[q]
+                    if (!v) {
+                        const bx = px - (lx & 1),
+                            by = py - (ly & 1),
+                            n = vnoise(bx / 26, by / 12, 42),
+                            n2 = vnoise(bx / 9, by / 5, 43)
+                        nm[q] = 108 + n * 40 + n2 * 12
+                        v = nm[q]
+                    }
                     d[j2] = v - 6
                     d[j2 + 1] = v + 2
                     d[j2 + 2] = v + 10
                     d[j2 + 3] = 255
                 } else if (fog) {
-                    const n = vnoise(px / 14, py / 9, 40),
-                        n2 = vnoise(px / 5, py / 4, 41),
-                        v = 14 + n * 18 + n2 * 6
+                    let v = nf[q]
+                    if (!v) {
+                        const bx = px - (lx & 1),
+                            by = py - (ly & 1),
+                            n = vnoise(bx / 14, by / 9, 40),
+                            n2 = vnoise(bx / 5, by / 4, 41)
+                        nf[q] = 14 + n * 18 + n2 * 6
+                        v = nf[q]
+                    }
                     d[j2] = v
                     d[j2 + 1] = v + 7
                     d[j2 + 2] = v + 18
@@ -658,7 +707,44 @@ export function makeVeil(i?, j?) {
     })
     ch.g.putImageData(ch.im, 0, 0)
     ch.gen = GV.veilGen
+    ch.used = GV.chunkUse
+    // A chunk under solid fog hides the ground: it never needs painting.
+    let opaque = true
+    for (let y = VPAD; y < VPAD + VCH && opaque; y++) {
+        for (
+            let x = VPAD, k = (x + y * S2) * 4 + 3;
+            x < VPAD + VCH;
+            x++, k += 4
+        ) {
+            if (d[k] !== 255) {
+                opaque = false
+                break
+            }
+        }
+    }
+    ch.opaque = opaque
     return ch
+}
+/* The fog over one chunk. A stale one is redrawn within the frame's time
+   budget; until then the old fog shows for a moment. */
+export function veilChunk(i?, j?, budget?) {
+    const v = GV.vcv.get(i + j * CW)
+    if (!v || (v.gen !== GV.veilGen && budget.left())) {
+        return makeVeil(i, j)
+    }
+    v.used = GV.chunkUse
+    return v
+}
+export function trimVeils() {
+    if (GV.vcv.size <= MAXV) {
+        return
+    }
+    const old = [...GV.vcv.entries()]
+        .filter(([, c]) => c.used !== GV.chunkUse)
+        .sort((a?, b?) => a[1].used - b[1].used)
+    for (let k = 0; k < old.length && GV.vcv.size > MAXV; k++) {
+        GV.vcv.delete(old[k][0])
+    }
 }
 /* Chunks under the view rectangle (world units). New chunks are painted at once,
    stale ones (after a season change) within a small time budget per frame. */
@@ -673,10 +759,85 @@ export function eachChunk(vx0?, vy0?, vx1?, vy1?, fn?) {
         }
     }
 }
+/* Painting a whole chunk takes tens of milliseconds. Chunks painted ahead of
+   time (the ones just outside the view, or old ones after a season change)
+   are painted in bands, a few per frame, while the old chunk still shows. */
+const BAND = 64
+GV.gpend = new Map()
+function startPend(key?) {
+    let p = GV.gpend.get(key)
+    if (!p || p.gen !== GV.groundGen) {
+        const S2 = CH + 2 * PAD,
+            c = document.createElement('canvas')
+        c.width = c.height = S2
+        p = {
+            cv: c,
+            g: c.getContext('2d'),
+            row: 0,
+            any: false,
+            gen: GV.groundGen,
+        }
+        GV.gpend.set(key, p)
+    }
+    return p
+}
+/* Paint the next band; true when the chunk is done. */
+function bandStep(key?, p?) {
+    const S2 = CH + 2 * PAD,
+        i = key % CW,
+        j = (key / CW) | 0,
+        h = Math.min(BAND, S2 - p.row),
+        im = paintGround(i * CH - PAD, j * CH - PAD + p.row, S2, h)
+    if (im) {
+        p.g.putImageData(im, 0, p.row)
+        p.any = true
+    }
+    p.row += h
+    return p.row >= S2
+}
+function finishPend(key?, p?) {
+    GV.gpend.delete(key)
+    const ch = p.any
+        ? { cv: p.cv, g: p.g, gen: p.gen, used: GV.chunkUse, mip: null }
+        : { empty: true, gen: p.gen, used: GV.chunkUse }
+    GV.gcv.set(key, ch)
+    return ch
+}
+/* Forget half-painted chunks over a rectangle of chunk pixels (it changed). */
+function dropPend(px0?, py0?, px1?, py1?) {
+    for (const k of [...GV.gpend.keys()]) {
+        const i = k % CW,
+            j = (k / CW) | 0
+        if (
+            i * CH + CH >= px0 &&
+            i * CH <= px1 &&
+            j * CH + CH >= py0 &&
+            j * CH <= py1
+        ) {
+            GV.gpend.delete(k)
+        }
+    }
+}
+/* The ground of a chunk in view. One not painted yet is painted in bands
+   while the frame has time; until it is done, `partial` holds what is
+   painted so far, so a wide view fills in over a few frames instead of
+   stopping the game. */
 export function groundChunk(i?, j?, budget?) {
-    let ch = GV.gcv.get(i + j * CW)
-    if (!ch || (ch.gen !== GV.groundGen && budget.left())) {
-        ch = makeChunk(i, j)
+    const key = i + j * CW
+    const ch = GV.gcv.get(key)
+    if (!ch) {
+        const p = startPend(key)
+        let first = !GV.bandDone
+        while (first || budget.left()) {
+            first = false
+            GV.bandDone = true
+            if (bandStep(key, p)) {
+                return finishPend(key, p)
+            }
+        }
+        return { partial: p }
+    } else if (ch.gen !== GV.groundGen) {
+        startPend(key)
     }
     ch.used = GV.chunkUse
     return ch
@@ -690,14 +851,33 @@ export function trimChunks() {
         .sort((a?, b?) => a[1].used - b[1].used)
     for (let k = 0; k < old.length && GV.gcv.size > MAXCH; k++) {
         GV.gcv.delete(old[k][0])
-        GV.vcv.delete(old[k][0])
     }
 }
 export function prefetchChunks(gx0?, gy0?, gx1?, gy1?, budget?) {
     const m = VCH
     eachChunk(gx0 - m, gy0 - m, gx1 + m, gy1 + m, (i?, j?) => {
-        if (!GV.gcv.has(i + j * CW) && budget.left()) {
-            makeChunk(i, j).used = GV.chunkUse
+        const key = i + j * CW
+        if (GV.gcv.has(key) || GV.gpend.has(key) || GV.gpend.size >= 3) {
+            return
         }
+        const v = GV.vcv.get(key)
+        if (v && v.opaque) {
+            return
+        }
+        startPend(key)
     })
+    // Bands as long as the frame has time, but at least one, so work goes on.
+    let first = true
+    for (const [key, p] of GV.gpend) {
+        while (first || budget.left()) {
+            first = false
+            if (bandStep(key, p)) {
+                finishPend(key, p)
+                break
+            }
+        }
+        if (!budget.left()) {
+            return
+        }
+    }
 }
