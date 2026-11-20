@@ -44,6 +44,7 @@ import {
     puff,
     toast,
 } from './helpers'
+import { GRIP, HI, afterArm, compact, showPal } from './hudui'
 import {
     anchor,
     centreCam,
@@ -216,6 +217,7 @@ export function buildCards() {
                 GV.drag.active = true
                 GV.armed = null
                 GV.selected = null
+                $('#palette').classList.add('ghost')
             }
             if (GV.drag.active) {
                 GV.hover = anchor(
@@ -239,10 +241,12 @@ export function buildCards() {
                 arm(t)
             }
             GV.drag = null
+            $('#palette').classList.remove('ghost')
         })
         el.addEventListener('pointercancel', () => {
             GV.drag = null
             GV.hover = null
+            $('#palette').classList.remove('ghost')
         })
         el.addEventListener('keydown', (e?) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -281,6 +285,7 @@ export function arm(t?) {
     } else {
         GV.hover = null
     }
+    afterArm()
     setCursor()
     hud()
 }
@@ -1443,6 +1448,36 @@ export const fmtTime = (s?) => {
     s = Math.max(0, Math.ceil(s))
     return ((s / 60) | 0) + ':' + String(s % 60).padStart(2, '0')
 }
+/* A picture of the chosen building next to its name, as in the build tray. */
+GV.portraits = {}
+function portrait(box?, sel?) {
+    const t = sel && typeof sel.t === 'string' && DEF[sel.t] ? sel.t : null,
+        h2 = t && box.querySelector('h2')
+    if (!h2) {
+        return
+    }
+    let url = GV.portraits[t]
+    if (url === undefined) {
+        try {
+            const c = document.createElement('canvas')
+            c.width = 96
+            c.height = 88
+            iconFor(t, c.getContext('2d'))
+            url = c.toDataURL()
+        } catch {
+            url = ''
+        }
+        GV.portraits[t] = url
+    }
+    if (url) {
+        const img = document.createElement('img')
+        img.className = 'portrait'
+        img.src = url
+        img.alt = ''
+        h2.prepend(img)
+        h2.classList.add('withpic')
+    }
+}
 export function hud() {
     if (!GV.S) {
         return
@@ -1451,6 +1486,8 @@ export function hud() {
         $('#r-' + r).textContent = Math.floor(GV.S.res[r])
     }
     $('#r-pop').textContent = pop() + '/' + cap()
+    $('#r-popf').style.width =
+        Math.round(Math.min(1, pop() / Math.max(1, cap())) * 100) + '%'
     $('#r-sold').textContent = GV.S.sold.filter(
         (x?) => x.kind !== 'scout'
     ).length
@@ -1528,12 +1565,16 @@ export function hud() {
     }
     $('#rm').setAttribute('aria-pressed', String(GV.armed === 'remove'))
     $('#ringBtn').setAttribute('aria-pressed', String(GV.armed === 'ring'))
-    const fb = $('#flagBtn'),
-        ft = 'Banner ' + GV.S.banners.length + '/' + MAX_BANNERS
-    fb.setAttribute('aria-pressed', String(GV.armed === 'flag'))
+    const fb = $('#flagN'),
+        ft = GV.S.banners.length + '/' + MAX_BANNERS
+    $('#flagBtn').setAttribute('aria-pressed', String(GV.armed === 'flag'))
     if (fb._t !== ft) {
         fb.textContent = ft
         fb._t = ft
+        $('#flagBtn').setAttribute(
+            'aria-label',
+            'War banner, ' + ft + ' planted'
+        )
     }
     if (
         GV.selected &&
@@ -1562,17 +1603,37 @@ export function hud() {
         pl.hidden = true
     }
     const ins = $('#inspect')
+    // On a phone the inspect sheet and the build tray share the bottom edge.
+    if (GV.selected && GV.palOpen && compact()) {
+        showPal(false)
+    }
     if (GV.selected && !GV.selected.dead) {
         const h = inspectHTML(GV.selected)
         if (h !== GV.lastInspect) {
-            ins.innerHTML = h
+            // Keep the reader's place when the text changes under them.
+            const top = ins.scrollTop
+            ins.innerHTML = GRIP + h
+            portrait(ins, GV.selected)
+            ins.scrollTop = top
             GV.lastInspect = h
+        }
+        if (ins.hidden) {
+            ins.scrollTop = 0
         }
         ins.hidden = false
     } else {
         ins.hidden = true
         GV.lastInspect = ''
+        GV.inspBig = false
+        ins.classList.remove('big')
     }
+    // The frame hides what is not needed now (see style.css).
+    const app = $('#app'),
+        mode = GV.armed ? 'placing' : GV.selected ? 'inspect' : ''
+    if (app.dataset.mode !== mode) {
+        app.dataset.mode = mode
+    }
+    app.classList.toggle('compact', compact())
     const evEl = $('#event')
     if (GV.S.ev) {
         const ev = GV.S.ev
@@ -1623,14 +1684,44 @@ export function hud() {
                 String(+b.dataset.speed === GV.speed)
             )
         )
+    const pz = $('[data-speed="0"]'),
+        paused = GV.speed === 0
+    if (pz._p !== paused) {
+        pz._p = paused
+        pz.innerHTML = paused ? HI.play : HI.pause
+        pz.setAttribute('aria-label', paused ? 'Go on' : 'Pause')
+        pz.title = paused ? 'Go on (Space)' : 'Pause (Space)'
+    }
+    const sc = $('#speedCyc'),
+        st = (paused ? GV.lastSpeed || 1 : GV.speed) + '×'
+    if (sc._t !== st) {
+        sc._t = st
+        sc.textContent = st
+        sc.setAttribute('aria-label', 'Game speed ' + st)
+    }
     ecoHud()
     drawMini()
 }
-document.querySelectorAll<HTMLElement>('[data-speed]').forEach((b?) =>
-    b.addEventListener('click', () => {
-        GV.speed = +b.dataset.speed
-        hud()
-    })
+GV.hud = hud
+GV.lastSpeed = 1
+/* Pause toggles: a second press goes on at the speed from before. */
+export function setSpeed(n?) {
+    if (n === 0 && GV.speed === 0) {
+        n = GV.lastSpeed || 1
+    }
+    if (GV.speed > 0) {
+        GV.lastSpeed = GV.speed
+    }
+    GV.speed = n
+    hud()
+}
+document
+    .querySelectorAll<HTMLElement>('[data-speed]')
+    .forEach((b?) =>
+        b.addEventListener('click', () => setSpeed(+b.dataset.speed))
+    )
+$('#speedCyc').addEventListener('click', () =>
+    setSpeed(GV.speed === 0 ? GV.lastSpeed || 1 : (GV.speed % 3) + 1)
 )
 export function bindDiff(input?, onPick?) {
     const box = input.closest('.diff')

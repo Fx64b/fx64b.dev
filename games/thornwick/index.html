@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta
             name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
         />
         <title>Thornwick: castle and village builder</title>
         <script>
@@ -26,64 +26,216 @@
             ></canvas>
 
             <header id="bar">
-                <h1>Thornwick</h1>
+                <h1 class="sr">Thornwick</h1>
                 <ul id="res" aria-label="Stores">
-                    <li title="Food">
-                        <span data-ic="food"></span><span id="r-food">0</span>
+                    <li class="pill" title="Food">
+                        <span class="ic" data-ic="food"></span
+                        ><span id="r-food">0</span>
                     </li>
-                    <li title="Wood">
-                        <span data-ic="wood"></span><span id="r-wood">0</span>
+                    <li class="pill" title="Wood">
+                        <span class="ic" data-ic="wood"></span
+                        ><span id="r-wood">0</span>
                     </li>
-                    <li title="Stone">
-                        <span data-ic="stone"></span><span id="r-stone">0</span>
+                    <li class="pill" title="Stone">
+                        <span class="ic" data-ic="stone"></span
+                        ><span id="r-stone">0</span>
                     </li>
-                    <li title="Gold">
-                        <span data-ic="gold"></span><span id="r-gold">0</span>
+                    <li class="pill" title="Gold">
+                        <span class="ic" data-ic="gold"></span
+                        ><span id="r-gold">0</span>
                     </li>
-                    <li title="People, out of housing">
-                        <span data-ic="people"></span
-                        ><span id="r-pop">0/0</span>
+                    <li class="pill pop" title="People, out of housing">
+                        <span class="ic" data-ic="people"></span
+                        ><span id="r-pop">0/0</span
+                        ><i class="fill" aria-hidden="true"
+                            ><i id="r-popf"></i
+                        ></i>
                     </li>
-                    <li title="Soldiers">
-                        <span data-ic="shield"></span><span id="r-sold">0</span>
-                    </li>
-                    <li id="clock" title="Season and time of day">
-                        <span id="r-clock"></span>
+                    <li class="pill" title="Soldiers">
+                        <span class="ic" data-ic="shield"></span
+                        ><span id="r-sold">0</span>
                     </li>
                 </ul>
-                <ul id="goods" aria-label="Goods"></ul>
+                <div id="sub">
+                    <span
+                        id="clock"
+                        class="pill soft"
+                        title="Season and time of day"
+                        ><span id="r-clock"></span
+                    ></span>
+                    <button
+                        class="pill soft tog"
+                        id="goodsBtn"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="goods"
+                        title="Goods in store"
+                    >
+                        <span data-hi="goods"></span
+                        ><span class="wl">Goods</span>
+                    </button>
+                    <ul id="goods" aria-label="Goods"></ul>
+                    <button
+                        class="pill soft mood"
+                        id="moodBtn"
+                        type="button"
+                        title="How content the villagers are. Tap for their needs."
+                    >
+                        <span id="g-moodic"></span><span id="g-mood"></span>
+                    </button>
+                </div>
                 <div id="ctl">
-                    <div class="seg" role="group" aria-label="Game speed">
-                        <button class="btn" data-speed="0">Pause</button>
+                    <div class="seg speed" role="group" aria-label="Game speed">
+                        <button class="btn" data-speed="0" aria-label="Pause">
+                            <span data-hi="pause"></span>
+                        </button>
+                        <button
+                            class="btn compactonly"
+                            id="speedCyc"
+                            title="Game speed"
+                            aria-label="Game speed"
+                        >
+                            1×
+                        </button>
                         <button class="btn" data-speed="1">1×</button>
                         <button class="btn" data-speed="2">2×</button>
                         <button class="btn" data-speed="3">3×</button>
                     </div>
-                    <button class="btn grow" id="realmBtn">Realm</button>
-                    <button class="btn" id="helpBtn">How to play</button>
-                    <button class="btn" id="newBtn">New kingdom</button>
+                    <button class="btn wideonly" id="realmBtn">
+                        <span data-hi="realm"></span>Realm
+                    </button>
+                    <button class="btn wideonly" id="helpBtn">
+                        How to play
+                    </button>
+                    <button class="btn wideonly" id="newBtn">
+                        New kingdom
+                    </button>
+                    <button
+                        class="btn icon compactonly"
+                        id="menuBtn"
+                        aria-label="Menu"
+                        aria-expanded="false"
+                        aria-controls="menu"
+                    >
+                        <span data-hi="menu"></span>
+                    </button>
                 </div>
             </header>
+            <div id="menu" class="pop-menu" hidden role="menu">
+                <button class="btn" role="menuitem" data-proxy="realmBtn">
+                    <span data-hi="realm"></span>The realm
+                </button>
+                <button class="btn" role="menuitem" data-proxy="helpBtn">
+                    <span data-hi="help"></span>How to play
+                </button>
+                <button class="btn" role="menuitem" data-proxy="newBtn">
+                    <span data-hi="crown"></span>New kingdom
+                </button>
+            </div>
 
             <div id="pennant">
                 <span id="p1"></span><b id="p2"></b><span id="p3"></span>
             </div>
-            <aside id="palette" aria-label="Buildings">
-                <div id="tabs">
-                    <button class="btn" data-tab="0">Village</button>
-                    <button class="btn" data-tab="1">Castle</button>
-                    <button class="btn" data-tab="3">Industry</button>
-                    <button class="btn" data-tab="2">Decor</button>
+
+            <div id="mapbox">
+                <canvas
+                    id="mini"
+                    width="448"
+                    height="224"
+                    aria-label="Map of the realm. Tap to move the view."
+                ></canvas>
+                <div id="alerts" role="group" aria-label="Alerts">
+                    <button
+                        class="rb"
+                        id="al-idle"
+                        title="Jump to idle villagers (I)"
+                        aria-label="Idle villagers"
+                        disabled
+                    >
+                        <span data-hi="idle"></span><b class="badge"></b>
+                    </button>
+                    <button
+                        class="rb"
+                        id="al-empty"
+                        title="Jump to workplaces with no workers (E)"
+                        aria-label="Empty workplaces"
+                        disabled
+                    >
+                        <span data-hi="empty"></span><b class="badge"></b>
+                    </button>
+                    <button
+                        class="rb"
+                        id="al-fire"
+                        title="Jump to buildings on fire (F)"
+                        aria-label="Fires"
+                        disabled
+                    >
+                        <span data-hi="fire"></span><b class="badge"></b>
+                    </button>
+                    <button
+                        class="rb"
+                        id="al-atk"
+                        title="Jump to the latest attack (A)"
+                        aria-label="Attack"
+                        disabled
+                    >
+                        <span data-hi="atk"></span><b class="badge"></b>
+                    </button>
+                    <button
+                        class="rb"
+                        id="al-log"
+                        title="Message log (L)"
+                        aria-label="Message log"
+                        aria-pressed="false"
+                    >
+                        <span data-hi="log"></span><b class="badge"></b>
+                    </button>
+                </div>
+            </div>
+
+            <nav id="dock" aria-label="Commands">
+                <button
+                    class="fab"
+                    id="armyBtn"
+                    aria-pressed="false"
+                    title="Army and orders"
+                >
+                    <span data-hi="army"></span><span class="lb">Army</span>
+                </button>
+                <button class="fab" id="flagBtn" aria-pressed="false">
+                    <span data-hi="banner"></span><span class="lb">Banner</span
+                    ><b class="badge" id="flagN">0/4</b>
+                </button>
+                <button
+                    class="fab big"
+                    id="buildBtn"
+                    aria-expanded="false"
+                    aria-controls="palette"
+                    title="Buildings (B)"
+                >
+                    <span data-hi="build"></span><span class="lb">Build</span>
+                </button>
+            </nav>
+
+            <aside id="palette" aria-label="Buildings" hidden>
+                <div class="phead">
+                    <div id="tabs" role="group" aria-label="Kind of building">
+                        <button class="btn" data-tab="0">Village</button>
+                        <button class="btn" data-tab="1">Castle</button>
+                        <button class="btn" data-tab="3">Industry</button>
+                        <button class="btn" data-tab="2">Decor</button>
+                    </div>
+                    <button
+                        class="btn x"
+                        id="palClose"
+                        aria-label="Close the buildings"
+                    >
+                        <span data-hi="close"></span>
+                    </button>
                 </div>
                 <div id="tools">
-                    <button class="btn" id="armyBtn" aria-pressed="false">
-                        Army
-                    </button>
-                    <button class="btn" id="flagBtn" aria-pressed="false">
-                        Banner
-                    </button>
                     <button class="btn" id="rm" aria-pressed="false">
-                        Remove
+                        <span data-hi="remove"></span>Remove
                     </button>
                     <button
                         class="btn"
@@ -91,59 +243,12 @@
                         aria-pressed="false"
                         title="Lay a whole ring of wall round a point, with a gatehouse"
                     >
-                        Wall ring
+                        <span data-hi="ring"></span>Wall ring
                     </button>
                 </div>
                 <div id="cards"></div>
             </aside>
-            <canvas
-                id="mini"
-                width="448"
-                height="224"
-                aria-label="Map of the realm. Tap to move the view."
-            ></canvas>
-            <div id="alerts" role="group" aria-label="Alerts">
-                <button
-                    class="btn"
-                    id="al-idle"
-                    title="Jump to idle villagers (I)"
-                    disabled
-                >
-                    Idle
-                </button>
-                <button
-                    class="btn"
-                    id="al-empty"
-                    title="Jump to workplaces with no workers (E)"
-                    disabled
-                >
-                    Empty
-                </button>
-                <button
-                    class="btn"
-                    id="al-fire"
-                    title="Jump to buildings on fire (F)"
-                    disabled
-                >
-                    Fire
-                </button>
-                <button
-                    class="btn"
-                    id="al-atk"
-                    title="Jump to the latest attack (A)"
-                    disabled
-                >
-                    Attack
-                </button>
-                <button
-                    class="btn"
-                    id="al-log"
-                    title="Message log (L)"
-                    aria-pressed="false"
-                >
-                    Log
-                </button>
-            </div>
+
             <section id="log" hidden aria-label="Message log">
                 <div class="head">
                     <h2>Messages</h2>
@@ -152,7 +257,7 @@
                         id="logClose"
                         aria-label="Close the log"
                     >
-                        ✕
+                        <span data-hi="close"></span>
                     </button>
                 </div>
                 <ol id="logList"></ol>
@@ -161,8 +266,15 @@
             <section id="inspect" hidden aria-live="polite"></section>
             <div id="toasts" role="status" aria-live="polite"></div>
             <div id="placing" hidden>
-                <span id="placingText"></span
-                ><button class="btn primary" id="placingDone">Done</button>
+                <span id="placingText"></span>
+                <button
+                    class="btn compactonly"
+                    id="placingMore"
+                    aria-label="Show the buildings"
+                >
+                    <span data-hi="build"></span>
+                </button>
+                <button class="btn primary" id="placingDone">Done</button>
             </div>
 
             <div class="veil" id="loading">
@@ -294,10 +406,11 @@
                             Decor tab, or claim new land.
                         </li>
                         <li>
-                            The goods you have show in the second row of the top
-                            bar. Tap "Realm" for charts of your stores, an
-                            overview of all known lords, your villagers' needs
-                            and trade.
+                            The goods you have show under the stores in the top
+                            bar. On a phone, tap the crate to see them. Tap
+                            "Realm" (on a phone, in the menu at the top right)
+                            for charts of your stores, an overview of all known
+                            lords, your villagers' needs and trade.
                         </li>
                     </ul>
 
@@ -514,10 +627,18 @@
                     <h3>Controls</h3>
                     <ul>
                         <li>
+                            The round buttons at the bottom right are your
+                            commands. Build (key B) opens the buildings, Army
+                            shows your soldiers and orders, and Banner plants a
+                            war banner.
+                        </li>
+                        <li>
                             Drag a building card onto the map, or tap a card and
-                            then tap tiles. Walls, moats and stakes: drag to
-                            paint a line. Cottages, farms, wells and
-                            watchtowers: drag to lay a row with a gap between.
+                            then tap tiles. On a phone, the buildings close when
+                            you choose one; the hammer next to Done opens them
+                            again. Walls, moats and stakes: drag to paint a
+                            line. Cottages, farms, wells and watchtowers: drag
+                            to lay a row with a gap between.
                         </li>
                         <li>
                             "Wall ring" lays a whole ring of palisade or stone
@@ -529,12 +650,13 @@
                         </li>
                         <li>
                             Tap a building to see what it does, how well it
-                            works and what you can do with it.
+                            works and what you can do with it. On a phone, the
+                            arrow on top of the panel makes it taller.
                         </li>
                         <li>
                             Drag the map to move. Scroll, pinch or press + and −
-                            to zoom. Esc cancels. Use the speed buttons to pause
-                            or go faster.
+                            to zoom. Esc cancels. Use the speed buttons at the
+                            top to pause (Space) or go faster.
                         </li>
                         <li>
                             Tap or drag on the small map in the corner to jump
@@ -542,10 +664,12 @@
                             begins, orange rings a fire.
                         </li>
                         <li>
-                            The buttons under the small map jump to idle
+                            The round buttons next to the small map jump to idle
                             villagers (key I), workplaces with no one at work
                             (E), fires (F) and the latest attack (A). Press
-                            again for the next one. Log (L) keeps every message.
+                            again for the next one. The scroll (L) keeps every
+                            message. On a phone, only the alerts with something
+                            to show appear.
                         </li>
                     </ul>
                     <p class="note">

@@ -201,28 +201,41 @@ export function jump(kind?) {
     }
     hud()
 }
-const LABEL = { idle: 'Idle', empty: 'Empty', fire: 'Fire', atk: 'Attack' }
+const LABEL = {
+    idle: 'Idle villagers',
+    empty: 'Empty workplaces',
+    fire: 'Fires',
+    atk: 'Attack',
+}
+function badge(el?, txt?, label?) {
+    if (el._t === txt) {
+        return
+    }
+    el._t = txt
+    el.querySelector('.badge').textContent = txt
+    el.setAttribute('aria-label', label + (txt ? ': ' + txt : ''))
+}
 export function alertsHud() {
     if (!GV.S) {
         return
     }
     for (const k in LABEL) {
         const el = $('#al-' + k)
-        const n = matches(k).length,
-            txt = LABEL[k] + (n && k !== 'atk' ? ' ' + n : '')
-        if (el._t !== txt) {
-            el.textContent = txt
-            el._t = txt
-        }
+        const n = matches(k).length
+        badge(
+            el,
+            n && k !== 'atk' ? String(Math.min(99, n)) : n ? '!' : '',
+            LABEL[k]
+        )
         el.disabled = !n
         el.classList.toggle('hot', !!n && (k === 'fire' || k === 'atk'))
     }
-    const lb = $('#al-log'),
-        lt = GV.logUnread ? 'Log ' + Math.min(99, GV.logUnread) : 'Log'
-    if (lb._t !== lt) {
-        lb.textContent = lt
-        lb._t = lt
-    }
+    const lb = $('#al-log')
+    badge(
+        lb,
+        GV.logUnread ? String(Math.min(99, GV.logUnread)) : '',
+        'Message log'
+    )
     lb.setAttribute('aria-pressed', String(GV.logOpen))
 }
 for (const k in LABEL) {

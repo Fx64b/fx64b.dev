@@ -60,20 +60,17 @@ const MAKER = {
 GV.goodsEls = null
 function goodsRow() {
     const ul = $('#goods')
-    ul.innerHTML =
-        GOODS.map(
-            (g?) =>
-                '<li title="' +
-                GOOD[g].name +
-                '" hidden>' +
-                ICON[g] +
-                '<span id="g-' +
-                g +
-                '">0</span></li>'
-        ).join('') +
-        '<li class="moodli"><button class="btn mood" id="moodBtn" type="button" title="How content the villagers are. Tap for their needs.">' +
-        (ICON as any).mood +
-        '<span id="g-mood"></span></button></li>'
+    ul.innerHTML = GOODS.map(
+        (g?) =>
+            '<li class="pill soft" title="' +
+            GOOD[g].name +
+            '" hidden>' +
+            ICON[g] +
+            '<span id="g-' +
+            g +
+            '">0</span></li>'
+    ).join('')
+    $('#g-moodic').innerHTML = (ICON as any).mood
     GV.goodsEls = GOODS.map((g?) => [g, $('#g-' + g), $('#g-' + g).parentNode])
     $('#moodBtn').addEventListener('click', () => openRealm('people'))
 }
