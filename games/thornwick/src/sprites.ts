@@ -1,5 +1,5 @@
 import { DEF, FCOL } from './config'
-import { C, grade, hsh, tw } from './noise'
+import { C, grade, hsh, tw, vnoise } from './noise'
 import { ecoRecipe } from './sprites-eco'
 import { GV } from './vars'
 
@@ -338,6 +338,191 @@ export function blob(cx?, cy?, cz?, r?, rz?, tex?) {
         }
     }
 }
+/* Rock: tone patches, specks, thin cracks and spots of lichen. U, V in texels. */
+export function rockTex(base?, U?, V?, s?) {
+    const n = hsh(U >> 2, V >> 2, s),
+        h = hsh(U, V, s + 1)
+    let f = n < 0.25 ? 0.9 : n > 0.8 ? 1.07 : 1
+    if (h < 0.06) {
+        f *= 0.86
+    } else if (h > 0.95) {
+        f *= 1.1
+    }
+    if (
+        (U + (V >> 1) * 3 + ((hsh(V >> 3, 0, s + 4) * 9) | 0)) % 23 === 0 &&
+        hsh(U >> 3, V >> 3, s + 2) < 0.55
+    ) {
+        f *= 0.62
+    }
+    if (hsh(U >> 1, V >> 1, s + 3) < 0.012) {
+        return 0xb3ad72
+    }
+    return tw(base, f)
+}
+/* A rough rock: a convex shape cut by a few random planes, so each face is
+   flat and lit on its own, with a light rim on edges that face up and a dark
+   crease on those that face down. Moss grows on faces that look at the sky. */
+export function chunk(cx?, cy?, cz?, r?, rz?, base?, seed?, moss?) {
+    moss = moss === undefined ? 0.35 : moss
+    const P = []
+    const n = 8
+    for (let k = 0; k < n; k++) {
+        const az = (k / n) * 6.2832 + hsh(k, 1, seed) * 0.7,
+            el = hsh(k, 2, seed) * 0.95 - 0.1,
+            d = 0.8 + hsh(k, 3, seed) * 0.24
+        P.push([
+            Math.cos(el) * Math.cos(az),
+            Math.cos(el) * Math.sin(az),
+            Math.sin(el),
+            d,
+        ])
+    }
+    // Two faces on top, tilted a little, and a floor.
+    for (let k = 0; k < 2; k++) {
+        const az = hsh(k, 4, seed) * 6.2832,
+            el = 1.05 + hsh(k, 5, seed) * 0.4
+        P.push([
+            Math.cos(el) * Math.cos(az),
+            Math.cos(el) * Math.sin(az),
+            Math.sin(el),
+            0.78 + hsh(k, 6, seed) * 0.12,
+        ])
+    }
+    P.push([0, 0, -1, 0.35])
+    const st = 0.42 / Math.max(r, rz) / R
+    for (let b = -0.5; b <= 1.57; b += st) {
+        const cb = Math.cos(b),
+            sb = Math.sin(b)
+        for (let a = 0; a < 6.2832; a += st / Math.max(0.2, cb)) {
+            const dx = cb * Math.cos(a),
+                dy = cb * Math.sin(a)
+            let t = 9,
+                t2 = 9,
+                j = -1
+            for (let k = 0; k < P.length; k++) {
+                const q = P[k],
+                    dot = q[0] * dx + q[1] * dy + q[2] * sb
+                if (dot <= 0.001) {
+                    continue
+                }
+                const tk = q[3] / dot
+                if (tk < t) {
+                    t2 = t
+                    t = tk
+                    j = k
+                } else if (tk < t2) {
+                    t2 = tk
+                }
+            }
+            if (j < 0 || t > 1.6) {
+                continue
+            }
+            // The face's normal, bent by the rock's own proportions.
+            const q = P[j],
+                mx = q[0] / r,
+                my = q[1] / r,
+                mz = q[2] / rz,
+                ml = Math.hypot(mx, my, mz),
+                nx = mx / ml,
+                ny = my / ml,
+                nz = mz / ml
+            // The same light as the buildings: top 1.12, left 0.95, right 0.72.
+            let l =
+                0.8 +
+                0.32 * nz +
+                0.15 * ny -
+                0.08 * nx +
+                (hsh(j, 7, seed) - 0.5) * 0.2
+            if (t2 - t < 0.025) {
+                l *= nz > 0.3 ? 1.18 : 0.74
+            }
+            const U = (a * r * R) | 0,
+                V = ((b + 1.6) * r * R) | 0
+            let c = rockTex(base, U, V, seed)
+            if (
+                nz > 0.55 &&
+                vnoise(U / 5, V / 4, seed + 5) < moss * (nz + 0.1)
+            ) {
+                c = hsh(U, V, seed + 6) < 0.3 ? 0x6f8a44 : 0x58763a
+            }
+            plot(
+                cx + r * t * dx,
+                cy + r * t * dy,
+                cz + rz * t * sb,
+                c,
+                quant(l)
+            )
+        }
+    }
+}
+/* A crown of leaves: bumpy at the edge, with clumps that catch the light and
+   dark gaps between them. */
+export function foliage(cx?, cy?, cz?, r?, rz?, tex?, seed?) {
+    const st = 0.5 / r / R
+    for (let b = -1.57; b <= 1.57; b += st) {
+        const cb = Math.cos(b),
+            sb = Math.sin(b)
+        for (let a = 0; a < 6.2832; a += st / Math.max(0.2, cb)) {
+            const nx = cb * Math.cos(a),
+                ny = cb * Math.sin(a),
+                k = 2.6 / Math.max(2.5, r),
+                cl = vnoise(
+                    (nx * r) / 1.6 + seed,
+                    (ny * r) / 1.6 + (sb * rz) / 1.6,
+                    seed
+                ),
+                lump = 1 + 0.16 * (cl - 0.45) * k * 2.2
+            const c = tex(
+                (a * r) | 0,
+                ((b + 1.6) * r) | 0,
+                0,
+                0,
+                (a * r * R) | 0,
+                ((b + 1.6) * r * R) | 0
+            )
+            if (c < 0) {
+                continue
+            }
+            plot(
+                cx + r * lump * nx,
+                cy + r * lump * ny,
+                cz + rz * lump * sb,
+                c,
+                quant(
+                    0.6 + 0.32 * sb + 0.2 * ny - 0.14 * nx + (cl - 0.5) * 0.42
+                )
+            )
+        }
+    }
+}
+/* One tier of a pine: a cone whose lower edge breaks into branch tips. */
+export function pineTier(cx?, cy?, r?, z0?, h?, tex?, seed?) {
+    const st = 0.45 / r / R,
+        sl = Math.hypot(r, h),
+        tips = 9 + ((hsh(seed, 1, 2) * 3) | 0)
+    for (let a = 0; a < 6.2832; a += st) {
+        const ca = Math.cos(a),
+            sa = Math.sin(a),
+            ph = (a / 6.2832) * tips + hsh(seed, 3, 4),
+            tip = 1 - Math.abs((ph % 1) - 0.5) * 2,
+            u = (a * r) | 0,
+            U = (a * r * R) | 0,
+            base = cylLight(a) + 0.06
+        for (let s2 = SS / 2; s2 < sl; s2 += SS) {
+            const k = s2 / sl,
+                edge = k < 0.3 ? (0.3 - k) / 0.3 : 0,
+                rr = r * (1 - k) * (1 + 0.16 * tip * edge),
+                zz = z0 + h * k - 0.9 * tip * edge
+            plot(
+                cx + rr * ca,
+                cy + rr * sa,
+                zz,
+                tex(u, s2 | 0, 0, 0, U, (s2 * R) | 0),
+                quant(base + (tip - 0.5) * 0.14 * (k < 0.5 ? 1 : 0.4))
+            )
+        }
+    }
+}
 export function line3(a?, b?, c?, l?, thick?) {
     const n = Math.ceil(
         Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]) * 2 * R
@@ -460,11 +645,36 @@ export function finish() {
             }
         }
     }
+    // Inner outlines: where a nearer part stands in front of a farther one
+    // (a roof over its wall, leaves over a trunk), the farther side of the
+    // step gets a darker edge.
+    const zb = s.zb,
+        STEP = 2.6
+    for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+            const i = x + y * w
+            if (!op(i) || edge[i]) {
+                continue
+            }
+            const z = zb[i]
+            if (
+                (op(i - w) && zb[i - w] - z > STEP) ||
+                (op(i - 1) && zb[i - 1] - z > STEP) ||
+                (op(i + 1) && zb[i + 1] - z > STEP)
+            ) {
+                edge[i] = 2
+            }
+        }
+    }
     for (let i = 0; i < w * h; i++) {
-        if (edge[i]) {
+        if (edge[i] === 1) {
             px[i * 4] *= 0.38
             px[i * 4 + 1] *= 0.38
             px[i * 4 + 2] *= 0.46
+        } else if (edge[i] === 2) {
+            px[i * 4] *= 0.72
+            px[i * 4 + 1] *= 0.72
+            px[i * 4 + 2] *= 0.78
         }
     }
     if (s.size === 1) {
@@ -1261,6 +1471,128 @@ export function recipe(t?, o?) {
                 (u?, v?) => (v === 1 ? 0x4a3828 : C.wood),
                 TX.flat(tw(C.wood, 1.1))
             )
+            break
+        }
+        case 'cathedral': {
+            // Raised in stages: 0 the footings, then walls, roof, towers
+            // and at last the spires.
+            // Pale limestone, so it stands apart from the grey keep, and
+            // spires sheathed in green copper.
+            const sg = o.st || 0,
+                lime = TX.stone(0xcdc3a8, 48),
+                lime2 = TX.stone(0xb8ad92, 49),
+                limeTop = TX.speck(0xc4b99d, 50),
+                slate = TX.shingle(C.slate, 47),
+                copper = TX.shingle(0x5f9a86, 51),
+                glass = (u?, v?, nu?, nv?) =>
+                    v === nv - 1 || u === 0 || u === nu - 1
+                        ? C.stone2
+                        : [0xe9b949, 0x4f8fd0, C.madder, 0x5fae5a][
+                              (u + v * 2) % 4
+                          ]
+            const wood = 0x7a5a36,
+                pole = (x?, y?, z1?) => line3([x, y, 0], [x, y, z1], wood, 1)
+            const scaff = (x0?, y0?, x1?, y1?, z1?) => {
+                for (const [x, y] of [
+                    [x0, y0],
+                    [x1, y0],
+                    [x0, y1],
+                    [x1, y1],
+                    [(x0 + x1) / 2, y1],
+                    [x1, (y0 + y1) / 2],
+                ]) {
+                    pole(x, y, z1)
+                }
+                for (let z = 4; z <= z1; z += 4) {
+                    line3([x0, y1, z], [x1, y1, z], tw(wood, 1.1), 1)
+                    line3([x1, y0, z], [x1, y1, z], tw(wood, 0.9), 1)
+                }
+            }
+            shadow(-6, -6, 22, 22)
+            if (sg === 0) {
+                box(2, -4, 14, 20, 0, 1.4, lime2, limeTop)
+                box(-1, 15, 4.5, 21, 0, 2, lime2, limeTop)
+                box(11.5, 15, 17, 21, 0, 2, lime2, limeTop)
+                box(5, 3, 11, 9, 0, 1.6, lime2, limeTop)
+                scaff(1, -5, 15, 21, 8)
+                // Cut stone waiting by the footings.
+                box(16, 4, 19, 7, 0, 1.6, lime, limeTop)
+                box(17, 8, 19.5, 10.5, 0, 1.6, lime, limeTop)
+                box(16.5, 5, 18.5, 6.5, 1.6, 3, lime, limeTop)
+                break
+            }
+            const WH = sg === 1 ? 10 : 16
+            const nave = box(
+                2,
+                -4,
+                14,
+                20,
+                0,
+                WH,
+                lime,
+                sg === 1 ? TX.flat(0x4a443c) : limeTop
+            )
+            // Tall windows of coloured glass down the side, and buttresses.
+            for (let k = 0; k < 4; k++) {
+                nave.R(3 + k * 5, 3, 1.6, Math.min(7, WH - 4), glass)
+                box(
+                    14,
+                    -2.6 + k * 5,
+                    15.4,
+                    -1.4 + k * 5,
+                    0,
+                    WH - 3,
+                    lime2,
+                    limeTop
+                )
+            }
+            nave.L(4.5, 0, 3, 6, TX.door(3, 6))
+            if (sg >= 2) {
+                nave.L(4.4, 8, 3.2, 3.6, glass)
+                gable(1.2, -4.6, 14.8, 20.6, WH - 0.4, 9, slate, lime, 'y', 0.8)
+            }
+            const TWH = sg === 1 ? 9 : sg === 2 ? 18 : 31
+            for (const [x0, x1] of [
+                [-1, 4.5],
+                [11.5, 17],
+            ]) {
+                const tw2 = box(x0, 15, x1, 21, 0, TWH, lime, limeTop)
+                tw2.L(1.8, TWH - 6, 1.6, 3, sg >= 3 ? glass : TX.flat(C.dark))
+                if (sg >= 3) {
+                    tw2.R(2, 14, 1.6, 4, TX.flat(C.dark))
+                    tw2.L(1.8, 8, 1.6, 3, TX.flat(C.dark))
+                }
+                if (sg >= 3 && sg < 4) {
+                    crenRect(x0, 15, x1, 21, TWH, lime)
+                }
+                if (sg >= 4) {
+                    pyramid(x0 - 0.4, 14.6, x1 + 0.4, 21.4, TWH, 17, copper)
+                    const mx = (x0 + x1) / 2
+                    line3([mx, 18, TWH + 17], [mx, 18, TWH + 21], C.gold, 1)
+                    line3(
+                        [mx - 1.2, 18, TWH + 19.5],
+                        [mx + 1.2, 18, TWH + 19.5],
+                        C.gold,
+                        1
+                    )
+                }
+            }
+            if (sg >= 2) {
+                const CTH = sg === 2 ? WH + 6 : 30
+                box(5, 3, 11, 9, WH, CTH, lime, limeTop)
+                if (sg >= 4) {
+                    pyramid(4.6, 2.6, 11.4, 9.4, CTH, 14, copper)
+                    line3([8, 6, CTH + 14], [8, 6, CTH + 17], C.gold, 1)
+                } else if (sg === 3) {
+                    crenRect(5, 3, 11, 9, CTH, lime)
+                }
+            }
+            if (sg >= 4) {
+                flag(-1.4, 15.4, 31, 7, FC, f, C.gold)
+            }
+            if (sg <= 2) {
+                scaff(-2, 14, 18, 22, sg === 1 ? 12 : 20)
+            }
             break
         }
         case 'chapel': {
@@ -2136,10 +2468,10 @@ export function recipeProp(kind?, v?, se?) {
             const c = v ? 0x356f4f : C.pine,
                 tx = TX.leaf(c, 70 + v),
                 s = v ? 1.12 : 1
-            box(-0.9, -0.9, 0.9, 0.9, 0, 5, TX.flat(C.bark))
-            cone(0, 0, 5.6 * s, 3.5, 8 * s, tx)
-            cone(0, 0, 4.4 * s, 8.5 * s, 7.5 * s, tx)
-            cone(0, 0, 3.1 * s, 13.5 * s, 7 * s, tx)
+            box(-0.9, -0.9, 0.9, 0.9, 0, 5, TX.plank(C.bark, 71))
+            pineTier(0, 0, 5.6 * s, 3.5, 8 * s, tx, 1 + v)
+            pineTier(0, 0, 4.4 * s, 8.5 * s, 7.5 * s, tx, 3 + v)
+            pineTier(0, 0, 3.1 * s, 13.5 * s, 7 * s, tx, 5 + v)
         } else if (se === 3) {
             const bc = v === 3 ? 0xd9d4c4 : C.bark,
                 tw2 = v === 3 ? 0x8a8478 : 0x6a5040
@@ -2175,10 +2507,10 @@ export function recipeProp(kind?, v?, se?) {
         } else if (v === 2) {
             cyl(0, 0, 1.3, 0, 7, TX.plank(C.bark, 72))
             const tx = lf(C.leaf, 73)
-            blob(0, 0, 12.5, 5.6, 5.2, tx)
-            blob(-3, 2, 9.5, 3.6, 3.2, tx)
-            blob(3, -1.5, 10.5, 3.9, 3.4, lf(0x4c9a40, 74))
-            blob(0.5, 1.5, 16.5, 3.4, 2.8, lf(0x4c9a40, 75))
+            foliage(0, 0, 12.5, 5.6, 5.2, tx, 11)
+            foliage(-3, 2, 9.5, 3.6, 3.2, tx, 12)
+            foliage(3, -1.5, 10.5, 3.9, 3.4, lf(0x4c9a40, 74), 13)
+            foliage(0.5, 1.5, 16.5, 3.4, 2.8, lf(0x4c9a40, 75), 14)
             if (se === 3) {
                 line3([0, 0, 7], [-3, 2, 12], C.bark, 1)
                 line3([0, 0, 7], [3, -1, 13], C.bark, 1)
@@ -2189,9 +2521,9 @@ export function recipeProp(kind?, v?, se?) {
                 v2 % 3 === 1 ? 0x6b6a60 : 0xe4e0d2
             )
             const tx = lf(C.leaf2, 76)
-            blob(0, 0, 13, 4.4, 5.6, tx)
-            blob(-2, 1, 10, 3, 3, lf(0x6fae44, 77))
-            blob(1.5, -0.5, 17, 2.8, 2.6, lf(0x6fae44, 78))
+            foliage(0, 0, 13, 4.4, 5.6, tx, 15)
+            foliage(-2, 1, 10, 3, 3, lf(0x6fae44, 77), 16)
+            foliage(1.5, -0.5, 17, 2.8, 2.6, lf(0x6fae44, 78), 17)
             if (se === 0) {
                 blob(0, 0, 13.2, 4.5, 5.7, (u?, v2?) =>
                     hsh(u, v2, 79) < 0.1 ? 0xf6d3de : -1
@@ -2205,20 +2537,33 @@ export function recipeProp(kind?, v?, se?) {
         }
     } else {
         shadow(-5, -5, 5, 5)
-        const a = TX.stone(0x8c8b83, 80 + v),
-            b2 = TX.speck(0x9a9990, 82)
+        // Three kinds of outcrop, each in its own shade of grey.
+        const g = [0x8c8b83, 0x8a8478, 0x828690][v % 3]
         if (v === 0) {
-            blob(-1.5, -1, 2.5, 4.6, 4.2, a)
-            blob(3, 2.5, 1.6, 2.8, 2.6, b2)
-            blob(-4.5, 3, 1, 1.8, 1.6, b2)
+            chunk(-1.5, -1, 0, 4.4, 4.6, g, 80)
+            chunk(3, 2.5, 0, 2.5, 2.4, tw(g, 1.05), 81, 0.2)
+            chunk(-4.4, 3, 0, 1.6, 1.4, tw(g, 0.95), 82, 0.1)
         } else if (v === 1) {
-            box(-4.5, -4, 1, 1.5, 0, 6, a, b2)
-            box(-2, -1, 3.5, 4.5, 0, 3.6, a, b2)
-            blob(4.5, -2, 1.4, 2.3, 2.2, b2)
+            // A tall, broken slab with a smaller block leaning on it.
+            chunk(-2, -1.5, 0, 3.4, 7, g, 83, 0.25)
+            chunk(1.8, 1.4, 0, 2.9, 3, tw(g, 1.04), 84)
+            chunk(4.4, -2.2, 0, 1.7, 1.5, tw(g, 0.96), 85, 0.1)
         } else {
-            blob(0, 0, 3.2, 5.2, 5.4, a)
-            blob(-3.6, 3.4, 1.4, 2.4, 2.2, b2)
-            blob(4.2, 1, 1.2, 2, 2, a)
+            chunk(0, 0, 0, 5, 4.4, g, 86, 0.45)
+            chunk(-3.6, 3.4, 0, 2.2, 2, tw(g, 1.05), 87, 0.2)
+            chunk(4.2, 1, 0, 1.8, 1.7, g, 88, 0.15)
+        }
+        // Gravel at the foot.
+        for (let k = 0; k < 7; k++) {
+            const a = hsh(v, k, 89) * 6.28,
+                d = 4.6 + hsh(k, v, 90) * 1.6
+            plot(
+                Math.cos(a) * d,
+                Math.sin(a) * d,
+                0.05,
+                tw(g, 0.9 + hsh(k, 1, 91) * 0.3),
+                1
+            )
         }
     }
 }

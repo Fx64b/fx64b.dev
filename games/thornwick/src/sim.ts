@@ -11,6 +11,7 @@ import {
     tavernTick,
 } from './eco'
 import { startEvent } from './events'
+import { gwTick } from './greatwork'
 import { tintAll } from './ground'
 import {
     cap,
@@ -82,6 +83,7 @@ export function tick(dt?) {
         GV.S.growCd =
             (GV.S.b.some((b?) => b.t === 'chapel' && b.o === 0) ? 3.5 : 6) *
             (se === 3 ? 1.6 : 1) *
+            (GV.S.boon === 'hands' ? 0.75 : 1) *
             growMul()
         if (pop() < cap() && stores() >= 20) {
             spawnVillager(false)
@@ -128,6 +130,7 @@ export function tick(dt?) {
     }
     ecoTick(dt)
     livingTick(dt)
+    gwTick(dt)
     if ((GV.trainCd -= dt) <= 0) {
         GV.trainCd = 2
         for (const b of GV.S.b) {

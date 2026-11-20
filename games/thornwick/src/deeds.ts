@@ -105,6 +105,18 @@ export const DEEDS: Deed[] = [
         prog: () => [GV.keep.lvl >= 3 ? 1 : 0, 1],
     },
     {
+        id: 'stone1',
+        name: 'The first stone',
+        text: 'Lay the footings of the great cathedral.',
+        reward: { gold: 100 },
+        prog: () => [
+            GV.S.b.some((b) => b.o === 0 && b.t === 'cathedral' && !b.dead)
+                ? 1
+                : 0,
+            1,
+        ],
+    },
+    {
         id: 'six',
         name: 'Unbroken',
         text: 'Beat back 6 attacks.',
@@ -121,7 +133,7 @@ export const DEEDS: Deed[] = [
     {
         id: 'crown',
         name: 'The crown',
-        text: 'Take every rival keep once the realm has reached its full size.',
+        text: 'Take every rival keep once the realm has reached its full size, or finish the great cathedral.',
         reward: {},
         prog: () => [GV.S.won ? 1 : 0, 1],
     },
@@ -170,6 +182,7 @@ export function checkDeeds() {
         }
         puff(GV.keep.cx, GV.keep.cy, 10, '#e0b23a')
         GV.deedFlash = 2
+        GV.chron?.('Deed done: ' + d.name.toLowerCase() + '.')
         const rw = rewardText(d.reward)
         toast(
             'Deed done: ' +

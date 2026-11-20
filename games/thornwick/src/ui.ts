@@ -36,6 +36,7 @@ import { checkDeeds, deedHud } from './deeds'
 import { farmYield, workMul } from './eco'
 import { ecoAct, ecoHow, ecoHowMore, ecoHud, ecoInspect } from './ecoui'
 import { pickEvent } from './events'
+import { gwAct, gwInspect } from './greatwork'
 import {
     afford,
     cap,
@@ -80,6 +81,7 @@ import {
     train,
     warCry,
 } from './people'
+import { chronTick, showBoons } from './realm'
 import { propSprite, sprite } from './sprites'
 import {
     addB,
@@ -110,7 +112,7 @@ export function costHTML(cost?) {
         .join('')
 }
 GV.cards = {}
-export function iconFor(t?, g?) {
+export function iconFor(t?, g?, st?) {
     g.imageSmoothingEnabled = false
     if (t === 'moat') {
         g.fillStyle = '#3f86b0'
@@ -132,7 +134,15 @@ export function iconFor(t?, g?) {
     const sp =
         t === 'grove'
             ? propSprite(1, 2, 1)
-            : sprite(t, t === 'wall' || t === 'palisade' ? { m: 3 } : {})
+            : sprite(
+                  t,
+                  t === 'wall' || t === 'palisade'
+                      ? { m: 3 }
+                      : // The build card shows the cathedral finished.
+                        t === 'cathedral'
+                        ? { st: st === undefined ? 4 : st }
+                        : {}
+              )
     const img = sp.full || sp.parts[0].cv,
         w = img.width,
         h = img.height,
@@ -1126,6 +1136,7 @@ export function inspectHTML(sel?) {
             '</p>'
     }
     h += ecoInspect(b)
+    h += gwInspect(b, costHTML)
     h += livingInspectB(b)
     if (b.t === 'gate') {
         h +=
@@ -1329,6 +1340,10 @@ $('#inspect').addEventListener('click', (e?) => {
         hud()
         return
     }
+    if (gwAct(act, b)) {
+        hud()
+        return
+    }
     switch (act) {
         case 'close':
             GV.selected = null
@@ -1477,18 +1492,20 @@ function portrait(box?, sel?) {
     if (!h2) {
         return
     }
-    let url = GV.portraits[t]
+    // The cathedral's picture shows the stage it has reached.
+    const pk = t === 'cathedral' ? t + (sel.stage || 0) : t
+    let url = GV.portraits[pk]
     if (url === undefined) {
         try {
             const c = document.createElement('canvas')
             c.width = 96
             c.height = 88
-            iconFor(t, c.getContext('2d'))
+            iconFor(t, c.getContext('2d'), sel.stage || 0)
             url = c.toDataURL()
         } catch {
             url = ''
         }
-        GV.portraits[t] = url
+        GV.portraits[pk] = url
     }
     if (url) {
         const img = document.createElement('img')
@@ -1723,6 +1740,7 @@ export function hud() {
     ecoHud()
     checkDeeds()
     deedHud()
+    chronTick()
     drawMini()
 }
 GV.hud = hud
@@ -1814,7 +1832,13 @@ export function showNew(on?) {
     $('#newkGo').focus()
 }
 $('#helpBtn').addEventListener('click', () => showHelp(true))
-$('#helpGo').addEventListener('click', () => showHelp(false))
+$('#helpGo').addEventListener('click', () => {
+    showHelp(false)
+    // A new realm starts with the choice of a boon.
+    if (GV.S && !GV.S.boon) {
+        showBoons()
+    }
+})
 $('#newBtn').addEventListener('click', () => showNew(true))
 $('#newkGo').addEventListener('click', () => {
     rememberDiff(+$('#newkDiff').value)
@@ -1845,4 +1869,5 @@ export function restart() {
     centreCam()
     clampCam()
     hud()
+    showBoons()
 }

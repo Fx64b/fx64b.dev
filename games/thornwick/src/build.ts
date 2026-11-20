@@ -1,6 +1,7 @@
 import { plantBanner } from './army'
 import { DEF, KEEP_POP, KEEP_UP, KX, KY, N, TIERS } from './config'
 import { resetSite } from './eco'
+import { gwPlaceErr } from './greatwork'
 import {
     adjWater,
     afford,
@@ -50,6 +51,10 @@ export function rockyAt(x?, y?) {
     return false
 }
 export function placeErr(t?, x?, y?) {
+    const ue = gwPlaceErr(t)
+    if (ue) {
+        return ue
+    }
     const d = DEF[t],
         s = d.size || 1
     for (let j = 0; j < s; j++) {
@@ -303,6 +308,11 @@ export function upgradeKeep() {
                 : '')
     )
     buildCards()
+    GV.chron?.(
+        'The keep was rebuilt as a ' +
+            TIERS[GV.keep.lvl - 1].toLowerCase() +
+            '.'
+    )
 }
 export function demolish(b?) {
     if (b === GV.keep || b.o !== 0) {

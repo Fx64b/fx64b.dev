@@ -77,7 +77,8 @@ export function step(real?) {
         !GV.helpOpen &&
         !GV.overOpen &&
         !GV.newOpen &&
-        !GV.realmOpen
+        !GV.realmOpen &&
+        !GV.boonOpen
     if (run) {
         GV.acc += real * GV.speed
         let n = 0

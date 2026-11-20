@@ -69,6 +69,8 @@ export function bParams(b?) {
         o.v = b.v
     } else if (b.t === 'farm') {
         o.st = sn ? 3 : Math.min(2, (((GV.S.t + b.seed * 18) % 18) / 6) | 0)
+    } else if (b.t === 'cathedral') {
+        o.st = b.stage || 0
     } else if (b.t === 'mill') {
         o.f = reduceMotion ? 0 : ((GV.animT * 5) | 0) % 4
     } else if (

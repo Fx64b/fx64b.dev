@@ -987,6 +987,7 @@ export function rivalFall(rv?, by?) {
     }
     GV.S.conq[rv.r] = 1
     GV.S.taken = (GV.S.taken || 0) + 1
+    GV.chron?.('The keep of ' + rv.name + ' fell to Thornwick.')
     const g = 120 * rv.tier
     GV.S.res.gold += g
     GV.ownDirty = GV.flowDirty = GV.pathsDirty = true
@@ -1237,6 +1238,15 @@ export function rivalsTick(dt?) {
                 P.agg
             if (rv.foe === 0) {
                 GV.S.wave++
+                if (GV.S.wave === 1) {
+                    GV.chron?.(
+                        'The first host, sent by ' +
+                            rv.name +
+                            ', was beaten back.'
+                    )
+                } else if (GV.S.wave % 5 === 0) {
+                    GV.chron?.(GV.S.wave + ' attacks had been beaten back.')
+                }
                 const bonus = 10 + 5 * Math.round(rv.pw)
                 GV.S.res.gold += bonus
                 toast(
@@ -2270,22 +2280,42 @@ export function endScreen(won?) {
     if (!won) {
         GV.S.over = true
     }
-    $('#overTitle').textContent = won
-        ? 'The realm is yours'
-        : 'The keep has fallen'
-    $('#overText').textContent = won
-        ? 'Every rival keep has fallen and all the land flies the banner of Thornwick. You broke ' +
-          GV.S.wave +
-          ' attacks along the way. You may rule on in peace, or begin again.'
-        : GV.S.wave === 0
-          ? 'The first host broke through. Next time, raise a palisade and a watchtower, or train soldiers, before the pennant runs out.'
-          : 'Thornwick broke ' +
-            GV.S.wave +
-            (GV.S.wave === 1 ? ' attack' : ' attacks') +
-            ' and sheltered ' +
-            pop() +
-            ' people at the end.'
+    $('#overTitle').textContent =
+        won === 'wonder'
+            ? 'The great work is done'
+            : won
+              ? 'The realm is yours'
+              : 'The keep has fallen'
+    $('#overText').textContent =
+        won === 'wonder'
+            ? 'The bells of the great cathedral ring over Thornwick, and the lords of the realm come to kneel before it. You broke ' +
+              GV.S.wave +
+              ' attacks along the way. You may rule on in peace, or begin again.'
+            : won
+              ? 'Every rival keep has fallen and all the land flies the banner of Thornwick. You broke ' +
+                GV.S.wave +
+                ' attacks along the way. You may rule on in peace, or begin again.'
+              : GV.S.wave === 0
+                ? 'The first host broke through. Next time, raise a palisade and a watchtower, or train soldiers, before the pennant runs out.'
+                : 'Thornwick broke ' +
+                  GV.S.wave +
+                  (GV.S.wave === 1 ? ' attack' : ' attacks') +
+                  ' and sheltered ' +
+                  pop() +
+                  ' people at the end.'
     $('#overKeep').hidden = !won
+    if (won) {
+        GV.S.won = true
+    }
+    GV.chron?.(
+        won === 'wonder'
+            ? 'The great cathedral was finished, and the realm knelt.'
+            : won
+              ? 'The last rival keep fell. The realm was won.'
+              : 'The keep of Thornwick fell.'
+    )
+    GV.renderChronicle?.()
     $('#over').hidden = false
     GV.overOpen = true
 }
+GV.endScreen = endScreen

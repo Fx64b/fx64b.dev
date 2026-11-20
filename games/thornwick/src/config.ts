@@ -830,6 +830,16 @@ export const DEF = {
         hp: 100,
         tip: 'A founder in stone. Decoration only.',
     },
+    cathedral: {
+        name: 'Great cathedral',
+        tab: 0,
+        tier: 3,
+        size: 2,
+        cost: { wood: 200, stone: 300, gold: 150 },
+        hp: 1500,
+        unique: 1,
+        tip: 'The great work of the realm, raised in four stages. Finish it and the realm is yours. Only one can rise.',
+    },
     camp: { name: 'Bandit camp', hp: 160 },
 }
 export const BUILD = Object.keys(DEF).filter((t?) => DEF[t].tab !== undefined)

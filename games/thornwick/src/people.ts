@@ -188,7 +188,10 @@ GV.blessMul = 1
 export function addSoldier(home?, x?, y?, kind?) {
     kind = kind || (DEF[home.t].units || ['sword'])[0]
     const U = UNITS[kind],
-        max = kind === 'captain' ? 120 + 30 * GV.S.capLvl : U.hp
+        max =
+            kind === 'captain'
+                ? 120 + 30 * GV.S.capLvl
+                : Math.round(U.hp * (GV.S.boon === 'warriors' ? 1.2 : 1))
     const s = {
         x,
         y,
@@ -539,7 +542,12 @@ export function vUpdate(u?, dt?) {
                     GV.S.res[spare[0]] -= 3
                     g = 6
                 }
-                gain('gold', g, b.x, b.y)
+                gain(
+                    'gold',
+                    GV.S.boon === 'merchants' ? Math.round(g * 1.34) : g,
+                    b.x,
+                    b.y
+                )
             } else if (u.carryN) {
                 gain(u.carry, u.carryN, b.x, b.y)
             }

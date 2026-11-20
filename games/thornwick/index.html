@@ -368,6 +368,11 @@
                             people, shoots further and doubles the tax.
                         </li>
                         <li>
+                            <b>Choose a boon.</b> Each new realm offers three
+                            gifts, such as fertile fields or a guild of masons.
+                            You keep the one you choose for the whole realm.
+                        </li>
+                        <li>
                             <b>Follow the deeds.</b> The card with the star
                             shows your next deed. Each one done brings a gift
                             from the realm. Tap it to see them all.
@@ -605,6 +610,20 @@
                             a lord who grows too strong.
                         </li>
                         <li>
+                            There is a second way to win: with a Great keep,
+                            build the great cathedral. It rises in four stages,
+                            each paid for and started from its panel. Each stage
+                            you begin makes the lords march sooner, and if
+                            raiders bring it down the work is lost. From the
+                            roof on it serves every home as a chapel. Finish the
+                            spires and the realm is yours.
+                        </li>
+                        <li>
+                            The Realm sheet keeps the chronicle of your realm
+                            and its renown. When a realm ends, its chronicle is
+                            shown with your best renown.
+                        </li>
+                        <li>
                             Your soldiers and the raiders both go for people and
                             buildings first. They only break walls when there is
                             no other way in. Once the realm has reached its full
@@ -721,6 +740,7 @@
                         <button class="btn" data-rtab="people">Needs</button>
                         <button class="btn" data-rtab="trade">Trade</button>
                         <button class="btn" data-rtab="deeds">Deeds</button>
+                        <button class="btn" data-rtab="chron">Chronicle</button>
                     </div>
                     <div id="realmBody"></div>
                     <div class="foot">
@@ -776,10 +796,27 @@
                 </div>
             </div>
 
+            <div class="veil" id="boon" hidden>
+                <div
+                    class="sheet wide"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="boonTitle"
+                >
+                    <h2 id="boonTitle">A boon for the realm</h2>
+                    <p>
+                        No two realms are alike. Choose one gift for Thornwick.
+                        It lasts as long as the realm.
+                    </p>
+                    <div id="boonCards" class="boons"></div>
+                </div>
+            </div>
+
             <div class="veil" id="over" hidden>
                 <div class="sheet">
                     <h2 id="overTitle">The keep has fallen</h2>
                     <p id="overText"></p>
+                    <div id="overChron"></div>
                     <button class="btn primary" id="overGo">
                         Found a new kingdom
                     </button>
