@@ -28,6 +28,18 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.9.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.8.0...fx64b.dev-v5.9.0) (2026-11-20)
+
+
+### Features
+
+* **thornwick:** boons, a chronicle, the great cathedral and finer textures ([a3d0ccc](https://github.com/Fx64b/fx64b.dev/commit/a3d0cccb0eb77657facbe53b426e217d250f3c8c))
+
+
+### Performance Improvements
+
+* **thornwick:** smooth panning when zoomed out ([0032e2c](https://github.com/Fx64b/fx64b.dev/commit/0032e2ca78e612116090b7975185cf8620c62e1e))
+
 ## [5.8.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.7.0...fx64b.dev-v5.8.0) (2026-11-20)
 
 
