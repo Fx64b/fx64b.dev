@@ -6,6 +6,7 @@ import * as ECO from './eco'
 import { closeRealm, openRealm } from './ecoui'
 import { EVENTS, pickEvent, startEvent } from './events'
 import { groundInit } from './ground'
+import { initFrame } from './hudui'
 import { lookAt, pick, readTheme, resize } from './input'
 import { refreshOwn } from './land'
 import * as LIVING from './livingworld'
@@ -166,12 +167,13 @@ export async function boot() {
     readTheme()
     newGame()
     showHelp(true)
+    initFrame()
     buildCards()
     resize()
     hud()
     $('#loading').hidden = true
     if (window.ResizeObserver) {
-        new ResizeObserver(resize).observe($('#palette'))
+        new ResizeObserver(resize).observe($('#bar'))
     }
     requestAnimationFrame(frame)
 }

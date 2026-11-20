@@ -93,7 +93,6 @@ export function resize() {
     cv.height = Math.round(GV.H * GV.DPR)
     const root = document.documentElement.style
     root.setProperty('--bar-h', $('#bar').offsetHeight + 'px')
-    root.setProperty('--pal-h', $('#palette').offsetHeight + 'px')
     if (GV.firstSize && GV.W > 0) {
         centreCam()
         GV.firstSize = false

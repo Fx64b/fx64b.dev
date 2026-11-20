@@ -121,12 +121,18 @@ export const DAYLEN = 200,
     SEASONS = ['Spring', 'Summer', 'Autumn', 'Winter']
 export const RES = ['food', 'wood', 'stone', 'gold']
 export const TIERS = ['Wooden hall', 'Stone keep', 'Great keep']
-export const KEEP_CAP = [8, 12, 16],
-    KEEP_DMG = [8, 12, 16],
+export const KEEP_CAP = [8, 12, 24],
+    KEEP_DMG = [8, 12, 20],
     KEEP_UP = [
         { wood: 150, stone: 120, gold: 60 },
-        { wood: 300, stone: 300, gold: 200 },
-    ]
+        // The Great keep is a milestone: it needs the iron and cloth trades.
+        { wood: 450, stone: 500, gold: 400, tools: 20, cloth: 15 },
+    ],
+    // People the village must hold before the keep can be rebuilt.
+    KEEP_POP = [0, 40],
+    // What the Great keep gives besides the buildings it opens.
+    KEEP3_PERKS =
+        'Room for 24 people at the keep. Its arrows hit harder and reach 1 tile further. The royal court doubles the tax.'
 /* Banner colours. 0 is Thornwick, 1 to 8 the first lords, 10 the bandits and
    11 on the lords who come later (each lord's `col`). */
 export const FCOL = [
@@ -371,7 +377,7 @@ export const LIT = {
     scriptorium: 1,
 }
 export const DEF = {
-    keep: { name: 'Keep', size: 2, hp: [500, 900, 1400], conn: 1, flam: 1 },
+    keep: { name: 'Keep', size: 2, hp: [500, 900, 1800], conn: 1, flam: 1 },
     house: {
         name: 'Cottage',
         tab: 0,

@@ -20,8 +20,10 @@ import {
     DIFF_KEY,
     FIRST_RAID,
     ICON,
+    KEEP3_PERKS,
     KEEP_CAP,
     KEEP_DMG,
+    KEEP_POP,
     KEEP_UP,
     KX,
     KY,
@@ -30,6 +32,7 @@ import {
     TIERS,
     cv,
 } from './config'
+import { checkDeeds, deedHud } from './deeds'
 import { farmYield, workMul } from './eco'
 import { ecoAct, ecoHow, ecoHowMore, ecoHud, ecoInspect } from './ecoui'
 import { pickEvent } from './events'
@@ -44,6 +47,7 @@ import {
     puff,
     toast,
 } from './helpers'
+import { GRIP, HI, afterArm, compact, showPal } from './hudui'
 import {
     anchor,
     centreCam,
@@ -216,6 +220,7 @@ export function buildCards() {
                 GV.drag.active = true
                 GV.armed = null
                 GV.selected = null
+                $('#palette').classList.add('ghost')
             }
             if (GV.drag.active) {
                 GV.hover = anchor(
@@ -239,10 +244,12 @@ export function buildCards() {
                 arm(t)
             }
             GV.drag = null
+            $('#palette').classList.remove('ghost')
         })
         el.addEventListener('pointercancel', () => {
             GV.drag = null
             GV.hover = null
+            $('#palette').classList.remove('ghost')
         })
         el.addEventListener('keydown', (e?) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -281,6 +288,7 @@ export function arm(t?) {
     } else {
         GV.hover = null
     }
+    afterArm()
     setCursor()
     hud()
 }
@@ -588,10 +596,14 @@ export function howHTML(b?) {
     switch (b.t) {
         case 'keep': {
             P.push(
-                'Every 8 seconds each person, soldiers too, eats 1 food (bread first, for up to half), and every 10 villagers pay 1 gold in tax. A new villager arrives here every 6 seconds while homes have room and there are 20 food and bread in store.'
+                'Every 8 seconds each person, soldiers too, eats 1 food (bread first, for up to half), and every 10 villagers pay ' +
+                    (b.lvl >= 3 ? '2 gold' : '1 gold') +
+                    ' in tax. A new villager arrives here every 6 seconds while homes have room and there are 20 food and bread in store.'
             )
             P.push(
-                'It shoots the nearest raider within 4.5 tiles for ' +
+                'It shoots the nearest raider within ' +
+                    (b.lvl >= 3 ? '5.5' : '4.5') +
+                    ' tiles for ' +
                     KEEP_DMG[b.lvl - 1] +
                     ' damage each second.'
             )
@@ -1187,10 +1199,22 @@ export function inspectHTML(sel?) {
             DF().name +
             '</span></div>'
         if (b.lvl < 3) {
-            const uc = KEEP_UP[b.lvl - 1]
+            const uc = KEEP_UP[b.lvl - 1],
+                need = KEEP_POP[b.lvl - 1],
+                popOk = pop() >= need
+            if (need) {
+                h +=
+                    '<p class="note' +
+                    (popOk ? '' : ' lackn') +
+                    '">Needs ' +
+                    need +
+                    ' people in the village (now ' +
+                    pop() +
+                    ').</p>'
+            }
             h +=
                 '<div class="row"><button class="btn primary" data-act="up"' +
-                (afford(uc) ? '' : ' disabled') +
+                (afford(uc) && popOk ? '' : ' disabled') +
                 '>Rebuild as ' +
                 TIERS[b.lvl].toLowerCase() +
                 '</button><span class="costs">' +
@@ -1200,7 +1224,9 @@ export function inspectHTML(sel?) {
                 BUILD.filter((t?) => DEF[t].tier === b.lvl + 1)
                     .map((t?) => DEF[t].name.toLowerCase())
                     .join(', ') +
-                '.</p>'
+                '.' +
+                (b.lvl === 2 ? ' ' + KEEP3_PERKS : '') +
+                '</p>'
         } else {
             h += '<p class="note">The greatest keep in the land.</p>'
         }
@@ -1443,6 +1469,36 @@ export const fmtTime = (s?) => {
     s = Math.max(0, Math.ceil(s))
     return ((s / 60) | 0) + ':' + String(s % 60).padStart(2, '0')
 }
+/* A picture of the chosen building next to its name, as in the build tray. */
+GV.portraits = {}
+function portrait(box?, sel?) {
+    const t = sel && typeof sel.t === 'string' && DEF[sel.t] ? sel.t : null,
+        h2 = t && box.querySelector('h2')
+    if (!h2) {
+        return
+    }
+    let url = GV.portraits[t]
+    if (url === undefined) {
+        try {
+            const c = document.createElement('canvas')
+            c.width = 96
+            c.height = 88
+            iconFor(t, c.getContext('2d'))
+            url = c.toDataURL()
+        } catch {
+            url = ''
+        }
+        GV.portraits[t] = url
+    }
+    if (url) {
+        const img = document.createElement('img')
+        img.className = 'portrait'
+        img.src = url
+        img.alt = ''
+        h2.prepend(img)
+        h2.classList.add('withpic')
+    }
+}
 export function hud() {
     if (!GV.S) {
         return
@@ -1451,6 +1507,8 @@ export function hud() {
         $('#r-' + r).textContent = Math.floor(GV.S.res[r])
     }
     $('#r-pop').textContent = pop() + '/' + cap()
+    $('#r-popf').style.width =
+        Math.round(Math.min(1, pop() / Math.max(1, cap())) * 100) + '%'
     $('#r-sold').textContent = GV.S.sold.filter(
         (x?) => x.kind !== 'scout'
     ).length
@@ -1528,12 +1586,16 @@ export function hud() {
     }
     $('#rm').setAttribute('aria-pressed', String(GV.armed === 'remove'))
     $('#ringBtn').setAttribute('aria-pressed', String(GV.armed === 'ring'))
-    const fb = $('#flagBtn'),
-        ft = 'Banner ' + GV.S.banners.length + '/' + MAX_BANNERS
-    fb.setAttribute('aria-pressed', String(GV.armed === 'flag'))
+    const fb = $('#flagN'),
+        ft = GV.S.banners.length + '/' + MAX_BANNERS
+    $('#flagBtn').setAttribute('aria-pressed', String(GV.armed === 'flag'))
     if (fb._t !== ft) {
         fb.textContent = ft
         fb._t = ft
+        $('#flagBtn').setAttribute(
+            'aria-label',
+            'War banner, ' + ft + ' planted'
+        )
     }
     if (
         GV.selected &&
@@ -1562,17 +1624,37 @@ export function hud() {
         pl.hidden = true
     }
     const ins = $('#inspect')
+    // On a phone the inspect sheet and the build tray share the bottom edge.
+    if (GV.selected && GV.palOpen && compact()) {
+        showPal(false)
+    }
     if (GV.selected && !GV.selected.dead) {
         const h = inspectHTML(GV.selected)
         if (h !== GV.lastInspect) {
-            ins.innerHTML = h
+            // Keep the reader's place when the text changes under them.
+            const top = ins.scrollTop
+            ins.innerHTML = GRIP + h
+            portrait(ins, GV.selected)
+            ins.scrollTop = top
             GV.lastInspect = h
+        }
+        if (ins.hidden) {
+            ins.scrollTop = 0
         }
         ins.hidden = false
     } else {
         ins.hidden = true
         GV.lastInspect = ''
+        GV.inspBig = false
+        ins.classList.remove('big')
     }
+    // The frame hides what is not needed now (see style.css).
+    const app = $('#app'),
+        mode = GV.armed ? 'placing' : GV.selected ? 'inspect' : ''
+    if (app.dataset.mode !== mode) {
+        app.dataset.mode = mode
+    }
+    app.classList.toggle('compact', compact())
     const evEl = $('#event')
     if (GV.S.ev) {
         const ev = GV.S.ev
@@ -1623,14 +1705,46 @@ export function hud() {
                 String(+b.dataset.speed === GV.speed)
             )
         )
+    const pz = $('[data-speed="0"]'),
+        paused = GV.speed === 0
+    if (pz._p !== paused) {
+        pz._p = paused
+        pz.innerHTML = paused ? HI.play : HI.pause
+        pz.setAttribute('aria-label', paused ? 'Go on' : 'Pause')
+        pz.title = paused ? 'Go on (Space)' : 'Pause (Space)'
+    }
+    const sc = $('#speedCyc'),
+        st = (paused ? GV.lastSpeed || 1 : GV.speed) + '×'
+    if (sc._t !== st) {
+        sc._t = st
+        sc.textContent = st
+        sc.setAttribute('aria-label', 'Game speed ' + st)
+    }
     ecoHud()
+    checkDeeds()
+    deedHud()
     drawMini()
 }
-document.querySelectorAll<HTMLElement>('[data-speed]').forEach((b?) =>
-    b.addEventListener('click', () => {
-        GV.speed = +b.dataset.speed
-        hud()
-    })
+GV.hud = hud
+GV.lastSpeed = 1
+/* Pause toggles: a second press goes on at the speed from before. */
+export function setSpeed(n?) {
+    if (n === 0 && GV.speed === 0) {
+        n = GV.lastSpeed || 1
+    }
+    if (GV.speed > 0) {
+        GV.lastSpeed = GV.speed
+    }
+    GV.speed = n
+    hud()
+}
+document
+    .querySelectorAll<HTMLElement>('[data-speed]')
+    .forEach((b?) =>
+        b.addEventListener('click', () => setSpeed(+b.dataset.speed))
+    )
+$('#speedCyc').addEventListener('click', () =>
+    setSpeed(GV.speed === 0 ? GV.lastSpeed || 1 : (GV.speed % 3) + 1)
 )
 export function bindDiff(input?, onPick?) {
     const box = input.closest('.diff')
