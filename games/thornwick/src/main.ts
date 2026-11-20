@@ -5,6 +5,7 @@ import { $, DEF, N, STEP } from './config'
 import * as ECO from './eco'
 import { closeRealm, openRealm } from './ecoui'
 import { EVENTS, pickEvent, startEvent } from './events'
+import * as GROUND from './ground'
 import { groundInit } from './ground'
 import { initFrame } from './hudui'
 import { lookAt, pick, readTheme, resize } from './input'
@@ -263,5 +264,6 @@ export async function boot() {
     // The living world: weather, wildlife, travellers, tales and build helpers.
     living: { ...WEATHER, ...WILD, ...TRAVEL, ...TOOLS, ...LIVING, TALES },
     world: WORLD,
+    ground: GROUND,
 }
 boot()
