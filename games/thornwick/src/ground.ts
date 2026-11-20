@@ -432,14 +432,33 @@ export function drawGroundTile(x?, y?) {
                     )
                 )
                 c = GRASS[gi]
-                if (hsh(px, py, 30) < 0.07) {
-                    c = tw(c, 0.74)
-                } else if (hsh(px, py + 1, 30) < 0.07) {
-                    c = tw(c, 1.17)
-                } else if (hsh(px, py + 2, 30) < 0.035) {
-                    c = tw(c, 1.08)
+                // Blades of grass: short upright strokes, dark at the root
+                // and light at the tip, a little denser where it is lush.
+                // One hash gives both the chance of a blade and its offset.
+                const bh = hsh(px, py >> 2, 31),
+                    ph = (py & 3) + ((bh * 4096) & 3)
+                if (bh < 0.13 + n1 * 0.06 && (ph & 3) < 3) {
+                    c = tw(
+                        c,
+                        (ph & 3) === 0 ? 1.16 : (ph & 3) === 1 ? 0.98 : 0.8
+                    )
+                } else if (hsh(px, py, 30) < 0.05) {
+                    c = tw(c, 0.76)
+                } else if (hsh(px, py + 1, 30) < 0.04) {
+                    c = tw(c, 1.14)
                 } else if (h < 0.03) {
                     c = tw(c, 0.86)
+                }
+                // Soft patches of clover and of drier grass.
+                const pt = n2
+                if (t === 0 && pt > 0.72 && hsh(px >> 1, py >> 1, 33) < 0.45) {
+                    c = tw(c, 1.07)
+                } else if (
+                    t === 0 &&
+                    pt < 0.2 &&
+                    hsh(px >> 1, py >> 1, 34) < 0.35
+                ) {
+                    c = mix(c, 0x9a9a4a, 0.22)
                 }
                 if (t === 1 && hsh(px, py, 15) < 0.05) {
                     c = hsh(px, py, 16) < 0.5 ? 0x5a4a2e : 0x6b5532
@@ -492,6 +511,12 @@ export function drawGroundTile(x?, y?) {
                             c = 0xcbbf9e
                         } else if (h > 0.978) {
                             c = 0x6c5e44
+                        } else if (hsh(px >> 1, py >> 1, 35) < 0.05) {
+                            // Stones trodden into the road, lit on top.
+                            const top = !(
+                                hsh(px >> 1, (py - 1) >> 1, 35) < 0.05
+                            )
+                            c = top && (py & 1) === 0 ? 0xb4ab96 : 0x8f8672
                         } else if (hsh(px, py - 1, 1) < 0.025) {
                             c = tw(c, 0.8)
                         }

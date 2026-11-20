@@ -35,6 +35,7 @@ import { GOOD, GOODS, amountText } from './goods'
 import { pop } from './helpers'
 import { moodBonus } from './livingworld'
 import { power } from './lords'
+import { chronicleHTML } from './realm'
 import { rivById } from './state'
 import { costHTML, fmtTime, hud } from './ui'
 import { GV } from './vars'
@@ -419,7 +420,9 @@ function renderRealm() {
                 ? tradeHTML()
                 : t === 'deeds'
                   ? deedsHTML()
-                  : overHTML()
+                  : t === 'chron'
+                    ? chronicleHTML(false)
+                    : overHTML()
     if (t === 'charts') {
         drawCharts()
     }

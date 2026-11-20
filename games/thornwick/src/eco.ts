@@ -3,6 +3,7 @@
    that run out. Other modules call in through a few small hooks. */
 import { DEF, N, WALLISH } from './config'
 import { GOOD, GOODS, amountText } from './goods'
+import { gwChapel } from './greatwork'
 import { groundTileChanged } from './ground'
 import { afford, gain, pay, pop, puff, toast } from './helpers'
 import { moodBonus } from './livingworld'
@@ -145,7 +146,9 @@ export const CRAFT = {
     scholar: 1,
 }
 export const mineYield = (b?) =>
-    (regAt(b.x, b.y).type === 'hills' ? 3 : 2) + (GV.S.tech.deep ? 1 : 0)
+    (regAt(b.x, b.y).type === 'hills' ? 3 : 2) +
+    (GV.S.tech.deep ? 1 : 0) +
+    (GV.S.boon === 'iron' ? 1 : 0)
 /** What one work cycle takes and makes, for a building. */
 export function recipeOf(b?) {
     switch (b.t) {
@@ -258,7 +261,13 @@ export function farmYield(b?, se?, millNear?) {
         sea = se === 2 ? 1.5 : se === 3 ? 1 / 3 : 1
     return Math.max(
         1,
-        Math.round(base * sea * (GV.S.tech.crop ? 1.25 : 1) * harvestMul())
+        Math.round(
+            base *
+                sea *
+                (GV.S.tech.crop ? 1.25 : 1) *
+                (GV.S.boon === 'fertile' ? 1.2 : 1) *
+                harvestMul()
+        )
     )
 }
 
@@ -339,11 +348,16 @@ export function needsTick() {
     n.cloth = S.clothCov
     const hs = homes(),
         ch = S.b.filter((b?) => b.o === 0 && b.t === 'chapel')
-    n.chapel = hs.length
-        ? hs.filter((h?) =>
-              ch.some((c?) => Math.hypot(c.cx - h.cx, c.cy - h.cy) <= CHAPEL_R)
-          ).length / hs.length
-        : 0
+    // From the roof on, the great cathedral serves every home.
+    n.chapel = gwChapel()
+        ? 1
+        : hs.length
+          ? hs.filter((h?) =>
+                ch.some(
+                    (c?) => Math.hypot(c.cx - h.cx, c.cy - h.cy) <= CHAPEL_R
+                )
+            ).length / hs.length
+          : 0
     n.sat = S.vill.length
         ? Math.max(
               0,
@@ -472,9 +486,9 @@ export const scholars = () =>
     GV.S.vill.filter((u?) => u.role === 'scholar' && u.state === 'work').length
 /** Masonry: own stone walls, towers and gates take less damage. */
 export const wallDmgMul = (b?) =>
-    GV.S.tech.masonry && b.o === 0 && WALLISH[b.t] && b.t !== 'palisade'
+    (GV.S.tech.masonry && b.o === 0 && WALLISH[b.t] && b.t !== 'palisade'
         ? 0.75
-        : 1
+        : 1) * (GV.S.boon === 'masons' && b.o === 0 && WALLISH[b.t] ? 0.85 : 1)
 /** Longbows: extra reach for own archers and towers. */
 export const reachBonus = () => (GV.S.tech.longbows ? 1 : 0)
 /** Herbal lore: fires burn out faster. */
