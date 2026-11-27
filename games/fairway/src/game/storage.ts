@@ -14,6 +14,7 @@ export interface DailyResult {
 const PREFIX = 'fairway:'
 const RESULTS_KEY = `${PREFIX}daily-results`
 const HINT_KEY = `${PREFIX}hint-dismissed`
+const SOUND_KEY = `${PREFIX}sound`
 
 export interface KeyValueStore {
     getItem(key: string): string | null
@@ -72,6 +73,13 @@ export function createStorage(store: KeyValueStore | null = defaultStore()) {
         },
         dismissHint(): void {
             write(HINT_KEY, true)
+        },
+        /** Sound (effects and ambience) on or off. On by default. */
+        soundOn(): boolean {
+            return read<unknown>(SOUND_KEY, true) !== false
+        },
+        setSoundOn(on: boolean): void {
+            write(SOUND_KEY, on)
         },
     }
 }

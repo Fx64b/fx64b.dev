@@ -1,5 +1,6 @@
 // Fairway: the game loop. It connects the round rules (game/), the physics
 // playback, the renderer (render/), the HUD and menus (ui/) and the input.
+import { createAudio } from './audio'
 import {
     generateHole,
     holeLength,
@@ -60,6 +61,45 @@ const minimap = createMinimap(uiRoot)
 const screens = createScreens(uiRoot)
 const input = createInput({ canvas, swingPad: hud.swingPad })
 const storage = createStorage()
+const audio = createAudio({ enabled: storage.soundOn() })
+hud.setSound(audio.enabled())
+screens.setSound(audio.enabled())
+
+function toggleSound(): void {
+    const on = !audio.enabled()
+    audio.setEnabled(on)
+    storage.setSoundOn(on)
+    hud.setSound(on)
+    screens.setSound(on)
+}
+hud.onSoundToggle(toggleSound)
+screens.onSoundToggle(toggleSound)
+
+// M mutes. Not while typing a seed.
+window.addEventListener('keydown', (e) => {
+    if (e.code !== 'KeyM' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) {
+        return
+    }
+    const target = e.target
+    if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+            target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT')
+    ) {
+        return
+    }
+    toggleSound()
+})
+
+// A very soft click for the menu buttons.
+screens.el.addEventListener('click', (e) => {
+    const target = e.target
+    if (target instanceof Element && target.closest('button, summary')) {
+        audio.uiClick()
+    }
+})
 
 // The renderer caps the pixel ratio for its quality tier.
 function resize(): void {
@@ -111,6 +151,8 @@ function showTitle(): void {
     const today = todayUtc()
     setHole(generateHole(today))
     phase = { name: 'menu' }
+    audio.setScene('menu')
+    audio.setFlight(0)
     input.setEnabled(false)
     input.setSkippable(false)
     hud.setVisible(false)
@@ -189,6 +231,7 @@ function setHole(h: HoleData): void {
         hole = h
         renderer.setHole(h)
     }
+    audio.setWind(h.conditions.windSpeed)
 }
 
 // --- Round ------------------------------------------------------------------
@@ -196,6 +239,7 @@ function setHole(h: HoleData): void {
 function startRound(h: HoleData): void {
     setHole(h)
     round = createRound(h)
+    audio.setScene('round')
     screens.hide()
     hud.setVisible(true)
     minimap.setHole(h)
@@ -353,18 +397,28 @@ input.on('swingRelease', (power) => {
     if (phase.name !== 'aim' || !round || power < MIN_POWER) {
         return
     }
-    const outcome = playShot(round, { club: club(), aim, power })
+    hit(power)
+})
+
+/** Hit the ball with the current club and aim, and start the playback. */
+function hit(power: number): void {
+    const r = round!
+    const outcome = playShot(r, { club: club(), aim, power })
     const { samples, duration } = outcome.result
+    audio.swing(club(), power)
+    audio.flightStart(outcome.result, r.hole.pin)
     input.setEnabled(false)
     input.setSkippable(true)
     hud.showSkip(true)
     renderer.setAimRing(null)
     renderer.setPathPreview(null)
     phase = { name: 'flight', samples, duration, t: 0, outcome }
-})
+}
 
 function skip(): void {
     if (phase.name === 'flight') {
+        // No burst of bounces: at most the splash or the cup drop.
+        audio.flightSkip()
         phase.t = phase.duration
     } else if (phase.name === 'settle') {
         phase.left = 0
@@ -410,6 +464,7 @@ function announce(o: ShotOutcome): void {
             tone: 'accent',
             duration: 2600,
         })
+        audio.chime(r.stats.strokes < r.hole.par)
     } else if (notes.includes('water')) {
         hud.toast('In the water. +1 stroke')
     } else if (notes.includes('ob')) {
@@ -432,6 +487,7 @@ function finishRound(): void {
     input.setEnabled(false)
     input.setSkippable(false)
     renderer.cameraOverview()
+    audio.setScene('menu')
     let official = false
     if (m.kind === 'daily' && m.official && r.holed) {
         official = storage.saveResult(m.date, {
@@ -486,7 +542,15 @@ function step(dt: number): void {
                 landing: null,
             })
             renderer.cameraFollow(pos, vel)
+            audio.flightAdvance(phase.t)
+            // The wind swells a little with the speed and height.
+            const height = pos.y - renderer.groundHeight(pos.x, pos.z)
+            audio.setFlight(
+                0.55 * Math.min(1, Math.hypot(vel.x, vel.y, vel.z) / 65) +
+                    0.45 * Math.min(1, Math.max(0, height) / 30)
+            )
             if (phase.t >= phase.duration) {
+                audio.setFlight(0)
                 announce(o)
                 phase = { name: 'settle', left: SETTLE_S, outcome: o }
             }
@@ -527,6 +591,8 @@ function step(dt: number): void {
     }
     renderer.update(dt)
     renderer.render()
+    audio.setListener(renderer.camera.position)
+    audio.update()
 }
 
 let last = performance.now()
@@ -557,6 +623,7 @@ Object.assign(window, {
         renderer,
         hud,
         input,
+        audio,
         get round() {
             return round
         },
@@ -574,19 +641,7 @@ Object.assign(window, {
             }
             aim += aimOffset
             refreshAim()
-            const outcome = playShot(round, { club: club(), aim, power })
-            input.setEnabled(false)
-            input.setSkippable(true)
-            hud.showSkip(true)
-            renderer.setAimRing(null)
-            renderer.setPathPreview(null)
-            phase = {
-                name: 'flight',
-                samples: outcome.result.samples,
-                duration: outcome.result.duration,
-                t: 0,
-                outcome,
-            }
+            hit(power)
         },
     },
 })

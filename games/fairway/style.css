@@ -231,6 +231,8 @@ body {
 }
 
 .fw-hole-title {
+    /* Room for the sound toggle. */
+    padding-right: 28px;
     font-size: 15px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -626,6 +628,57 @@ body {
     height: 16px;
 }
 
+/* Sound toggle (hole card and title card) */
+
+.fw-sound {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    color: var(--fw-ink-soft);
+    pointer-events: auto;
+    transition:
+        background-color 140ms ease,
+        color 140ms ease;
+}
+
+/* A larger touch target than the icon. */
+.fw-sound::after {
+    position: absolute;
+    inset: -7px;
+    content: '';
+}
+
+.fw-sound svg {
+    width: 18px;
+    height: 18px;
+}
+
+.fw-sound[aria-pressed='false'] {
+    color: var(--fw-ink-faint);
+}
+
+.fw-sound:focus-visible {
+    outline: 2px solid var(--fw-accent-ring);
+    outline-offset: 1px;
+}
+
+.fw-hole-sound {
+    top: 5px;
+    right: 5px;
+}
+
+.fw-title-sound {
+    top: 0;
+    right: -4px;
+    width: 34px;
+    height: 34px;
+}
+
+.fw-title-sound svg {
+    width: 20px;
+    height: 20px;
+}
+
 /* Toast */
 
 .fw-toast {
@@ -947,6 +1000,7 @@ body {
 /* Title */
 
 .fw-brand {
+    position: relative;
     display: grid;
     gap: 6px;
     padding: 2px 2px 0;

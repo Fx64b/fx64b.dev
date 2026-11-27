@@ -9,7 +9,7 @@ import {
     CLUB_NAMES,
     clampClubIndex,
 } from './clubs'
-import { ICONS, h, svg } from './dom'
+import { ICONS, h, soundButton, svg } from './dom'
 import { formatKmhValue, formatYardsValue, lieName, msToKmh } from './format'
 
 export interface HoleInfo {
@@ -27,8 +27,10 @@ export interface ToastOptions {
     tone?: 'neutral' | 'accent'
 }
 
-export const DEFAULT_HINT = 'Hold Space or the pad, release to hit. A/D to aim.'
-export const DEFAULT_HINT_TOUCH = 'Hold the pad, release to hit. Drag to aim.'
+export const DEFAULT_HINT =
+    'Hold Space or the pad, release to hit. Esc cancels. A/D to aim.'
+export const DEFAULT_HINT_TOUCH =
+    'Hold the pad, release to hit. Slide away to cancel. Drag to aim.'
 
 export interface Hud {
     /** The HUD root element. */
@@ -57,10 +59,14 @@ export interface Hud {
     showHint(v: boolean, text?: string): void
     /** Show or hide the whole HUD (fades). */
     setVisible(v: boolean): void
+    /** The state of the sound toggle (the game owns the setting). */
+    setSound(on: boolean): void
     onClubSelect(cb: (index: number) => void): () => void
     onSkip(cb: () => void): () => void
     /** The player closed the hint (store it so it stays closed). */
     onHintDismiss(cb: () => void): () => void
+    /** The player pressed the sound toggle. */
+    onSoundToggle(cb: () => void): () => void
     dispose(): void
 }
 
@@ -87,6 +93,7 @@ export function createHud(root: HTMLElement): Hud {
     const strokesEl = h('span', { class: 'fw-num' }, '0')
     const lieDot = h('span', { class: 'fw-lie-dot', 'data-lie': 'tee' })
     const lieText = h('span', {}, 'Tee')
+    const sound = soundButton('fw-hole-sound')
     const holePanel = h(
         'section',
         { class: 'fw-panel fw-hole', 'aria-label': 'Hole' },
@@ -98,7 +105,8 @@ export function createHud(root: HTMLElement): Hud {
             h('span', { class: 'fw-sep', 'aria-hidden': 'true' }),
             h('span', {}, 'Strokes ', strokesEl)
         ),
-        h('div', { class: 'fw-lie' }, lieDot, lieText)
+        h('div', { class: 'fw-lie' }, lieDot, lieText),
+        sound.el
     )
 
     const windArrow = svg(
@@ -247,6 +255,7 @@ export function createHud(root: HTMLElement): Hud {
     const clubCbs = new Set<(i: number) => void>()
     const skipCbs = new Set<() => void>()
     const hintCbs = new Set<() => void>()
+    const soundCbs = new Set<() => void>()
 
     // Keep focus where it is (Space must not click a club button later).
     function keepFocus(e: Event): void {
@@ -254,6 +263,12 @@ export function createHud(root: HTMLElement): Hud {
     }
     clubBar.addEventListener('pointerdown', keepFocus)
     skipBtn.addEventListener('pointerdown', keepFocus)
+    sound.el.addEventListener('pointerdown', keepFocus)
+    sound.el.addEventListener('click', () => {
+        for (const cb of [...soundCbs]) {
+            cb()
+        }
+    })
 
     clubBar.addEventListener('click', (e) => {
         const b = (e.target as Element).closest<HTMLButtonElement>('.fw-club')
@@ -398,6 +413,8 @@ export function createHud(root: HTMLElement): Hud {
         onClubSelect: (cb) => on(clubCbs, cb),
         onSkip: (cb) => on(skipCbs, cb),
         onHintDismiss: (cb) => on(hintCbs, cb),
+        setSound: (v) => sound.set(v),
+        onSoundToggle: (cb) => on(soundCbs, cb),
         dispose() {
             if (lingerTimer) {
                 clearTimeout(lingerTimer)
@@ -408,6 +425,7 @@ export function createHud(root: HTMLElement): Hud {
             clubCbs.clear()
             skipCbs.clear()
             hintCbs.clear()
+            soundCbs.clear()
             el.remove()
         },
     }

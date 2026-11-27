@@ -1,7 +1,7 @@
 // Menus: title, archive and result (SPEC 9). Plain DOM over the scene. The
 // screens only show data and report choices; the game owns storage and
 // navigation (it calls showTitle again on onBack, and so on).
-import { ICONS, h, svg } from './dom'
+import { ICONS, h, soundButton, svg } from './dom'
 import {
     formatDate,
     formatToPar,
@@ -74,6 +74,10 @@ export interface Screens {
     onOpenArchive(cb: () => void): () => void
     /** Back from the archive or result (button or Escape). */
     onBack(cb: (from: ScreenName) => void): () => void
+    /** The state of the sound toggle on the title screen. */
+    setSound(on: boolean): void
+    /** The player pressed the sound toggle. */
+    onSoundToggle(cb: () => void): () => void
     dispose(): void
 }
 
@@ -133,6 +137,7 @@ export function createScreens(root: HTMLElement): Screens {
         playSeed: new Set<Cb<[string]>>(),
         playAgain: new Set<Cb>(),
         openArchive: new Set<Cb>(),
+        sound: new Set<Cb>(),
         back: new Set<Cb<[ScreenName]>>(),
     }
     function fire<A extends unknown[]>(set: Set<Cb<A>>, ...a: A): void {
@@ -148,6 +153,9 @@ export function createScreens(root: HTMLElement): Screens {
     }
 
     let current: ScreenName | null = null
+    // One button for every title screen: it keeps its state.
+    const sound = soundButton('fw-title-sound')
+    sound.el.addEventListener('click', () => fire(cbs.sound))
     let copyTimer: ReturnType<typeof setTimeout> | null = null
 
     function mount(name: ScreenName, card: HTMLElement, focus?: HTMLElement) {
@@ -321,6 +329,11 @@ export function createScreens(root: HTMLElement): Screens {
                 h(
                     'li',
                     {},
+                    'To cancel a swing, press Esc, or slide away from the pad and release.'
+                ),
+                h(
+                    'li',
+                    {},
                     'Mind the wind. One hole a day, the first round counts.'
                 )
             )
@@ -333,7 +346,8 @@ export function createScreens(root: HTMLElement): Screens {
                 'div',
                 { class: 'fw-brand' },
                 h('h1', { class: 'fw-wordmark' }, svg(ICONS.flag), 'Fairway'),
-                h('p', { class: 'fw-tagline' }, 'One golf hole a day.')
+                h('p', { class: 'fw-tagline' }, 'One golf hole a day.'),
+                sound.el
             ),
             today,
             h(
@@ -596,6 +610,8 @@ export function createScreens(root: HTMLElement): Screens {
         onPlayAgain: (cb) => on(cbs.playAgain, cb),
         onOpenArchive: (cb) => on(cbs.openArchive, cb),
         onBack: (cb) => on(cbs.back, cb),
+        setSound: (v) => sound.set(v),
+        onSoundToggle: (cb) => on(cbs.sound, cb),
         dispose() {
             document.removeEventListener('keydown', onKey)
             if (copyTimer) {

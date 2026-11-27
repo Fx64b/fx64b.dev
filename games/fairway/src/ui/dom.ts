@@ -59,4 +59,33 @@ export const ICONS = {
         '<rect x="4" y="5.5" width="16" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
     forward:
         '<path d="M6 6.5l6 5.5-6 5.5M13 6.5l6 5.5-6 5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+    soundOn:
+        '<path d="M4.5 9.75h2.9l4.1-3.5v11.5l-4.1-3.5H4.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 9.4a3.7 3.7 0 0 1 0 5.2M17.4 7a7.1 7.1 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+    soundOff:
+        '<path d="M4.5 9.75h2.9l4.1-3.5v11.5l-4.1-3.5H4.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15.5 9.75l4.5 4.5M20 9.75l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
 } as const
+
+export interface SoundButton {
+    el: HTMLButtonElement
+    /** Show the sound as on or off. */
+    set(on: boolean): void
+}
+
+/**
+ * The sound toggle: a small speaker button. aria-pressed is true while the
+ * sound is on. The caller listens for the click.
+ */
+export function soundButton(cls = ''): SoundButton {
+    const el = h('button', {
+        type: 'button',
+        class: `fw-icon-btn fw-sound${cls ? ` ${cls}` : ''}`,
+        'aria-label': 'Sound',
+    })
+    function set(on: boolean): void {
+        el.setAttribute('aria-pressed', String(on))
+        el.title = on ? 'Sound on (M)' : 'Sound off (M)'
+        el.replaceChildren(svg(on ? ICONS.soundOn : ICONS.soundOff))
+    }
+    set(true)
+    return { el, set }
+}
