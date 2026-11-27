@@ -132,7 +132,7 @@ export const KEEP_CAP = [8, 12, 24],
     KEEP_POP = [0, 40],
     // What the Great keep gives besides the buildings it opens.
     KEEP3_PERKS =
-        'Room for 24 people at the keep. Its arrows hit harder and reach 1 tile further. The royal court doubles the tax.'
+        'Room for 24 people at the keep. Its arrows hit harder and reach 1 tile further. The royal court doubles the tax. The siege workshop can build rams and catapults.'
 /* Banner colours. 0 is Thornwick, 1 to 8 the first lords, 10 the bandits and
    11 on the lords who come later (each lord's `col`). */
 export const FCOL = [
@@ -758,7 +758,7 @@ export const DEF = {
         garrison: 4,
         units: ['pram', 'pcat', 'eng'],
         flam: 1,
-        tip: 'Builds battering rams and catapults and trains engineers. They follow a war banner planted on a rival castle.',
+        tip: 'Trains engineers. With a great keep it also builds battering rams and catapults. They follow a war banner planted on a rival castle.',
     },
     smith: {
         name: 'Blacksmith',

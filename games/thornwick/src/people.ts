@@ -1,6 +1,6 @@
-import { bannerOf, slotOf } from './army'
+import { MOP_R, bannerOf, slotOf } from './army'
 import { ARMOURED, flankMul, fleeStep, shieldCover, shock } from './combat'
-import { DEF, KX, KY, N, ORDER, WALLISH } from './config'
+import { DEF, KX, KY, N, ORDER, TIERS, WALLISH } from './config'
 import {
     craftUpdate,
     farmYield,
@@ -122,6 +122,7 @@ export const UNITS = {
         rng: 1,
         cd: 1.6,
         siege: 1,
+        need: 3,
     },
     pcat: {
         name: 'Catapult',
@@ -134,6 +135,7 @@ export const UNITS = {
         cd: 4.5,
         siege: 1,
         ranged: 1,
+        need: 3,
     },
     shield: {
         name: 'Shield-bearer',
@@ -722,10 +724,26 @@ export function scoutUpdate(s?, dt?) {
         s.dead = true
     }
 }
+/*
+ * The place a soldier fights for: its banner, or the ground of a siege just won
+ * (s.mop), where it attacks what is left before it goes home. Gives [x, y, r].
+ */
+export function fightArea(s?, dt?) {
+    const bn = bannerOf(s)
+    if (bn) {
+        s.mop = null
+        return [bn.x, bn.y, 0]
+    }
+    const m = s.mop
+    if (m && (m.t -= dt) > 0) {
+        return [m.x, m.y, MOP_R]
+    }
+    s.mop = null
+    return null
+}
 export function siegeUpdate(s?, dt?) {
     const U = UNITS[s.kind],
-        bn = bannerOf(s),
-        flag = bn ? [bn.x, bn.y] : null
+        flag = fightArea(s, dt)
     s.cd -= dt
     s.moving = false
     if ((s.think -= dt) <= 0) {
@@ -733,10 +751,11 @@ export function siegeUpdate(s?, dt?) {
         s.tb = null
         if (flag) {
             let bd = 1e9
+            const r = flag[2] || 9
             for (const b of GV.S.b) {
                 if (
                     b.o !== 0 &&
-                    Math.hypot(b.cx - flag[0], b.cy - flag[1]) < 9
+                    Math.hypot(b.cx - flag[0], b.cy - flag[1]) < r
                 ) {
                     // Rams go for gates and the keep, catapults for towers.
                     const d =
@@ -755,6 +774,9 @@ export function siegeUpdate(s?, dt?) {
                         s.tb = b
                     }
                 }
+            }
+            if (!s.tb && flag[2]) {
+                s.mop = null
             }
         }
     }
@@ -932,11 +954,12 @@ export function sUpdate(s?, dt?) {
     s.moving = false
     s.think -= dt
     const bn = bannerOf(s),
-        flag = bn ? [bn.x, bn.y] : null,
+        flag = fightArea(s, dt),
+        mopR = flag ? flag[2] : 0,
         U = UNITS[s.kind],
         arch = !!U.ranged,
         shield = s.kind === 'shield',
-        hold = (bn ? bn.st : GV.S.stance) === 'hold',
+        hold = !mopR && (bn ? bn.st : GV.S.stance) === 'hold',
         hi = arch ? s.hi || 0 : 0
     const [ax, ay] = anchorOf(s)
     if (s.hunt && (s.hunt.dead || (s.huntT -= dt) <= 0)) {
@@ -961,7 +984,8 @@ export function sUpdate(s?, dt?) {
                 ok =
                     d < (s.onWall ? 6 : 4.5) + hi ||
                     (flag
-                        ? Math.hypot(e.x - flag[0], e.y - flag[1]) < 7
+                        ? Math.hypot(e.x - flag[0], e.y - flag[1]) <
+                          (mopR || 7)
                         : !(arch && s.post) &&
                           d < 24 &&
                           (ownedT(clampN(e.x), clampN(e.y)) ||
@@ -979,7 +1003,7 @@ export function sUpdate(s?, dt?) {
             for (const b of GV.S.b) {
                 if (
                     b.o !== 0 &&
-                    Math.hypot(b.cx - flag[0], b.cy - flag[1]) < 8
+                    Math.hypot(b.cx - flag[0], b.cy - flag[1]) < (mopR || 8)
                 ) {
                     const ds =
                         Math.hypot(b.cx - s.x, b.cy - s.y) +
@@ -990,6 +1014,10 @@ export function sUpdate(s?, dt?) {
                     }
                 }
             }
+        }
+        // Nothing left to fight where the siege was won: go home.
+        if (mopR && !best && !s.tb) {
+            s.mop = null
         }
         if (arch && !flag) {
             pickPost(s)
@@ -1153,13 +1181,21 @@ export function hitSold(s?, dmg?, how?, att?) {
         }
     }
 }
+/* A unit is open once the keep is grand enough for it. */
+export const unitOpen = (k?) => !UNITS[k].need || GV.keep.lvl >= UNITS[k].need
 export function train(b?, auto?, kind?) {
     const d = DEF[b.t]
-    kind = kind || b.trainKind || d.units[0]
+    kind = kind || b.trainKind || d.units.find(unitOpen) || d.units[0]
     const U = UNITS[kind]
-    if (U.need && GV.keep.lvl < U.need) {
+    if (!unitOpen(kind)) {
         if (!auto) {
-            toast(U.name + 's need a stone keep.')
+            toast(
+                U.plural[0].toUpperCase() +
+                    U.plural.slice(1) +
+                    ' need a ' +
+                    TIERS[U.need - 1].toLowerCase() +
+                    '.'
+            )
         }
         return
     }
