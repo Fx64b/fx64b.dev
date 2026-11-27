@@ -12,6 +12,7 @@ export type ClubId =
 
 export interface Club {
     id: ClubId
+    /** Full name, as the HUD shows it. */
     name: string
     /** Ball speed at full power, in m/s. */
     ballSpeed: number
@@ -42,22 +43,25 @@ function club(
 }
 
 // Ball speed (m/s), launch angle (deg), spin (rpm) and the target carry (m).
-// Launch angle and spin are those of SPEC 5.3. The ball speeds were solved
-// so that the flight model gives the listed carry (no wind, sea level, flat
-// ground). They are 0.1 to 2.3 m/s below the start values of the SPEC
-// (65, 61, 56, 51, 46, 42, 36).
+// SPEC 5.3 lists the same values. The ball speeds were solved so that the
+// flight model gives the listed carry (no wind, sea level, flat ground),
+// starting from typical launch monitor speeds (65, 61, 56, 51, 46, 42 and
+// 36 m/s); they ended 0.1 to 2.3 m/s lower.
 export const CLUBS: Record<ClubId, Club> = {
     driver: club('driver', 'Driver', 63.6, 12, 2700, 215),
     wood3: club('wood3', '3 Wood', 59.4, 11, 3500, 195),
     iron5: club('iron5', '5 Iron', 53.7, 13, 5300, 165),
     iron7: club('iron7', '7 Iron', 50.5, 16, 7000, 145),
     iron9: club('iron9', '9 Iron', 45.3, 21, 8500, 120),
-    pw: club('pw', 'PW', 41.9, 25, 9300, 105),
-    sw: club('sw', 'SW', 33.3, 30, 10000, 75),
+    pw: club('pw', 'Pitching wedge', 41.9, 25, 9300, 105),
+    sw: club('sw', 'Sand wedge', 33.3, 30, 10000, 75),
     putter: club('putter', 'Putter', PUTTER_MAX_SPEED, 0, 0, 0),
 }
 
-/** The clubs from longest to shortest. */
+/**
+ * The clubs from longest to shortest. A club's index in this list is its
+ * index everywhere else (HUD club bar, number keys, stored rounds).
+ */
 export const CLUB_ORDER: readonly ClubId[] = [
     'driver',
     'wood3',

@@ -5,7 +5,7 @@ import { ICONS, h, musicButton, soundButton, svg } from './dom'
 import {
     formatDate,
     formatToPar,
-    formatYardsValue,
+    formatYards,
     plural,
     scoreName,
     shareText,
@@ -51,8 +51,6 @@ export interface ResultData {
     date?: string
     /** Appended to the share text, e.g. a link to the seed. */
     url?: string
-    /** Overrides the generated share text. */
-    shareText?: string
 }
 
 export type ScreenName = 'title' | 'archive' | 'result'
@@ -248,7 +246,7 @@ export function createScreens(root: HTMLElement): Screens {
                     { class: 'fw-today-facts' },
                     h('span', {}, `Par ${d.par}`),
                     h('span', { class: 'fw-sep', 'aria-hidden': 'true' }),
-                    h('span', {}, `${formatYardsValue(d.lengthM)} yd`)
+                    h('span', {}, formatYards(d.lengthM))
                 )
             ),
             played
@@ -456,19 +454,16 @@ export function createScreens(root: HTMLElement): Screens {
     // --- Result --------------------------------------------------------------
 
     function showResult(d: ResultData): void {
-        const diff = d.strokes - d.par
-        const text =
-            d.shareText ??
-            shareText({
-                number: d.number,
-                seed: d.seed,
-                strokes: d.strokes,
-                par: d.par,
-                putts: d.putts,
-                penalties: d.penalties,
-                bunkers: d.bunkers,
-                url: d.url,
-            })
+        const text = shareText({
+            number: d.number,
+            seed: d.seed,
+            strokes: d.strokes,
+            par: d.par,
+            putts: d.putts,
+            penalties: d.penalties,
+            bunkers: d.bunkers,
+            url: d.url,
+        })
         const title = d.number > 0 ? `Hole #${d.number}` : `Seed "${d.seed}"`
         const sub = [
             d.date ? formatDate(d.date) : null,
@@ -549,7 +544,7 @@ export function createScreens(root: HTMLElement): Screens {
             ),
             h(
                 'div',
-                { class: 'fw-result-stats', 'data-diff': String(diff) },
+                { class: 'fw-result-stats' },
                 stat(d.putts === 1 ? 'Putt' : 'Putts', d.putts),
                 stat(d.penalties === 1 ? 'Penalty' : 'Penalties', d.penalties),
                 stat(d.bunkers === 1 ? 'Bunker' : 'Bunkers', d.bunkers)

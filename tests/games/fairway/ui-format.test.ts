@@ -1,32 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-    LAUNCH_DATE,
-    addDays,
-    archiveDates,
-    daysBetween,
     formatDate,
-    formatKmh,
+    formatKmhValue,
     formatToPar,
     formatYards,
     formatYardsValue,
-    isIsoDate,
     lieName,
-    metresToYards,
-    msToKmh,
     scoreName,
     shareText,
     todayUtc,
-    yardsToMetres,
 } from '../../../games/fairway/src/ui/format'
 
 describe('units', () => {
-    it('converts metres to yards and back', () => {
-        expect(metresToYards(0.9144)).toBeCloseTo(1, 12)
-        expect(yardsToMetres(100)).toBeCloseTo(91.44, 12)
-        expect(metresToYards(215)).toBeCloseTo(235.13, 2)
-    })
-
     it('formats yards', () => {
         expect(formatYards(215)).toBe('235 yd')
         expect(formatYardsValue(376.7328)).toBe('412')
@@ -36,10 +22,11 @@ describe('units', () => {
         expect(formatYardsValue(Number.NaN)).toBe('-')
     })
 
-    it('converts m/s to km/h', () => {
-        expect(msToKmh(10)).toBe(36)
-        expect(formatKmh(3.9)).toBe('14 km/h')
-        expect(formatKmh(0)).toBe('0 km/h')
+    it('formats km/h', () => {
+        expect(formatKmhValue(3.9)).toBe('14')
+        expect(formatKmhValue(0)).toBe('0')
+        expect(formatKmhValue(-2)).toBe('0')
+        expect(formatKmhValue(Number.NaN)).toBe('-')
     })
 })
 
@@ -118,25 +105,13 @@ describe('shareText', () => {
 })
 
 describe('dates', () => {
-    it('validates and steps UTC dates', () => {
-        expect(isIsoDate('2026-11-27')).toBe(true)
-        expect(isIsoDate('2026-02-30')).toBe(false)
-        expect(isIsoDate('27.11.2026')).toBe(false)
-        expect(addDays('2026-12-31', 1)).toBe('2027-01-01')
-        expect(daysBetween('2026-11-27', '2027-01-01')).toBe(35)
+    it('takes today in UTC', () => {
         expect(todayUtc(new Date(Date.UTC(2026, 10, 27, 23, 59)))).toBe(
             '2026-11-27'
         )
-    })
-
-    it('lists archive dates from launch to today, newest first', () => {
-        expect(archiveDates(LAUNCH_DATE)).toEqual(['2026-11-27'])
-        expect(archiveDates('2026-11-30')).toEqual([
-            '2026-11-30',
-            '2026-11-29',
-            '2026-11-28',
-            '2026-11-27',
-        ])
+        expect(todayUtc(new Date('2026-12-31T21:30:00-05:00'))).toBe(
+            '2027-01-01'
+        )
     })
 
     it('formats dates', () => {
@@ -144,5 +119,6 @@ describe('dates', () => {
         expect(formatDate('2026-11-27', 'long')).toBe(
             'Friday, 27 November 2026'
         )
+        expect(() => formatDate('2026-02-30')).toThrow()
     })
 })

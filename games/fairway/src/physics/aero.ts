@@ -2,7 +2,10 @@
 import { ln } from './detmath'
 
 // Drag and lift depend on the spin factor S = r * omega / |v_rel|, where
-// v_rel is the velocity of the ball relative to the air.
+// v_rel is the velocity of the ball relative to the air:
+//   Cd = CD_BASE + CD_SPIN * S
+//   Cl = CL_MAX * S / (CL_HALF_SPIN + S)
+// (simulate.ts evaluates both inline in its hot loop).
 //
 // The shapes follow the wind tunnel data for dimpled balls above the drag
 // crisis (Bearman and Harvey 1976, Smits and Smith 1994):
@@ -15,14 +18,6 @@ export const CD_BASE = 0.215
 export const CD_SPIN = 0.3
 export const CL_MAX = 0.42
 export const CL_HALF_SPIN = 0.09
-
-export function dragCoefficient(spinFactor: number): number {
-    return CD_BASE + CD_SPIN * spinFactor
-}
-
-export function liftCoefficient(spinFactor: number): number {
-    return (CL_MAX * spinFactor) / (CL_HALF_SPIN + spinFactor)
-}
 
 // Spin decay in flight: d(omega)/dt = -SPIN_DECAY * omega * |v_rel| / r.
 // With 2e-5 a ball at 50 m/s loses about 4.5% of its spin per second, which

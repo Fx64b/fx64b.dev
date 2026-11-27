@@ -14,6 +14,7 @@ import {
 import { CameraRig } from './cameraRig'
 import { type GreenGrid, createGreenGrid } from './greenGrid'
 import type { HeightSampler } from './height'
+import { type Markers, createObStakes } from './markers'
 import { type Props, createProps } from './props'
 import { type Sky, createSky } from './sky'
 import {
@@ -88,6 +89,7 @@ interface World {
     water: Water
     props: Props
     grid: GreenGrid
+    stakes: Markers
     isGreen: (x: number, z: number) => boolean
     sampler: HeightSampler
 }
@@ -178,13 +180,15 @@ export function createRenderer(
             world.trees.group,
             world.water.group,
             world.props.group,
-            world.grid.group
+            world.grid.group,
+            world.stakes.group
         )
         world.terrain.dispose()
         world.trees.dispose()
         world.water.dispose()
         world.props.dispose()
         world.grid.dispose()
+        world.stakes.dispose()
         world = null
     }
 
@@ -236,14 +240,25 @@ export function createRenderer(
             terrain.uniforms,
             quality
         )
+        const stakes = createObStakes(h, terrain.ground)
         scene.add(
             terrain.group,
             trees.group,
             water.group,
             props.group,
-            grid.group
+            grid.group,
+            stakes.group
         )
-        world = { terrain, trees, water, props, grid, sampler, isGreen }
+        world = {
+            terrain,
+            trees,
+            water,
+            props,
+            grid,
+            stakes,
+            sampler,
+            isGreen,
+        }
         ballShown = false
         rig.setHole(h, terrain.ground, isGreen)
         rig.overview()

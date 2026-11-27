@@ -5,6 +5,8 @@ import {
     GENERATORS,
     LAUNCH_DATE,
     VERSION_SCHEDULE,
+    addDays,
+    archiveDates,
     createRng,
     dailySeed,
     hashString,
@@ -44,6 +46,27 @@ describe('fairway seeds', () => {
         expect(parseDateSeed('2026-13-01')).toBeNull()
         expect(parseDateSeed('fairway')).toBeNull()
         expect(parseDateSeed('2026-11-27x')).toBeNull()
+        expect(parseDateSeed('27.11.2026')).toBeNull()
+    })
+
+    it('steps date seeds by whole UTC days', () => {
+        expect(addDays('2026-12-31', 1)).toBe('2027-01-01')
+        expect(addDays('2026-11-27', -1)).toBe('2026-11-26')
+        expect(addDays('2028-02-28', 1)).toBe('2028-02-29')
+        expect(holeNumberFor(new Date('2027-01-01T00:00:00Z'))).toBe(36)
+        expect(() => addDays('2026-02-30', 1)).toThrow()
+    })
+
+    it('lists archive dates from launch to today, newest first', () => {
+        expect(archiveDates(LAUNCH_DATE)).toEqual(['2026-11-27'])
+        expect(archiveDates('2026-11-30')).toEqual([
+            '2026-11-30',
+            '2026-11-29',
+            '2026-11-28',
+            '2026-11-27',
+        ])
+        expect(archiveDates('2027-01-01')).toHaveLength(36)
+        expect(archiveDates('2026-11-26')).toEqual([])
     })
 
     it('makes random seeds from the entropy it is given', () => {

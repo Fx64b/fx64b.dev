@@ -21,12 +21,21 @@ export function h<K extends keyof HTMLElementTagNameMap>(
     return el
 }
 
-export function append(el: Element, children: Child[]): void {
+function append(el: Element, children: Child[]): void {
     for (const c of children) {
         if (c === null || c === undefined || c === false) {
             continue
         }
         el.append(typeof c === 'string' ? document.createTextNode(c) : c)
+    }
+}
+
+/** True on touch-first devices (phones, tablets): a coarse pointer. */
+export function prefersTouch(): boolean {
+    try {
+        return window.matchMedia?.('(pointer: coarse)').matches === true
+    } catch {
+        return false
     }
 }
 
@@ -74,8 +83,6 @@ export interface ToggleButton {
     /** Show the setting as on or off. */
     set(on: boolean): void
 }
-
-export type SoundButton = ToggleButton
 
 function toggleButton(
     name: string,

@@ -92,7 +92,7 @@ export interface WaterBody {
 
 export interface HoleConditions {
     /** Wind at 10 m height, in m/s. Direction the wind blows TOWARD,
-     *  in radians from +x toward +z (atan2(z, x)). */
+     *  in radians from +x toward +z, atan2(dz, dx). */
     windSpeed: number
     windDirection: number
     /** kg/m^3 */

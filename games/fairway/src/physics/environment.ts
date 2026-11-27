@@ -18,7 +18,7 @@ export function defaultEnvironment(
 
 /**
  * The environment of a generated hole. The wind direction of the hole data
- * is the direction the wind blows toward, as atan2(z, x).
+ * is the direction the wind blows toward, as atan2(dz, dx).
  */
 export function environmentFromHole(
     conditions: HoleData['conditions'],

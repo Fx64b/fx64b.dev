@@ -1,4 +1,6 @@
-// Seeds for daily, archive and random holes.
+// Seeds for daily, archive and random holes, and the UTC date helpers that
+// go with them. This module is light (no generator code), so the UI can
+// use it directly.
 
 const DAY_MS = 86_400_000
 
@@ -42,13 +44,33 @@ export function parseDateSeed(seed: string): Date | null {
     return date
 }
 
+const LAUNCH_DAY = utcDay(parseDateSeed(LAUNCH_DATE) as Date)
+
 /**
  * Display number of the daily hole. Launch day is #1. Dates before the
  * launch give 0 or less.
  */
 export function holeNumberFor(date: Date): number {
-    const launch = parseDateSeed(LAUNCH_DATE) as Date
-    return utcDay(date) - utcDay(launch) + 1
+    return utcDay(date) - LAUNCH_DAY + 1
+}
+
+/** The date seed `days` days after (or before) a date seed. */
+export function addDays(seed: string, days: number): string {
+    const date = parseDateSeed(seed)
+    if (!date) {
+        throw new Error(`Fairway: not a date seed: ${seed}`)
+    }
+    return dailySeed(new Date(date.getTime() + days * DAY_MS))
+}
+
+/** Every daily seed from the launch day to `today`, newest first. */
+export function archiveDates(today: string): string[] {
+    const date = parseDateSeed(today)
+    const out: string[] = []
+    for (let i = date ? holeNumberFor(date) - 1 : -1; i >= 0; i--) {
+        out.push(addDays(LAUNCH_DATE, i))
+    }
+    return out
 }
 
 // No vowels and no look-alike characters: seeds are typed and shared.

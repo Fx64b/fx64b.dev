@@ -1,16 +1,11 @@
 // The in-round HUD (SPEC 8): hole info, distance, club, wind, power meter,
 // swing pad, hint line, toasts and the skip button. Plain DOM; the game
 // calls the setters, the HUD never reads game state.
+import { msToKmh } from '../physics/units'
 import type { SurfaceId } from '../shared/hole'
-import {
-    CLUB_COUNT,
-    CLUB_LABELS,
-    CLUB_LABELS_NARROW,
-    CLUB_NAMES,
-    clampClubIndex,
-} from './clubs'
-import { ICONS, h, soundButton, svg } from './dom'
-import { formatKmhValue, formatYardsValue, lieName, msToKmh } from './format'
+import { CLUB_LABELS, clampClubIndex } from './clubs'
+import { ICONS, h, prefersTouch, soundButton, svg } from './dom'
+import { formatKmhValue, formatYardsValue, lieName } from './format'
 
 export interface HoleInfo {
     /** Daily hole number; 0 or less for a random or custom seed. */
@@ -27,9 +22,9 @@ export interface ToastOptions {
     tone?: 'neutral' | 'accent'
 }
 
-export const DEFAULT_HINT =
+const DEFAULT_HINT =
     'Hold Space or the pad, release to hit. Esc cancels. A/D to aim.'
-export const DEFAULT_HINT_TOUCH =
+const DEFAULT_HINT_TOUCH =
     'Hold the pad, release to hit. Slide away to cancel. Drag to aim.'
 
 export interface Hud {
@@ -71,14 +66,6 @@ export interface Hud {
 }
 
 const POWER_LINGER_MS = 900
-
-function prefersTouch(): boolean {
-    try {
-        return window.matchMedia?.('(pointer: coarse)').matches === true
-    } catch {
-        return false
-    }
-}
 
 function wrapPi(a: number): number {
     const t = 2 * Math.PI
@@ -136,7 +123,7 @@ export function createHud(root: HTMLElement): Hud {
     const distValue = h('span', { class: 'fw-num' }, '-')
     const carryValue = h('span', { class: 'fw-num' }, '-')
     const carryUnit = h('span', { class: 'fw-unit' }, 'yd')
-    const clubName = h('span', { class: 'fw-label' }, CLUB_NAMES[0])
+    const clubName = h('span', { class: 'fw-label' }, CLUB_LABELS[0].name)
     const shotPanel = h(
         'section',
         { class: 'fw-panel fw-shot', 'aria-label': 'Shot' },
@@ -166,7 +153,7 @@ export function createHud(root: HTMLElement): Hud {
         role: 'toolbar',
         'aria-label': 'Club',
     })
-    for (let i = 0; i < CLUB_COUNT; i++) {
+    CLUB_LABELS.forEach((club, i) => {
         const b = h(
             'button',
             {
@@ -174,15 +161,15 @@ export function createHud(root: HTMLElement): Hud {
                 class: 'fw-club',
                 'data-index': i,
                 'aria-pressed': 'false',
-                'aria-label': CLUB_NAMES[i],
-                title: `${CLUB_NAMES[i]} (${i + 1})`,
+                'aria-label': club.name,
+                title: `${club.name} (${i + 1})`,
             },
-            h('span', { class: 'fw-club-wide' }, CLUB_LABELS[i]),
-            h('span', { class: 'fw-club-narrow' }, CLUB_LABELS_NARROW[i])
+            h('span', { class: 'fw-club-wide' }, club.short),
+            h('span', { class: 'fw-club-narrow' }, club.narrow)
         )
         clubButtons.push(b)
         clubBar.append(b)
-    }
+    })
 
     const meterFill = h('span', { class: 'fw-meter-fill' })
     const meter = h(
@@ -337,7 +324,7 @@ export function createHud(root: HTMLElement): Hud {
             clubButtons.forEach((b, j) => {
                 b.setAttribute('aria-pressed', String(i === j))
             })
-            clubName.textContent = CLUB_NAMES[i]
+            clubName.textContent = CLUB_LABELS[i].name
             if (nominalCarryM === null || !Number.isFinite(nominalCarryM)) {
                 carryValue.textContent = '-'
             } else {

@@ -32,25 +32,56 @@ const spot = (x: number, z: number): Vec3 => ({
     y: renderer.groundHeight(x, z),
     z,
 })
+// Points along the line of play (tee, centre line, pin), by distance.
+const linePts = [hole.tee, ...hole.centerline, hole.pin].filter(
+    (p, i, all) =>
+        i === 0 || Math.hypot(p.x - all[i - 1].x, p.z - all[i - 1].z) > 0.5
+)
+const lineLen = linePts.reduce(
+    (sum, p, i) =>
+        i === 0
+            ? 0
+            : sum + Math.hypot(p.x - linePts[i - 1].x, p.z - linePts[i - 1].z),
+    0
+)
+function along(dist: number): Vec3 {
+    let left = Math.min(Math.max(dist, 0), lineLen)
+    for (let i = 1; i < linePts.length; i++) {
+        const a = linePts[i - 1]
+        const b = linePts[i]
+        const seg = Math.hypot(b.x - a.x, b.z - a.z)
+        if (left <= seg || i === linePts.length - 1) {
+            const t = Math.min(1, left / seg)
+            return spot(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t)
+        }
+        left -= seg
+    }
+    return { ...hole.pin }
+}
 const spots: Record<'tee' | 'fairway' | 'approach' | 'green', () => Vec3> = {
     tee: () => ({ ...hole.tee }),
-    fairway: () => spot(16, 205),
-    approach: () => spot(33, 318),
-    green: () => spot(36, 361),
+    fairway: () => along(lineLen * 0.5),
+    approach: () => along(lineLen - 48),
+    green: () => along(lineLen - 9),
 }
 const aimAt = (from: Vec3, to: Vec3) => Math.atan2(to.z - from.z, to.x - from.x)
+// From the tee, aim down the line of play; elsewhere, at the pin.
+const driveTarget = () => (lineLen < 230 ? hole.pin : along(210))
 const aimFor = (name: 'tee' | 'fairway' | 'approach' | 'green', p: Vec3) => {
-    // From the tee, aim down the fairway; elsewhere, at the pin.
-    const target = name === 'tee' ? { x: 12, y: 0, z: 200 } : hole.pin
+    const target = name === 'tee' ? driveTarget() : hole.pin
     return aimAt(p, target) + aimOffset
 }
 
-// A simple drive for the flight view: a parabola from the tee.
-const FLIGHT = { time: 6.2, carry: 205, apex: 27 }
+// A simple shot for the flight view: a parabola from the tee.
+const FLIGHT = {
+    time: 6.2,
+    carry: Math.min(205, lineLen * 0.92),
+    apex: Math.min(27, lineLen * 0.14),
+}
 function flightState(t: number): { pos: Vec3; vel: Vec3 } {
     const k = Math.min(Math.max(t / FLIGHT.time, 0), 1)
     const tee = hole.tee
-    const a = aimAt(tee, { x: 12, y: 0, z: 200 })
+    const a = aimAt(tee, driveTarget())
     const d = FLIGHT.carry * k
     const x = tee.x + Math.cos(a) * d
     const z = tee.z + Math.sin(a) * d
@@ -102,7 +133,7 @@ function setView(next: View, opts: { t?: number } = {}) {
         renderer.setAimRing(null)
         // Replay from the address so the chase camera is settled.
         const tee = hole.tee
-        const a = aimAt(tee, { x: 12, y: 0, z: 200 })
+        const a = aimAt(tee, driveTarget())
         renderer.cameraGlideTo(tee, a, 0)
         renderer.cameraAddress(tee, a)
         renderer.update(0)
@@ -210,7 +241,7 @@ function frame(now: number) {
                 }
                 if (flightT < dt * 1.5) {
                     const tee = hole.tee
-                    const a = aimAt(tee, { x: 12, y: 0, z: 200 })
+                    const a = aimAt(tee, driveTarget())
                     renderer.cameraGlideTo(tee, a, 0)
                 }
             }

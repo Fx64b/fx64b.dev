@@ -1,30 +1,15 @@
 // Display formatting for the UI. The game passes SI units (metres, m/s);
 // everything shown to the player is converted here: yards and km/h.
+import { dailySeed, parseDateSeed } from '../course/seed'
+import { mToYd, msToKmh } from '../physics/units'
 import type { SurfaceId } from '../shared/hole'
-
-export const METRES_PER_YARD = 0.9144
-
-/** The first daily hole. The archive starts here. */
-export const LAUNCH_DATE = '2026-11-27'
-
-export function metresToYards(m: number): number {
-    return m / METRES_PER_YARD
-}
-
-export function yardsToMetres(yd: number): number {
-    return yd * METRES_PER_YARD
-}
-
-export function msToKmh(ms: number): number {
-    return ms * 3.6
-}
 
 /** Yards as a number string: whole yards, one decimal below 10 yd. */
 export function formatYardsValue(m: number): string {
     if (!Number.isFinite(m)) {
         return '-'
     }
-    const yd = metresToYards(Math.max(0, m))
+    const yd = mToYd(Math.max(0, m))
     if (yd < 9.95) {
         return yd.toFixed(1)
     }
@@ -42,11 +27,6 @@ export function formatKmhValue(ms: number): string {
         return '-'
     }
     return String(Math.round(msToKmh(Math.max(0, ms))))
-}
-
-/** "14 km/h". */
-export function formatKmh(ms: number): string {
-    return `${formatKmhValue(ms)} km/h`
 }
 
 const LIE_NAMES: Record<SurfaceId, string> = {
@@ -108,7 +88,7 @@ export function plural(n: number, one: string, many = `${one}s`): string {
     return `${n} ${n === 1 ? one : many}`
 }
 
-export interface ShareData {
+interface ShareData {
     /** Daily hole number; 0 or less for a random or custom seed. */
     number: number
     seed: string
@@ -147,7 +127,6 @@ export function shareText(d: ShareData): string {
 
 // --- Dates (UTC, YYYY-MM-DD) -------------------------------------------------
 
-const DAY_MS = 86_400_000
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEKDAYS_LONG = [
     'Sunday',
@@ -187,55 +166,9 @@ const MONTHS_LONG = [
     'December',
 ]
 
-const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/
-
-export function isIsoDate(s: string): boolean {
-    const m = ISO_DATE.exec(s)
-    if (!m) {
-        return false
-    }
-    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))
-    return toIsoDate(d) === s
-}
-
-/** Milliseconds since the epoch for midnight UTC of the date. */
-export function isoDateToMs(iso: string): number {
-    const m = ISO_DATE.exec(iso)
-    if (!m) {
-        throw new Error(`Not a date: ${iso}`)
-    }
-    return Date.UTC(+m[1], +m[2] - 1, +m[3])
-}
-
-export function toIsoDate(d: Date): string {
-    const y = d.getUTCFullYear()
-    const mo = String(d.getUTCMonth() + 1).padStart(2, '0')
-    const da = String(d.getUTCDate()).padStart(2, '0')
-    return `${y}-${mo}-${da}`
-}
-
-/** Today's date in UTC. */
+/** Today's date in UTC, as a date seed (YYYY-MM-DD). */
 export function todayUtc(now: Date = new Date()): string {
-    return toIsoDate(now)
-}
-
-export function addDays(iso: string, days: number): string {
-    return toIsoDate(new Date(isoDateToMs(iso) + days * DAY_MS))
-}
-
-/** Whole days from a to b (b - a). */
-export function daysBetween(a: string, b: string): number {
-    return Math.round((isoDateToMs(b) - isoDateToMs(a)) / DAY_MS)
-}
-
-/** All dates from the launch day to `today`, newest first. */
-export function archiveDates(today: string, launch = LAUNCH_DATE): string[] {
-    const n = daysBetween(launch, today)
-    const out: string[] = []
-    for (let i = n; i >= 0; i--) {
-        out.push(addDays(launch, i))
-    }
-    return out
+    return dailySeed(now)
 }
 
 /** "Fri 27 Nov" (short) or "Friday, 27 November 2026" (long). */
@@ -243,7 +176,10 @@ export function formatDate(
     iso: string,
     style: 'short' | 'long' = 'short'
 ): string {
-    const d = new Date(isoDateToMs(iso))
+    const d = parseDateSeed(iso)
+    if (!d) {
+        throw new Error(`Not a date: ${iso}`)
+    }
     const day = d.getUTCDate()
     const wd = d.getUTCDay()
     const mo = d.getUTCMonth()

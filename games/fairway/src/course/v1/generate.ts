@@ -14,6 +14,7 @@
 //  5. One height function (noise hills, flattened under tee, fairway and
 //     green, with carved bunkers and water) sampled into both heightfields.
 //  6. Surface grid, trees, pin and conditions.
+import { METRES_PER_YARD as YD, kmhToMs } from '../../physics/units'
 import type {
     Bunker,
     HoleData,
@@ -31,7 +32,6 @@ import { MAX_PIN_SLOPE, pinSlope, validateHole } from '../validate'
 
 const VERSION = 1
 const MAX_ATTEMPTS = 12
-const YD = 0.9144
 
 // Surface indices (see SURFACE_IDS).
 const TEE = 0
@@ -435,7 +435,7 @@ function chamfer(mask: Uint8Array, cols: number, rows: number): Float32Array {
 }
 
 /** Par, difficulty and length. They do not change between attempts. */
-export function holeIdentityV1(seed: string): {
+function holeIdentityV1(seed: string): {
     par: 3 | 4 | 5
     difficulty: number
     length: number
@@ -455,7 +455,7 @@ export function holeIdentityV1(seed: string): {
  * Builds the hole for one attempt, without checking it. Returns null when
  * the layout cannot be finished (for example no flat spot for the pin).
  */
-export function buildHoleV1(
+function buildHoleV1(
     seed: string,
     number: number,
     attempt: number
@@ -1989,8 +1989,8 @@ export function buildHoleV1(
 
     // ---- Conditions ------------------------------------------------------
     const cRng = stream('conditions')
-    const windMax = lerp(9, 25, difficulty) / 3.6
-    const windMin = lerp(0, 6, difficulty) / 3.6
+    const windMax = kmhToMs(lerp(9, 25, difficulty))
+    const windMin = kmhToMs(lerp(0, 6, difficulty))
     const windSpeed = lerp(windMin, windMax, cRng.next())
     const windDirection = cRng.range(0, TAU)
     const altitude = cRng.next() * cRng.next()

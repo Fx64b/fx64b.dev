@@ -47,6 +47,8 @@ describe('performance', () => {
 
 describe('units', () => {
     it('converts', () => {
+        expect(mToYd(0.9144)).toBeCloseTo(1, 12)
+        expect(ydToM(100)).toBeCloseTo(91.44, 12)
         expect(mToYd(215)).toBeCloseTo(235.13, 2)
         expect(ydToM(mToYd(123.4))).toBeCloseTo(123.4, 12)
         expect(msToKmh(10)).toBe(36)
@@ -80,7 +82,7 @@ describe('environment from hole data', () => {
             },
             { x: 4, y: 1.5, z: 320 }
         )
-        // Direction is atan2(z, x): pi/2 blows toward +z.
+        // Direction is atan2(dz, dx): pi/2 blows toward +z.
         expect(env.wind.x).toBeCloseTo(0, 12)
         expect(env.wind.z).toBeCloseTo(5, 12)
         expect(env.airDensity).toBe(1.15)

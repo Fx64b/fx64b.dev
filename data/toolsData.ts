@@ -74,6 +74,15 @@ const toolsData: Tool[] = [
         tags: ['game', 'strategy', 'castle', 'city builder', 'medieval'],
         wide: true,
     },
+    {
+        slug: 'fairway',
+        title: 'Fairway',
+        description:
+            'A calm daily golf game: one new full-size hole a day, played in first person with realistic ball flight, wind and greens',
+        category: 'games',
+        tags: ['game', 'golf', 'daily', 'sports', '3d'],
+        wide: true,
+    },
 ]
 
 export default toolsData

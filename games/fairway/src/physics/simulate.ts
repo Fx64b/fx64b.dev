@@ -44,7 +44,7 @@ export interface SimulationOptions {
 }
 
 /** The simulation gives up after this time (a ball on an endless slope). */
-export const MAX_SHOT_TIME = 90
+const MAX_SHOT_TIME = 90
 
 /** One path sample every this many steps (240 Hz / 4 = 60 Hz). */
 const SAMPLE_EVERY = 4
@@ -138,7 +138,7 @@ const TILT_REFERENCE_ANGLE = (44.4 * 3.141592653589793) / 180
 const MAX_TILT = (25 * 3.141592653589793) / 180
 const HALF_PI = 1.5707963267948966
 
-export function baseRestitution(normalSpeed: number): number {
+function baseRestitution(normalSpeed: number): number {
     if (normalSpeed >= 20) {
         return 0.12
     }

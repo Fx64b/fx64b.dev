@@ -202,16 +202,17 @@ export class CameraRig {
     }
 
     /**
-     * Frames the whole hole, tee to green, from high behind the tee. The
-     * distance comes from the size of the hole and the field of view, so
-     * short par 3s and long par 5s both fit, also on a tall phone screen.
+     * Frames the whole hole from high behind the tee and a little to the
+     * side. The camera looks down at a fixed angle and moves in as close as
+     * it can while the tee, the line of play and the green all stay inside
+     * the view, so short par 3s and long par 5s both fill the screen, also
+     * on a tall phone.
      */
     private overviewPose(outPos: THREE.Vector3, outLook: THREE.Vector3) {
         const hole = this.hole
         if (!hole) {
             return
         }
-        const pts = [hole.tee, ...hole.centerline, hole.pin]
         const tx = hole.tee.x
         const tz = hole.tee.z
         let dx = hole.pin.x - tx
@@ -219,44 +220,82 @@ export class CameraRig {
         const len = Math.hypot(dx, dz) || 1
         dx /= len
         dz /= len
-        // Extent of the hole along and across the tee-to-pin line.
-        let minA = 0
-        let maxA = len
-        let maxC = 0
-        for (const p of pts) {
-            const a = (p.x - tx) * dx + (p.z - tz) * dz
-            const c = Math.abs(-(p.x - tx) * dz + (p.z - tz) * dx)
-            minA = Math.min(minA, a)
-            maxA = Math.max(maxA, a)
-            maxC = Math.max(maxC, c)
+        // What must be in view: the line of play, with room around the tee
+        // and the green.
+        const pts: { x: number; z: number }[] = []
+        const around = (p: { x: number; z: number }, r: number) => {
+            pts.push(
+                { x: p.x + r, z: p.z },
+                { x: p.x - r, z: p.z },
+                { x: p.x, z: p.z + r },
+                { x: p.x, z: p.z - r }
+            )
         }
-        const margin = 12
-        const halfLen = (maxA - minA) / 2 + margin
-        const halfWide = maxC + 32
-        const mid = (minA + maxA) / 2
-        const cx = tx + dx * mid
-        const cz = tz + dz * mid
+        around(hole.tee, 14)
+        around(hole.pin, 24)
+        for (const p of hole.centerline) {
+            around(p, 22)
+        }
         const base = Math.max(hole.tee.y, hole.pin.y)
-
-        // Look down at a fixed angle, with a slow sway to the side.
-        const pitch = THREE.MathUtils.degToRad(31)
-        const sway = 0.22 + Math.sin(this.time * 0.12) * 0.06
-        const vHalf = THREE.MathUtils.degToRad(this.camera.fov) / 2
-        const hHalf = Math.atan(Math.tan(vHalf) * this.camera.aspect)
-        // Distance so that the length fits the height of the view and the
-        // width fits its width. The length is foreshortened by the pitch.
-        const fitLen =
-            (halfLen * Math.sin(pitch)) / Math.tan(vHalf) +
-            halfLen * Math.cos(pitch)
-        const fitWide = halfWide / Math.tan(hHalf) + halfLen * Math.cos(pitch)
-        const dist = Math.max(fitLen, fitWide, 90)
+        const pitch = THREE.MathUtils.degToRad(38)
+        const sway = 0.24 + Math.sin(this.time * 0.12) * 0.06
         const bx = Math.cos(sway) * dx - Math.sin(sway) * dz
         const bz = Math.sin(sway) * dx + Math.cos(sway) * dz
-        outPos.set(
-            cx - bx * dist * Math.cos(pitch),
-            base + dist * Math.sin(pitch),
-            cz - bz * dist * Math.cos(pitch)
-        )
+        const tanV = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2)
+        const tanH = tanV * this.camera.aspect
+        const cp = Math.cos(pitch)
+        const sp = Math.sin(pitch)
+        // Does everything fit at distance d when looking at (cx, cz)? Leave
+        // room at the edges (more at the top and bottom, where the title
+        // and the buttons are).
+        const fits = (cx: number, cz: number, d: number) => {
+            const ex = cx - bx * d * cp
+            const ez = cz - bz * d * cp
+            const ey = d * sp
+            for (const p of pts) {
+                const vx = p.x - ex
+                const vz = p.z - ez
+                const fwd = (vx * bx + vz * bz) * cp + ey * sp
+                if (fwd < 1) {
+                    return false
+                }
+                const right = -vx * bz + vz * bx
+                const upv = (vx * bx + vz * bz) * sp - ey * cp
+                if (
+                    Math.abs(right) > fwd * tanH * 0.86 ||
+                    Math.abs(upv) > fwd * tanV * 0.8
+                ) {
+                    return false
+                }
+            }
+            return true
+        }
+        // Try look points along the hole and keep the one that lets the
+        // camera come closest.
+        let dist = Infinity
+        let cx = tx
+        let cz = tz
+        for (let k = 0; k <= 8; k++) {
+            const t = 0.3 + (0.4 * k) / 8
+            const lx = tx + (hole.pin.x - tx) * t
+            const lz = tz + (hole.pin.z - tz) * t
+            let lo = 40
+            let hi = 2500
+            for (let i = 0; i < 18; i++) {
+                const mid = (lo + hi) / 2
+                if (fits(lx, lz, mid)) {
+                    hi = mid
+                } else {
+                    lo = mid
+                }
+            }
+            if (hi < dist) {
+                dist = hi
+                cx = lx
+                cz = lz
+            }
+        }
+        outPos.set(cx - bx * dist * cp, base + dist * sp, cz - bz * dist * cp)
         outLook.set(cx, base, cz)
     }
 

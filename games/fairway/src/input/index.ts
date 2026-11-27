@@ -123,7 +123,8 @@ function keyCode(e: KeyboardEvent): string {
     return k
 }
 
-function isEditable(t: EventTarget | null): boolean {
+/** True for a text field or other editable element: keys there are text. */
+export function isEditable(t: EventTarget | null): boolean {
     if (!t || !(t instanceof HTMLElement)) {
         return false
     }

@@ -7,11 +7,12 @@
 //   ?state=archive&bar=0                      the same from the URL
 //
 // Backquote (`) cycles the states.
-import { generateHole } from '../../course'
+import { addDays, generateHole } from '../../course'
 import { createInput } from '../../input'
+import { ydToM } from '../../physics/units'
 import type { HoleData, SurfaceId, Vec3 } from '../../shared/hole'
 import { CLUB_COUNT, PUTTER_INDEX } from '../clubs'
-import { addDays, todayUtc, yardsToMetres } from '../format'
+import { todayUtc } from '../format'
 import { createHud } from '../hud'
 import { createMinimap } from '../minimap'
 import type { ArchiveEntry } from '../screens'
@@ -86,10 +87,10 @@ const today = todayUtc()
 const game = {
     par: 4,
     number: 1,
-    lengthM: yardsToMetres(412),
+    lengthM: ydToM(412),
     strokes: 0,
     lie: 'tee' as SurfaceId,
-    distM: yardsToMetres(412),
+    distM: ydToM(412),
     club: 0,
     aim: 0,
     windSpeed: 3.9,
@@ -244,12 +245,12 @@ function resetRound(): void {
     Object.assign(game, {
         par: 4,
         number: 1,
-        lengthM: yardsToMetres(412),
+        lengthM: ydToM(412),
         windSpeed: 3.9,
         windDir: 0.9,
         strokes: 0,
         lie: 'tee',
-        distM: yardsToMetres(412),
+        distM: ydToM(412),
         club: 0,
         aim: 0,
         flying: false,
@@ -309,7 +310,7 @@ function show(s: DevState): void {
             Object.assign(game, {
                 strokes: 1,
                 lie: 'fairway',
-                distM: yardsToMetres(176),
+                distM: ydToM(176),
                 club: 2,
                 aim: 0.35,
             })

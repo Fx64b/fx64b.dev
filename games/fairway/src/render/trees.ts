@@ -8,7 +8,7 @@ import * as THREE from 'three'
 
 import type { HoleData, Tree, TreeKind } from '../shared/hole'
 import type { HeightSampler } from './height'
-import { fbm, hash2, lerp, mulberry32 } from './noise'
+import { clamp, fbm, hash2, lerp, mulberry32 } from './noise'
 import type { Quality } from './terrain'
 
 const KINDS: readonly TreeKind[] = ['broadleaf', 'pine', 'birch']
@@ -38,6 +38,11 @@ const BARK: Record<TreeKind, THREE.Color> = {
 
 const tmpC = new THREE.Color()
 
+interface BlobShape {
+    c: [number, number, number]
+    r: [number, number, number]
+}
+
 /** A lumpy ellipsoid. Units: canopy radius 1 in x/z, tree height 1 in y. */
 function addBlob(
     acc: Acc,
@@ -47,7 +52,8 @@ function addBlob(
     detail: number,
     seed: number,
     canopy: { y: number; ry: number },
-    lump: number
+    lump: number,
+    others: readonly BlobShape[] = []
 ) {
     const g = new THREE.IcosahedronGeometry(1, detail)
     const p = g.attributes.position
@@ -106,8 +112,21 @@ function addBlob(
         const out = Math.min(1, Math.hypot(px, pz))
         const k = Math.min(1, t * 0.6 + out * out * 0.45)
         tmpC.copy(low).lerp(top, k * k * (3 - 2 * k))
+        // Soft shade in the folds, where this lump meets its neighbours.
+        let open = 1
+        for (const o of others) {
+            const rho = Math.hypot(
+                (px - o.c[0]) / o.r[0],
+                (py - o.c[1]) / o.r[1],
+                (pz - o.c[2]) / o.r[2]
+            )
+            const f = Math.min(1, Math.max(0, (rho - 0.8) / 0.55))
+            open = Math.min(open, f * f * (3 - 2 * f))
+        }
         const tint =
-            0.96 + 0.06 * Math.sin(px * 7 + seed) * Math.sin(pz * 6 + py * 9)
+            (0.96 +
+                0.06 * Math.sin(px * 7 + seed) * Math.sin(pz * 6 + py * 9)) *
+            (0.76 + 0.24 * open)
         acc.col.push(tmpC.r * tint, tmpC.g * tint, tmpC.b * tint)
     }
     g.dispose()
@@ -173,16 +192,9 @@ function addCanopy(
     const canopy = { y: shape.y, ry: shape.ry }
     const detail = level === 'near' ? 2 : 1
     const core = shape.ring * 1.25
-    addBlob(
-        acc,
-        kind,
-        [0, shape.y + 0.02, 0],
-        [core, shape.ry * 0.8, core],
-        level === 'near' || level === 'far' ? 2 : 1,
-        seed,
-        canopy,
-        shape.lump
-    )
+    const blobs: BlobShape[] = [
+        { c: [0, shape.y + 0.02, 0], r: [core, shape.ry * 0.8, core] },
+    ]
     const n =
         level === 'near'
             ? shape.lobes
@@ -199,32 +211,44 @@ function addCanopy(
             lerp(1.12, 0.8, Math.abs(v)) *
             (0.82 + 0.36 * rnd()) *
             (level === 'near' ? 1 : 1.4)
-        addBlob(
-            acc,
-            kind,
-            [
+        blobs.push({
+            c: [
                 Math.cos(a) * ring,
                 shape.y + v * shape.ry * 0.68,
                 Math.sin(a) * ring,
             ],
-            [size, size * shape.ry * (0.95 + 0.3 * rnd()), size],
-            detail,
-            seed * 3 + i,
-            canopy,
-            shape.lump
-        )
+            r: [size, size * shape.ry * (0.95 + 0.3 * rnd()), size],
+        })
     }
+    blobs.forEach((b, i) => {
+        const coreDetail = level === 'near' || level === 'far' ? 2 : 1
+        addBlob(
+            acc,
+            kind,
+            b.c,
+            b.r,
+            i === 0 ? coreDetail : detail,
+            i === 0 ? seed : seed * 3 + i,
+            canopy,
+            shape.lump,
+            // The folds only matter up close.
+            level === 'near' ? blobs.filter((o) => o !== b) : []
+        )
+    })
 }
 
 /**
  * A conifer: many thin, drooping branch layers of uneven size with a loose,
- * irregular rim. Not a stack of equal cones.
+ * irregular rim. Not a stack of equal cones. Each layer is a few rings from
+ * the trunk to the tips, so it curves down and shades smoothly.
  */
 function addConifer(acc: Acc, level: Level, seed: number) {
     const rnd = mulberry32(seed * 104729 + 7)
     const layers =
-        level === 'near' ? 13 : level === 'far' ? 7 : level === 'low' ? 5 : 4
-    const seg = level === 'near' ? 14 : level === 'far' ? 8 : 6
+        level === 'near' ? 11 : level === 'far' ? 7 : level === 'low' ? 5 : 6
+    const seg =
+        level === 'near' ? 14 : level === 'far' ? 8 : level === 'low' ? 6 : 7
+    const fracs = level === 'near' ? [0.03, 0.4, 0.74, 1] : [0.03, 0.58, 1]
     const { top, low } = FOLIAGE.pine
     const y0 = level === 'backdrop' ? 0.1 : 0.17
     const span = 0.95 - y0
@@ -232,14 +256,25 @@ function addConifer(acc: Acc, level: Level, seed: number) {
     // In unit space y is squeezed by about height / radius, so a real
     // normal that leans 45 degrees up has a large y here.
     const ny = 3.6
-    const ring = (a: number, r: number, y: number, rim: number, k: number) => {
+    const push = (
+        a: number,
+        r: number,
+        y: number,
+        fr: number,
+        shade: number
+    ) => {
         const c = Math.cos(a)
         const s = Math.sin(a)
         acc.pos.push(c * r, y, s * r)
-        const l = Math.hypot(1, ny)
-        acc.nor.push(c / l, ny / l, s / l)
+        // Near the trunk the branch faces up; toward the tip it turns out.
+        const out = 0.55 + 0.9 * fr
+        const upN = ny * (1.15 - 0.45 * fr)
+        const l = Math.hypot(out, upN)
+        acc.nor.push((c * out) / l, upN / l, (s * out) / l)
         acc.edge.push(0, 0, 0)
-        acc.rim.push(rim)
+        acc.rim.push(Math.max(0, (fr - 0.35) / 0.65))
+        // Dark at the trunk, lighter at the tips.
+        const k = Math.min(1, (0.1 + 0.85 * fr * fr) * shade)
         tmpC.copy(low).lerp(top, k)
         acc.col.push(tmpC.r, tmpC.g, tmpC.b)
     }
@@ -250,6 +285,7 @@ function addConifer(acc: Acc, level: Level, seed: number) {
         const R = taper * (0.8 + 0.4 * rnd())
         const ph1 = rnd() * 6.28
         const ph2 = rnd() * 6.28
+        const ph3 = rnd() * 6.28
         const turn = rnd() * 6.28
         const shade = 0.85 + 0.3 * rnd()
         const rimR: number[] = []
@@ -258,44 +294,42 @@ function addConifer(acc: Acc, level: Level, seed: number) {
             const a = (j / seg) * Math.PI * 2
             const w =
                 1 +
-                0.2 * Math.sin(a * 3 + ph1) +
-                0.14 * Math.sin(a * 5 + ph2) +
-                (j % 2 === 0 ? 0.1 : -0.08)
+                0.18 * Math.sin(a * 3 + ph1) +
+                0.13 * Math.sin(a * 5 + ph2) +
+                0.08 * Math.sin(a * 7 + ph3)
             rimR.push(R * w)
-            rimY.push(yTop - dy * (0.8 + 0.25 * Math.sin(a * 2 + ph2)))
+            rimY.push(dy * (0.82 + 0.22 * Math.sin(a * 2 + ph2)))
         }
         rimR[seg] = rimR[0]
         rimY[seg] = rimY[0]
+        const vert = (j: number, q: number) => {
+            const fr = fracs[q]
+            const a = turn + (j / seg) * Math.PI * 2
+            // The wobble grows toward the tips; the droop is a curve.
+            const r = (R + (rimR[j] - R) * fr) * fr
+            const y = yTop - rimY[j] * Math.pow(fr, 1.5)
+            push(a, r, y, fr, shade)
+        }
         for (let j = 0; j < seg; j++) {
-            const a0 = turn + (j / seg) * Math.PI * 2
-            const a1 = turn + ((j + 1) / seg) * Math.PI * 2
-            const mid0 = rimR[j] * 0.58
-            const mid1 = rimR[j + 1] * 0.58
-            const ym0 = yTop - (yTop - rimY[j]) * 0.4
-            const ym1 = yTop - (yTop - rimY[j + 1]) * 0.4
-            const kIn = 0.12 * shade
-            const kMid = 0.5 * shade
-            const kOut = Math.min(1, 0.95 * shade)
-            // Inner fan.
-            ring(a0, 0.02, yTop, 0, kIn)
-            ring(a1, mid1, ym1, 0, kMid)
-            ring(a0, mid0, ym0, 0, kMid)
-            // Outer band.
-            ring(a0, mid0, ym0, 0, kMid)
-            ring(a1, mid1, ym1, 0, kMid)
-            ring(a0, rimR[j], rimY[j], 1, kOut)
-            ring(a0, rimR[j], rimY[j], 1, kOut)
-            ring(a1, mid1, ym1, 0, kMid)
-            ring(a1, rimR[j + 1], rimY[j + 1], 1, kOut)
+            for (let q = 0; q < fracs.length - 1; q++) {
+                if (q > 0) {
+                    vert(j, q)
+                    vert(j + 1, q)
+                    vert(j, q + 1)
+                }
+                vert(j, q + 1)
+                vert(j + 1, q)
+                vert(j + 1, q + 1)
+            }
         }
     }
     // The leader at the top.
     for (let j = 0; j < 5; j++) {
         const a0 = (j / 5) * Math.PI * 2
         const a1 = ((j + 1) / 5) * Math.PI * 2
-        ring(a0, 0.1, 0.9, 0, 0.7)
-        ring(0, 0.001, 0.995, 0, 0.9)
-        ring(a1, 0.1, 0.9, 0, 0.7)
+        push(a0, 0.1, 0.9, 0.3, 0.8)
+        push(0, 0.001, 0.995, 0.3, 1)
+        push(a1, 0.1, 0.9, 0.3, 0.8)
     }
 }
 
@@ -380,19 +414,26 @@ function createMaterial(
                 {
                     float a = texture2D(uNoise, vTreePos.xz * 0.31 + vTreePos.y * 0.17).g;
                     float b = texture2D(uNoise, vTreePos.xy * 0.09 + vTreePos.z * 0.06).r;
-                    float leaf = texture2D(uNoise, vTreePos.xz * 0.11 + vTreePos.y * 0.071).a;
-                    // A ragged, leafy outline: foliage dissolves where the
-                    // surface turns away from the eye, and at the loose rim
-                    // of conifer branches.
+                    float fine = texture2D(uNoise, vTreePos.xz * 0.23 + vTreePos.y * 0.37).a;
+                    // Two planes, so leaf clumps are round and not streaks.
+                    float tuft = 0.5 * (texture2D(uNoise, vTreePos.xy * 0.19).a + texture2D(uNoise, vTreePos.zy * 0.19 + 0.43).a);
                     float isLeaf = step(1e-9, dot(vEdgeN, vEdgeN));
+                    // Only the outside of a leafy lump is drawn. Through the
+                    // ragged edge you then see the lumps behind, not the
+                    // dark inside of this one.
+                    if (isLeaf > 0.5 && !gl_FrontFacing) discard;
+                    // A soft, leafy outline: foliage dissolves in clumps
+                    // where a lump turns away from the eye, and toward the
+                    // tips of conifer branches.
                     float facing = abs(dot(normalize(vEdgeN + 1e-5), normalize(vViewPosition)));
-                    float edge = max(isLeaf * (1.0 - facing), vRim * 0.92);
-                    float cut = mix(0.8, 0.995, leaf * 0.6 + a * 0.4);
-                    if (edge > cut) discard;
-                    // Inner faces seen through the gaps are in shade.
-                    if (!gl_FrontFacing) diffuseColor.rgb *= mix(1.0, 0.55, isLeaf);
-                    // Soft leaf mottling.
-                    diffuseColor.rgb *= 0.82 + 0.34 * mix(b, a, 0.55);
+                    float clump = tuft;
+                    float leafCut = mix(0.7, 1.0, clump);
+                    float tipCut = mix(0.5, 1.1, fine * 0.45 + tuft * 0.55);
+                    if (isLeaf * (1.0 - facing) > leafCut || vRim > tipCut) discard;
+                    // Soft mottling, and a slow drift between a warmer and
+                    // a cooler green inside one tree.
+                    diffuseColor.rgb *= 0.84 + 0.3 * mix(b, a, 0.55);
+                    diffuseColor.rgb *= mix(vec3(1.07, 1.03, 0.84), vec3(0.93, 1.0, 1.0), b);
                 }`
             )
         shader.vertexShader = shader.vertexShader
@@ -462,7 +503,15 @@ function writeInstance(mesh: THREE.InstancedMesh, i: number, t: Tree) {
     mesh.setMatrixAt(i, m4)
     const a = hash2(ix, iz, 32)
     const b = hash2(ix, iz, 33)
-    tint.setRGB(0.86 + 0.26 * a, 0.9 + 0.16 * b, 0.82 + 0.3 * (1 - a))
+    // Each tree has its own green: a little warmer or cooler, lighter
+    // or darker.
+    const c = hash2(ix, iz, 38)
+    const light = 0.88 + 0.22 * c
+    tint.setRGB(
+        light * (0.9 + 0.22 * a),
+        light * (0.95 + 0.1 * b),
+        light * (0.78 + 0.32 * (1 - a))
+    )
     mesh.setColorAt(i, tint)
 }
 
@@ -474,7 +523,7 @@ export function createBackdropTrees(
 ): Tree[] {
     const out: Tree[] = []
     const b = hole.bounds
-    const band = quality === 'high' ? 115 : 90
+    const band = quality === 'high' ? 120 : 90
     const spacing = quality === 'high' ? 11 : 13
     for (let z = b.minZ - band; z < b.maxZ + band; z += spacing) {
         for (let x = b.minX - band; x < b.maxX + band; x += spacing) {
@@ -488,7 +537,13 @@ export function createBackdropTrees(
             if (d < 1.5 || d > band) {
                 continue
             }
-            if (hash2(ix, iz, 43) > lerp(0.95, 0.45, d / band)) {
+            // The forest thins out toward the end of the band, with an
+            // uneven edge, so it does not stop on a line.
+            const far = d / band + (fbm(px / 45, pz / 45, 2, 21) - 0.5) * 0.5
+            if (
+                hash2(ix, iz, 43) >
+                lerp(0.95, 0.05, Math.pow(clamp(far, 0, 1), 1.6))
+            ) {
                 continue
             }
             const k = fbm(px / 80, pz / 80, 2, 9)
