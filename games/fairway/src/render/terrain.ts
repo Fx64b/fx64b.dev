@@ -151,6 +151,7 @@ interface Splat {
 
 function buildSplat(
     hole: HoleData,
+    ground: HeightSampler,
     shadowTrees: readonly Tree[],
     sunDir: THREE.Vector3
 ): Splat {
@@ -200,6 +201,44 @@ function buildSplat(
     const b = masks.map((m, i) => blur(m, w, h, i === 5 ? sigma * 1.6 : sigma))
 
     const texel = g.cellSize / scale
+    // Water depth (0 at the shore, 255 at 1.6 m or deeper), for the colour
+    // of the water and of the bed under it.
+    let depth: Uint8Array | null = null
+    if (hole.water.length > 0) {
+        depth = new Uint8Array(count)
+        const centres = hole.water.map((body) => {
+            let cx = 0
+            let cz = 0
+            for (const p of body.outline) {
+                cx += p.x
+                cz += p.z
+            }
+            const n = Math.max(1, body.outline.length)
+            return { x: cx / n, z: cz / n, level: body.level }
+        })
+        const wet = b[5]
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const i = y * w + x
+                if (wet[i] < 0.02) {
+                    continue
+                }
+                const px = g.originX + (x + 0.5) * texel
+                const pz = g.originZ + (y + 0.5) * texel
+                let level = centres[0].level
+                let best = Infinity
+                for (const c of centres) {
+                    const d = (c.x - px) ** 2 + (c.z - pz) ** 2
+                    if (d < best) {
+                        best = d
+                        level = c.level
+                    }
+                }
+                const d = (level - ground(px, pz)) / 1.6
+                depth[i] = Math.round(clamp(d, 0, 1) * 255)
+            }
+        }
+    }
     const shadow = bakeTreeShadows(
         shadowTrees,
         sunDir,
@@ -219,7 +258,7 @@ function buildSplat(
         a[i * 4 + 3] = b[3][i] * 255
         bb[i * 4] = b[4][i] * 255
         bb[i * 4 + 1] = b[5][i] * 255
-        bb[i * 4 + 2] = 0
+        bb[i * 4 + 2] = depth ? depth[i] : 0
         bb[i * 4 + 3] = shadow[i * 4]
     }
     const make = (data: Uint8Array) => {
@@ -257,6 +296,8 @@ const PALETTE = {
     uEarth: sRGB(0x5a4a2c),
     uBed: sRGB(0x2c3f36),
     uForest: sRGB(0x3a5228),
+    uCanopy: sRGB(0x5d8a3c),
+    uShallow: sRGB(0x7d8a5c),
 }
 
 const FRAG_PARS = /* glsl */ `
@@ -276,6 +317,8 @@ uniform vec3 uSand;
 uniform vec3 uEarth;
 uniform vec3 uBed;
 uniform vec3 uForest;
+uniform vec3 uCanopy;
+uniform vec3 uShallow;
 varying vec3 vFwPos;
 varying vec3 vFwNormal;
 float fwBakedLit = 1.0;
@@ -303,6 +346,8 @@ const FRAG_COLOR = /* glsl */ `
     float nFine = texture2D(uNoise, p * 0.23).r;
     float nMed = texture2D(uNoise, p * 0.041).g;
     float nLarge = texture2D(uNoise, p * 0.0077).b;
+    // Broad patches, 15 to 40 m across, so big areas are not one flat tone.
+    float nPatch = texture2D(uNoise, p * 0.0131 + 0.37).r;
     float nGrain = texture2D(uNoise, p * 0.9).a;
     float camDist = length(vFwPos - cameraPosition);
     float nearK = 1.0 - smoothstep(6.0, 60.0, camDist);
@@ -317,13 +362,20 @@ const FRAG_COLOR = /* glsl */ `
 
     vec2 dOut = max(max(uBounds.xy - p, p - uBounds.zw), 0.0);
     float outD = length(dOut);
-    float inRect = step(outD, 0.01);
-    float wForest = smoothstep(1.0, 16.0, outD + (nMed - 0.5) * 8.0);
+    // Baked shadows fade out just past the bounds instead of on a line.
+    float inRect = 1.0 - smoothstep(0.0, 14.0, outD + (nMed - 0.5) * 8.0);
+    // The forest floor starts at an uneven line near the bounds, not on
+    // the straight edge of the hole. It may reach a little into the rough.
+    vec2 dIn = min(p - uBounds.xy, uBounds.zw - p);
+    float edgeD = outD > 0.0 ? outD : -min(dIn.x, dIn.y);
+    float wForest = smoothstep(-4.0, 20.0, edgeD + (nLarge - 0.5) * 30.0 + (nMed - 0.5) * 12.0);
 
     // Rough: darker, mottled at several scales, a little grain up close.
     vec3 col = uRough * (0.8 + 0.4 * nMed) * (0.9 + 0.2 * nLarge);
     col *= 1.0 + (nFine - 0.5) * 0.22 + (nGrain - 0.5) * 0.3 * nearK;
     col = mix(col, col * vec3(1.12, 1.04, 0.8), smoothstep(0.55, 0.8, nLarge) * 0.35);
+    // Drier, lighter patches and lusher, darker ones.
+    col *= mix(vec3(0.9, 0.95, 0.96), vec3(1.1, 1.06, 0.92), smoothstep(0.3, 0.72, nPatch));
 
     // First cut.
     vec3 cCut = uCut * (0.93 + 0.14 * nMed) * (1.0 + (nGrain - 0.5) * 0.16 * nearK);
@@ -332,6 +384,7 @@ const FRAG_COLOR = /* glsl */ `
     // Fairway with broad diagonal stripes.
     float stF = fwStripes(p, vec2(0.7071, 0.7071), 5.5);
     vec3 cFair = uFair * (0.93 + 0.14 * stF) * (0.96 + 0.08 * nLarge);
+    cFair *= mix(vec3(0.955, 0.975, 0.97), vec3(1.045, 1.03, 0.96), smoothstep(0.3, 0.72, nPatch));
     cFair *= 1.0 + (nGrain - 0.5) * 0.1 * nearK;
     col = mix(col, cFair, wFair);
 
@@ -343,9 +396,13 @@ const FRAG_COLOR = /* glsl */ `
     // Green: smooth and bright with fine stripes.
     float stG = fwStripes(p, vec2(0.7071, -0.7071), 1.5);
     vec3 cGreen = uGreen * (0.965 + 0.07 * stG) * (0.98 + 0.04 * nLarge);
-    // A thin darker seam where the collar meets the putting surface.
-    float seam = smoothstep(0.3, 0.47, sa.b) * (1.0 - wGreen);
-    col = mix(col, col * 0.8, seam * 0.6);
+    // The fringe: a ring of short, even turf about a metre wide around the
+    // putting surface, with a thin seam where the two cuts meet.
+    float fringe = smoothstep(0.1, 0.26, sa.b) * (1.0 - wGreen);
+    vec3 cFringe = mix(uFair, uGreen, 0.38) * 0.95 * (0.98 + 0.04 * nMed);
+    col = mix(col, cFringe, fringe * (1.0 - wSand) * 0.9);
+    float seam = smoothstep(0.38, 0.47, sa.b) * (1.0 - wGreen);
+    col = mix(col, col * 0.86, seam * 0.6);
     // Putting slopes are only a few percent, so plain lighting hardly shows
     // them. Shade the green a little by how it tilts toward the sun.
     float tilt = dot(normalize(vFwNormal).xz, uSunXZ);
@@ -357,14 +414,30 @@ const FRAG_COLOR = /* glsl */ `
     col = mix(col, uEarth, lip * 0.75);
     vec3 cSand = uSand * (0.95 + 0.08 * nMed) * (1.0 + (nGrain - 0.5) * 0.1 * nearK);
     cSand *= mix(0.84, 1.0, smoothstep(0.5, 0.9, sb.r));
+    // Soft rake lines, gently wavy, gone before they could shimmer.
+    float rakePh = (dot(p, vec2(0.83, 0.56)) + (nMed - 0.5) * 1.6) * (6.2832 / 0.42);
+    float rake = sin(rakePh) * (1.0 - smoothstep(0.35, 1.3, fwidth(rakePh)));
+    cSand *= 1.0 + 0.035 * rake;
+    cSand *= mix(vec3(0.97, 0.965, 0.95), vec3(1.03, 1.02, 0.99), nPatch);
     col = mix(col, cSand, wSand);
 
     // Water: damp earth at the shore, a dark bed below.
-    col = mix(col, uEarth * 0.9, smoothstep(0.3, 0.5, sb.g) * 0.75);
-    col = mix(col, uBed, wWater);
+    col = mix(col, uEarth * 0.9, smoothstep(0.3, 0.5, sb.g) * 0.6);
+    // Under water: a pale shelf at the shore, a dark bed further in.
+    col = mix(col, mix(uShallow, uBed, smoothstep(0.0, 0.55, sb.b)), wWater);
 
     // Beyond the bounds: forest floor.
-    col = mix(col, uForest * (0.75 + 0.5 * nMed), wForest);
+    // Far outside, past the last trees, the land reads as tree tops.
+    // Two scales at different angles, soft and low in contrast, so no
+    // repeat shows from high up.
+    vec2 q = vec2(p.x * 0.8 + p.y * 0.6, p.y * 0.8 - p.x * 0.6);
+    float crown = texture2D(uNoise, p * 0.043 + 0.11).g * 0.55
+        + texture2D(uNoise, q * 0.0173 + 0.53).r * 0.45;
+    vec3 cFar = mix(uForest * 1.12, uCanopy * 0.93, smoothstep(0.1, 0.9, crown)) * (0.9 + 0.2 * nLarge);
+    // Under the backdrop trees the floor is in shade.
+    vec3 cNear = uForest * (0.5 + 0.3 * nMed);
+    vec3 cForest = mix(cNear, cFar, smoothstep(50.0, 140.0, outD + (nLarge - 0.5) * 50.0));
+    col = mix(col, cForest, wForest * (outD > 0.0 ? 1.0 : 1.0 - wCut));
 
     diffuseColor.rgb = col;
 
@@ -564,7 +637,7 @@ export function createTerrain(
             out.set(-hx, 2 * e, -hz).normalize()
         }
 
-    const splat = buildSplat(hole, shadowTrees, sunDir)
+    const splat = buildSplat(hole, sampler, shadowTrees, sunDir)
     const b = hole.bounds
     const uniforms: TerrainUniforms = {
         uSplatA: { value: splat.texA },

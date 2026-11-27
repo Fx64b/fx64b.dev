@@ -30,7 +30,8 @@ export function createWater(
             uSplatB: terrain.uSplatB,
             uSplatRect: terrain.uSplatRect,
             uTime: time,
-            uDeep: { value: new THREE.Color(0x1f3d3d) },
+            uDeep: { value: new THREE.Color(0x1c3a3d) },
+            uShallow: { value: new THREE.Color(0x4f7f78) },
             uBank: { value: new THREE.Color(0x2f4c2a) },
         },
         defines: ripples ? { FW_RIPPLES: '' } : {},
@@ -59,38 +60,49 @@ export function createWater(
             uniform vec4 uSplatRect;
             uniform float uTime;
             uniform vec3 uDeep;
+            uniform vec3 uShallow;
             uniform vec3 uBank;
             varying vec3 vWorld;
             void main() {
                 vec3 V = normalize(cameraPosition - vWorld);
                 vec2 p = vWorld.xz;
                 vec3 N = vec3(0.0, 1.0, 0.0);
-                float wob = 0.5;
                 #ifdef FW_RIPPLES
                 vec2 r1 = texture2D(uNoise, p * 0.03 + uTime * vec2(0.007, 0.004)).rg - 0.5;
                 vec2 r2 = texture2D(uNoise, p * 0.085 - uTime * vec2(0.005, 0.009)).gr - 0.5;
                 N = normalize(vec3((r1.x + r2.x) * 0.02, 1.0, (r1.y + r2.y) * 0.02));
-                wob = r1.x + 0.5;
                 #endif
                 vec3 R = reflect(-V, N);
                 R.y = abs(R.y);
-                vec3 refl = fwSky(R);
-                refl *= vec3(0.86, 0.9, 0.95);
+                // The sky in the water: taken a little higher up than the true
+                // mirror direction, so a pond seen at a flat angle is still
+                // blue and not the pale colour of the horizon.
+                vec3 refl = fwSky(normalize(vec3(R.x, R.y * 2.0 + 0.22, R.z)));
+                refl *= vec3(0.8, 0.86, 0.93);
                 // The far bank and its trees, mirrored: an uneven dark band.
                 float az = atan(R.z, R.x);
-                float line = 0.1 + 0.07 * texture2D(uNoise, vec2(az * 1.9, 0.37)).r;
-                float bank = 1.0 - smoothstep(line - 0.02, line + 0.03, R.y + (wob - 0.5) * 0.01);
-                refl = mix(refl, uBank, bank * 0.92);
+                float line = 0.075 + 0.05 * texture2D(uNoise, vec2(az * 0.55, 0.37)).b;
+                // Use the flat mirror direction here: ripples would break the
+                // band into blotches.
+                float flatY = abs(V.y);
+                float bank = 1.0 - smoothstep(line - 0.05, line + 0.07, flatY);
+                refl = mix(refl, uBank, bank * 0.85);
                 float fres = 0.04 + 0.96 * pow(1.0 - max(dot(N, V), 0.0), 5.0);
-                vec3 col = mix(uDeep, refl, clamp(fres + 0.22, 0.0, 1.0));
+                // Depth from the baked ground: 0 at the shore, 1 at 1.6 m.
+                vec2 suv = (p - uSplatRect.xy) * uSplatRect.zw;
+                float depth = texture2D(uSplatB, suv).b;
+                // Lighter and clearer over the shelf, deep in the middle.
+                vec3 body = mix(uShallow, uDeep, smoothstep(0.0, 0.6, depth));
+                vec3 col = mix(body, refl, clamp(fres + 0.18, 0.0, 1.0));
                 float glint = pow(max(dot(R, uSunDir), 0.0), 260.0);
                 col += uSunGlow * glint * 1.2;
-
-                vec2 suv = (p - uSplatRect.xy) * uSplatRect.zw;
-                float w = texture2D(uSplatB, suv).g;
-                float shore = smoothstep(0.4, 0.6, w);
-                col = mix(col * 1.12 + 0.03, col, smoothstep(0.5, 0.8, w));
-                gl_FragColor = vec4(col, shore * 0.96);
+                // A soft, slightly bright edge where the water thins out.
+                float edge = smoothstep(0.0, 0.045, depth);
+                col += vec3(0.05, 0.055, 0.045) * (1.0 - smoothstep(0.03, 0.16, depth));
+                float alpha = edge * mix(0.6, 0.96, smoothstep(0.02, 0.4, depth));
+                // Mirror-like at a flat angle even in the shallows.
+                alpha = max(alpha, edge * clamp(fres * 1.3, 0.0, 0.96));
+                gl_FragColor = vec4(col, alpha);
                 #include <tonemapping_fragment>
                 #include <colorspace_fragment>
                 #include <fog_fragment>

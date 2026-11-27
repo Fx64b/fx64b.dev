@@ -24,16 +24,16 @@ export interface Atmosphere {
 export function createAtmosphere(): Atmosphere {
     return {
         sunDir: new THREE.Vector3(0.74, 0.36, 0.5).normalize(),
-        sunColor: new THREE.Color(0xffcf94),
-        sunIntensity: 3.0,
+        sunColor: new THREE.Color(0xffca8c),
+        sunIntensity: 3.05,
         skyZenith: new THREE.Color(0x5b8ec8),
         skyMid: new THREE.Color(0xb3cee2),
-        skyHorizon: new THREE.Color(0xf3dcbb),
+        skyHorizon: new THREE.Color(0xf5dab4),
         sunGlow: new THREE.Color(0xffc98a),
-        hemiSky: new THREE.Color(0xbfd4f5),
+        hemiSky: new THREE.Color(0xc6d6f0),
         hemiGround: new THREE.Color(0x9a9a66),
         hemiIntensity: 1.7,
-        fogDensity: 0.0016,
+        fogDensity: 0.0017,
         exposure: 0.95,
     }
 }
@@ -69,7 +69,8 @@ vec3 fwSky(vec3 d) {
     vec3 c = mix(uSkyHorizon, uSkyMid, smoothstep(0.0, 0.26, h));
     c = mix(c, uSkyZenith, smoothstep(0.12, 0.85, h));
     float sd = max(dot(d, uSunDir), 0.0);
-    c += uSunGlow * (0.28 * pow(sd, 5.0) + 0.5 * pow(sd, 48.0));
+    // A wide, gentle glow around the sun and a tighter bright core.
+    c += uSunGlow * (0.08 * pow(sd, 2.0) + 0.26 * pow(sd, 7.0) + 0.5 * pow(sd, 48.0));
     return c;
 }
 `
