@@ -8,7 +8,7 @@ import type { HoleData, Vec3 } from '../shared/hole'
 import type { HeightSampler } from './height'
 
 export const EYE_HEIGHT = 1.7
-export const ADDRESS_BACK = 3
+export const ADDRESS_BACK = 4
 
 type Mode = 'none' | 'address' | 'follow' | 'glide' | 'overview'
 
@@ -74,14 +74,15 @@ export class CameraRig {
         // lower, and the ball must not hide behind the tee edge.
         const ey = Math.max(this.ground(ex, ez), ball.y) + EYE_HEIGHT
         outPos.set(ex, ey, ez)
-        // Look down the aim line, a little below the horizon, so the ball
-        // stays in the lower part of the view. Follow the land a little.
+        // Look down the aim line about 10 degrees below the horizon. The
+        // ball then sits a little below the centre of the view, clear of the
+        // HUD at the bottom. Follow the land a little.
         const ahead = 26
         const gy = this.ground(ball.x + dx * ahead, ball.z + dz * ahead)
         const rise = THREE.MathUtils.clamp((gy - ball.y) * 0.45, -2.5, 3)
         outLook.set(
             ball.x + dx * (ahead - ADDRESS_BACK),
-            ey - 3.0 + rise,
+            ey - 4.6 + rise,
             ball.z + dz * (ahead - ADDRESS_BACK)
         )
     }
