@@ -263,8 +263,13 @@ function refreshAim(): void {
 
 // --- Path preview -----------------------------------------------------------
 
-/** Share of the flight (or of the roll, for a putt) that the dots show. */
-const PREVIEW_SHARE = 0.1
+/**
+ * How much of the path the dots show: only the start of a full shot (its
+ * launch angle and direction), and a little more of a putt (its line).
+ */
+const PREVIEW_SHARE_FLIGHT = 0.015
+const PREVIEW_SHARE_PUTT = 0.1
+const PREVIEW_MIN_LENGTH = 1
 let previewPower = -1
 
 /**
@@ -284,7 +289,12 @@ function refreshPreview(): void {
     const id = club()
     const result = simulate(round, { club: id, aim, power })
     const rolling = id === 'putter'
-    const want = PREVIEW_SHARE * (rolling ? result.total : result.carry)
+    const want = Math.max(
+        PREVIEW_MIN_LENGTH,
+        rolling
+            ? PREVIEW_SHARE_PUTT * result.total
+            : PREVIEW_SHARE_FLIGHT * result.carry
+    )
     const start = result.samples[0]
     const points: Vec3[] = []
     for (const smp of result.samples) {

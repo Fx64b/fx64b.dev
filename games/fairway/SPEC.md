@@ -45,9 +45,10 @@ person. The physics are realistic. The interface gives only a little help.
   rolls further.
 - **Power meter:** a bar next to the swing pad, with marks at 25, 50 and
   75%. It fills while the player holds.
-- **Path preview:** faint dots along the first 10% of the predicted flight
-  (or of the roll, for a putt). They show full power while the player aims,
-  and the current power while the player holds.
+- **Path preview:** faint dots along only the start of the predicted flight
+  (the first 1.5% of the carry, at least 1 m: the launch angle and
+  direction), or along the first 10% of the roll for a putt. They show full
+  power while the player aims, and the current power while the player holds.
 - **No random dispersion.** The same input always gives the same shot.
 
 ## 4. Camera
