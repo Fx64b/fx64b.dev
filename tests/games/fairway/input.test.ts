@@ -26,7 +26,12 @@ function key(
 function pointer(
     target: EventTarget,
     type: string,
-    init: { pointerId?: number; clientX?: number; button?: number } = {}
+    init: {
+        pointerId?: number
+        clientX?: number
+        clientY?: number
+        button?: number
+    } = {}
 ) {
     const e = new PointerEvent(type, {
         pointerId: 1,
@@ -135,6 +140,59 @@ describe('createInput', () => {
         expect(input.isCharging()).toBe(false)
         key('keyup', 'Space')
         expect(release).not.toHaveBeenCalled()
+    })
+
+    it('cancels a keyboard swing with Escape', () => {
+        const release = vi.fn()
+        const cancel = vi.fn()
+        input.on('swingRelease', release)
+        input.on('swingCancel', cancel)
+        key('keydown', 'Space')
+        t += 900
+        const esc = key('keydown', 'Escape')
+        expect(esc.defaultPrevented).toBe(true)
+        expect(cancel).toHaveBeenCalledTimes(1)
+        expect(input.isCharging()).toBe(false)
+        key('keyup', 'Space')
+        expect(release).not.toHaveBeenCalled()
+    })
+
+    it('cancels a pad swing that is dragged away and released', () => {
+        const release = vi.fn()
+        const cancel = vi.fn()
+        const armed = vi.fn()
+        input.on('swingRelease', release)
+        input.on('swingCancel', cancel)
+        input.on('swingCancelArmed', armed)
+        pointer(pad, 'pointerdown', { clientX: 500, clientY: 600 })
+        t += 900
+        // A small slip still hits.
+        pointer(window, 'pointermove', { clientX: 470, clientY: 580 })
+        expect(input.isCancelArmed()).toBe(false)
+        // Far up and left: armed.
+        pointer(window, 'pointermove', { clientX: 420, clientY: 520 })
+        expect(input.isCancelArmed()).toBe(true)
+        expect(pad.hasAttribute('data-cancel-armed')).toBe(true)
+        expect(armed).toHaveBeenLastCalledWith(true)
+        pointer(document.body, 'pointerup', { clientX: 420, clientY: 520 })
+        expect(release).not.toHaveBeenCalled()
+        expect(cancel).toHaveBeenCalledTimes(1)
+        expect(pad.hasAttribute('data-cancel-armed')).toBe(false)
+        expect(armed).toHaveBeenLastCalledWith(false)
+    })
+
+    it('hits when a dragged-away pad swing comes back to the pad', () => {
+        const release = vi.fn()
+        input.on('swingRelease', release)
+        pointer(pad, 'pointerdown', { clientX: 500, clientY: 600 })
+        t += 1100
+        pointer(window, 'pointermove', { clientX: 380, clientY: 600 })
+        expect(input.isCancelArmed()).toBe(true)
+        pointer(window, 'pointermove', { clientX: 495, clientY: 598 })
+        expect(input.isCancelArmed()).toBe(false)
+        pointer(window, 'pointerup', { clientX: 495, clientY: 598 })
+        expect(release).toHaveBeenCalledTimes(1)
+        expect(release.mock.calls[0][0]).toBeCloseTo(0.5, 6)
     })
 
     it('cancels a pad swing on pointercancel', () => {

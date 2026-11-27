@@ -36,6 +36,9 @@ person. The physics are realistic. The interface gives only a little help.
   club for the distance to the pin.
 - **Swing:** hold Space, or hold the mouse or a finger on the swing pad. Release
   to hit.
+- **Cancel a swing:** press Escape while holding. On the pad, drag the finger or
+  pointer more than 80 px away (for example up or left) and release there.
+  Sliding back onto the pad before the release hits as normal.
 - **Hold time to power:** linear from 0 to 1 over 2.2 s, then capped at 1.
   Power is a fraction of the club's nominal carry distance. The physics module
   finds the launch speed for that carry (see 5.4). Half power gives about half

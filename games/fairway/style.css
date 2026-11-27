@@ -1524,3 +1524,24 @@ body {
         padding: 3px;
     }
 }
+
+/* Swing cancel: the pad pointer was dragged away, a release cancels. */
+
+.fw-pad[data-cancel-armed] .fw-pad-ring {
+    border-color: var(--fw-ink-soft);
+    opacity: 0.5;
+}
+
+.fw-pad[data-cancel-armed] .fw-pad-label {
+    font-size: 0;
+}
+
+.fw-pad[data-cancel-armed] .fw-pad-label::after {
+    content: 'Cancel';
+    color: var(--fw-ink-soft);
+    font-size: 13px;
+}
+
+.fw-swing:has(.fw-pad[data-cancel-armed]) .fw-meter {
+    opacity: 0.35;
+}

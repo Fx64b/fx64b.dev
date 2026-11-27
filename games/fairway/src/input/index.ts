@@ -9,10 +9,14 @@
 // - Skip: while skippable (ball in flight), Enter skips. The HUD has a Skip
 //   button. A click or tap on the view does not skip.
 //
-// A window blur, a hidden page or a pointercancel cancels a swing; it never
-// hits a shot.
+// Cancel a swing: Escape, or drag the pad pointer more than CANCEL_DRAG_PX
+// away and release there (sliding back onto the pad undoes it). A window
+// blur, a hidden page or a pointercancel also cancels; it never hits a shot.
 
 export const POWER_RAMP_S = 2.2
+
+/** Drag a pad swing this far (CSS px) from where it started to cancel it. */
+export const CANCEL_DRAG_PX = 80
 
 /** Power for a hold time in seconds: linear over POWER_RAMP_S, capped at 1. */
 export function powerForHold(seconds: number): number {
@@ -29,8 +33,12 @@ export interface InputEvents {
     club: (dir: ClubStep) => void
     swingStart: () => void
     swingRelease: (power: number) => void
-    /** The swing was cancelled (blur, pointercancel, disabled). No shot. */
+    /** The swing was cancelled (Escape, drag off the pad, blur,
+     *  pointercancel, disabled). No shot. */
     swingCancel: () => void
+    /** A pad swing was dragged far from the pad (true): a release now
+     *  cancels it. False when the pointer comes back. */
+    swingCancelArmed: (armed: boolean) => void
     skip: () => void
 }
 
@@ -41,6 +49,8 @@ export interface Input {
     /** Current charge 0..1 while holding, else 0. */
     power(): number
     isCharging(): boolean
+    /** True while a pad swing is dragged far enough to cancel on release. */
+    isCancelArmed(): boolean
     /** Aim, club and swing input. Off while the ball moves or a menu is
      *  open. Turning it off cancels a swing in progress. */
     setEnabled(v: boolean): void
@@ -151,6 +161,7 @@ export function createInput(opts: InputOptions): Input {
         swingStart: new Set(),
         swingRelease: new Set(),
         swingCancel: new Set(),
+        swingCancelArmed: new Set(),
         skip: new Set(),
     }
 
@@ -167,6 +178,9 @@ export function createInput(opts: InputOptions): Input {
     let skippable = false
     let swing: SwingSource | null = null
     let swingStartMs = 0
+    // Where a pad swing started, and whether a release would cancel it.
+    let padStart = { x: 0, y: 0 }
+    let cancelArmed = false
     const held = new Set<string>()
     let shiftHeld = false
     let aimHoldTime = 0
@@ -194,8 +208,21 @@ export function createInput(opts: InputOptions): Input {
         emit('swingStart')
     }
 
+    function setCancelArmed(v: boolean): void {
+        if (v === cancelArmed) {
+            return
+        }
+        cancelArmed = v
+        swingPad.toggleAttribute('data-cancel-armed', v)
+        emit('swingCancelArmed', v)
+    }
+
     function releaseSwing(): void {
         if (!swing) {
+            return
+        }
+        if (cancelArmed) {
+            cancelSwing()
             return
         }
         const p = power()
@@ -209,6 +236,7 @@ export function createInput(opts: InputOptions): Input {
             return
         }
         swing = null
+        setCancelArmed(false)
         swingPad.removeAttribute('data-charging')
         emit('swingCancel')
     }
@@ -225,6 +253,13 @@ export function createInput(opts: InputOptions): Input {
             shiftHeld = true
         }
         if (e.ctrlKey || e.metaKey || e.altKey) {
+            return
+        }
+
+        // Escape cancels a swing in progress (keyboard or pad).
+        if (swing && code === 'Escape') {
+            e.preventDefault()
+            cancelSwing()
             return
         }
 
@@ -321,6 +356,7 @@ export function createInput(opts: InputOptions): Input {
             return
         }
         capture(swingPad, e.pointerId)
+        padStart = { x: e.clientX, y: e.clientY }
         startSwing({ kind: 'pointer', id: e.pointerId })
     }
 
@@ -360,6 +396,12 @@ export function createInput(opts: InputOptions): Input {
 
     function onPointerMove(ev: Event): void {
         const e = ev as PointerEvent
+        if (swing?.kind === 'pointer' && swing.id === e.pointerId) {
+            // Far from the pad: a release cancels. Back near it: it hits.
+            const d = Math.hypot(e.clientX - padStart.x, e.clientY - padStart.y)
+            setCancelArmed(d > CANCEL_DRAG_PX)
+            return
+        }
         if (!drag || drag.id !== e.pointerId) {
             return
         }
@@ -483,6 +525,7 @@ export function createInput(opts: InputOptions): Input {
         },
         power,
         isCharging: () => swing !== null,
+        isCancelArmed: () => cancelArmed,
         setEnabled(v) {
             if (enabled === v) {
                 return
