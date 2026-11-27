@@ -1,0 +1,10 @@
+// Fairway physics core. Pure TypeScript: no DOM, no rendering, no randomness.
+export * from './constants'
+export * from './units'
+export * from './types'
+export * from './ground'
+export * from './environment'
+export * from './surfaces'
+export * from './aero'
+export * from './clubs'
+export * from './simulate'

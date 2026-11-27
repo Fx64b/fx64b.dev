@@ -47,3 +47,7 @@ CLAUDE.md
 # built game (from games/thornwick)
 /public/games/thornwick.html
 /public/games/thornwick/
+
+# built game (from games/fairway)
+/public/games/fairway.html
+/public/games/fairway/

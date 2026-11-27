@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+        />
+        <title>Fairway UI (dev)</title>
+        <link rel="stylesheet" href="./style.css" />
+        <style>
+            /* Dev only: the state switcher. */
+            .dev-bar {
+                position: fixed;
+                top: calc(8px + env(safe-area-inset-top, 0px));
+                left: 50%;
+                z-index: 100;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 4px;
+                max-width: calc(100% - 340px);
+                padding: 4px;
+                border-radius: 10px;
+                background: rgba(30, 28, 24, 0.55);
+                font:
+                    12px/1 system-ui,
+                    sans-serif;
+                transform: translateX(-50%);
+            }
+            .dev-bar button {
+                padding: 5px 8px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: #f4efe6;
+                font: inherit;
+                cursor: pointer;
+            }
+            .dev-bar button[aria-pressed='true'] {
+                background: rgba(255, 255, 255, 0.2);
+            }
+            .dev-bar[hidden] {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <canvas id="view" tabindex="0" aria-label="Golf hole"></canvas>
+            <div id="ui"></div>
+        </div>
+        <nav class="dev-bar" id="dev-bar" aria-label="UI states"></nav>
+        <script type="module" src="./src/ui/dev/main.ts"></script>
+    </body>
+</html>
