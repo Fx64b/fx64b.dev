@@ -4,6 +4,7 @@ import { generateHole } from '../../../games/fairway/src/course'
 import {
     MAX_STROKES,
     createRound,
+    defaultAim,
     distanceToPin,
     headingToPin,
     playShot,
@@ -95,6 +96,30 @@ describe('round rules', () => {
         expect(out.notes).toContain('holed')
         expect(r.done).toBe(true)
         expect(r.stats.putts).toBe(1)
+    })
+
+    it('aims down the fairway on a dogleg, and at the pin in reach', () => {
+        // Straight along +z for 250 m, then a right angle toward +x.
+        const centerline = []
+        for (let z = 0; z <= 250; z += 10) {
+            centerline.push({ x: 0, z })
+        }
+        for (let x = 10; x <= 200; x += 10) {
+            centerline.push({ x, z: 250 })
+        }
+        const pin = { x: 200, y: 0, z: 250 }
+        const r = createRound(
+            { ...hole, centerline, tee: { x: 0, y: 0, z: 0 }, pin },
+            {
+                ground: createPlaneGround({ surface: 'fairway' }),
+                env: defaultEnvironment(),
+            }
+        )
+        // The driver (about 215 m) cannot reach: aim along the first leg.
+        expect(defaultAim(r, 'driver')).toBeCloseTo(UP, 6)
+        // From the corner: aim along the second leg, toward the pin.
+        r.ball = { x: 0, y: 0, z: 250 }
+        expect(defaultAim(r, 'iron5')).toBeCloseTo(0, 6)
     })
 
     it('stops at the stroke limit', () => {

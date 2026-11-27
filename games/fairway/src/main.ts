@@ -12,8 +12,8 @@ import {
     type Round,
     type ShotOutcome,
     createRound,
+    defaultAim,
     distanceToPin,
-    headingToPin,
     playShot,
     simulate,
     suggestClub,
@@ -33,6 +33,7 @@ import {
     type ArchiveEntry,
     archiveDates,
     createHud,
+    createMinimap,
     createScreens,
     scoreName,
     todayUtc,
@@ -55,6 +56,7 @@ const quality =
           : 'high'
 const renderer = createRenderer(canvas, { quality })
 const hud = createHud(uiRoot)
+const minimap = createMinimap(uiRoot)
 const screens = createScreens(uiRoot)
 const input = createInput({ canvas, swingPad: hud.swingPad })
 const storage = createStorage()
@@ -112,6 +114,7 @@ function showTitle(): void {
     input.setEnabled(false)
     input.setSkippable(false)
     hud.setVisible(false)
+    minimap.setVisible(false)
     renderer.setBall(hole!.tee, false)
     renderer.setAimRing(null)
     renderer.setPathPreview(null)
@@ -195,6 +198,8 @@ function startRound(h: HoleData): void {
     round = createRound(h)
     screens.hide()
     hud.setVisible(true)
+    minimap.setHole(h)
+    minimap.setVisible(true)
     hud.setHoleInfo({
         number: h.number,
         par: h.par,
@@ -209,8 +214,9 @@ function startRound(h: HoleData): void {
 /** Ready for the next shot: aim at the pin, pick the club. */
 function beginAim(snap: boolean): void {
     const r = round!
-    aim = headingToPin(r)
-    setClub(CLUB_ORDER.indexOf(suggestClub(r)))
+    const suggested = suggestClub(r)
+    aim = defaultAim(r, suggested)
+    setClub(CLUB_ORDER.indexOf(suggested))
     if (snap) {
         renderer.cameraAddress(r.ball, aim)
     }
@@ -247,14 +253,19 @@ function refreshAim(): void {
     const r = round
     renderer.cameraAddress(r.ball, aim)
     const id = club()
+    // The faint ring and the minimap marker show the nominal full-power
+    // carry: no wind, slope or lie.
+    let landing: Vec3 | null = null
     if (id === 'putter') {
         renderer.setAimRing(null)
     } else {
         const d = nominalCarry(id)
         const x = r.ball.x + Math.cos(aim) * d
         const z = r.ball.z + Math.sin(aim) * d
-        renderer.setAimRing({ x, y: renderer.groundHeight(x, z), z })
+        landing = { x, y: renderer.groundHeight(x, z), z }
+        renderer.setAimRing(landing)
     }
+    minimap.update({ ball: r.ball, aim, landing })
     const c = r.hole.conditions
     hud.setWind(c.windSpeed, c.windDirection - aim)
     previewPower = -1
@@ -417,6 +428,7 @@ function finishRound(): void {
     const r = round!
     const m = mode!
     hud.setVisible(false)
+    minimap.setVisible(false)
     input.setEnabled(false)
     input.setSkippable(false)
     renderer.cameraOverview()
@@ -468,6 +480,11 @@ function step(dt: number): void {
                 phase.t >= phase.duration &&
                 (o.notes.includes('water') || o.notes.includes('holed'))
             renderer.setBall(pos, !lost)
+            minimap.update({
+                ball: pos,
+                aim: Math.atan2(vel.z, vel.x),
+                landing: null,
+            })
             renderer.cameraFollow(pos, vel)
             if (phase.t >= phase.duration) {
                 announce(o)
@@ -483,7 +500,11 @@ function step(dt: number): void {
                     phase = { name: 'finish', left: FINISH_S }
                 } else {
                     renderer.setBall(r.ball, true)
-                    renderer.cameraGlideTo(r.ball, headingToPin(r), GLIDE_S)
+                    renderer.cameraGlideTo(
+                        r.ball,
+                        defaultAim(r, suggestClub(r)),
+                        GLIDE_S
+                    )
                     hud.showSkip(false)
                     input.setSkippable(false)
                     phase = { name: 'glide', left: GLIDE_S }

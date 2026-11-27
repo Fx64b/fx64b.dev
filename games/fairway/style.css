@@ -58,6 +58,22 @@
     --fw-lie-water: #6c9fc0;
     --fw-lie-ob: #bdb3a4;
 
+    /* Minimap (soft, slightly lighter than the 3D scene) */
+    --fw-map-tee: #acd07c;
+    --fw-map-fairway: #a1c878;
+    --fw-map-firstcut: #8fb86a;
+    --fw-map-rough: #79a05a;
+    --fw-map-ob: #6d8a58;
+    --fw-map-green: #b5db88;
+    --fw-map-bunker: #ecdfbf;
+    --fw-map-water: #86b4cc;
+    --fw-map-tree: #4f7444;
+    --fw-map-tree-shade: rgba(30, 45, 25, 0.28);
+    --fw-map-marker: #fbf8f1;
+    --fw-map-pole: #fbf8f1;
+    --fw-map-ink: rgba(43, 40, 34, 0.55);
+    --fw-map-flag: #c8533f;
+
     /* Layout */
     --fw-edge: 16px;
     --fw-radius: 14px;
@@ -320,6 +336,34 @@ body {
 
 .fw-wind[data-calm] .fw-wind-arrow {
     opacity: 0;
+}
+
+/* Minimap, right side under the wind panel */
+
+.fw-minimap {
+    position: absolute;
+    z-index: 5;
+    top: calc(var(--fw-edge-t) + 70px);
+    right: var(--fw-edge-r);
+    width: 150px;
+    height: 220px;
+    padding: 4px;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: opacity 240ms ease;
+}
+
+.fw-minimap[data-hidden],
+.fw-minimap[data-empty] {
+    opacity: 0;
+}
+
+.fw-minimap-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
 }
 
 /* Shot info, bottom left */
@@ -588,6 +632,8 @@ body {
     position: absolute;
     top: 22%;
     left: 50%;
+    box-sizing: border-box;
+    width: max-content;
     max-width: calc(100% - 2 * var(--fw-edge));
     padding: 9px 20px;
     border-radius: 999px;
@@ -1373,7 +1419,7 @@ body {
     }
 
     .fw-toast {
-        top: 30%;
+        top: 34%;
     }
 }
 
@@ -1422,6 +1468,24 @@ body {
         white-space: normal;
     }
 
+    /* Keep the hint clear of the minimap on the right. */
+    .fw-hint {
+        left: var(--fw-edge-l);
+        max-width: calc(100% - 3 * var(--fw-edge) - 96px);
+        transform: none;
+    }
+
+    .fw-minimap {
+        top: calc(var(--fw-edge-t) + 68px);
+        width: 96px;
+        height: 140px;
+        padding: 3px;
+    }
+
+    .fw-minimap-canvas {
+        border-radius: 8px;
+    }
+
     .fw-card {
         padding: 22px 18px 18px;
         gap: 16px;
@@ -1452,5 +1516,11 @@ body {
 @media (max-height: 520px) and (orientation: landscape) {
     .fw-toast {
         top: 18%;
+    }
+
+    .fw-minimap {
+        width: 96px;
+        height: 140px;
+        padding: 3px;
     }
 }

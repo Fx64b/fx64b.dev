@@ -99,6 +99,39 @@ export function headingToPin(round: Round): number {
 }
 
 /**
+ * The aim a player would take with this club: straight at the pin when the
+ * club can reach it, else at the point on the centre line of the hole at
+ * the full carry of the club. On a dogleg that is down the fairway, not
+ * over the trees at the corner.
+ */
+export function defaultAim(round: Round, club: ClubId): number {
+    const reach = club === 'putter' ? Infinity : nominalCarry(club)
+    if (distanceToPin(round) <= reach * 1.05) {
+        return headingToPin(round)
+    }
+    const line = round.hole.centerline
+    const b = round.ball
+    // Start at the centre line point nearest to the ball, then walk toward
+    // the green to the first point that is a full carry away.
+    let nearest = 0
+    let best = Infinity
+    for (let i = 0; i < line.length; i++) {
+        const d = Math.hypot(line[i].x - b.x, line[i].z - b.z)
+        if (d < best) {
+            best = d
+            nearest = i
+        }
+    }
+    for (let i = nearest + 1; i < line.length; i++) {
+        const p = line[i]
+        if (Math.hypot(p.x - b.x, p.z - b.z) >= reach) {
+            return Math.atan2(p.z - b.z, p.x - b.x)
+        }
+    }
+    return headingToPin(round)
+}
+
+/**
  * The club a caddie would hand over: the putter on and near the green, else
  * the shortest club whose full carry reaches the pin. From the tee of a long
  * hole that is the driver.

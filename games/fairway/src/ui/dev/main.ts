@@ -7,11 +7,13 @@
 //   ?state=archive&bar=0                      the same from the URL
 //
 // Backquote (`) cycles the states.
+import { generateHole } from '../../course'
 import { createInput } from '../../input'
-import type { SurfaceId } from '../../shared/hole'
+import type { HoleData, SurfaceId, Vec3 } from '../../shared/hole'
 import { CLUB_COUNT, PUTTER_INDEX } from '../clubs'
 import { addDays, todayUtc, yardsToMetres } from '../format'
 import { createHud } from '../hud'
+import { createMinimap } from '../minimap'
 import type { ArchiveEntry } from '../screens'
 import { createScreens } from '../screens'
 
@@ -24,6 +26,8 @@ const STATES = [
     'archive',
     'result',
     'result-practice',
+    'map-par5',
+    'map-par3',
 ] as const
 type DevState = (typeof STATES)[number]
 
@@ -33,7 +37,47 @@ const bar = document.getElementById('dev-bar') as HTMLElement
 
 const hud = createHud(ui)
 const screens = createScreens(ui)
+const minimap = createMinimap(ui)
 const input = createInput({ canvas, swingPad: hud.swingPad })
+
+// Generated holes for the minimap states.
+const MAP_SEEDS: Partial<Record<DevState, string>> = {
+    'map-par5': 'alpha',
+    'map-par3': '2026-11-27',
+}
+const holes = new Map<string, HoleData>()
+let mapHole: HoleData | null = null
+let mapBall: Vec3 = { x: 0, y: 0, z: 0 }
+let mapHeading = 0
+
+function holeFor(seed: string): HoleData {
+    let hd = holes.get(seed)
+    if (!hd) {
+        hd = generateHole(seed)
+        holes.set(seed, hd)
+    }
+    return hd
+}
+
+function updateMinimap(): void {
+    if (!mapHole) {
+        return
+    }
+    const aim = mapHeading + game.aim
+    const carry = game.club === PUTTER_INDEX ? 0 : CARRY_M[game.club]
+    minimap.update({
+        ball: mapBall,
+        aim,
+        landing:
+            carry > 0
+                ? {
+                      x: mapBall.x + Math.cos(aim) * carry,
+                      y: mapBall.y,
+                      z: mapBall.z + Math.sin(aim) * carry,
+                  }
+                : null,
+    })
+}
 
 // --- Fake round ---------------------------------------------------------------
 
@@ -100,10 +144,32 @@ function land(): void {
     }
     game.flying = false
     input.setSkippable(false)
-    input.setEnabled(state === 'hud')
+    input.setEnabled(isLive(state))
     hud.showSkip(false)
     game.strokes++
     const carry = CARRY_M[game.club] * game.lastPower
+    if (mapHole) {
+        const aim = mapHeading + game.aim
+        mapBall = {
+            x: mapBall.x + Math.cos(aim) * carry,
+            y: mapBall.y,
+            z: mapBall.z + Math.sin(aim) * carry,
+        }
+        game.distM = Math.hypot(
+            mapHole.pin.x - mapBall.x,
+            mapHole.pin.z - mapBall.z
+        )
+        mapHeading = Math.atan2(
+            mapHole.pin.z - mapBall.z,
+            mapHole.pin.x - mapBall.x
+        )
+        game.aim = 0
+        game.lie = 'fairway'
+        game.strokes++
+        refreshHud()
+        updateMinimap()
+        return
+    }
     game.distM = Math.max(0, Math.abs(game.distM - carry))
     if (game.distM < 0.5) {
         hud.toast('In the hole!', { tone: 'accent' })
@@ -168,12 +234,22 @@ screens.onBack(() => show('title'))
 // --- States ---------------------------------------------------------------------
 
 let state: DevState = 'hud'
+let lastSetHoleMs = 0
+
+function isLive(s: DevState): boolean {
+    return s === 'hud' || MAP_SEEDS[s] !== undefined
+}
 
 function resetRound(): void {
     Object.assign(game, {
+        par: 4,
+        number: 1,
+        lengthM: yardsToMetres(412),
+        windSpeed: 3.9,
+        windDir: 0.9,
         strokes: 0,
         lie: 'tee',
-        distM: game.lengthM,
+        distM: yardsToMetres(412),
         club: 0,
         aim: 0,
         flying: false,
@@ -188,12 +264,40 @@ function show(s: DevState): void {
     for (const b of bar.querySelectorAll('button')) {
         b.setAttribute('aria-pressed', String(b.dataset.state === s))
     }
-    const inRound = s === 'hud' || s === 'charging' || s === 'flight'
+    const seed = MAP_SEEDS[s]
+    const inRound =
+        s === 'hud' || s === 'charging' || s === 'flight' || seed !== undefined
     hud.setVisible(inRound)
+    minimap.setVisible(seed !== undefined)
+    mapHole = null
     input.setSkippable(false)
-    input.setEnabled(s === 'hud')
+    input.setEnabled(isLive(s))
     if (inRound) {
         screens.hide()
+    }
+    if (seed !== undefined) {
+        resetRound()
+        const hd = holeFor(seed)
+        mapHole = hd
+        mapBall = { ...hd.tee }
+        mapHeading = Math.atan2(hd.pin.z - hd.tee.z, hd.pin.x - hd.tee.x)
+        const len = Math.hypot(hd.pin.x - hd.tee.x, hd.pin.z - hd.tee.z)
+        Object.assign(game, {
+            par: hd.par,
+            number: hd.number,
+            lengthM: len,
+            distM: len,
+            club: hd.par === 3 ? 4 : 0,
+            windSpeed: hd.conditions.windSpeed,
+            windDir: hd.conditions.windDirection - mapHeading,
+        })
+        refreshHud()
+        hud.showHint(false)
+        const t0 = performance.now()
+        minimap.setHole(hd)
+        lastSetHoleMs = performance.now() - t0
+        updateMinimap()
+        return
     }
     switch (s) {
         case 'hud':
@@ -405,7 +509,8 @@ function frame(t: number): void {
     const dt = Math.min(0.1, (t - last) / 1000)
     last = t
     input.update(dt)
-    if (state === 'hud') {
+    updateMinimap()
+    if (isLive(state)) {
         hud.setPower(input.power(), input.isCharging())
         if (game.flying) {
             game.flightTimer -= dt
@@ -438,6 +543,8 @@ declare global {
             hud: typeof hud
             screens: typeof screens
             input: typeof input
+            minimap: typeof minimap
+            setHoleMs(): number
         }
     }
 }
@@ -452,4 +559,6 @@ window.__fairwayUiDev = {
     hud,
     screens,
     input,
+    minimap,
+    setHoleMs: () => lastSetHoleMs,
 }
