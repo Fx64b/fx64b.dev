@@ -28,6 +28,34 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.11.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.10.0...fx64b.dev-v5.11.0) (2026-11-27)
+
+
+### Features
+
+* **fairway:** add a minimap and aim down the fairway on doglegs ([74e4c7d](https://github.com/Fx64b/fx64b.dev/commit/74e4c7dea013b7427e23810b017866269450910d))
+* **fairway:** add ambient sound and effects ([bbc9dc2](https://github.com/Fx64b/fx64b.dev/commit/bbc9dc2b0cf4eab76d8fca5d50424006b519556c))
+* **fairway:** add ball physics core with tests ([1fdf8b9](https://github.com/Fx64b/fx64b.dev/commit/1fdf8b94473e6217a1f84e762cdb16fce5e936c5))
+* **fairway:** add game spec and build setup ([5246de5](https://github.com/Fx64b/fx64b.dev/commit/5246de53cbc771bc7f661740f72d7e238e336627))
+* **fairway:** add HUD, menu screens and input handling ([0ace38d](https://github.com/Fx64b/fx64b.dev/commit/0ace38d20a26673f4fd0c4741802160ee2ed93f5))
+* **fairway:** add round rules and local result storage ([1e2c994](https://github.com/Fx64b/fx64b.dev/commit/1e2c994b9186d6d0e49e2079ec21ac350e9818ad))
+* **fairway:** add seeded, versioned hole generator ([009ca75](https://github.com/Fx64b/fx64b.dev/commit/009ca7591356862f1aff2166c2dc89089af68f18))
+* **fairway:** add three.js and the shared hole data contract ([481c462](https://github.com/Fx64b/fx64b.dev/commit/481c4628cbe4ebf581da365a26e628a93fb6b04e))
+* **fairway:** add Three.js renderer and connect the game loop ([5b08348](https://github.com/Fx64b/fx64b.dev/commit/5b083480d9a273d524417525370fd6ee8baa4039))
+* **fairway:** add very faint generative background music ([cce790d](https://github.com/Fx64b/fx64b.dev/commit/cce790d7ccc711960e250bacec5b4f63174a1609))
+* **fairway:** drop one club length back after water ([bc24f14](https://github.com/Fx64b/fx64b.dev/commit/bc24f14ecf80dfffb7942936ea46ba855370573e))
+* **fairway:** let the player cancel a swing ([e3a6480](https://github.com/Fx64b/fx64b.dev/commit/e3a648096a2fbe0b73f668b641a8c5cb4d700cf8))
+* **fairway:** make the break on the green easier to read ([2de6451](https://github.com/Fx64b/fx64b.dev/commit/2de6451e25dce67d0cbb6a4dbc4ae75745a92748))
+* **fairway:** make the cup about 1.6 times the real size ([4d9e53c](https://github.com/Fx64b/fx64b.dev/commit/4d9e53c46ce393f070f9239fd4a2b3cb40aa286e))
+* **fairway:** more varied holes and a closer fairway start ([86f5247](https://github.com/Fx64b/fx64b.dev/commit/86f52479a8a45fe0d17e66c31bc50b7e43e6dd6c))
+* **fairway:** slower power, path preview, putter distance, no tap skip ([4792995](https://github.com/Fx64b/fx64b.dev/commit/4792995f49545b465c9506a500e9c667db1f0fea))
+
+
+### Bug Fixes
+
+* **fairway:** keep the ball above the HUD at address ([8cd2417](https://github.com/Fx64b/fx64b.dev/commit/8cd24170ff62d766270b33a4052314fe10ab8d3a))
+* **fairway:** show only the start of the flight in the path preview ([3b9e34a](https://github.com/Fx64b/fx64b.dev/commit/3b9e34aa155bbd5ebc62535e9620500504c885bd))
+
 ## [5.10.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.9.0...fx64b.dev-v5.10.0) (2026-11-27)
 
 
