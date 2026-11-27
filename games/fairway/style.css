@@ -674,6 +674,14 @@ body {
     height: 34px;
 }
 
+.fw-title-music {
+    top: 0;
+    right: 34px;
+    width: 34px;
+    height: 34px;
+}
+
+.fw-title-music svg,
 .fw-title-sound svg {
     width: 20px;
     height: 20px;

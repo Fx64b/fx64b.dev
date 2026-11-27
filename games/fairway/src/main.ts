@@ -61,7 +61,10 @@ const minimap = createMinimap(uiRoot)
 const screens = createScreens(uiRoot)
 const input = createInput({ canvas, swingPad: hud.swingPad })
 const storage = createStorage()
-const audio = createAudio({ enabled: storage.soundOn() })
+const audio = createAudio({
+    enabled: storage.soundOn(),
+    music: storage.musicOn(),
+})
 hud.setSound(audio.enabled())
 screens.setSound(audio.enabled())
 
@@ -75,9 +78,24 @@ function toggleSound(): void {
 hud.onSoundToggle(toggleSound)
 screens.onSoundToggle(toggleSound)
 
-// M mutes. Not while typing a seed.
+screens.setMusic(audio.musicEnabled())
+function toggleMusic(): void {
+    const on = !audio.musicEnabled()
+    audio.setMusicEnabled(on)
+    storage.setMusicOn(on)
+    screens.setMusic(on)
+}
+screens.onMusicToggle(toggleMusic)
+
+// M mutes everything, N only the music. Not while typing a seed.
 window.addEventListener('keydown', (e) => {
-    if (e.code !== 'KeyM' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) {
+    if (
+        (e.code !== 'KeyM' && e.code !== 'KeyN') ||
+        e.repeat ||
+        e.ctrlKey ||
+        e.metaKey ||
+        e.altKey
+    ) {
         return
     }
     const target = e.target
@@ -90,7 +108,11 @@ window.addEventListener('keydown', (e) => {
     ) {
         return
     }
-    toggleSound()
+    if (e.code === 'KeyM') {
+        toggleSound()
+    } else {
+        toggleMusic()
+    }
 })
 
 // A very soft click for the menu buttons.
@@ -153,6 +175,7 @@ function showTitle(): void {
     phase = { name: 'menu' }
     audio.setScene('menu')
     audio.setFlight(0)
+    audio.flightEnd()
     input.setEnabled(false)
     input.setSkippable(false)
     hud.setVisible(false)
@@ -232,6 +255,7 @@ function setHole(h: HoleData): void {
         renderer.setHole(h)
     }
     audio.setWind(h.conditions.windSpeed)
+    audio.setMusicSeed(h.seed)
 }
 
 // --- Round ------------------------------------------------------------------
@@ -551,6 +575,7 @@ function step(dt: number): void {
             )
             if (phase.t >= phase.duration) {
                 audio.setFlight(0)
+                audio.flightEnd()
                 announce(o)
                 phase = { name: 'settle', left: SETTLE_S, outcome: o }
             }

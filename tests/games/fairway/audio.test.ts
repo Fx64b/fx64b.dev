@@ -539,7 +539,7 @@ describe('sound toggle', () => {
         screens.setSound(false)
         screens.showTitle(title)
         const btn = root.querySelector<HTMLButtonElement>(
-            '.fw-title-card .fw-sound'
+            '.fw-title-card .fw-title-sound'
         )!
         expect(btn.getAttribute('aria-pressed')).toBe('false')
         let clicks = 0
@@ -550,7 +550,7 @@ describe('sound toggle', () => {
         screens.showArchive([])
         screens.showTitle(title)
         const again = root.querySelector<HTMLButtonElement>(
-            '.fw-title-card .fw-sound'
+            '.fw-title-card .fw-title-sound'
         )!
         expect(again.getAttribute('aria-pressed')).toBe('true')
         again.click()

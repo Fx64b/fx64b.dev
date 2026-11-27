@@ -24,8 +24,10 @@ import {
     playUiClick,
     playWhoosh,
 } from './fx'
+import { type Music, createMusic } from './music'
 
 export * from './cues'
+export * from './score'
 export { STRONG_WIND, windParams } from './ambient'
 
 export type AudioScene = 'menu' | 'round'
@@ -34,6 +36,8 @@ export interface AudioInfo {
     /** False if the browser has no Web Audio (or it failed to start). */
     supported: boolean
     enabled: boolean
+    /** The music setting (the master toggle still mutes it). */
+    music: boolean
     /** State of the AudioContext, or 'none' before the first gesture. */
     state: string
     volume: number
@@ -43,6 +47,11 @@ export interface GameAudio {
     /** Sound on or off (the mute toggle). */
     enabled(): boolean
     setEnabled(on: boolean): void
+    /** Background music on or off; `setEnabled(false)` mutes it too. */
+    musicEnabled(): boolean
+    setMusicEnabled(on: boolean): void
+    /** The seed of the music (the hole seed): each hole sounds its own. */
+    setMusicSeed(seed: string): void
     /** Master volume 0..1. */
     setVolume(v: number): void
     /** A user gesture happened. The audio also listens for it itself. */
@@ -65,6 +74,8 @@ export interface GameAudio {
     flightAdvance(t: number): void
     /** The player skipped: at most the splash or the cup drop plays. */
     flightSkip(): void
+    /** The ball stopped: the music comes back up. */
+    flightEnd(): void
     /** A soft chime after a holed ball. */
     chime(underPar: boolean): void
     uiClick(): void
@@ -75,6 +86,10 @@ export interface GameAudio {
 export interface AudioOptions {
     /** Start with the sound on. Default true. */
     enabled?: boolean
+    /** Start with the music on. Default true. */
+    music?: boolean
+    /** Seed of the music. */
+    musicSeed?: string
     /** Master volume 0..1. Default 0.8. */
     volume?: number
     /** Makes the context; for tests. Default: window.AudioContext. */
@@ -85,6 +100,17 @@ export interface AudioOptions {
 const AMBIENT_ROUND = 1
 const AMBIENT_MENU = 0.65
 const FX_LEVEL = 0.9
+/**
+ * The music is very faint: under the ambient bed in a round, a little
+ * more present (still soft) in the menus, and lower while the ball flies.
+ */
+export const MUSIC_ROUND = 0.5
+export const MUSIC_MENU = 0.7
+export const MUSIC_FLIGHT_DUCK = 0.5
+/** How much of the music goes to the room reverb. */
+export const MUSIC_ROOM = 2
+/** The music fades in slowly: time constant in s. */
+const MUSIC_FADE_S = 2.5
 const FADE_IN_S = 0.6
 const FADE_OUT_S = 0.25
 
@@ -109,6 +135,12 @@ interface Graph {
     /** 0 when muted or the page is hidden, else 1. */
     fade: GainNode
     ambient: Ambient
+    /** Level of the music: setting, scene and flight. */
+    musicBus: GainNode
+    /** Dips for a moment under the splash and the cup drop. */
+    musicDuck: GainNode
+    /** Made when the music is first on. */
+    music: Music | null
 }
 
 function clamp01(v: number): number {
@@ -118,6 +150,9 @@ function clamp01(v: number): number {
 export function createAudio(opts: AudioOptions = {}): GameAudio {
     const make = opts.createContext ?? defaultContext
     let on = opts.enabled ?? true
+    let musicOn = opts.music ?? true
+    let musicSeed = opts.musicSeed ?? 'fairway'
+    let inFlight = false
     let volume = clamp01(opts.volume ?? 0.8)
     let supported = true
     let unlocked = false
@@ -177,7 +212,67 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
         ambientRoom.connect(room)
         const ambient = createAmbient(ctx, ambientBus, ambientRoom)
         ambient.setWind(wind)
-        return { ctx, fx, ambientBus, volume: vol, fade, ambient }
+
+        const musicDuck = ctx.createGain()
+        musicDuck.connect(vol)
+        // A little room on the music, after its level and ducking.
+        const musicRoom = ctx.createGain()
+        musicRoom.gain.value = MUSIC_ROOM
+        musicDuck.connect(musicRoom).connect(room)
+        const musicBus = ctx.createGain()
+        musicBus.gain.value = 0
+        musicBus.connect(musicDuck)
+        return {
+            ctx,
+            fx,
+            ambientBus,
+            volume: vol,
+            fade,
+            ambient,
+            musicBus,
+            musicDuck,
+            music: null,
+        }
+    }
+
+    function musicLevel(): number {
+        if (!musicOn) {
+            return 0
+        }
+        return (
+            (scene === 'menu' ? MUSIC_MENU : MUSIC_ROUND) *
+            (inFlight ? MUSIC_FLIGHT_DUCK : 1)
+        )
+    }
+
+    /** Make the music if it is wanted, and move its level. */
+    function syncMusic(timeConstant = 0.5): void {
+        const g = graph
+        if (!g) {
+            return
+        }
+        try {
+            if (musicOn && !g.music) {
+                g.music = createMusic(g.ctx, g.musicBus, musicSeed)
+                timeConstant = MUSIC_FADE_S
+            }
+            g.musicBus.gain.setTargetAtTime(
+                musicLevel(),
+                g.ctx.currentTime,
+                timeConstant
+            )
+        } catch {
+            // Ignore.
+        }
+    }
+
+    /** A short dip of the music under an important sound. */
+    function duckMusic(t: number): void {
+        const g = graph
+        if (g) {
+            g.musicDuck.gain.setTargetAtTime(0.35, t, 0.08)
+            g.musicDuck.gain.setTargetAtTime(1, t + 2, 0.9)
+        }
     }
 
     /** Bring the context and the fade in line with the wanted state. */
@@ -192,6 +287,7 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
             if (!graph) {
                 supported = false
             }
+            syncMusic()
         }
         const g = graph
         if (!g) {
@@ -260,9 +356,11 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
                     break
                 case 'splash':
                     playSplash(g.ctx, g.fx, t, 0.45 + 0.55 * gain)
+                    duckMusic(t)
                     break
                 case 'cup':
                     playCup(g.ctx, g.fx, t, Math.max(0.5, gain))
+                    duckMusic(t)
                     break
                 case 'lip':
                     playLipOut(g.ctx, g.fx, t, Math.max(0.5, gain))
@@ -307,6 +405,17 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
                 sync()
             }
         },
+        musicEnabled: () => musicOn,
+        setMusicEnabled(v) {
+            if (musicOn !== v) {
+                musicOn = v
+                syncMusic(v ? 1.2 : 0.4)
+            }
+        },
+        setMusicSeed(seed) {
+            musicSeed = seed
+            graph?.music?.setSeed(seed)
+        },
         setVolume(v) {
             volume = clamp01(v)
             const g = graph
@@ -340,6 +449,7 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
                     // Ignore.
                 }
             }
+            syncMusic(1.5)
         },
         setWind(speedMs) {
             wind = Number.isFinite(speedMs) ? Math.max(0, speedMs) : 0
@@ -356,6 +466,9 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
             if (g && g.ctx.state === 'running') {
                 try {
                     g.ambient.tick(g.ctx.currentTime)
+                    if (musicOn) {
+                        g.music?.tick(g.ctx.currentTime)
+                    }
                 } catch {
                     // Ignore.
                 }
@@ -374,6 +487,14 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
         },
         flightStart(result, pin) {
             cues = createCuePlayer(flightCues(result, pin))
+            inFlight = true
+            syncMusic(0.4)
+        },
+        flightEnd() {
+            if (inFlight) {
+                inFlight = false
+                syncMusic(1.5)
+            }
         },
         flightAdvance(t) {
             if (cues) {
@@ -398,6 +519,7 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
         info: () => ({
             supported,
             enabled: on,
+            music: musicOn,
             state: graph ? graph.ctx.state : 'none',
             volume,
         }),
@@ -422,6 +544,7 @@ export function createAudio(opts: AudioOptions = {}): GameAudio {
             if (g) {
                 try {
                     g.ambient.dispose()
+                    g.music?.dispose()
                     void g.ctx.close().catch(() => {})
                 } catch {
                     // Ignore.

@@ -63,29 +63,50 @@ export const ICONS = {
         '<path d="M4.5 9.75h2.9l4.1-3.5v11.5l-4.1-3.5H4.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15 9.4a3.7 3.7 0 0 1 0 5.2M17.4 7a7.1 7.1 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
     soundOff:
         '<path d="M4.5 9.75h2.9l4.1-3.5v11.5l-4.1-3.5H4.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M15.5 9.75l4.5 4.5M20 9.75l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+    musicOn:
+        '<path d="M9.5 17.2V6.6l8-1.8v10.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="7.4" cy="17.3" rx="2.2" ry="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/><ellipse cx="15.4" cy="15.3" rx="2.2" ry="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+    musicOff:
+        '<path d="M9.5 17.2V6.6l8-1.8v10.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="7.4" cy="17.3" rx="2.2" ry="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/><ellipse cx="15.4" cy="15.3" rx="2.2" ry="1.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 4.5l15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
 } as const
 
-export interface SoundButton {
+export interface ToggleButton {
     el: HTMLButtonElement
-    /** Show the sound as on or off. */
+    /** Show the setting as on or off. */
     set(on: boolean): void
+}
+
+export type SoundButton = ToggleButton
+
+function toggleButton(
+    name: string,
+    key: string,
+    iconOn: string,
+    iconOff: string,
+    cls: string
+): ToggleButton {
+    const el = h('button', {
+        type: 'button',
+        class: `fw-icon-btn fw-sound${cls ? ` ${cls}` : ''}`,
+        'aria-label': name,
+    })
+    function set(on: boolean): void {
+        el.setAttribute('aria-pressed', String(on))
+        el.title = `${name} ${on ? 'on' : 'off'} (${key})`
+        el.replaceChildren(svg(on ? iconOn : iconOff))
+    }
+    set(true)
+    return { el, set }
 }
 
 /**
  * The sound toggle: a small speaker button. aria-pressed is true while the
  * sound is on. The caller listens for the click.
  */
-export function soundButton(cls = ''): SoundButton {
-    const el = h('button', {
-        type: 'button',
-        class: `fw-icon-btn fw-sound${cls ? ` ${cls}` : ''}`,
-        'aria-label': 'Sound',
-    })
-    function set(on: boolean): void {
-        el.setAttribute('aria-pressed', String(on))
-        el.title = on ? 'Sound on (M)' : 'Sound off (M)'
-        el.replaceChildren(svg(on ? ICONS.soundOn : ICONS.soundOff))
-    }
-    set(true)
-    return { el, set }
+export function soundButton(cls = ''): ToggleButton {
+    return toggleButton('Sound', 'M', ICONS.soundOn, ICONS.soundOff, cls)
+}
+
+/** The music toggle: a small note button, like the sound toggle. */
+export function musicButton(cls = ''): ToggleButton {
+    return toggleButton('Music', 'N', ICONS.musicOn, ICONS.musicOff, cls)
 }

@@ -15,6 +15,7 @@ const PREFIX = 'fairway:'
 const RESULTS_KEY = `${PREFIX}daily-results`
 const HINT_KEY = `${PREFIX}hint-dismissed`
 const SOUND_KEY = `${PREFIX}sound`
+const MUSIC_KEY = `${PREFIX}music`
 
 export interface KeyValueStore {
     getItem(key: string): string | null
@@ -80,6 +81,13 @@ export function createStorage(store: KeyValueStore | null = defaultStore()) {
         },
         setSoundOn(on: boolean): void {
             write(SOUND_KEY, on)
+        },
+        /** Background music on or off. On by default. */
+        musicOn(): boolean {
+            return read<unknown>(MUSIC_KEY, true) !== false
+        },
+        setMusicOn(on: boolean): void {
+            write(MUSIC_KEY, on)
         },
     }
 }
