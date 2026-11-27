@@ -28,6 +28,19 @@
 * migrate site from Next.js to Vite + React-TS with SSG ([39f441a](https://github.com/Fx64b/fx64b.dev/commit/39f441a746b83f702dbe5765360bdc142af89914))
 * several improvements to the ui ([43d9a25](https://github.com/Fx64b/fx64b.dev/commit/43d9a256e4ef772cf1a269c3fc6ea69985570ae3))
 
+## [5.10.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.9.0...fx64b.dev-v5.10.0) (2026-11-27)
+
+
+### Features
+
+* **thornwick:** lower siege banners when won, rams and catapults need great keep ([a86ff7a](https://github.com/Fx64b/fx64b.dev/commit/a86ff7a486b0252c09cfbf9641be3a5c4f0d944f))
+
+
+### Performance Improvements
+
+* **thornwick:** faster path search for large armies ([f5f3081](https://github.com/Fx64b/fx64b.dev/commit/f5f3081ea020d1488f650ee038a4fe3572419fbd))
+* **thornwick:** paint ground in workers, cheaper sprite drawing ([da0262a](https://github.com/Fx64b/fx64b.dev/commit/da0262aa9f5ce00cf75364eaeb2f50cd32a3ad3d))
+
 ## [5.9.0](https://github.com/Fx64b/fx64b.dev/compare/fx64b.dev-v5.8.0...fx64b.dev-v5.9.0) (2026-11-20)
 
 
