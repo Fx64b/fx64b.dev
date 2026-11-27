@@ -20,6 +20,8 @@ export interface TerrainUniforms {
     uGreenRect: { value: THREE.Vector4 }
     /** x, z of the real shadow area and its radius. */
     uShadowArea: { value: THREE.Vector3 }
+    /** Horizontal direction toward the sun, for the green slope shade. */
+    uSunXZ: { value: THREE.Vector2 }
 }
 
 export interface Terrain {
@@ -265,6 +267,7 @@ uniform vec4 uSplatRect;
 uniform vec4 uBounds;
 uniform vec4 uGreenRect;
 uniform vec3 uShadowArea;
+uniform vec2 uSunXZ;
 uniform vec3 uRough;
 uniform vec3 uCut;
 uniform vec3 uFair;
@@ -274,6 +277,7 @@ uniform vec3 uEarth;
 uniform vec3 uBed;
 uniform vec3 uForest;
 varying vec3 vFwPos;
+varying vec3 vFwNormal;
 float fwBakedLit = 1.0;
 float fwBakedK = 1.0;
 
@@ -342,6 +346,10 @@ const FRAG_COLOR = /* glsl */ `
     // A thin darker seam where the collar meets the putting surface.
     float seam = smoothstep(0.3, 0.47, sa.b) * (1.0 - wGreen);
     col = mix(col, col * 0.8, seam * 0.6);
+    // Putting slopes are only a few percent, so plain lighting hardly shows
+    // them. Shade the green a little by how it tilts toward the sun.
+    float tilt = dot(normalize(vFwNormal).xz, uSunXZ);
+    cGreen *= 1.0 + clamp(tilt * 5.0, -0.16, 0.16);
     col = mix(col, cGreen, wGreen);
 
     // Bunker: a dark lip of earth, then warm sand.
@@ -410,11 +418,11 @@ function createMaterial(
         shader.vertexShader = shader.vertexShader
             .replace(
                 '#include <common>',
-                '#include <common>\nvarying vec3 vFwPos;'
+                '#include <common>\nvarying vec3 vFwPos;\nvarying vec3 vFwNormal;'
             )
             .replace(
                 '#include <begin_vertex>',
-                '#include <begin_vertex>\nvFwPos = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;'
+                '#include <begin_vertex>\nvFwPos = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;\nvFwNormal = normal;'
             )
         shader.fragmentShader = shader.fragmentShader
             .replace('#include <common>', '#include <common>\n' + FRAG_PARS)
@@ -570,6 +578,9 @@ export function createTerrain(
                 : new THREE.Vector4(1, 1, 0, 0),
         },
         uShadowArea: { value: new THREE.Vector3(0, 0, 1) },
+        uSunXZ: {
+            value: new THREE.Vector2(sunDir.x, sunDir.z).normalize(),
+        },
     }
 
     const group = new THREE.Group()

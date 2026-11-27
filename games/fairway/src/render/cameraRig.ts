@@ -9,6 +9,9 @@ import type { HeightSampler } from './height'
 
 export const EYE_HEIGHT = 1.7
 export const ADDRESS_BACK = 4
+/** Putting view: a crouched eye, further back, so slopes are readable. */
+export const PUTT_EYE_HEIGHT = 0.9
+export const PUTT_BACK = 5.2
 
 type Mode = 'none' | 'address' | 'follow' | 'glide' | 'overview'
 
@@ -19,6 +22,12 @@ export class CameraRig {
     private mode: Mode = 'none'
     private ground: HeightSampler = () => 0
     private hole: HoleData | null = null
+    private isGreen: (x: number, z: number) => boolean = () => false
+    /** 0 = normal address view, 1 = putting view. Smoothed. */
+    private putt = 0
+    private puttTarget = 0
+    private lastBall: Vec3 = { x: 0, y: 0, z: 0 }
+    private lastAim = 0
 
     private pos = new THREE.Vector3(0, 2, -3)
     private look = new THREE.Vector3(0, 0, 10)
@@ -38,10 +47,22 @@ export class CameraRig {
         this.camera = new THREE.PerspectiveCamera(55, 16 / 9, 0.12, 6000)
     }
 
-    setHole(hole: HoleData, ground: HeightSampler) {
+    setHole(
+        hole: HoleData,
+        ground: HeightSampler,
+        isGreen: (x: number, z: number) => boolean
+    ) {
         this.hole = hole
         this.ground = ground
+        this.isGreen = isGreen
         this.mode = 'none'
+        this.putt = 0
+        this.puttTarget = 0
+    }
+
+    /** The current kind of view. */
+    get view(): Mode {
+        return this.mode
     }
 
     /** Field of view: 55 degrees high in landscape, wider in portrait. */
@@ -59,41 +80,66 @@ export class CameraRig {
         this.camera.updateProjectionMatrix()
     }
 
+    /**
+     * The address pose. `putt` blends from the standing view (0) to the
+     * crouched putting view (1): lower, further back, and looking flatter,
+     * so the ball and the cup area are both in view and the slopes of the
+     * green show against the horizon.
+     */
     private addressPose(
         ball: Vec3,
         aimAngle: number,
+        putt: number,
         outPos: THREE.Vector3,
         outLook: THREE.Vector3
     ) {
         const dx = Math.cos(aimAngle)
         const dz = Math.sin(aimAngle)
-        const ex = ball.x - dx * ADDRESS_BACK
-        const ez = ball.z - dz * ADDRESS_BACK
+        const back = THREE.MathUtils.lerp(ADDRESS_BACK, PUTT_BACK, putt)
+        const eye = THREE.MathUtils.lerp(EYE_HEIGHT, PUTT_EYE_HEIGHT, putt)
+        const ex = ball.x - dx * back
+        const ez = ball.z - dz * back
         // Eye height is measured from the higher of the ball and the ground
         // under the camera. On a raised tee the ground behind the ball is
         // lower, and the ball must not hide behind the tee edge.
-        const ey = Math.max(this.ground(ex, ez), ball.y) + EYE_HEIGHT
+        const ey = Math.max(this.ground(ex, ez), ball.y) + eye
         outPos.set(ex, ey, ez)
-        // Look down the aim line about 10 degrees below the horizon. The
-        // ball then sits a little below the centre of the view, clear of the
-        // HUD at the bottom. Follow the land a little.
+        // Look down the aim line about 10 degrees below the horizon (about
+        // 3 degrees when putting). The ball then sits a little below the
+        // centre of the view, clear of the HUD at the bottom. Follow the
+        // land a little.
         const ahead = 26
         const gy = this.ground(ball.x + dx * ahead, ball.z + dz * ahead)
-        const rise = THREE.MathUtils.clamp((gy - ball.y) * 0.45, -2.5, 3)
+        const rise =
+            THREE.MathUtils.clamp((gy - ball.y) * 0.45, -2.5, 3) * (1 - putt)
+        const drop = THREE.MathUtils.lerp(4.6, 1.3, putt)
         outLook.set(
-            ball.x + dx * (ahead - ADDRESS_BACK),
-            ey - 4.6 + rise,
-            ball.z + dz * (ahead - ADDRESS_BACK)
+            ball.x + dx * (ahead - back),
+            ey - drop + rise,
+            ball.z + dz * (ahead - back)
         )
     }
 
     address(ball: Vec3, aimAngle: number) {
+        this.lastBall = { x: ball.x, y: ball.y, z: ball.z }
+        this.lastAim = aimAngle
+        this.puttTarget = this.isGreen(ball.x, ball.z) ? 1 : 0
         if (this.mode === 'glide') {
             // Keep gliding, toward the new target.
-            this.addressPose(ball, aimAngle, this.wantPos, this.wantLook)
+            this.putt = this.puttTarget
+            this.addressPose(
+                ball,
+                aimAngle,
+                this.putt,
+                this.wantPos,
+                this.wantLook
+            )
             return
         }
-        this.addressPose(ball, aimAngle, this.wantPos, this.wantLook)
+        if (this.mode !== 'address') {
+            this.putt = this.puttTarget
+        }
+        this.addressPose(ball, aimAngle, this.putt, this.wantPos, this.wantLook)
         if (this.mode !== 'address') {
             this.pos.copy(this.wantPos)
             this.look.copy(this.wantLook)
@@ -131,7 +177,12 @@ export class CameraRig {
     }
 
     glideTo(ball: Vec3, aimAngle: number, seconds: number) {
-        this.addressPose(ball, aimAngle, this.wantPos, this.wantLook)
+        // The glide itself is the blend into (or out of) the putting view.
+        this.lastBall = { x: ball.x, y: ball.y, z: ball.z }
+        this.lastAim = aimAngle
+        this.puttTarget = this.isGreen(ball.x, ball.z) ? 1 : 0
+        this.putt = this.puttTarget
+        this.addressPose(ball, aimAngle, this.putt, this.wantPos, this.wantLook)
         if (seconds <= 0 || this.mode === 'none') {
             this.pos.copy(this.wantPos)
             this.look.copy(this.wantLook)
@@ -225,12 +276,26 @@ export class CameraRig {
         } else if (this.mode === 'overview') {
             this.overviewPose(this.pos, this.look)
         } else if (this.mode !== 'none') {
+            if (this.mode === 'address' && this.putt !== this.puttTarget) {
+                // Ease between the standing and the putting view.
+                const step = dt * 1.6
+                const d = this.puttTarget - this.putt
+                this.putt += Math.abs(d) <= step ? d : Math.sign(d) * step
+                const t = this.putt * this.putt * (3 - 2 * this.putt)
+                this.addressPose(
+                    this.lastBall,
+                    this.lastAim,
+                    t,
+                    this.wantPos,
+                    this.wantLook
+                )
+            }
             this.pos.lerp(this.wantPos, damp(this.posRate, dt))
             this.look.lerp(this.wantLook, damp(this.lookRate, dt))
         }
         // Never go under the ground.
         if (this.mode !== 'none') {
-            const g = this.ground(this.pos.x, this.pos.z) + 0.5
+            const g = this.ground(this.pos.x, this.pos.z) + 0.4
             if (this.pos.y < g) {
                 this.pos.y = g
             }

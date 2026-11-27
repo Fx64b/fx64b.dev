@@ -248,6 +248,10 @@ declare global {
             /** Advance the animation clock without waiting. */
             /** Address view from any spot toward a target. */
             lookFrom(x: number, z: number, tx: number, tz: number): void
+            /** Ball on the green: dist metres from the pin, at an angle. */
+            putt(dist: number, angleDeg: number, aimOffsetDeg?: number): void
+            /** Slope (rise over run) of the ground at a point. */
+            slopeAt(x: number, z: number): number
             step(seconds: number): void
             pause(on: boolean): void
             /** Draw one frame while paused. */
@@ -283,6 +287,26 @@ window.__fairwayDev = {
         renderer.cameraGlideTo(p, a, 0)
         renderer.cameraAddress(p, a)
         view = 'custom'
+    },
+    putt(dist, angleDeg, aimOffsetDeg = 0) {
+        const a = (angleDeg * Math.PI) / 180
+        const p = spot(
+            hole.pin.x + Math.cos(a) * dist,
+            hole.pin.z + Math.sin(a) * dist
+        )
+        const aim = aimAt(p, hole.pin) + (aimOffsetDeg * Math.PI) / 180
+        view = 'custom'
+        renderer.setBall(p, true)
+        renderer.setAimRing(null)
+        renderer.cameraGlideTo(p, aim, 0)
+        renderer.cameraAddress(p, aim)
+    },
+    slopeAt(x, z) {
+        const e = 0.5
+        return Math.hypot(
+            renderer.groundHeight(x + e, z) - renderer.groundHeight(x - e, z),
+            renderer.groundHeight(x, z + e) - renderer.groundHeight(x, z - e)
+        )
     },
     stats: () => renderer.stats(),
     renderer: () => renderer,

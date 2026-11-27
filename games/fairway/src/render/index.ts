@@ -5,13 +5,14 @@
 import * as THREE from 'three'
 
 import { createGround as createCourseGround } from '../course'
-import type { HoleData, Vec3 } from '../shared/hole'
+import { type HoleData, SURFACE_IDS, type Vec3 } from '../shared/hole'
 import {
     type Atmosphere,
     createAtmosphere,
     createSkyUniforms,
 } from './atmosphere'
 import { CameraRig } from './cameraRig'
+import { type GreenGrid, createGreenGrid } from './greenGrid'
 import type { HeightSampler } from './height'
 import { type Props, createProps } from './props'
 import { type Sky, createSky } from './sky'
@@ -86,6 +87,8 @@ interface World {
     trees: Trees
     water: Water
     props: Props
+    grid: GreenGrid
+    isGreen: (x: number, z: number) => boolean
     sampler: HeightSampler
 }
 
@@ -138,6 +141,9 @@ export function createRenderer(
 
     let sky: Sky | null = null
     let world: World | null = null
+    // Where the ball is, for the putting aids on the green.
+    const ballAt = { x: 0, z: 0 }
+    let ballShown = false
     let hole: HoleData | null = null
     let width = canvas.clientWidth || canvas.width || 1
     let height = canvas.clientHeight || canvas.height || 1
@@ -171,12 +177,14 @@ export function createRenderer(
             world.terrain.group,
             world.trees.group,
             world.water.group,
-            world.props.group
+            world.props.group,
+            world.grid.group
         )
         world.terrain.dispose()
         world.trees.dispose()
         world.water.dispose()
         world.props.dispose()
+        world.grid.dispose()
         world = null
     }
 
@@ -208,9 +216,36 @@ export function createRenderer(
             high
         )
         const props = createProps(h, terrain.ground, atmo.sunDir, time, high)
-        scene.add(terrain.group, trees.group, water.group, props.group)
-        world = { terrain, trees, water, props, sampler }
-        rig.setHole(h, terrain.ground)
+        const sf = h.surfaces
+        const greenId = SURFACE_IDS.indexOf('green')
+        const isGreen = (x: number, z: number) => {
+            const c = Math.floor((x - sf.originX) / sf.cellSize)
+            const r = Math.floor((z - sf.originZ) / sf.cellSize)
+            return (
+                c >= 0 &&
+                r >= 0 &&
+                c < sf.cols &&
+                r < sf.rows &&
+                sf.data[r * sf.cols + c] === greenId
+            )
+        }
+        const grid = createGreenGrid(
+            h,
+            terrain.ground,
+            isGreen,
+            terrain.uniforms,
+            quality
+        )
+        scene.add(
+            terrain.group,
+            trees.group,
+            water.group,
+            props.group,
+            grid.group
+        )
+        world = { terrain, trees, water, props, grid, sampler, isGreen }
+        ballShown = false
+        rig.setHole(h, terrain.ground, isGreen)
         rig.overview()
     }
 
@@ -284,6 +319,9 @@ export function createRenderer(
         },
         setBall(pos, visible = true) {
             world?.props.setBall(pos, visible)
+            ballAt.x = pos.x
+            ballAt.z = pos.z
+            ballShown = visible
         },
         setAimRing(pos) {
             world?.props.setAimRing(pos)
@@ -319,6 +357,20 @@ export function createRenderer(
             }
             world.trees.regroup(camera.position.x, camera.position.z)
             world.props.update(camera, height)
+            // The slope grid shows while the ball is on the green and the
+            // player stands at it (or watches a putt roll).
+            const view = rig.view
+            world.grid.setShown(
+                ballShown &&
+                    view !== 'overview' &&
+                    view !== 'none' &&
+                    world.isGreen(ballAt.x, ballAt.z)
+            )
+            world.grid.update(
+                dt,
+                gl.domElement.height /
+                    (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2))
+            )
             if (quality === 'high') {
                 updateShadows()
             }
