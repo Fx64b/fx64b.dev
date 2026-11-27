@@ -1,6 +1,6 @@
 import { DEF, FCOL, GH, GW, N, OX, OY } from './config'
-import { isWater } from './helpers'
-import { grade, hsh, mix, tw, vnoise } from './noise'
+import { paintGround as paintPure, setPaintData } from './groundpaint'
+import { vnoise } from './noise'
 import { R, toCanvas } from './sprites'
 import { bmap, fcol, inMap, pathMap, reg, terrain, wx, wy } from './state'
 import { GV } from './vars'
@@ -11,8 +11,7 @@ GV.gcv = null
 GV.vcv = null
 GV.glow = null
 GV.torch = null
-export const GRASS = [0x4a7f35, 0x548a3a, 0x5e9540, 0x699f47],
-    DIRT = [0x8f744d, 0x9d8158, 0xab8f64]
+export { DIRT, GRASS } from './groundpaint'
 export const AW = GW * R,
     AH = GH * R,
     CH = 512,
@@ -24,15 +23,218 @@ export const CW = Math.ceil(AW / CH),
     MAXCH = 80,
     // Fog chunks are smaller and many stand over land never painted: keep more.
     MAXV = 220
-GV.gbuf = new Uint8ClampedArray(0)
-GV.gbx = 0
-GV.gby = 0
-GV.gbw = 0
-GV.gbh = 0
-GV.gpainted = 0
 GV.groundGen = 1
 GV.veilGen = 1
 GV.chunkUse = 0
+/* What the painter reads, live, on the main thread. */
+function liveData() {
+    return {
+        N,
+        OX,
+        OY,
+        R,
+        AH,
+        season: GV.curSeason,
+        terrain,
+        pathMap,
+        link: (i?) => pathLink(i % N, (i / N) | 0),
+        moat: (i?) => GV.S.tmod[i] === 3,
+    }
+}
+/* Paint one rectangle of ground pixels on the main thread, tinted. */
+function paintGround(x0?, y0?, w?, h?) {
+    setPaintData(liveData())
+    return paintPure(x0, y0, w, h)
+}
+/*
+ * Workers paint whole chunks off the main thread, so panning and zooming out do
+ * not stop the frame. The workers paint from a copy of the map (a snapshot,
+ * at most one each half second). Each job carries the generation of the ground
+ * and the count of changes in its snapshot. When the pixels come back, the
+ * small changes made since are painted over them here; after a large change,
+ * or with ground of an older generation, the pixels are thrown away and the
+ * chunk is asked for again. Without workers, chunks are painted in bands on
+ * the main thread as before.
+ */
+GV.groundChg = 0
+/* Recent changes: { c, x0, y0, x1, y1, big } in chunk pixels. */
+const changes = []
+let snapChg = 0,
+    snapAt = -1,
+    lost = 0,
+    lastBig = 0
+const pool = []
+let poolOn = false,
+    sentVer = ''
+const jobs = new Map()
+/* True while workers paint (for tests). */
+export const groundBusy = () => jobs.size > 0
+const wanted = []
+function initPool() {
+    if (pool.length || typeof Worker === 'undefined') {
+        return
+    }
+    // Leave two cores for the game and the browser.
+    const n = Math.max(1, Math.min(3, (navigator.hardwareConcurrency || 2) - 2))
+    try {
+        for (let k = 0; k < n; k++) {
+            const w = new Worker(
+                new URL('./groundworker.ts', import.meta.url),
+                {
+                    type: 'module',
+                }
+            )
+            const slot = { w, busy: 0 }
+            w.onmessage = (e?) => {
+                slot.busy--
+                jobDone(e.data)
+            }
+            w.onerror = () => stopPool()
+            pool.push(slot)
+        }
+        poolOn = true
+    } catch {
+        stopPool()
+    }
+}
+function stopPool() {
+    for (const p of pool) {
+        p.w.terminate()
+    }
+    pool.length = 0
+    jobs.clear()
+    poolOn = false
+}
+/* A copy of what the painter reads, for the workers. */
+function snapshot() {
+    const link = new Uint8Array(N * N),
+        moat = new Uint8Array(N * N)
+    for (let i = 0; i < N * N; i++) {
+        link[i] = pathLink(i % N, (i / N) | 0) ? 1 : 0
+    }
+    for (const k in GV.S.tmod) {
+        if (GV.S.tmod[k] === 3) {
+            moat[+k] = 1
+        }
+    }
+    return {
+        N,
+        OX,
+        OY,
+        R,
+        AH,
+        season: GV.curSeason,
+        terrain: terrain.slice(),
+        pathMap: pathMap.slice(),
+        link,
+        moat,
+    }
+}
+function jobDone(m?) {
+    jobs.delete(m.key)
+    if (m.gen !== GV.groundGen || m.chg < lost) {
+        return
+    }
+    const x0 = m.x0,
+        y0 = m.y0,
+        x1 = x0 + m.w,
+        y1 = y0 + m.h,
+        late = changes.filter(
+            (c?) =>
+                c.c > m.chg && c.x1 > x0 && c.x0 < x1 && c.y1 > y0 && c.y0 < y1
+        )
+    if (late.some((c?) => c.big)) {
+        return
+    }
+    let ch = GV.gcv.get(m.key)
+    if (!m.buf) {
+        GV.gcv.set(m.key, { empty: true, gen: m.gen, used: GV.chunkUse })
+        return
+    }
+    if (!ch || ch.empty) {
+        const c = document.createElement('canvas')
+        c.width = c.height = m.w
+        ch = { cv: c, g: c.getContext('2d'), gen: 0, used: GV.chunkUse }
+        GV.gcv.set(m.key, ch)
+    }
+    ch.g.putImageData(
+        new ImageData(new Uint8ClampedArray(m.buf), m.w, m.h),
+        0,
+        0
+    )
+    for (const c of late) {
+        const im = paintGround(c.x0, c.y0, c.x1 - c.x0, c.y1 - c.y0)
+        if (im) {
+            ch.g.putImageData(im, c.x0 - x0, c.y0 - y0)
+        }
+    }
+    ch.gen = m.gen
+    ch.mip = null
+}
+/* Send the wanted chunks to free workers, the first wanted first. */
+function dispatch() {
+    const S2 = CH + 2 * PAD
+    for (const key of wanted) {
+        if (jobs.has(key)) {
+            continue
+        }
+        let slot = null
+        for (const p of pool) {
+            if (p.busy < 2 && (!slot || p.busy < slot.busy)) {
+                slot = p
+            }
+        }
+        if (!slot) {
+            break
+        }
+        const ver = GV.groundGen + ':' + GV.groundChg,
+            now = performance.now()
+        if (
+            ver !== sentVer &&
+            (snapAt < 0 ||
+                now - snapAt > 500 ||
+                snapChg < lastBig ||
+                !sentVer.startsWith(GV.groundGen + ':'))
+        ) {
+            sentVer = ver
+            snapAt = now
+            snapChg = GV.groundChg
+            const data = snapshot()
+            for (const p of pool) {
+                p.w.postMessage({ data })
+            }
+        }
+        const i = key % CW,
+            j = (key / CW) | 0
+        jobs.set(key, 1)
+        slot.busy++
+        slot.w.postMessage({
+            job: {
+                key,
+                x0: i * CH - PAD,
+                y0: j * CH - PAD,
+                w: S2,
+                h: S2,
+                gen: GV.groundGen,
+                chg: snapChg,
+            },
+        })
+    }
+    wanted.length = 0
+}
+/* Note a change to the ground over a rectangle of chunk pixels. */
+function stamp(px0?, py0?, px1?, py1?, big?) {
+    const c = ++GV.groundChg
+    changes.push({ c, x0: px0, y0: py0, x1: px1, y1: py1, big })
+    if (big) {
+        lastBig = c
+    }
+    // Keep the last few hundred. A job older than the ones let go is redone.
+    if (changes.length > 400) {
+        lost = changes[changes.length - 301].c
+        changes.splice(0, changes.length - 300)
+    }
+}
 export function groundInit() {
     GV.gcv = new Map()
     GV.vcv = new Map()
@@ -67,50 +269,6 @@ export function groundInit() {
     }
     GV.torch = toCanvas(tw3, th3, p2)
 }
-/* Season tint of an untinted ground buffer, into new image data. */
-export function tintBuf(src?, w?, h?) {
-    const s = GV.curSeason < 0 ? 0 : GV.curSeason,
-        im = new ImageData(w, h),
-        d = im.data
-    for (let j = 0; j < w * h * 4; j += 4) {
-        let r = src[j],
-            g = src[j + 1],
-            b = src[j + 2]
-        d[j + 3] = src[j + 3]
-        if (s !== 1 && src[j + 3]) {
-            const green = g > r + 10 && g > b + 18
-            if (s === 3) {
-                if (green) {
-                    const v = 182 + (g - 105) * 0.45
-                    r = v - 10
-                    g = v - 4
-                    b = v + 7
-                } else if (b > g && b > r + 16) {
-                    r = r * 0.42 + 96
-                    g = g * 0.42 + 112
-                    b = b * 0.42 + 126
-                } else {
-                    r = r * 0.7 + 58
-                    g = g * 0.7 + 61
-                    b = b * 0.7 + 66
-                }
-            } else if (s === 2) {
-                if (green) {
-                    r += 42
-                    g -= 4
-                    b -= 12
-                }
-            } else if (green) {
-                g += 6
-                r += 2
-            }
-        }
-        d[j] = r
-        d[j + 1] = g
-        d[j + 2] = b
-    }
-    return im
-}
 /* Every tile whose centre lies in a rectangle of world pixels, row by row. */
 export function eachTileIn(px0?, py0?, px1?, py1?, fn?) {
     const u0 = Math.ceil((px0 - OX) / 16),
@@ -136,6 +294,7 @@ export function staleGround(x0?, y0?, x1?, y1?) {
         px1 = (wx(x1, y0) + 40) * R,
         py0 = (wy(x0, y0) - 24) * R,
         py1 = (wy(x1, y1) + 24) * R
+    stamp(px0, py0, px1, py1, true)
     for (const [k, ch] of GV.gcv) {
         const i = k % CW,
             j = (k / CW) | 0
@@ -153,73 +312,6 @@ export function staleGround(x0?, y0?, x1?, y1?) {
         }
     }
     dropPend(px0, py0, px1, py1)
-}
-/* Paint the ground of one rectangle (ground pixels) from scratch and return it tinted. */
-export function paintGround(x0?, y0?, w?, h?) {
-    if (GV.gbuf.length < w * h * 4) {
-        GV.gbuf = new Uint8ClampedArray(w * h * 4)
-    } else {
-        GV.gbuf.fill(0, 0, w * h * 4)
-    }
-    GV.gbx = x0
-    GV.gby = y0
-    GV.gbw = w
-    GV.gbh = h
-    GV.gpainted = 0
-    eachTileIn(
-        (x0 - 36) / R,
-        (y0 - 20) / R,
-        (x0 + w + 36) / R,
-        (y0 + h + 20) / R,
-        drawGroundTile
-    )
-    const Lx = (wx(0, N - 1) - 16) * R,
-        Ly = wy(0, N - 1) * R,
-        Bx = wx(N - 1, N - 1) * R,
-        By = (wy(N - 1, N - 1) + 8) * R,
-        Rx = (wx(N - 1, 0) + 16) * R
-    for (let px = Math.max(Lx, x0); px < Math.min(Rx, x0 + w); px++) {
-        const left = px < Bx,
-            ey = Math.floor(left ? Ly + (px - Lx) / 2 : By - (px - Bx) / 2)
-        if (ey + 48 < y0 || ey >= y0 + h) {
-            continue
-        }
-        for (let k = 0; k < 48; k++) {
-            const py = ey + k
-            if (py >= AH) {
-                break
-            }
-            const hh = hsh(px, py, 12),
-                band = vnoise(px / 16, k / 6, 13),
-                root = hsh(px, 7, 17)
-            let c
-            if (k < 3) {
-                c = k === 0 ? 0x3d6a2e : 0x2f5224
-            } else if (k < 5 + root * 7 && hsh(px, 9, 17) < 0.3) {
-                c = 0x3a2a1c
-            } else {
-                c =
-                    k < 8 + band * 6
-                        ? 0x56402b
-                        : band > 0.55
-                          ? hsh(px >> 2, k >> 1, 18) < 0.5
-                              ? 0x79766d
-                              : 0x6c695f
-                          : 0x64492f
-            }
-            c = tw(
-                c,
-                (left ? 1 : 0.74) *
-                    (hh < 0.2 ? 0.86 : hh > 0.95 ? 1.12 : 1) *
-                    (1 - k * 0.007)
-            )
-            if (k >= 43) {
-                c = hh < 0.5 ? 0x9cc8d4 : 0x6fa3b6
-            }
-            gput(px, py, c)
-        }
-    }
-    return GV.gpainted ? tintBuf(GV.gbuf, w, h) : null
 }
 export function makeChunk(i?, j?) {
     const S2 = CH + 2 * PAD,
@@ -256,7 +348,15 @@ export function chunkSrc(ch?) {
         g.imageSmoothingEnabled = true
         g.imageSmoothingQuality = 'medium'
         g.drawImage(ch.cv, 0, 0, S2, S2, 0, 0, S2 / 2, S2 / 2)
-        ch.mip = m
+        // Read back once: a canvas filled with putImageData draws faster.
+        const m2 = document.createElement('canvas')
+        m2.width = m2.height = S2 / 2
+        m2.getContext('2d').putImageData(
+            g.getImageData(0, 0, S2 / 2, S2 / 2),
+            0,
+            0
+        )
+        ch.mip = m2
     }
     return ch.mip
 }
@@ -271,6 +371,7 @@ export function groundTileChanged(x?, y?) {
         h = 40
     // A half-painted chunk here starts over, so it shows the change.
     dropPend(x0, y0, x0 + w, y0 + h)
+    stamp(x0, y0, x0 + w, y0 + h)
     let im = null
     for (
         let j = Math.floor((y0 + PAD) / CH) - 1;
@@ -327,290 +428,6 @@ export function pathLink(x?, y?) {
     const b = bmap[i]
     return !!(b && b.o === 0 && (DEF[b.t].path || b === GV.keep))
 }
-export function gput(px?, py?, c?) {
-    px -= GV.gbx
-    py -= GV.gby
-    if (px < 0 || py < 0 || px >= GV.gbw || py >= GV.gbh) {
-        return
-    }
-    const j = (px + py * GV.gbw) * 4,
-        q = grade((c >> 16) & 255, (c >> 8) & 255, c & 255)
-    GV.gbuf[j] = q[0]
-    GV.gbuf[j + 1] = q[1]
-    GV.gbuf[j + 2] = q[2]
-    GV.gbuf[j + 3] = 255
-    GV.gpainted = 1
-}
-export function drawGroundTile(x?, y?) {
-    const cx = wx(x, y) * R,
-        cy = wy(x, y) * R,
-        i = x + y * N,
-        t = terrain[i]
-    const isP = pathMap[i] === 1 && t !== 3
-    const lk = isP
-        ? [
-              pathLink(x + 1, y),
-              pathLink(x - 1, y),
-              pathLink(x, y + 1),
-              pathLink(x, y - 1),
-          ]
-        : null
-    const wN = [
-        isWater(x + 1, y),
-        isWater(x - 1, y),
-        isWater(x, y + 1),
-        isWater(x, y - 1),
-    ]
-    const dug = GV.S.tmod[i] === 3
-    const moatN = (k?) => {
-        const nx = x + +(k === 0) - +(k === 1),
-            ny = y + +(k === 2) - +(k === 3)
-        return inMap(nx, ny) && GV.S.tmod[nx + ny * N] === 3
-    }
-    for (let r = 0; r < 32; r++) {
-        const hw = r < 16 ? 2 * (r + 1) : 2 * (32 - r)
-        for (let dx = -hw; dx < hw; dx++) {
-            const px = cx + dx,
-                py = cy - 16 + r
-            const ddx = (dx + 0.5) / R,
-                ddy = (r - 15.5) / R,
-                u = ddx / 2 + ddy,
-                v = ddy - ddx / 2
-            const gx = x + u / 16,
-                gy = y + v / 16,
-                h = hsh(px, py, 1)
-            let c
-            if (t === 3) {
-                const ed =
-                    Math.min(
-                        wN[0] ? 9 : 8 - u,
-                        wN[1] ? 9 : 8 + u,
-                        wN[2] ? 9 : 8 - v,
-                        wN[3] ? 9 : 8 + v
-                    ) +
-                    (vnoise(gx * 5, gy * 5, 3) - 0.5) * 2
-                if (ed < 1.1) {
-                    c = dug
-                        ? h < 0.3
-                            ? 0x5f4b31
-                            : 0x6e5739
-                        : h < 0.2
-                          ? 0xb3a26f
-                          : 0xc4b27e
-                } else if (ed < 1.7) {
-                    c = h < 0.55 ? 0x8bbccb : 0x5f9db3
-                } else if (ed < 2.9) {
-                    c = h < 0.1 ? 0x5a9ab2 : 0x4a8aa3
-                } else {
-                    c = [0x255a7b, 0x2c6588, 0x347294][
-                        Math.min(
-                            2,
-                            (vnoise(gx * 2.2, gy * 2.2, 4) * 2.4 + h * 0.7) | 0
-                        )
-                    ]
-                    if (
-                        (py + (px >> 3)) % 9 === 0 &&
-                        hsh(px >> 3, py, 5) < 0.42
-                    ) {
-                        c = 0x5294b1
-                    } else if (
-                        (py + (px >> 3)) % 9 === 1 &&
-                        hsh(px >> 3, py - 1, 5) < 0.42
-                    ) {
-                        c = 0x22506e
-                    }
-                }
-            } else {
-                const n1 = vnoise(gx / 4.5, gy / 4.5, 6),
-                    n2 = vnoise(gx * 1.7, gy * 1.7, 14)
-                const gi = Math.max(
-                    0,
-                    Math.min(
-                        3,
-                        (n1 * 2.3 + n2 * 0.9 + h * 0.9 - (t === 1 ? 0.9 : 0)) |
-                            0
-                    )
-                )
-                c = GRASS[gi]
-                // Blades of grass: short upright strokes, dark at the root
-                // and light at the tip, a little denser where it is lush.
-                // One hash gives both the chance of a blade and its offset.
-                const bh = hsh(px, py >> 2, 31),
-                    ph = (py & 3) + ((bh * 4096) & 3)
-                if (bh < 0.13 + n1 * 0.06 && (ph & 3) < 3) {
-                    c = tw(
-                        c,
-                        (ph & 3) === 0 ? 1.16 : (ph & 3) === 1 ? 0.98 : 0.8
-                    )
-                } else if (hsh(px, py, 30) < 0.05) {
-                    c = tw(c, 0.76)
-                } else if (hsh(px, py + 1, 30) < 0.04) {
-                    c = tw(c, 1.14)
-                } else if (h < 0.03) {
-                    c = tw(c, 0.86)
-                }
-                // Soft patches of clover and of drier grass.
-                const pt = n2
-                if (t === 0 && pt > 0.72 && hsh(px >> 1, py >> 1, 33) < 0.45) {
-                    c = tw(c, 1.07)
-                } else if (
-                    t === 0 &&
-                    pt < 0.2 &&
-                    hsh(px >> 1, py >> 1, 34) < 0.35
-                ) {
-                    c = mix(c, 0x9a9a4a, 0.22)
-                }
-                if (t === 1 && hsh(px, py, 15) < 0.05) {
-                    c = hsh(px, py, 16) < 0.5 ? 0x5a4a2e : 0x6b5532
-                }
-                if (t === 2 || t === 4) {
-                    if (hsh(px >> 1, py >> 1, 7) < (t === 4 ? 0.5 : 0.3)) {
-                        const sv = hsh(px >> 1, py >> 1, 8)
-                        c = [0x8d8c84, 0x9f9d94, 0x7b7a72][(sv * 3) | 0]
-                        if (
-                            !(
-                                hsh(px >> 1, (py - 1) >> 1, 7) <
-                                (t === 4 ? 0.5 : 0.3)
-                            ) &&
-                            (py & 1) === 0
-                        ) {
-                            c = tw(c, 1.15)
-                        }
-                    }
-                }
-                if (isP) {
-                    let pd = Math.hypot(u, v)
-                    if (lk[0] && u > 0) {
-                        pd = Math.min(pd, Math.abs(v))
-                    }
-                    if (lk[1] && u < 0) {
-                        pd = Math.min(pd, Math.abs(v))
-                    }
-                    if (lk[2] && v > 0) {
-                        pd = Math.min(pd, Math.abs(u))
-                    }
-                    if (lk[3] && v < 0) {
-                        pd = Math.min(pd, Math.abs(u))
-                    }
-                    const w = 3.1 + (vnoise(gx * 3.3, gy * 3.3, 10) - 0.5) * 2.6
-                    if (pd < w) {
-                        c =
-                            DIRT[
-                                Math.min(
-                                    2,
-                                    (h * 2.1 +
-                                        vnoise(gx * 4, gy * 4, 11) * 1.2) |
-                                        0
-                                )
-                            ]
-                        if (pd > w - 1) {
-                            c = h < 0.5 ? 0x75633f : mix(c, GRASS[gi], 0.5)
-                        } else if (Math.abs(pd - w * 0.45) < 0.28) {
-                            c = tw(c, 0.86)
-                        } else if (h < 0.025) {
-                            c = 0xcbbf9e
-                        } else if (h > 0.978) {
-                            c = 0x6c5e44
-                        } else if (hsh(px >> 1, py >> 1, 35) < 0.05) {
-                            // Stones trodden into the road, lit on top.
-                            const top = !(
-                                hsh(px >> 1, (py - 1) >> 1, 35) < 0.05
-                            )
-                            c = top && (py & 1) === 0 ? 0xb4ab96 : 0x8f8672
-                        } else if (hsh(px, py - 1, 1) < 0.025) {
-                            c = tw(c, 0.8)
-                        }
-                    }
-                }
-                for (let k = 0; k < 4; k++) {
-                    if (wN[k]) {
-                        const e =
-                            (k === 0
-                                ? 8 - u
-                                : k === 1
-                                  ? 8 + u
-                                  : k === 2
-                                    ? 8 - v
-                                    : 8 + v) +
-                            (vnoise(gx * 5, gy * 5, 3) - 0.5) * 2
-                        if (e < 2.2) {
-                            c = moatN(k)
-                                ? h < 0.4
-                                    ? 0x725a36
-                                    : 0x7f6640
-                                : h < 0.3
-                                  ? 0xb9a872
-                                  : 0xc8b682
-                        } else if (e < 2.7 && !moatN(k)) {
-                            c = mix(c, 0xb9a872, 0.5)
-                        }
-                    }
-                }
-            }
-            gput(px, py, c)
-        }
-    }
-    if (t !== 3 && !isP && !wN[0] && !wN[1] && !wN[2] && !wN[3]) {
-        const n = (hsh(x, y, 20) * 5.2) | 0,
-            lush = vnoise(x / 3, y / 3, 9)
-        for (let k = 0; k < n; k++) {
-            const bx = cx - 18 + ((hsh(x * 7 + k, y, 21) * 36) | 0),
-                by = cy - 6 + ((hsh(x, y * 7 + k, 22) * 12) | 0),
-                kind = hsh(x + k * 3, y - k, 23)
-            if (t === 2 || t === 4 || kind > 0.9) {
-                const g = [0xa9a79c, 0x96948a][k & 1]
-                gput(bx, by, g)
-                gput(bx + 1, by, g)
-                gput(bx + 2, by, tw(g, 0.85))
-                gput(bx, by - 1, tw(g, 1.15))
-                gput(bx + 1, by - 1, tw(g, 1.1))
-                gput(bx, by + 1, 0x3c4a2e)
-                gput(bx + 1, by + 1, 0x3c4a2e)
-                gput(bx + 2, by + 1, 0x3c4a2e)
-            } else if (t === 1 && kind > 0.8) {
-                const cap = kind > 0.87 ? 0x8a3a2a : 0x9a7a52
-                gput(bx, by, 0xd8cfb8)
-                gput(bx, by - 1, 0xd8cfb8)
-                gput(bx - 1, by - 2, cap)
-                gput(bx, by - 2, tw(cap, 1.15))
-                gput(bx + 1, by - 2, tw(cap, 0.8))
-                gput(bx, by - 3, cap)
-                if (kind > 0.87) {
-                    gput(bx, by - 2, 0xe6dcc8)
-                }
-            } else if (t === 0 && kind > 0.62 && lush > 0.45) {
-                const fc = [0xe8e4d4, 0xe2bf4a, 0xc85870, 0x9a6ad0, 0xe08a3c][
-                    (hsh(x, y, 24) * 5) | 0
-                ]
-                for (const [ox, oy] of [
-                    [0, 0],
-                    [4, -1],
-                    [-3, 2],
-                ]) {
-                    gput(bx + ox, by + oy, 0x34652c)
-                    gput(bx + ox, by + oy - 1, 0x3c7230)
-                    gput(bx + ox, by + oy - 2, fc)
-                    gput(bx + ox + 1, by + oy - 2, tw(fc, 0.8))
-                    gput(bx + ox, by + oy - 3, tw(fc, 1.12))
-                }
-            } else {
-                const dk = t === 1 ? 0x2f5a26 : 0x3d7230,
-                    lt = t === 1 ? 0x548a3a : 0x82b955
-                gput(bx, by, dk)
-                gput(bx, by - 1, dk)
-                gput(bx, by - 2, lt)
-                gput(bx - 1, by, dk)
-                gput(bx - 2, by - 1, dk)
-                gput(bx - 2, by - 2, lt)
-                gput(bx + 1, by, dk)
-                gput(bx + 2, by - 1, dk)
-                gput(bx + 3, by - 2, lt)
-                gput(bx + 1, by - 2, dk)
-                gput(bx + 1, by - 3, lt)
-            }
-        }
-    }
-}
 export function drawGroundAll() {
     if (!GV.gcv) {
         return
@@ -618,6 +435,7 @@ export function drawGroundAll() {
     GV.gcv.clear()
     GV.vcv.clear()
     GV.gpend.clear()
+    wanted.length = 0
     GV.groundGen++
     GV.veilGen++
 }
@@ -787,7 +605,7 @@ export function eachChunk(vx0?, vy0?, vx1?, vy1?, fn?) {
 /* Painting a whole chunk takes tens of milliseconds. Chunks painted ahead of
    time (the ones just outside the view, or old ones after a season change)
    are painted in bands, a few per frame, while the old chunk still shows. */
-const BAND = 64
+const BAND = 32
 GV.gpend = new Map()
 function startPend(key?) {
     let p = GV.gpend.get(key)
@@ -847,9 +665,22 @@ function dropPend(px0?, py0?, px1?, py1?) {
    while the frame has time; until it is done, `partial` holds what is
    painted so far, so a wide view fills in over a few frames instead of
    stopping the game. */
+const MISSING = { empty: true, missing: true }
 export function groundChunk(i?, j?, budget?) {
     const key = i + j * CW
     const ch = GV.gcv.get(key)
+    initPool()
+    if (poolOn) {
+        // The workers paint it; until then there is only the sea here.
+        if (!ch || ch.gen !== GV.groundGen) {
+            wanted.push(key)
+        }
+        if (!ch) {
+            return MISSING
+        }
+        ch.used = GV.chunkUse
+        return ch
+    }
     if (!ch) {
         const p = startPend(key)
         let first = !GV.bandDone
@@ -880,6 +711,41 @@ export function trimChunks() {
 }
 export function prefetchChunks(gx0?, gy0?, gx1?, gy1?, budget?) {
     const m = VCH
+    if (poolOn) {
+        // Missing chunks in view first, nearest the middle first, then stale
+        // ones, then the ring just outside the view when it fits in the cache.
+        const mx = ((gx0 + gx1) / 2) * R,
+            my = ((gy0 + gy1) / 2) * R,
+            far = (k?) =>
+                Math.hypot(
+                    ((k % CW) + 0.5) * CH - mx,
+                    (((k / CW) | 0) + 0.5) * CH - my
+                ) + (GV.gcv.has(k) ? 1e6 : 0)
+        wanted.sort((a?, b?) => far(a) - far(b))
+        let n = 0
+        eachChunk(gx0 - m, gy0 - m, gx1 + m, gy1 + m, () => {
+            n++
+        })
+        if (n <= MAXCH) {
+            eachChunk(gx0 - m, gy0 - m, gx1 + m, gy1 + m, (i?, j?) => {
+                const key = i + j * CW
+                if (!GV.gcv.has(key) && !GV.vcv.get(key)?.opaque) {
+                    wanted.push(key)
+                }
+            })
+        }
+        dispatch()
+        return
+    }
+    // When the view and the ring round it do not fit in the cache, painting the
+    // ring would only push out chunks in view, to be painted again: skip it.
+    let n = 0
+    eachChunk(gx0 - m, gy0 - m, gx1 + m, gy1 + m, () => {
+        n++
+    })
+    if (n > MAXCH) {
+        return
+    }
     eachChunk(gx0 - m, gy0 - m, gx1 + m, gy1 + m, (i?, j?) => {
         const key = i + j * CW
         if (GV.gcv.has(key) || GV.gpend.has(key) || GV.gpend.size >= 3) {

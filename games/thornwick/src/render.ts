@@ -254,8 +254,244 @@ export const TOPH = {
     brewery: 26,
     scriptorium: 34,
 }
-export const blit = (c?, img?, x?, y?) =>
-    c.drawImage(img, x, y, img.width / R, img.height / R)
+/*
+ * Sprites are painted at R pixels a unit. At any other zoom, each sprite is
+ * copied once at the scale of the zoom (cleared when the zoom changes), and
+ * drawn on whole pixels: a plain copy is much cheaper than scaling at every
+ * draw. Zooms more than twice the sprite scale draw as before, to keep memory low.
+ */
+const scaled = new Map()
+let scaledK = 0
+/*
+ * The same pixels in a canvas filled with putImageData. Chrome draws such a
+ * canvas about twice as fast as one filled with drawImage, so every cached
+ * copy is settled this way once.
+ */
+export function settled(c?) {
+    const o = document.createElement('canvas')
+    o.width = c.width
+    o.height = c.height
+    o.getContext('2d').putImageData(
+        c.getContext('2d').getImageData(0, 0, c.width, c.height),
+        0,
+        0
+    )
+    return o
+}
+function scaleCopy(img?, f?) {
+    const o = document.createElement('canvas')
+    o.width = Math.max(1, Math.round(img.width * f))
+    o.height = Math.max(1, Math.round(img.height * f))
+    const g = o.getContext('2d')
+    g.imageSmoothingEnabled = f < 1
+    g.imageSmoothingQuality = 'medium'
+    g.drawImage(img, 0, 0, o.width, o.height)
+    return settled(o)
+}
+/* The copy of a sprite at the scale of the zoom. */
+function scaledCopy(img?) {
+    const K = GV.K
+    if (K !== scaledK) {
+        scaled.clear()
+        scaledK = K
+    }
+    let o = scaled.get(img)
+    if (!o) {
+        o = scaleCopy(img, K / R)
+        scaled.set(img, o)
+    }
+    return o
+}
+export function blit(c?, img?, x?, y?) {
+    const K = GV.K
+    if (c !== ctx || K === R || K > 2 * R) {
+        c.drawImage(img, x, y, img.width / R, img.height / R)
+        return
+    }
+    const o = scaledCopy(img)
+    c.drawImage(
+        o,
+        Math.round(x * K) / K,
+        Math.round(y * K) / K,
+        o.width / K,
+        o.height / K
+    )
+}
+/* A unit sprite with its shadow on the ground under it: one draw, not three. */
+const shaded = new Map()
+function withShadow(img?) {
+    let o = shaded.get(img)
+    if (!o) {
+        o = document.createElement('canvas')
+        o.width = img.width
+        o.height = img.height
+        const g = o.getContext('2d'),
+            iw = img.width / R,
+            ih = img.height / R
+        g.scale(R, R)
+        g.fillStyle = 'rgba(10,16,22,.32)'
+        g.fillRect(iw * 0.22, ih - 1.5, iw * 0.56, 1)
+        g.fillRect(iw * 0.32, ih - 0.5, iw * 0.36, 0.5)
+        g.setTransform(1, 0, 0, 1, 0, 0)
+        g.drawImage(img, 0, 0)
+        o = settled(o)
+        shaded.set(img, o)
+    }
+    return o
+}
+/* The props (trees, rocks, ruins) in cells of 8 by 8 tiles, so a frame looks
+   only at the cells in view. Built again when the list of props changes. */
+const PB = 8,
+    PW = Math.ceil(N / PB)
+let pCells = null,
+    pSrc = null,
+    pLen = -1
+function propCells() {
+    const P = GV.props
+    if (P !== pSrc || P.length !== pLen) {
+        pSrc = P
+        pLen = P.length
+        pCells = Array.from({ length: PW * PW }, () => [])
+        for (const p of P) {
+            const cx = Math.min(PW - 1, Math.max(0, (p.x / PB) | 0)),
+                cy = Math.min(PW - 1, Math.max(0, (p.y / PB) | 0))
+            pCells[cx + cy * PW].push(p)
+        }
+    }
+    return pCells
+}
+/*
+ * Zoomed out, most of the view is woods and rocks with no one near: thousands
+ * of props, one draw each. A cell of props with nothing else within 4 tiles
+ * (a quiet cell) is drawn from one image made once, so the props draw in the
+ * same order and nothing can stand between them. A cell keeps its image until
+ * its props change (a signature of them), the season or the zoom changes.
+ */
+const BAKE_M = 4
+const bakes = new Map()
+const busy = new Uint8Array(PW * PW)
+let bakeK = 0,
+    bakeUse = 0,
+    bakeNew = 0
+/* A cheap signature of the props in a cell. */
+function cellSig(l?) {
+    let h = l.length
+    for (const p of l) {
+        h = (h * 31 + p.x * 7 + p.y * 13 + (p.k | 0) * 17 + (p.v | 0)) | 0
+        h =
+            (h +
+                Math.round((p.ox || 0) * 8) +
+                Math.round((p.oy || 0) * 8) * 3) |
+            0
+    }
+    return h
+}
+function propImg(p?, se?) {
+    return p.k === 4
+        ? sprite(p.poi === 'ruins' ? 'ruin' : p.poi, se === 3 ? { sn: 1 } : {})
+        : propSprite(p.k, p.v, se)
+}
+/* Mark the cells near a thing on the map as busy. */
+function markBusy(x?, y?, s?) {
+    const c0 = Math.max(0, ((x - BAKE_M) / PB) | 0),
+        c1 = Math.min(PW - 1, ((x + s + BAKE_M) / PB) | 0),
+        r0 = Math.max(0, ((y - BAKE_M) / PB) | 0),
+        r1 = Math.min(PW - 1, ((y + s + BAKE_M) / PB) | 0)
+    for (let r = r0; r <= r1; r++) {
+        for (let c = c0; c <= c1; c++) {
+            busy[c + r * PW] = 1
+        }
+    }
+}
+/* The image of a quiet cell, made when needed. Null when its props are not
+   all in discovered land. */
+function bakedCell(ci?, l?, se?) {
+    const K = GV.K,
+        sig = cellSig(l),
+        key = ci + ':' + se
+    let b = bakes.get(key)
+    if (b && b.sig === sig) {
+        b.use = bakeUse
+        return b
+    }
+    // A few new images a frame at most: panning brings many cells at once.
+    if (bakeNew >= 4) {
+        return null
+    }
+    for (const p of l) {
+        if (!GV.regs[reg[tileI(p.x, p.y)]].disc) {
+            return null
+        }
+    }
+    bakeNew++
+    // Where each prop goes, in device pixels, as blit would draw it.
+    const items = []
+    let x0 = 1e9,
+        y0 = 1e9,
+        x1 = -1e9,
+        y1 = -1e9
+    for (const p of l) {
+        const sp = propImg(p, se),
+            src = sp.parts[0].cv,
+            o = scaledCopy(src),
+            dx = Math.round((wx(p.x, p.y) - sp.ox / R + p.ox) * K),
+            dy = Math.round((wy(p.x, p.y) - sp.oy / R + p.oy) * K)
+        items.push([p.x + p.y, o, dx, dy])
+        x0 = Math.min(x0, dx)
+        y0 = Math.min(y0, dy)
+        x1 = Math.max(x1, dx + o.width)
+        y1 = Math.max(y1, dy + o.height)
+    }
+    items.sort((a?, q?) => a[0] - q[0])
+    const cv = document.createElement('canvas')
+    cv.width = Math.max(1, x1 - x0)
+    cv.height = Math.max(1, y1 - y0)
+    const g = cv.getContext('2d')
+    for (const it of items) {
+        g.drawImage(it[1], it[2] - x0, it[3] - y0)
+    }
+    b = { cv: settled(cv), x: x0, y: y0, sig, use: bakeUse }
+    bakes.set(key, b)
+    if (bakes.size > 200) {
+        // Forget the images not drawn for longest.
+        const old = [...bakes.entries()].sort((a?, q?) => a[1].use - q[1].use)
+        for (let k = 0; k < old.length - 160; k++) {
+            bakes.delete(old[k][0])
+        }
+    }
+    return b
+}
+/* Each prop in view, cell by cell. */
+function eachProp(vx0?, vy0?, vx1?, vy1?, fn?) {
+    const cells = propCells()
+    eachPropCell(vx0, vy0, vx1, vy1, (ci?) => {
+        const l = cells[ci]
+        for (let k = 0; k < l.length; k++) {
+            fn(l[k])
+        }
+    })
+}
+/* Each cell of props in view, by its index. */
+function eachPropCell(vx0?, vy0?, vx1?, vy1?, fn?) {
+    for (let cy = 0; cy < PW; cy++) {
+        for (let cx = 0; cx < PW; cx++) {
+            const x0 = cx * PB,
+                y0 = cy * PB,
+                x1 = x0 + PB,
+                y1 = y0 + PB
+            // The cell's anchor points in world pixels.
+            if (
+                wx(x1, y0) < vx0 ||
+                wx(x0, y1) > vx1 ||
+                wy(x1, y1) < vy0 ||
+                wy(x0, y0) > vy1
+            ) {
+                continue
+            }
+            fn(cx + cy * PW)
+        }
+    }
+}
 GV.vgCache = null
 export function render() {
     const c = ctx,
@@ -271,7 +507,10 @@ export function render() {
         nf = nightF(),
         se = GV.curSeason < 0 ? 0 : GV.curSeason
     c.setTransform(GV.K, 0, 0, GV.K, tx, ty)
-    c.imageSmoothingEnabled = GV.K < R
+    // Sprites and ground are drawn at their own size (see blit), and smoothing
+    // makes even a plain copy about three times slower. Only a draw that
+    // still scales down turns it on for itself.
+    c.imageSmoothingEnabled = false
     if (!reduceMotion) {
         c.fillStyle = 'rgba(255,255,255,.22)'
         const mx = OX,
@@ -499,10 +738,13 @@ export function render() {
     }
 
     const list = []
-    for (const p of GV.props) {
-        if (vis(p.x, p.y)) {
-            list.push([p.x + p.y, 0, p])
-        }
+    const bake = GV.K < R
+    if (!bake) {
+        eachProp(vx0, vy0, vx1, vy1, (p?) => {
+            if (vis(p.x, p.y)) {
+                list.push([p.x + p.y, 0, p])
+            }
+        })
     }
     for (const b of GV.S.b) {
         if (vis(b.cx, b.cy)) {
@@ -556,6 +798,44 @@ export function render() {
     for (const bn of GV.S.banners) {
         if (vis(bn.x, bn.y)) {
             list.push([bn.x + bn.y + 0.03, 5, bn])
+        }
+    }
+    if (bake) {
+        // Busy cells: near anything that is not a prop. Their props go into the
+        // list one by one; quiet cells are drawn whole, back to front.
+        if (GV.K !== bakeK) {
+            bakes.clear()
+            bakeK = GV.K
+        }
+        bakeUse++
+        bakeNew = 0
+        busy.fill(0)
+        for (const d of list) {
+            const o = d[2]
+            markBusy(o.x + (o.ox || 0), o.y + (o.oy || 0), o.s || 1)
+        }
+        const cells = propCells(),
+            quiet = []
+        eachPropCell(vx0, vy0, vx1, vy1, (ci?) => {
+            const l = cells[ci]
+            if (!l.length) {
+                return
+            }
+            const b = busy[ci] ? null : bakedCell(ci, l, se)
+            if (b) {
+                quiet.push([(ci % PW) + ((ci / PW) | 0), b])
+                return
+            }
+            for (const p of l) {
+                if (vis(p.x, p.y)) {
+                    list.push([p.x + p.y, 0, p])
+                }
+            }
+        })
+        quiet.sort((a?, q?) => a[0] - q[0])
+        const K = GV.K
+        for (const [, b] of quiet) {
+            c.drawImage(b.cv, b.x / K, b.y / K, b.cv.width / K, b.cv.height / K)
         }
     }
     list.sort((a?, b?) => a[0] - b[0])
@@ -675,6 +955,7 @@ export function render() {
             const px = Math.round(wx(gx, gy)) - iw / 2,
                 py = Math.round(wy(gx, gy)) - ih + 1 - lift
             if (!lift && wet(tX, tY)) {
+                c.imageSmoothingEnabled = GV.K < R
                 c.drawImage(
                     img,
                     0,
@@ -686,17 +967,13 @@ export function render() {
                     iw,
                     ih - 5
                 )
+                c.imageSmoothingEnabled = false
                 c.fillStyle = 'rgba(190,220,232,.75)'
                 c.fillRect(px + 2.5, py + ih - 2.5, iw - 5, 0.5)
                 c.fillRect(px + 1.5, py + ih - 2, 1, 0.5)
                 c.fillRect(px + iw - 2.5, py + ih - 2, 1, 0.5)
             } else {
-                if (!lift) {
-                    c.fillStyle = 'rgba(10,16,22,.32)'
-                    c.fillRect(px + iw * 0.22, py + ih - 1.5, iw * 0.56, 1)
-                    c.fillRect(px + iw * 0.32, py + ih - 0.5, iw * 0.36, 0.5)
-                }
-                blit(c, img, px, py)
+                blit(c, lift ? img : withShadow(img), px, py)
             }
             if (u.carry) {
                 const bx = px + (u.face < 0 ? iw - 5.5 : 0.5),

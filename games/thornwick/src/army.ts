@@ -5,8 +5,9 @@
  */
 import { KX, KY, WALLISH } from './config'
 import { toast } from './helpers'
+import { dist, search, siegeCost } from './path'
 import { UNITS } from './people'
-import { regAt, rivById } from './state'
+import { regAt, rivById, tileI } from './state'
 import { GV } from './vars'
 
 export const MAX_BANNERS = 4
@@ -51,6 +52,9 @@ export function plantBanner(x?, y?, moveId?) {
     }
     b.x = x
     b.y = y
+    // A banner moved to a new place starts fresh: it is a siege only if rival
+    // buildings stand there.
+    b.sg = 0
     for (const s of GV.S.sold) {
         if (s.sq === b.id) {
             s.path = null
@@ -62,6 +66,7 @@ export function plantBanner(x?, y?, moveId?) {
 }
 export function removeBanner(id?) {
     GV.S.banners = GV.S.banners.filter((b?) => b.id !== id)
+    flows.delete(id)
     for (const s of GV.S.sold) {
         if (s.sq === id) {
             s.sq = 0
@@ -119,6 +124,9 @@ export function sizeUp(b?) {
         }
     }
     b.siege = bld > 0
+    if (b.siege) {
+        b.sg = 1
+    }
     b.target = near
     // The squad faces the enemy, or the castle, or away from home.
     let dx = b.x - (KX + 0.5),
@@ -135,8 +143,85 @@ export function sizeUp(b?) {
     b.fy = dy / l
     return 1 + foes + Math.min(6, bld)
 }
+/*
+ * A flow field for each banner: the cost from every tile to the banner, so a
+ * squad marching there walks downhill instead of each soldier searching the
+ * whole way. Built again when the banner moves, and every few seconds as walls
+ * fall. At most one is built per tick.
+ */
+const FLOW_AGE = 4
+const flows = new Map()
+export function bannerFlow(id?) {
+    const b = bannerById(id)
+    if (!b) {
+        return null
+    }
+    const t = tileI(b.x, b.y)
+    let f = flows.get(id)
+    const stale = !f || f.t !== t || GV.S.t - f.at > FLOW_AGE
+    if (stale && GV.flowTick !== GV.S.t) {
+        GV.flowTick = GV.S.t
+        // The cheapest step of siegeCost is 0.55 (a road).
+        search([t], -1, siegeCost, true, 0.55)
+        if (!f) {
+            f = { d: new Float32Array(dist.length), t, at: 0 }
+            flows.set(id, f)
+        }
+        f.d.set(dist)
+        f.t = t
+        f.at = GV.S.t
+    }
+    // A field for a banner that has moved leads to the wrong place.
+    return f && f.t === t ? f : null
+}
+/* After a siege, the squad goes for what is left within this many tiles. */
+export const MOP_R = 13
+/* Hostile units or rival buildings left within MOP_R of a place. */
+export function foesNear(x?, y?) {
+    for (const e of GV.S.en) {
+        if (!e.dead && Math.hypot(e.x - x, e.y - y) < MOP_R) {
+            return true
+        }
+    }
+    for (const o of GV.S.b) {
+        if (o.o !== 0 && !o.dead && Math.hypot(o.cx - x, o.cy - y) < MOP_R) {
+            return true
+        }
+    }
+    return false
+}
+/*
+ * A siege banner whose buildings have all fallen is lowered. Its squad attacks
+ * what is left nearby (troops or buildings), then goes home.
+ */
+function endSiege(b?) {
+    const mop = foesNear(b.x, b.y)
+    const sq = GV.S.sold.filter((s?) => s.sq === b.id && !s.dead)
+    removeBanner(b.id)
+    if (mop) {
+        for (const s of sq) {
+            if (s.kind !== 'eng' && s.kind !== 'scout') {
+                s.mop = { x: b.x, y: b.y, t: 120 }
+            }
+        }
+    }
+    toast(
+        'The siege at banner ' +
+            b.id +
+            ' is won and the banner comes down. ' +
+            (mop
+                ? 'The squad attacks what is left nearby, then goes home.'
+                : 'The squad goes home.')
+    )
+}
 /* Shares soldiers out among the banners. Run about once a second. */
 export function assignSquads() {
+    for (const b of GV.S.banners.slice()) {
+        b.wt = sizeUp(b)
+        if (b.sg && !b.siege) {
+            endSiege(b)
+        }
+    }
     const B = GV.S.banners,
         all = GV.S.sold
     if (!B.length) {
@@ -154,7 +239,7 @@ export function assignSquads() {
     const field = all.filter(fieldUnit)
     const weight = {}
     for (const b of B) {
-        weight[b.id] = sizeUp(b)
+        weight[b.id] = b.wt
     }
     const quota = {}
     let left = field.length
@@ -220,6 +305,7 @@ export function assignSquads() {
             continue
         }
         s.sq = b.id
+        s.mop = null
         s.path = null
         s.tg = null
         mem[b.id].push(s)
@@ -247,6 +333,7 @@ export function assignSquads() {
             }
         }
         s.sq = best.id
+        s.mop = null
         s.path = null
     }
     // The captain rides with the largest squad.

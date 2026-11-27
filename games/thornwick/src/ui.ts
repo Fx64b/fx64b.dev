@@ -79,6 +79,7 @@ import {
     huntDown,
     sendScout,
     train,
+    unitOpen,
     warCry,
 } from './people'
 import { chronTick, showBoons } from './realm'
@@ -842,8 +843,8 @@ export function howHTML(b?) {
                 archer: '40 health, 6 damage from 3.4 tiles. Goes up onto stone walls by itself.',
                 xbow: '55 health, 24 damage from 3.9 tiles, but slow to reload. Bolts go through armour: more damage to brutes, rams and champions, where arrows glance off.',
                 knight: '150 health, 13 damage, very fast. Hits hardest at the end of a charge.',
-                pram: '320 health. Slow, but batters rival walls and gates.',
-                pcat: '180 health. Throws stones up to 7.5 tiles for 42 damage. Best against walls and towers.',
+                pram: '320 health. Slow, but batters rival walls and gates. Needs a great keep.',
+                pcat: '180 health. Throws stones up to 7.5 tiles for 42 damage. Best against walls and towers. Needs a great keep.',
                 eng: '60 health, weak in a fight. At a banner on a rival castle, raises a siege tower your soldiers can climb over the wall (16 seconds), or digs a tunnel that brings a stretch of wall down (30 seconds, faster with more engineers).',
             }
             for (const k of d.units) {
@@ -1181,20 +1182,23 @@ export function inspectHTML(sel?) {
         }
     }
     if (d.garrison) {
-        const tk = b.trainKind || d.units[0]
+        const tk = b.trainKind || d.units.find(unitOpen) || d.units[0]
         for (const k of d.units) {
-            const U = UNITS[k]
+            const U = UNITS[k],
+                open = unitOpen(k)
             h +=
                 '<div class="row"><button class="btn' +
-                (tk === k ? ' primary' : '') +
+                (tk === k && open ? ' primary' : '') +
                 '" data-act="train:' +
                 k +
                 '"' +
-                (garr(b) >= d.garrison ? ' disabled' : '') +
+                (garr(b) >= d.garrison || !open ? ' disabled' : '') +
                 '>Train ' +
                 U.name.toLowerCase() +
                 '</button><span class="costs">' +
-                costHTML(U.cost) +
+                (open
+                    ? costHTML(U.cost)
+                    : 'needs a ' + TIERS[U.need - 1].toLowerCase()) +
                 '</span></div>'
         }
         h +=

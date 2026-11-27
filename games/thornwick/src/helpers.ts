@@ -1,4 +1,5 @@
 import { logMsg } from './alerts'
+import { eachNear } from './combat'
 import { $, DEF, KEEP_CAP, N } from './config'
 import {
     bmap,
@@ -86,17 +87,18 @@ export function nearest(list?, x?, y?, maxD?) {
 }
 export function nearestSold(x?, y?, maxD?, incWall?) {
     let best = null,
-        bd = maxD
-    for (const o of GV.S.sold) {
-        if (o.dead || (o.onWall && !incWall)) {
-            continue
+        bd = maxD * maxD
+    // The grid of fighting units (combat.ts) holds every soldier, once a tick.
+    eachNear(x, y, maxD, (o?) => {
+        if (o.side || (o.onWall && !incWall)) {
+            return
         }
-        const d = Math.hypot(o.x - x, o.y - y)
+        const d = (o.x - x) * (o.x - x) + (o.y - y) * (o.y - y)
         if (d < bd) {
             bd = d
             best = o
         }
-    }
+    })
     return best
 }
 export function freeNear(cx?, cy?, rad?) {
