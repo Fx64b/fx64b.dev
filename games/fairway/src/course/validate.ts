@@ -89,8 +89,6 @@ const DRY: ReadonlySet<SurfaceId> = new Set([
     'tee',
 ])
 const NO_TREES: ReadonlySet<SurfaceId> = new Set([
-    'fairway',
-    'firstCut',
     'green',
     'tee',
     'bunker',
@@ -191,6 +189,9 @@ export function validateHole(
     let badTrees = 0
     for (const t of trees) {
         const at = ground.surface(t.x, t.z)
+        // The trunk stands in the rough or beyond. The canopy of a guard
+        // tree may hang over the fairway, but never over a green, a tee
+        // or a hazard.
         let bad = at !== 'rough' && at !== 'ob'
         for (let i = 0; i < 8 && !bad; i++) {
             const s = ground.surface(
@@ -270,7 +271,10 @@ export function validateHole(
         return true
     }
     const safeLanding = (i: number): boolean => {
-        if (!SHORT_GRASS.has(ground.surface(px[i], pz[i]))) {
+        if (
+            !SHORT_GRASS.has(ground.surface(px[i], pz[i])) ||
+            nearTree(px[i], pz[i])
+        ) {
             return false
         }
         let dry = 0

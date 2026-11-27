@@ -42,6 +42,8 @@ const BUNKER = 4
 const GREEN = 5
 const WATER = 6
 const OB = 7
+/** Rough under a guard tree. Becomes ROUGH after the first cut is drawn. */
+const GUARD_PATCH = 8
 
 const TERRAIN_CELL = 1
 const SURFACE_CELL = 0.5
@@ -240,6 +242,11 @@ interface Layout {
     length: number
     /** Stations of the landing zones (the dogleg corners, if any). */
     landing: number[]
+    /**
+     * For each landing zone: the side of the inside of its dogleg, as the
+     * sign of the lateral offset (0 when the hole does not bend there).
+     */
+    inside: number[]
 }
 
 function buildCenterline(
@@ -250,45 +257,69 @@ function buildCenterline(
 ): Layout {
     const pts: Vec2[] = [{ x: 0, z: 0 }]
     const landing: number[] = []
+    const inside: number[] = []
     if (par === 3) {
         // None or a slight curve.
         pts.push(
-            { x: rng.range(-1, 1) * length * 0.035, z: length * 0.5 },
+            { x: rng.range(-1, 1) * length * 0.05, z: length * 0.5 },
             { x: 0, z: length }
         )
     } else {
         const roll = rng.next()
         let doglegs =
             par === 4
-                ? roll < 0.3
+                ? roll < 0.2
                     ? 0
-                    : 1
-                : roll < 0.15
+                    : roll < 0.78
+                      ? 1
+                      : 2
+                : roll < 0.1
                   ? 0
-                  : roll < 0.6
+                  : roll < 0.45
                     ? 1
                     : 2
         const c1 = clamp(rng.range(200, 240), 150, length - 85)
-        const c2 = Math.min(c1 + rng.range(165, 200), length - 90)
-        if (doglegs === 2 && c2 - c1 < 120) {
+        const reach2 = rng.range(165, 200)
+        // Par 5: the second corner is the lay-up zone. Par 4: a second,
+        // gentle bend half way to the green.
+        const c2 =
+            par === 5
+                ? Math.min(c1 + reach2, length - 90)
+                : c1 + (length - c1) * 0.5
+        if (doglegs === 2 && c2 - c1 < (par === 5 ? 120 : 75)) {
             doglegs = 1
         }
-        const maxBend = lerp(24, 38, difficulty)
+        // Some holes turn hard, most turn gently.
+        const strong = rng.chance(0.22 + 0.2 * difficulty)
+        const maxBend = strong
+            ? lerp(44, 60, difficulty)
+            : lerp(24, 40, difficulty)
         const side = rng.sign()
-        const bend1 = side * rng.range(10, maxBend)
-        const bend2 =
-            (rng.chance(0.6) ? -side : side) * rng.range(8, maxBend * 0.7)
-        const radius = rng.range(50, 90)
+        const bend1 = side * rng.range(strong ? 30 : 10, maxBend)
+        const sameWay = rng.chance(0.4)
+        let bend2Size = rng.range(8, par === 4 ? 22 : maxBend * 0.7)
+        if (sameWay) {
+            bend2Size = Math.min(bend2Size, Math.max(8, 70 - Math.abs(bend1)))
+        }
+        const bend2 = (sameWay ? side : -side) * bend2Size
+        // A wide sweep or a tighter corner.
+        const radius = rng.range(45, 130)
         const wobble1 = rng.range(-1, 1)
         const wobble2 = rng.range(-1, 1)
+        // Holes without a corner curve gently instead: a C or an S.
+        const curve = rng.range(0.03, 0.085)
+        inside.push(doglegs >= 1 ? (bend1 > 0 ? -1 : 1) : 0)
+        if (par === 5) {
+            inside.push(doglegs >= 2 ? (bend2 > 0 ? -1 : 1) : 0)
+        }
         landing.push(c1)
         if (par === 5) {
             landing.push(c2)
         }
         if (doglegs === 0) {
             pts.push(
-                { x: wobble1 * length * 0.03, z: length * 0.35 },
-                { x: wobble2 * length * 0.03, z: length * 0.68 },
+                { x: wobble1 * length * curve, z: length * 0.35 },
+                { x: wobble2 * length * curve, z: length * 0.68 },
                 { x: 0, z: length }
             )
         } else {
@@ -336,7 +367,13 @@ function buildCenterline(
         const dz = line[i].z - line[i - 1].z
         station[i] = station[i - 1] + Math.sqrt(dx * dx + dz * dz)
     }
-    return { line, station, length: station[line.length - 1], landing }
+    return {
+        line,
+        station,
+        length: station[line.length - 1],
+        landing,
+        inside,
+    }
 }
 
 /** Chamfer distance (in cells) to the nearest set cell of a mask. */
@@ -434,7 +471,7 @@ export function buildHoleV1(
         wantedLength,
         difficulty
     )
-    const { line, station, length: L, landing } = layout
+    const { line, station, length: L, landing, inside } = layout
     const lastSeg = line.length - 2
     const endTx = line[lastSeg + 1].x - line[lastSeg].x
     const endTz = line[lastSeg + 1].z - line[lastSeg].z
@@ -537,11 +574,22 @@ export function buildHoleV1(
     const halfLanding = (lerp(36, 27, difficulty) * YD) / 2
     const roughWidth = lerp(30, 20, difficulty) + pRng.range(-2, 3)
     const treeBand = lerp(13, 9, difficulty)
-    const fairwayStart =
+    // Where the fairway starts and ends. Par 4 and 5: it starts a short
+    // way in front of the tee box. Both ends may move once the water is
+    // placed (see "Fairway ends" below), so the profiles hold the full
+    // width for now.
+    const TEE_FRONT = 4.5
+    const fRng = stream('fairway')
+    let fairwayStart =
         par === 3
             ? L - gR - pRng.range(22, 40)
-            : lerp(55, 85, difficulty) + pRng.range(-8, 12)
-    const fairwayEnd = L - gR * 0.3
+            : TEE_FRONT + lerp(20, 42, difficulty) + fRng.range(0, 18)
+    let fairwayEnd = L - gR * 0.3
+    // Some fairways come in from one side of the green.
+    const approachOffset =
+        par > 3 && fRng.chance(0.4)
+            ? fRng.sign() * fRng.range(0.35, 0.8) * gR
+            : 0
     const par3Half = pRng.range(9, 12)
     const CAP = 16
     for (let i = 0; i < pLen; i++) {
@@ -559,7 +607,9 @@ export function buildHoleV1(
             for (const lz of landing) {
                 wide -= (halfWide - halfLanding) * bump(sc - lz, 60)
             }
-            wide = Math.max(wide, halfLanding)
+            // Slow changes in width along the hole.
+            wide *= 1 + 0.16 * noiseP(sc / 120, 27.7)
+            wide = Math.max(wide, halfLanding * 0.95)
             // The fairway wanders a little off the centre line, and each
             // edge has its own wobble.
             const drift = 3.2 * noiseP(sc / 95, 15.5)
@@ -575,18 +625,13 @@ export function buildHoleV1(
         const neck = smoothstep(L - 60, L - gR - 4, sc)
         left = lerp(left, Math.min(left, gR * 0.7), neck)
         right = lerp(right, Math.min(right, gR * 0.7), neck)
-        corr[i] = lerp(9, Math.max(left, right), smoothstep(5, 70, sc))
+        const shift = approachOffset * smoothstep(L - 120, L - 25, sc)
+        left = Math.max(left + shift, 2.5)
+        right = Math.max(right - shift, 2.5)
+        corr[i] = lerp(9, Math.max(left, right), smoothstep(0, 30, sc))
 
-        let cap = 0
-        if (s >= fairwayStart && s <= fairwayEnd) {
-            cap = 1
-            if (s < fairwayStart + CAP) {
-                const u = 1 - (s - fairwayStart) / CAP
-                cap = Math.sqrt(1 - u * u)
-            }
-        }
-        fwL[i] = left * cap
-        fwR[i] = right * cap
+        fwL[i] = left
+        fwR[i] = right
 
         const nearGreen = (gR + 26) * smoothstep(L - 80, L - 30, sc)
         const base = (par === 3 ? lerp(18, 14, difficulty) : wide) + roughWidth
@@ -748,8 +793,11 @@ export function buildHoleV1(
     const hillAmp = tRng.range(1.2, 2.6)
     const hillAmp2 = tRng.range(0.3, 0.7)
     const tiltX = tRng.range(-0.008, 0.008)
-    const tiltZ = tRng.range(-0.012, 0.012)
     const moundAmp = tRng.range(0.35, 0.6)
+    // Most holes are fairly level. Some climb or fall all the way.
+    const gentleTilt = tRng.range(-0.012, 0.012)
+    const steepTilt = tRng.sign() * tRng.range(0.016, 0.032)
+    const tiltZ = tRng.chance(0.3) ? steepTilt : gentleTilt
     function macroRaw(x: number, z: number): number {
         return (
             hillAmp * noiseA(x / 210, z / 210) +
@@ -762,6 +810,9 @@ export function buildHoleV1(
 
     // ---- Water -----------------------------------------------------------
     const wRng = stream('water')
+    let creekCandidate = -1
+    /** Station of a creek across the hole, or -1. */
+    let creekStation = -1
     const waters: WaterSpec[] = []
     const hwAt = (s: number, side: number): number =>
         par === 3 ? par3Half : prof(side > 0 ? fwL : fwR, s)
@@ -816,10 +867,13 @@ export function buildHoleV1(
                 }
                 pond(cx, cz, r)
             } else {
-                // A pond beside the landing zone.
-                const side = wRng.sign()
-                const s0 = landing[0] + wRng.range(-25, 40)
-                const n = wRng.int(3, 4)
+                // A pond beside the landing zone. On a dogleg it is
+                // usually a lake inside the corner.
+                const anySide = wRng.sign()
+                const corner = inside[0] !== 0 && wRng.chance(0.7)
+                const side = corner ? inside[0] : anySide
+                const s0 = landing[0] + wRng.range(-25, 40) - (corner ? 15 : 0)
+                const n = wRng.int(3, 4) + (corner ? 1 : 0)
                 const cx: number[] = []
                 const cz: number[] = []
                 const r: number[] = []
@@ -858,7 +912,12 @@ export function buildHoleV1(
             }
             if (options.length > 0) {
                 const sc = options[0]
-                const slant = wRng.range(-0.25, 0.25)
+                creekCandidate = sc
+                // Mostly straight across, sometimes on a clear diagonal.
+                const gentle = wRng.range(-0.25, 0.25)
+                const slant = wRng.chance(0.35)
+                    ? wRng.sign() * wRng.range(0.35, 0.65)
+                    : gentle
                 const halfBase = wRng.range(2.2, 3.4)
                 const px: number[] = []
                 const pz: number[] = []
@@ -947,6 +1006,7 @@ export function buildHoleV1(
                 ok = false
             }
             if (ok) {
+                creekStation = creekCandidate
                 // The basin is the lowest ground near the water, so a pond
                 // always sits in a hollow.
                 const skirt = 26
@@ -1028,6 +1088,68 @@ export function buildHoleV1(
         return d
     }
 
+    // ---- Fairway ends ----------------------------------------------------
+    if (par > 3) {
+        const frontEdge = greenRadius(-playX, -playZ)
+        const stopRoll = fRng.next()
+        const stopGap = fRng.range(10, 26)
+        if (creekStation >= 0 && creekStation < landing[0]) {
+            // A forced carry off the tee: the fairway starts past the creek.
+            fairwayStart = creekStation + 12
+        } else if (creekStation >= 0 && stopRoll < 0.7) {
+            // A carry into the green: the fairway stops short of the creek.
+            fairwayEnd = creekStation - 10
+        } else if (stopRoll < 0.12 + 0.4 * difficulty) {
+            // The fairway stops short and leaves rough in front of the green.
+            fairwayEnd = L - frontEdge - FIRST_CUT_WIDTH - stopGap
+        }
+    }
+    // Some par 5s have a split fairway: a carry over rough between the
+    // drive zone and the lay-up zone.
+    let splitFrom = -1
+    let splitTo = -1
+    {
+        const splitRoll = fRng.next()
+        const splitAt = fRng.range(-15, 15)
+        const splitHalf = fRng.range(10, 17)
+        if (
+            par === 5 &&
+            creekStation < 0 &&
+            splitRoll < 0.15 + 0.3 * difficulty
+        ) {
+            const mid = (landing[0] + landing[1]) / 2 + splitAt
+            splitFrom = mid - splitHalf
+            splitTo = mid + splitHalf
+        }
+    }
+    for (let i = 0; i < pLen; i++) {
+        const s = i - PAD
+        let cap = 0
+        if (s >= fairwayStart && s <= fairwayEnd) {
+            cap = 1
+            if (s < fairwayStart + CAP) {
+                const u = 1 - (s - fairwayStart) / CAP
+                cap = Math.sqrt(1 - u * u)
+            }
+            if (par > 3 && s > fairwayEnd - CAP) {
+                const u = 1 - (fairwayEnd - s) / CAP
+                cap = Math.min(cap, Math.sqrt(1 - u * u))
+            }
+            if (splitFrom >= 0) {
+                // Distance outside the gap, with rounded ends on both sides.
+                const outside = s < splitFrom ? splitFrom - s : s - splitTo
+                if (outside <= 0) {
+                    cap = 0
+                } else if (outside < 12) {
+                    const u = 1 - outside / 12
+                    cap = Math.min(cap, Math.sqrt(1 - u * u))
+                }
+            }
+        }
+        fwL[i] *= cap
+        fwR[i] *= cap
+    }
+
     // ---- Bunkers ---------------------------------------------------------
     const bRng = stream('bunkers')
     const bunkers: BunkerSpec[] = []
@@ -1037,7 +1159,8 @@ export function buildHoleV1(
         r: number[],
         greenside: boolean,
         ux: number,
-        uz: number
+        uz: number,
+        style: 'normal' | 'pot' | 'waste' = 'normal'
     ): boolean {
         const blob = makeBlob(cx, cz, r, 2.5)
         for (let i = 0; i < cx.length; i++) {
@@ -1071,14 +1194,25 @@ export function buildHoleV1(
             ...blob,
             cx: blob.ox,
             cz: blob.oz,
-            depth: greenside
-                ? bRng.range(0.4, 0.6) + 0.2 * difficulty
-                : bRng.range(0.3, 0.55),
-            lip: bRng.range(0.2, 0.42),
+            depth:
+                style === 'waste'
+                    ? 0.32
+                    : style === 'pot'
+                      ? bRng.range(0.75, 0.95)
+                      : greenside
+                        ? bRng.range(0.4, 0.6) + 0.2 * difficulty
+                        : bRng.range(0.3, 0.55),
+            lip: style === 'waste' ? 0.05 : bRng.range(0.2, 0.42),
             ux: ux / ul,
             uz: uz / ul,
             greenside,
-            outline: blobOutline(blob, blob.ox, blob.oz, blob.reach, 28),
+            outline: blobOutline(
+                blob,
+                blob.ox,
+                blob.oz,
+                blob.reach,
+                style === 'waste' ? 44 : 28
+            ),
         })
         return true
     }
@@ -1171,6 +1305,134 @@ export function buildHoleV1(
                     side = -side as 1 | -1
                 }
             }
+
+            // Extra sand on some holes, more often on hard ones. Every
+            // number is drawn even when a feature is not used, so one
+            // feature does not shift the next.
+            const lastZone = landing[landing.length - 1]
+            const wasteRoll = bRng.next()
+            const wasteSide = bRng.sign()
+            const wasteStart = landing[0] + bRng.range(-55, -15)
+            const crossRoll = bRng.next()
+            const crossAt = L - gR - bRng.range(45, 75)
+            const crossLean = bRng.range(-8, 8)
+            const potRoll = bRng.next()
+            const potAt = lastZone + bRng.range(-25, 10)
+            const potSide = bRng.range(-4, 4)
+
+            // A waste area: a long, shallow strip of sand along one side.
+            if (wasteRoll < 0.1 + 0.22 * difficulty) {
+                const cx: number[] = []
+                const cz: number[] = []
+                const r: number[] = []
+                let sAt = Math.max(wasteStart, fairwayStart + 25)
+                for (let i = 0; i < 5; i++) {
+                    const ri = bRng.range(4.2, 6)
+                    const p = linePoint(
+                        sAt,
+                        wasteSide * (hwAt(sAt, wasteSide) + 2 + ri)
+                    )
+                    cx.push(p.x)
+                    cz.push(p.z)
+                    r.push(ri)
+                    sAt += ri * 0.9
+                }
+                const t = lineTangent(sAt)
+                addBunker(cx, cz, r, false, t.x, t.z, 'waste')
+            }
+            // Cross bunkers: a staggered row across the approach.
+            if (
+                crossRoll < 0.08 + 0.3 * difficulty &&
+                crossAt > lastZone + 45 &&
+                crossAt < fairwayEnd - 15
+            ) {
+                const t = lineTangent(crossAt)
+                for (let k = -1; k <= 1; k++) {
+                    const sAt = crossAt + k * crossLean
+                    const half = Math.min(hwAt(sAt, 1), hwAt(sAt, -1)) * 0.72
+                    const cx: number[] = []
+                    const cz: number[] = []
+                    const r: number[] = []
+                    for (let i = 0; i < 2; i++) {
+                        const ri = bRng.range(2.8, 3.8)
+                        const p = linePoint(
+                            sAt + bRng.range(-1, 1),
+                            k * half + (i - 0.5) * ri * 1.1
+                        )
+                        cx.push(p.x)
+                        cz.push(p.z)
+                        r.push(ri)
+                    }
+                    // Leave the middle open on easier holes.
+                    if (k !== 0 || difficulty > 0.6) {
+                        addBunker(cx, cz, r, false, t.x, t.z)
+                    }
+                }
+            }
+            // A pot bunker in the middle of the lay-up zone of a par 5.
+            if (par === 5 && potRoll < 0.12 + 0.3 * difficulty) {
+                const p = linePoint(potAt, potSide)
+                const t = lineTangent(potAt)
+                addBunker(
+                    [p.x],
+                    [p.z],
+                    [bRng.range(2.4, 3.1)],
+                    false,
+                    t.x,
+                    t.z,
+                    'pot'
+                )
+            }
+        }
+    }
+
+    // ---- Guard trees -----------------------------------------------------
+    // A single tree or a small group at the edge of the fairway, on the
+    // inside of a dogleg: the classic way to guard a corner. Each stands
+    // on its own patch of rough.
+    const gvRng = stream('guards')
+    const guards: Omit<Tree, 'y'>[] = []
+    for (let k = 0; k < landing.length; k++) {
+        const roll = gvRng.next()
+        const sAt = landing[k] + gvRng.range(-30, 5)
+        const anySide = gvRng.sign()
+        const count = gvRng.int(1, 3)
+        const bend = inside[k] !== 0
+        if (
+            roll >= (bend ? 0.3 + 0.35 * difficulty : 0.06 + 0.12 * difficulty)
+        ) {
+            continue
+        }
+        const side = bend ? inside[k] : anySide
+        for (let i = 0; i < count; i++) {
+            const size = gvRng.next()
+            const pine = gvRng.chance(0.3)
+            const along = sAt + i * gvRng.range(5, 8)
+            const edge = hwAt(along, side)
+            // The first tree leans into the fairway, the others stand
+            // behind it. None comes close to the centre line.
+            const d = Math.max(edge - gvRng.range(-1, 4) + i * 3.5, 11.5)
+            const p = linePoint(along, side * d)
+            const radius = pine ? lerp(2.2, 3.2, size) : lerp(3.2, 4.8, size)
+            let ok =
+                edge > 6 &&
+                waterSd(p.x, p.z) > radius + 4 &&
+                greenSd(p.x, p.z) > 30 &&
+                along > fairwayStart + 30
+            for (const b of bunkers) {
+                if (b.sd(p.x, p.z) < radius + 2.5) {
+                    ok = false
+                }
+            }
+            if (ok) {
+                guards.push({
+                    x: p.x,
+                    z: p.z,
+                    height: pine ? lerp(13, 19, size) : lerp(10, 15, size),
+                    radius,
+                    kind: pine ? 'pine' : 'broadleaf',
+                })
+            }
         }
     }
 
@@ -1196,8 +1458,21 @@ export function buildHoleV1(
     const featZ = playX * sin(featTurn) + playZ * cos(featTurn)
     const featOffset = gRng.range(-3, 3)
     const featHeight =
-        feature === 'tier' ? gRng.range(0.1, 0.17) : gRng.range(0.06, 0.1)
-    const greenRaise = gRng.range(0.25, 0.7)
+        feature === 'tier' ? gRng.range(0.08, 0.14) : gRng.range(0.06, 0.1)
+    // Most greens sit a little proud of the ground. Some are clearly
+    // raised, and a few (never next to water) lie in a hollow.
+    const raiseRoll = gRng.next()
+    const raiseUsual = gRng.range(0.25, 0.7)
+    const raiseHigh = gRng.range(1.0, 2.0)
+    const raiseLow = -gRng.range(0.3, 0.7)
+    const greenRaise =
+        raiseRoll < 0.2
+            ? raiseHigh
+            : raiseRoll < 0.3 && waters.length === 0
+              ? raiseLow
+              : raiseUsual
+    // A higher green gets a longer bank, so the slope stays walkable.
+    const greenSkirt = 13 + Math.max(0, greenRaise - 0.7) * 6
     let greenBase = 0
     let greenOn = false
     function greenSurface(x: number, z: number): number {
@@ -1218,7 +1493,7 @@ export function buildHoleV1(
         return h
     }
     const TEE_RAISE = 0.4
-    const greenReach2 = (gMaxR + 16) * (gMaxR + 16)
+    const greenReach2 = (gMaxR + greenSkirt + 3) * (gMaxR + greenSkirt + 3)
 
     function heightAt(x: number, z: number, carve: boolean): number {
         lookup(x, z)
@@ -1274,7 +1549,7 @@ export function buildHoleV1(
             const dz = z - gz
             if (dx * dx + dz * dz < greenReach2) {
                 gd = greenSd(x, z)
-                const w = 1 - smoothstep(1.5, 13, gd)
+                const w = 1 - smoothstep(1.5, greenSkirt, gd)
                 if (w > 0) {
                     h += (greenSurface(x, z) - h) * w
                 }
@@ -1520,12 +1795,26 @@ export function buildHoleV1(
                         if (out) {
                             continue
                         }
-                        data[i] =
+                        let id =
                             aD < prof(D > 0 ? fwL : fwR, S) &&
                             wsd > 3 &&
                             bsd > 1.2
                                 ? FAIRWAY
                                 : ROUGH
+                        // Fairway or rough: the patch also keeps the
+                        // first cut away from the trunk.
+                        {
+                            for (let k = 0; k < guards.length; k++) {
+                                const t = guards[k]
+                                const reach = t.radius + 2.2
+                                const tx = x - t.x
+                                const tz = z - t.z
+                                if (tx * tx + tz * tz < reach * reach) {
+                                    id = GUARD_PATCH
+                                }
+                            }
+                        }
+                        data[i] = id
                     }
                 }
             }
@@ -1589,7 +1878,11 @@ export function buildHoleV1(
         for (let r = 0; r < sRows; r++) {
             const cr = Math.floor(r / cStep) * cCols
             for (let c = 0; c < sCols; c++) {
-                const id = data[r * sCols + c]
+                let id = data[r * sCols + c]
+                if (id === GUARD_PATCH) {
+                    id = ROUGH
+                    data[r * sCols + c] = ROUGH
+                }
                 if (id !== ROUGH && id !== OB) {
                     clearMask[cr + Math.floor(c / cStep)] = 1
                 }
@@ -1681,6 +1974,18 @@ export function buildHoleV1(
         }
     }
     plantTrees()
+    // No other tree may crowd a guard tree.
+    for (const t of guards) {
+        for (let i = treeSpots.length - 1; i >= 0; i--) {
+            const dx = treeSpots[i].x - t.x
+            const dz = treeSpots[i].z - t.z
+            const reach = treeSpots[i].radius + t.radius
+            if (dx * dx + dz * dz < reach * reach) {
+                treeSpots.splice(i, 1)
+            }
+        }
+    }
+    treeSpots.push(...guards)
 
     // ---- Conditions ------------------------------------------------------
     const cRng = stream('conditions')
