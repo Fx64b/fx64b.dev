@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
+        <title>Fairway renderer (dev)</title>
+        <style>
+            html,
+            body {
+                margin: 0;
+                height: 100%;
+                overflow: hidden;
+                background: #111;
+                font:
+                    12px/1.4 system-ui,
+                    sans-serif;
+            }
+            canvas {
+                display: block;
+                width: 100vw;
+                height: 100vh;
+            }
+            #bar {
+                position: fixed;
+                left: 8px;
+                top: 8px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+                max-width: calc(100vw - 16px);
+            }
+            #bar button {
+                font: inherit;
+                padding: 4px 8px;
+                border: 0;
+                border-radius: 4px;
+                background: rgba(20, 24, 20, 0.6);
+                color: #fff;
+                cursor: pointer;
+            }
+            #hud {
+                position: fixed;
+                left: 8px;
+                bottom: 8px;
+                padding: 3px 6px;
+                border-radius: 4px;
+                background: rgba(20, 24, 20, 0.6);
+                color: #fff;
+            }
+            body.clean #bar,
+            body.clean #hud {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="view"></canvas>
+        <div id="bar">
+            <button data-view="tee">1 Tee</button>
+            <button data-view="fairway">2 Fairway</button>
+            <button data-view="approach">3 Approach</button>
+            <button data-view="flight">4 Flight</button>
+            <button data-view="overview">5 Overview</button>
+            <button data-view="green">6 Green</button>
+            <button id="btn-glide">G Glide</button>
+            <button id="btn-quality">Q Quality</button>
+        </div>
+        <div id="hud"></div>
+        <script type="module" src="./src/render/dev/main.ts"></script>
+    </body>
+</html>
