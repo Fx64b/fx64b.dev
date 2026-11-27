@@ -122,8 +122,7 @@ export function surfaceTable(
     return { ...FIXED, green: surfaceParams('green', env) }
 }
 
-// SPEC 5.6. The bunker value is for a fairway bunker. The rule "greenside
-// bunker: wedge only" is a club choice and belongs to the game logic.
+// Lie effects of SPEC 5.6. Fairway and greenside bunkers play the same.
 const LIES: Record<SurfaceId, LieEffect> = {
     tee: { distance: 1, spin: 1 },
     fairway: { distance: 1, spin: 1 },

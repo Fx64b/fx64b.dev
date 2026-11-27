@@ -19,7 +19,7 @@ export interface Music {
 }
 
 /** Overall level of the music voices. */
-export const MUSIC_TRIM = 0.2
+const MUSIC_TRIM = 0.2
 
 /** How far ahead of the audio clock a bar is scheduled, in s. */
 const LOOKAHEAD_S = 0.8

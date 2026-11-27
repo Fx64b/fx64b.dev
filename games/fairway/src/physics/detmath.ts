@@ -6,7 +6,6 @@
 // + - * / and Math.sqrt, which IEEE 754 defines exactly. These versions are
 // accurate to about 1e-15, which is far more than the physics needs.
 
-export const PI = 3.141592653589793
 const TWO_PI = 6.283185307179586
 const HALF_PI = 1.5707963267948966
 const LN2 = 0.6931471805599453

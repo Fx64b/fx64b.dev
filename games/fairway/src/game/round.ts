@@ -27,6 +27,13 @@ export const MIN_POWER = 0.03
  */
 export const CLUB_LENGTH = 1.14
 
+/** Aim at the pin when a full shot carries at least this share of it. */
+const PIN_REACH = 1.05
+/** Suggest a club whose full carry is at least this share of the pin. */
+const CLUB_REACH = 0.97
+/** From the first cut, suggest the putter this close to the pin, in m. */
+const FRINGE_PUTT_DISTANCE = 12
+
 /** One played shot: everything needed to replay it. */
 export interface ShotRecord {
     club: ClubId
@@ -112,7 +119,7 @@ export function headingToPin(round: Round): number {
  */
 export function defaultAim(round: Round, club: ClubId): number {
     const reach = club === 'putter' ? Infinity : nominalCarry(club)
-    if (distanceToPin(round) <= reach * 1.05) {
+    if (distanceToPin(round) <= reach * PIN_REACH) {
         return headingToPin(round)
     }
     const line = round.hole.centerline
@@ -147,12 +154,12 @@ export function suggestClub(round: Round): ClubId {
     if (round.lie === 'green') {
         return 'putter'
     }
-    if (round.lie === 'firstCut' && d < 12) {
+    if (round.lie === 'firstCut' && d < FRINGE_PUTT_DISTANCE) {
         return 'putter'
     }
     const full = CLUB_ORDER.filter((c) => c !== 'putter')
     for (let i = full.length - 1; i >= 0; i--) {
-        if (nominalCarry(full[i]) >= d * 0.97) {
+        if (nominalCarry(full[i]) >= d * CLUB_REACH) {
             return full[i]
         }
     }

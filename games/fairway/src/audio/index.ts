@@ -108,7 +108,7 @@ export const MUSIC_ROUND = 0.5
 export const MUSIC_MENU = 0.7
 export const MUSIC_FLIGHT_DUCK = 0.5
 /** How much of the music goes to the room reverb. */
-export const MUSIC_ROOM = 2
+const MUSIC_ROOM = 2
 /** The music fades in slowly: time constant in s. */
 const MUSIC_FADE_S = 2.5
 const FADE_IN_S = 0.6

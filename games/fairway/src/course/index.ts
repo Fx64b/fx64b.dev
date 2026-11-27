@@ -4,6 +4,8 @@ export { createRng, hashString, sfc32 } from './prng'
 export type { Rng } from './prng'
 export {
     LAUNCH_DATE,
+    addDays,
+    archiveDates,
     dailySeed,
     holeNumberFor,
     parseDateSeed,
@@ -22,11 +24,5 @@ export {
 export type { GenerateOptions, HoleGenerator, ScheduleEntry } from './versions'
 export { GREEN_SEAM, createGround } from './ground'
 export type { Ground } from './ground'
-export {
-    CLUB_CARRY,
-    holeLength,
-    pointOnLine,
-    polylineLength,
-    validateHole,
-} from './validate'
+export { CLUB_CARRY, holeLength, validateHole } from './validate'
 export type { ValidationResult } from './validate'

@@ -1,4 +1,5 @@
 // Physical constants of the simulation (SPEC 5.1).
+import { ftToM } from './units'
 
 /** Fixed time step in s. */
 export const DT = 1 / 240
@@ -36,4 +37,4 @@ export const PUTTER_REFERENCE_STIMP = 10
  */
 export const PUTTER_MAX_SPEED =
     STIMP_RELEASE_SPEED *
-    Math.sqrt(PUTTER_FULL_ROLL / (PUTTER_REFERENCE_STIMP * 0.3048))
+    Math.sqrt(PUTTER_FULL_ROLL / ftToM(PUTTER_REFERENCE_STIMP))

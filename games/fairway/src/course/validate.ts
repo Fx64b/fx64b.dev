@@ -5,7 +5,12 @@ import { SURFACE_IDS } from '../shared/hole'
 import { createGround } from './ground'
 import type { Ground } from './ground'
 
-/** Nominal full carry of each club in metres, longest first. */
+/**
+ * Nominal full carry of each club in metres, longest first (the target
+ * carries of physics/clubs.ts). A copy on purpose: the frozen generator
+ * versions validate with it, so a later change to the club tuning must not
+ * change archive holes.
+ */
 export const CLUB_CARRY = [215, 195, 165, 145, 120, 105, 75] as const
 
 /** Allowance for roll after a full shot that lands on short grass. */
@@ -22,7 +27,7 @@ export interface ValidationResult {
 }
 
 /** Length of a polyline. */
-export function polylineLength(line: readonly Vec2[]): number {
+function polylineLength(line: readonly Vec2[]): number {
     let total = 0
     for (let i = 1; i < line.length; i++) {
         const dx = line[i].x - line[i - 1].x
@@ -38,7 +43,7 @@ export function holeLength(hole: HoleData): number {
 }
 
 /** Point at distance s along a polyline (clamped to its ends). */
-export function pointOnLine(line: readonly Vec2[], s: number): Vec2 {
+function pointOnLine(line: readonly Vec2[], s: number): Vec2 {
     if (s <= 0) {
         return { x: line[0].x, z: line[0].z }
     }
