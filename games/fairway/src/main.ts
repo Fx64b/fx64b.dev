@@ -15,11 +15,17 @@ import {
     distanceToPin,
     headingToPin,
     playShot,
+    simulate,
     suggestClub,
 } from './game/round'
 import { createStorage } from './game/storage'
 import { createInput } from './input'
-import { CLUB_ORDER, type ClubId, nominalCarry } from './physics'
+import {
+    CLUB_ORDER,
+    type ClubId,
+    PUTTER_FULL_ROLL,
+    nominalCarry,
+} from './physics'
 import type { TrajectorySample } from './physics'
 import { createRenderer } from './render'
 import type { HoleData, Vec3 } from './shared/hole'
@@ -108,6 +114,7 @@ function showTitle(): void {
     hud.setVisible(false)
     renderer.setBall(hole!.tee, false)
     renderer.setAimRing(null)
+    renderer.setPathPreview(null)
     renderer.cameraOverview()
     const done = storage.result(today)
     screens.showTitle({
@@ -225,7 +232,10 @@ function club(): ClubId {
 function setClub(index: number): void {
     clubIndex = Math.max(0, Math.min(CLUB_ORDER.length - 1, index))
     const id = club()
-    hud.setClub(clubIndex, id === 'putter' ? null : nominalCarry(id))
+    hud.setClub(
+        clubIndex,
+        id === 'putter' ? PUTTER_FULL_ROLL : nominalCarry(id)
+    )
     refreshAim()
 }
 
@@ -247,6 +257,52 @@ function refreshAim(): void {
     }
     const c = r.hole.conditions
     hud.setWind(c.windSpeed, c.windDirection - aim)
+    previewPower = -1
+    refreshPreview()
+}
+
+// --- Path preview -----------------------------------------------------------
+
+/** Share of the flight (or of the roll, for a putt) that the dots show. */
+const PREVIEW_SHARE = 0.1
+let previewPower = -1
+
+/**
+ * Faint dots along the first part of the predicted path: for the power
+ * being charged, else for full power. It updates as the power rises.
+ */
+function refreshPreview(): void {
+    if (!round || phase.name !== 'aim') {
+        renderer.setPathPreview(null)
+        return
+    }
+    const power = input.isCharging() ? Math.max(input.power(), 0.04) : 1
+    if (Math.abs(power - previewPower) < 0.005) {
+        return
+    }
+    previewPower = power
+    const id = club()
+    const result = simulate(round, { club: id, aim, power })
+    const rolling = id === 'putter'
+    const want = PREVIEW_SHARE * (rolling ? result.total : result.carry)
+    const start = result.samples[0]
+    const points: Vec3[] = []
+    for (const smp of result.samples) {
+        const d = Math.hypot(smp.x - start.x, smp.z - start.z)
+        if (points.length > 0 && d > want) {
+            const prev = points[points.length - 1]
+            const pd = Math.hypot(prev.x - start.x, prev.z - start.z)
+            const f = d > pd ? (want - pd) / (d - pd) : 0
+            points.push({
+                x: prev.x + (smp.x - prev.x) * f,
+                y: prev.y + (smp.y - prev.y) * f,
+                z: prev.z + (smp.z - prev.z) * f,
+            })
+            break
+        }
+        points.push({ x: smp.x, y: smp.y, z: smp.z })
+    }
+    renderer.setPathPreview(points.length > 1 ? points : null)
 }
 
 input.on('aim', (d) => {
@@ -268,6 +324,10 @@ hud.onClubSelect((i) => {
 })
 hud.onHintDismiss(() => storage.dismissHint())
 input.on('swingStart', () => hud.showHint(false))
+input.on('swingCancel', () => {
+    previewPower = -1
+    refreshPreview()
+})
 input.on('swingRelease', (power) => {
     if (phase.name !== 'aim' || !round || power < MIN_POWER) {
         return
@@ -278,6 +338,7 @@ input.on('swingRelease', (power) => {
     input.setSkippable(true)
     hud.showSkip(true)
     renderer.setAimRing(null)
+    renderer.setPathPreview(null)
     phase = { name: 'flight', samples, duration, t: 0, outcome }
 })
 
@@ -385,6 +446,9 @@ function finishRound(): void {
 function step(dt: number): void {
     input.update(dt)
     hud.setPower(input.power(), input.isCharging())
+    if (phase.name === 'aim') {
+        refreshPreview()
+    }
     switch (phase.name) {
         case 'flight': {
             phase.t = Math.min(phase.duration, phase.t + dt)
@@ -484,6 +548,7 @@ Object.assign(window, {
             input.setSkippable(true)
             hud.showSkip(true)
             renderer.setAimRing(null)
+            renderer.setPathPreview(null)
             phase = {
                 name: 'flight',
                 samples: outcome.result.samples,

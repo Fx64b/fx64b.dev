@@ -6,12 +6,13 @@
 // - Club: Q/E step, 1-8 pick, or the HUD club bar (that one is the HUD's).
 // - Swing: hold Space or the swing pad, release to hit. Power rises linearly
 //   from 0 to 1 over POWER_RAMP_S and is then capped.
-// - Skip: while skippable (ball in flight), any key or a tap skips.
+// - Skip: while skippable (ball in flight), Enter skips. The HUD has a Skip
+//   button. A click or tap on the view does not skip.
 //
 // A window blur, a hidden page or a pointercancel cancels a swing; it never
 // hits a shot.
 
-export const POWER_RAMP_S = 1.1
+export const POWER_RAMP_S = 2.2
 
 /** Power for a hold time in seconds: linear over POWER_RAMP_S, capped at 1. */
 export function powerForHold(seconds: number): number {
@@ -44,7 +45,7 @@ export interface Input {
      *  open. Turning it off cancels a swing in progress. */
     setEnabled(v: boolean): void
     isEnabled(): boolean
-    /** While true, any key or a tap on the canvas or pad emits 'skip'. */
+    /** While true, Enter emits 'skip'. Clicks and taps do not. */
     setSkippable(v: boolean): void
     /** Cancel a swing in progress (emits 'swingCancel'). */
     cancelSwing(): void
@@ -93,15 +94,6 @@ type SwingSource = { kind: 'key' } | { kind: 'pointer'; id: number }
 
 const AIM_LEFT = new Set(['KeyA', 'ArrowLeft'])
 const AIM_RIGHT = new Set(['KeyD', 'ArrowRight'])
-const MODIFIER_KEYS = new Set([
-    'Shift',
-    'Control',
-    'Alt',
-    'Meta',
-    'CapsLock',
-    'Tab',
-    'OS',
-])
 
 function keyCode(e: KeyboardEvent): string {
     if (e.code) {
@@ -237,13 +229,11 @@ export function createInput(opts: InputOptions): Input {
         }
 
         if (skippable && !enabled) {
-            if (MODIFIER_KEYS.has(e.key)) {
-                return
-            }
             if (code === 'Space' || code.startsWith('Arrow')) {
                 e.preventDefault()
             }
-            if (!e.repeat) {
+            if (!e.repeat && (code === 'Enter' || code === 'NumpadEnter')) {
+                e.preventDefault()
                 emit('skip')
             }
             return
@@ -327,10 +317,6 @@ export function createInput(opts: InputOptions): Input {
             return
         }
         e.preventDefault()
-        if (skippable && !enabled) {
-            emit('skip')
-            return
-        }
         if (!enabled || swing) {
             return
         }
@@ -361,11 +347,6 @@ export function createInput(opts: InputOptions): Input {
     function onCanvasDown(ev: Event): void {
         const e = ev as PointerEvent
         if (e.button > 0) {
-            return
-        }
-        if (skippable && !enabled) {
-            e.preventDefault()
-            emit('skip')
             return
         }
         if (!enabled || swing || drag) {

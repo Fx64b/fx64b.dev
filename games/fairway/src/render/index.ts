@@ -47,6 +47,9 @@ export interface Renderer {
     setBall(pos: Vec3, visible?: boolean): void
     /** A faint ring at the nominal carry. null hides it. */
     setAimRing(pos: Vec3 | null): void
+    /** Faint dots along the start of the predicted path (ball bottoms).
+     *  null hides them. */
+    setPathPreview(points: Vec3[] | null): void
 
     /** Eye 1.7 m, 3 m behind the ball on the aim line. aimAngle is in
      *  radians, atan2(dz, dx). Snaps on the first call, then smooths. */
@@ -284,6 +287,9 @@ export function createRenderer(
         },
         setAimRing(pos) {
             world?.props.setAimRing(pos)
+        },
+        setPathPreview(points) {
+            world?.props.setPathPreview(points)
         },
         cameraAddress(ball, aimAngle) {
             rig.address(ball, aimAngle)

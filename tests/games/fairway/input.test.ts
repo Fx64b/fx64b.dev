@@ -40,13 +40,13 @@ function pointer(
 }
 
 describe('powerForHold', () => {
-    it('ramps linearly and caps at 1 after 1.1 s', () => {
-        expect(POWER_RAMP_S).toBe(1.1)
+    it('ramps linearly and caps at 1 after 2.2 s', () => {
+        expect(POWER_RAMP_S).toBe(2.2)
         expect(powerForHold(0)).toBe(0)
         expect(powerForHold(-1)).toBe(0)
-        expect(powerForHold(0.55)).toBeCloseTo(0.5, 10)
-        expect(powerForHold(0.275)).toBeCloseTo(0.25, 10)
-        expect(powerForHold(1.1)).toBe(1)
+        expect(powerForHold(1.1)).toBeCloseTo(0.5, 10)
+        expect(powerForHold(0.55)).toBeCloseTo(0.25, 10)
+        expect(powerForHold(2.2)).toBe(1)
         expect(powerForHold(3)).toBe(1)
     })
 })
@@ -84,13 +84,13 @@ describe('createInput', () => {
         expect(start).toHaveBeenCalledTimes(1)
         expect(input.isCharging()).toBe(true)
 
-        t += 275
-        expect(input.power()).toBeCloseTo(0.25, 6)
-        t += 275
-        expect(input.power()).toBeCloseTo(0.5, 6)
         t += 550
+        expect(input.power()).toBeCloseTo(0.25, 6)
+        t += 550
+        expect(input.power()).toBeCloseTo(0.5, 6)
+        t += 1100
         expect(input.power()).toBeCloseTo(1, 6)
-        t += 2000
+        t += 3000
         expect(input.power()).toBe(1)
 
         const up = key('keyup', 'Space')
@@ -104,7 +104,7 @@ describe('createInput', () => {
         const release = vi.fn()
         input.on('swingRelease', release)
         key('keydown', 'Space')
-        t += 440
+        t += 880
         key('keyup', 'Space')
         expect(release).toHaveBeenCalledTimes(1)
         expect(release.mock.calls[0][0]).toBeCloseTo(0.4, 6)
@@ -120,7 +120,7 @@ describe('createInput', () => {
         expect(rep.defaultPrevented).toBe(true)
         expect(start).toHaveBeenCalledTimes(1)
         // The start time is not reset by the repeats.
-        expect(input.power()).toBeCloseTo(0.3 / 1.1, 6)
+        expect(input.power()).toBeCloseTo(0.3 / POWER_RAMP_S, 6)
     })
 
     it('cancels the swing on window blur instead of hitting', () => {
@@ -156,7 +156,7 @@ describe('createInput', () => {
         const down = pointer(pad, 'pointerdown', { pointerId: 7 })
         expect(down.defaultPrevented).toBe(true)
         expect(pad.hasAttribute('data-charging')).toBe(true)
-        t += 550
+        t += 1100
         // Another pointer does not release it.
         pointer(document.body, 'pointerup', { pointerId: 8 })
         expect(release).not.toHaveBeenCalled()
@@ -183,19 +183,22 @@ describe('createInput', () => {
         expect(start).toHaveBeenCalledTimes(1)
     })
 
-    it('emits skip on a key or tap while skippable', () => {
+    it('emits skip only on Enter while skippable, not on a click', () => {
         const skip = vi.fn()
         input.on('skip', skip)
         input.setEnabled(false)
-        key('keydown', 'KeyX')
+        key('keydown', 'Enter')
         expect(skip).not.toHaveBeenCalled()
         input.setSkippable(true)
         const e = key('keydown', 'Space')
         expect(e.defaultPrevented).toBe(true)
-        key('keydown', 'Space', { repeat: true })
-        key('keydown', 'Shift')
+        key('keydown', 'KeyX')
         pointer(canvas, 'pointerdown')
-        expect(skip).toHaveBeenCalledTimes(2)
+        pointer(pad, 'pointerdown')
+        expect(skip).not.toHaveBeenCalled()
+        key('keydown', 'Enter')
+        key('keydown', 'Enter', { repeat: true })
+        expect(skip).toHaveBeenCalledTimes(1)
     })
 
     it('blurs a focused button on Space so it is not clicked too', () => {

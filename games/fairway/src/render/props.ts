@@ -1,6 +1,6 @@
 /*
- * Small objects: flagstick and flag, cup, tee markers, ball, ball shadow
- * and the aim ring.
+ * Small objects: flagstick and flag, cup, tee markers, ball, ball shadow,
+ * the aim ring and the path preview dots.
  */
 import * as THREE from 'three'
 
@@ -14,12 +14,19 @@ export interface Props {
     group: THREE.Group
     setBall(pos: Vec3, visible: boolean): void
     setAimRing(pos: Vec3 | null): void
+    /** Faint dots along the start of the predicted path. null hides them.
+     *  Points are ball bottoms, as for setBall. */
+    setPathPreview(points: Vec3[] | null): void
     /** Per-frame work: keeps small things readable at a distance. */
     update(camera: THREE.PerspectiveCamera, viewportHeight: number): void
     dispose(): void
 }
 
 const RING_SEGMENTS = 56
+const PATH_DOTS = 16
+/** Dot radius on screen, in px, at the start and at the end of the path. */
+const PATH_DOT_PX_START = 2.6
+const PATH_DOT_PX_END = 1.2
 
 export function createProps(
     hole: HoleData,
@@ -268,6 +275,70 @@ export function createProps(
         ringGeo.attributes.position.needsUpdate = true
     }
 
+    // --- Path preview: small see-through dots, evenly spaced along the path.
+    const dotMat = keep(
+        new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.5,
+            depthWrite: false,
+            fog: false,
+        })
+    )
+    const dots = new THREE.InstancedMesh(
+        keep(new THREE.SphereGeometry(1, 10, 6)),
+        dotMat,
+        PATH_DOTS
+    )
+    dots.frustumCulled = false
+    dots.visible = false
+    dots.renderOrder = 4
+    dots.count = 0
+    group.add(dots)
+    const dotPos: THREE.Vector3[] = []
+    const dotMatrix = new THREE.Matrix4()
+
+    /** Resample a polyline into evenly spaced dots (ball centres). */
+    const placeDots = (points: Vec3[]) => {
+        dotPos.length = 0
+        let total = 0
+        for (let i = 1; i < points.length; i++) {
+            total += Math.hypot(
+                points[i].x - points[i - 1].x,
+                points[i].y - points[i - 1].y,
+                points[i].z - points[i - 1].z
+            )
+        }
+        if (total < 0.05) {
+            return
+        }
+        const n = Math.min(PATH_DOTS, Math.max(4, Math.round(total / 0.25)))
+        const step = total / n
+        let seg = 1
+        let segStart = 0
+        for (let k = 1; k <= n; k++) {
+            const want = k * step
+            while (seg < points.length) {
+                const a = points[seg - 1]
+                const b = points[seg]
+                const len = Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z)
+                if (segStart + len >= want || seg === points.length - 1) {
+                    const f = len > 0 ? Math.min(1, (want - segStart) / len) : 0
+                    dotPos.push(
+                        new THREE.Vector3(
+                            a.x + (b.x - a.x) * f,
+                            a.y + (b.y - a.y) * f + BALL_RADIUS,
+                            a.z + (b.z - a.z) * f
+                        )
+                    )
+                    break
+                }
+                segStart += len
+                seg++
+            }
+        }
+    }
+
     const tmp = new THREE.Vector3()
     return {
         group,
@@ -280,6 +351,15 @@ export function createProps(
         setAimRing(pos) {
             aim = pos ? { ...pos } : null
             ring.visible = aim !== null
+        },
+        setPathPreview(points) {
+            if (points && points.length > 1) {
+                placeDots(points)
+            } else {
+                dotPos.length = 0
+            }
+            dots.count = dotPos.length
+            dots.visible = dotPos.length > 0
         },
         update(camera, viewportHeight) {
             const pxPerRad =
@@ -310,6 +390,20 @@ export function createProps(
             }
             if (aim) {
                 rebuildRing(camera)
+            }
+            if (dots.visible) {
+                // Constant size on screen, a little smaller toward the end.
+                const last = Math.max(1, dotPos.length - 1)
+                for (let i = 0; i < dotPos.length; i++) {
+                    const px =
+                        PATH_DOT_PX_START +
+                        (PATH_DOT_PX_END - PATH_DOT_PX_START) * (i / last)
+                    const d = tmp.copy(dotPos[i]).sub(camera.position).length()
+                    const r = Math.max(0.006, (px / pxPerRad) * d)
+                    dotMatrix.makeScale(r, r, r).setPosition(dotPos[i])
+                    dots.setMatrixAt(i, dotMatrix)
+                }
+                dots.instanceMatrix.needsUpdate = true
             }
             // The flag grows a little with distance so it reads from the tee.
             const fd = tmp

@@ -36,13 +36,18 @@ person. The physics are realistic. The interface gives only a little help.
   club for the distance to the pin.
 - **Swing:** hold Space, or hold the mouse or a finger on the swing pad. Release
   to hit.
-- **Hold time to power:** linear from 0 to 1 over 1.1 s, then capped at 1.
+- **Hold time to power:** linear from 0 to 1 over 2.2 s, then capped at 1.
   Power is a fraction of the club's nominal carry distance. The physics module
   finds the launch speed for that carry (see 5.4). Half power gives about half
   the carry.
-- **Putter:** power maps to the ball start speed (0 to 9 m/s).
-- **Power meter:** a small, thin bar near the swing pad. It fills while the
-  player holds.
+- **Putter:** power is linear in the roll distance on a flat green of
+  Stimp 10: full power rolls 24 m (26 yd). On a faster green the same stroke
+  rolls further.
+- **Power meter:** a bar next to the swing pad, with marks at 25, 50 and
+  75%. It fills while the player holds.
+- **Path preview:** faint dots along the first 10% of the predicted flight
+  (or of the roll, for a putt). They show full power while the player aims,
+  and the current power while the player holds.
 - **No random dispersion.** The same input always gives the same shot.
 
 ## 4. Camera
@@ -51,7 +56,8 @@ person. The physics are realistic. The interface gives only a little help.
 - **Flight:** chase camera behind and above the ball, with smoothing and a
   level horizon.
 - **Stop:** a short glide to the next address position.
-- **Skip:** a tap or key press skips the flight.
+- **Skip:** the Skip button or Enter skips the flight. A click or tap on the
+  view does not skip.
 
 ## 5. Physics
 
@@ -78,16 +84,16 @@ rendering or DOM code and are fully unit tested.
 
 ### 5.3 Clubs (start values, calibrate in tests)
 
-| Club   | Ball speed | Launch | Spin      | Carry (no wind, sea level) |
-| ------ | ---------- | ------ | --------- | -------------------------- |
-| Driver | 65 m/s     | 12 deg | 2700 rpm  | about 235 yd (215 m)       |
-| 3 Wood | 61 m/s     | 11 deg | 3500 rpm  | about 213 yd (195 m)       |
-| 5 Iron | 56 m/s     | 13 deg | 5300 rpm  | about 180 yd (165 m)       |
-| 7 Iron | 51 m/s     | 16 deg | 7000 rpm  | about 159 yd (145 m)       |
-| 9 Iron | 46 m/s     | 21 deg | 8500 rpm  | about 131 yd (120 m)       |
-| PW     | 42 m/s     | 25 deg | 9300 rpm  | about 115 yd (105 m)       |
-| SW     | 36 m/s     | 30 deg | 10000 rpm | about 82 yd (75 m)         |
-| Putter | 0 to 9 m/s | 0 deg  | 0         | -                          |
+| Club   | Ball speed   | Launch | Spin      | Carry (no wind, sea level) |
+| ------ | ------------ | ------ | --------- | -------------------------- |
+| Driver | 65 m/s       | 12 deg | 2700 rpm  | about 235 yd (215 m)       |
+| 3 Wood | 61 m/s       | 11 deg | 3500 rpm  | about 213 yd (195 m)       |
+| 5 Iron | 56 m/s       | 13 deg | 5300 rpm  | about 180 yd (165 m)       |
+| 7 Iron | 51 m/s       | 16 deg | 7000 rpm  | about 159 yd (145 m)       |
+| 9 Iron | 46 m/s       | 21 deg | 8500 rpm  | about 131 yd (120 m)       |
+| PW     | 42 m/s       | 25 deg | 9300 rpm  | about 115 yd (105 m)       |
+| SW     | 36 m/s       | 30 deg | 10000 rpm | about 82 yd (75 m)         |
+| Putter | 0 to 5.1 m/s | 0 deg  | 0         | 24 m roll (Stimp 10)       |
 
 ### 5.4 Power
 
@@ -150,7 +156,7 @@ All lie effects are fixed values, not random.
 - Current lie.
 - A faint ring on the ground at the nominal full-power carry, on the aim line.
   It does not include wind, slope or lie.
-- The small power meter.
+- The power meter and the path preview.
 
 ## 9. Daily, archive and random
 

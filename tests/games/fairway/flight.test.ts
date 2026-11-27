@@ -101,9 +101,9 @@ describe('power', () => {
         expect(still.outcome).toBe('rest')
     })
 
-    it('maps putter power linearly to 0 to 9 m/s', () => {
-        expect(launchFor('putter', 1).speed).toBe(9)
-        expect(launchFor('putter', 0.5).speed).toBe(4.5)
+    it('maps putter power to a start speed for a linear roll distance', () => {
+        expect(launchFor('putter', 1).speed).toBeCloseTo(5.135, 2)
+        expect(launchFor('putter', 0.25).speed).toBeCloseTo(5.135 / 2, 2)
         expect(launchFor('putter', 0.5).rolling).toBe(true)
     })
 })

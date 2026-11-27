@@ -19,5 +19,17 @@ export const CUP_RADIUS = 0.054
 /** Release speed of a Stimpmeter in m/s. */
 export const STIMP_RELEASE_SPEED = 1.83
 
-/** Largest start speed of a putt in m/s (SPEC 3). */
-export const PUTTER_MAX_SPEED = 9
+/** Roll of a full-power putt on a flat green of the reference speed, in m. */
+export const PUTTER_FULL_ROLL = 24
+
+/** Green speed (Stimp, in feet) that PUTTER_FULL_ROLL refers to. */
+export const PUTTER_REFERENCE_STIMP = 10
+
+/**
+ * Start speed of a full-power putt in m/s (about 5.1). A ball that leaves
+ * the Stimpmeter at STIMP_RELEASE_SPEED rolls the Stimp distance s, so a
+ * ball at speed v rolls s * (v / STIMP_RELEASE_SPEED)^2.
+ */
+export const PUTTER_MAX_SPEED =
+    STIMP_RELEASE_SPEED *
+    Math.sqrt(PUTTER_FULL_ROLL / (PUTTER_REFERENCE_STIMP * 0.3048))

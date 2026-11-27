@@ -175,9 +175,11 @@ function scaleForCarry(id: ClubId, carry: number): number {
  * power * nominal carry * lie distance factor. The lie can also take away
  * spin (rough), which is applied after the distance.
  *
- * Putter: power is linear in the start speed, 0 to 9 m/s. The ball rolls
- * from the start. The lie has no effect on the launch (the surface slows
- * the roll anyway).
+ * Putter: power is linear in the roll distance on a flat green of the
+ * reference speed (full power rolls PUTTER_FULL_ROLL), so the start speed
+ * is PUTTER_MAX_SPEED * sqrt(power). On a faster green the same stroke
+ * rolls further, as in real golf. The ball rolls from the start. The lie
+ * has no effect on the launch (the surface slows the roll anyway).
  */
 export function launchFor(
     id: ClubId,
@@ -188,7 +190,7 @@ export function launchFor(
     const c = CLUBS[id]
     if (id === 'putter') {
         return {
-            speed: PUTTER_MAX_SPEED * p,
+            speed: PUTTER_MAX_SPEED * Math.sqrt(p),
             launchAngle: 0,
             spin: 0,
             rolling: true,

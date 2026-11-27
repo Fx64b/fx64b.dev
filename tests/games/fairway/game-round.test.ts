@@ -13,6 +13,8 @@ import { createStorage } from '../../../games/fairway/src/game/storage'
 import {
     createPlaneGround,
     defaultEnvironment,
+    launchFor,
+    simulateShot,
 } from '../../../games/fairway/src/physics'
 import type { SurfaceId } from '../../../games/fairway/src/shared/hole'
 
@@ -87,8 +89,9 @@ describe('round rules', () => {
         r.lie = 'green'
         expect(suggestClub(r)).toBe('putter')
         expect(headingToPin(r)).toBeCloseTo(UP, 6)
-        // 3 m on a Stimp 10 green (0.55 m/s^2): about 2 m/s rolls a little past.
-        const out = playShot(r, { club: 'putter', aim: UP, power: 0.22 })
+        // Power is linear in the flat roll (24 m at full power): aim to
+        // roll 3.5 m, so the ball reaches the cup slowly.
+        const out = playShot(r, { club: 'putter', aim: UP, power: 3.5 / 24 })
         expect(out.notes).toContain('holed')
         expect(r.done).toBe(true)
         expect(r.stats.putts).toBe(1)
@@ -117,6 +120,32 @@ describe('round rules', () => {
         }
         expect(a.ball).toEqual(b.ball)
         expect(a.stats).toEqual(b.stats)
+    })
+})
+
+describe('putter distance', () => {
+    function roll(power: number, stimp: number): number {
+        return simulateShot(
+            {
+                start: { x: 0, z: 0 },
+                aim: { x: 0, z: 1 },
+                launch: launchFor('putter', power, 'green'),
+            },
+            defaultEnvironment({ stimp }),
+            createPlaneGround({ surface: 'green' })
+        ).total
+    }
+
+    it('is linear in distance: full power rolls about 24 m at Stimp 10', () => {
+        expect(roll(1, 10)).toBeGreaterThan(22.5)
+        expect(roll(1, 10)).toBeLessThan(25.5)
+        expect(roll(0.5, 10) / roll(1, 10)).toBeCloseTo(0.5, 1)
+        expect(roll(0.1, 10)).toBeGreaterThan(2)
+        expect(roll(0.1, 10)).toBeLessThan(2.8)
+    })
+
+    it('rolls further on a faster green', () => {
+        expect(roll(0.5, 12)).toBeGreaterThan(roll(0.5, 10) * 1.1)
     })
 })
 
