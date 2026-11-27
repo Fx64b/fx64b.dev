@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite-react-ssg dev",
-    "build": "pnpm build:game && vite-react-ssg build",
+    "build": "pnpm build:game && pnpm build:fairway && vite-react-ssg build",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -18,7 +18,9 @@
     "test:coverage": "vitest run --coverage",
     "build:game": "tsc -p games/thornwick && vite build -c games/thornwick/vite.config.ts",
     "dev:game": "vite -c games/thornwick/vite.config.ts",
-    "predev": "pnpm build:game"
+    "build:fairway": "tsc -p games/fairway && vite build -c games/fairway/vite.config.ts",
+    "dev:fairway": "vite -c games/fairway/vite.config.ts",
+    "predev": "pnpm build:game && pnpm build:fairway"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
