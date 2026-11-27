@@ -9,8 +9,17 @@ export const dist = new Float32Array(NN),
     prev = new Int32Array(NN),
     hI = new Int32Array(NN * 4),
     hC = new Float32Array(NN * 4)
-export function search(srcs?, tgt?, enter?, rev?) {
-    dist.fill(Infinity)
+/* Generation marks: a cell's dist is valid only when its mark is the current
+   generation, so a search to one target does not clear the whole map first. */
+const mark = new Int32Array(NN)
+let gen = 0
+/*
+ * Cheapest path from srcs to tgt with the entry cost `enter`. With tgt < 0 it
+ * fills `dist` for the whole map (flow fields). To one target it is A* with a
+ * heuristic of `hw` per tile: it must not be more than the cheapest step of
+ * `enter`, so the path stays the cheapest one. `cap` limits the cells it opens.
+ */
+export function search(srcs?, tgt?, enter?, rev?, hw?, cap?) {
     let hn = 0
     const push = (i?, c?) => {
         let k = hn++
@@ -51,6 +60,13 @@ export function search(srcs?, tgt?, enter?, rev?) {
         hI[k] = i
         return top
     }
+    if (tgt >= 0 && !rev) {
+        return aStar(srcs, tgt, enter, hw === undefined ? 0.3 : hw, cap || 0, push, popMin, () => hn)
+    }
+    if (tgt < 0 && rev) {
+        return flood(srcs, enter, hw || 0.3, push, popMin, () => hn)
+    }
+    dist.fill(Infinity)
     for (const s of srcs) {
         dist[s] = 0
         prev[s] = s
@@ -86,6 +102,150 @@ export function search(srcs?, tgt?, enter?, rev?) {
         }
     }
     return tgt < 0
+}
+/*
+ * The cost from every tile to the nearest of srcs, into `dist` (a step from n
+ * into m costs enter(m)). A bucket queue (Dial): bucket k holds the tiles at a
+ * cost from k*w up to (k+1)*w. With w no more than the cheapest step, a bucket
+ * is final when it is taken, so the result is the same as with a heap, only
+ * much faster. Steps far beyond the ring of buckets wait in the heap.
+ */
+const RS = 4096,
+    head = new Int32Array(RS),
+    done = new Uint8Array(NN),
+    pNode = new Int32Array(NN * 4),
+    pNext = new Int32Array(NN * 4)
+function flood(srcs?, enter?, w?, push?, popMin?, size?) {
+    dist.fill(Infinity)
+    head.fill(-1)
+    done.fill(0)
+    let used = 0,
+        inRing = 0,
+        cur = 0
+    const put = (n?) => {
+        // Never into a bucket already taken, even when floats round down.
+        const k = Math.max(cur, Math.floor(dist[n] / w))
+        if (k >= cur + RS || used >= pNode.length) {
+            if (size() < hC.length) {
+                push(n, dist[n])
+            }
+            return
+        }
+        const r = k % RS
+        pNode[used] = n
+        pNext[used] = head[r]
+        head[r] = used++
+        inRing++
+    }
+    for (const s of srcs) {
+        dist[s] = 0
+        put(s)
+    }
+    while (inRing || size()) {
+        if (!inRing) {
+            cur = Math.floor(hC[0] / w)
+        }
+        // Bring in from the heap what now fits in the ring.
+        while (size() && Math.floor(hC[0] / w) < cur + RS) {
+            const key = hC[0],
+                n = popMin()
+            if (dist[n] === key && !done[n]) {
+                put(n)
+            }
+        }
+        const r = cur % RS
+        while (head[r] >= 0) {
+            const e = head[r]
+            head[r] = pNext[e]
+            inRing--
+            const m = pNode[e]
+            // Each tile is final the first time it is taken.
+            if (done[m]) {
+                continue
+            }
+            done[m] = 1
+            const em = enter(m)
+            if (em === Infinity) {
+                continue
+            }
+            const c = dist[m] + em,
+                x = m % N,
+                y = (m / N) | 0
+            if (x > 0 && c < dist[m - 1]) {
+                dist[m - 1] = c
+                put(m - 1)
+            }
+            if (x < N - 1 && c < dist[m + 1]) {
+                dist[m + 1] = c
+                put(m + 1)
+            }
+            if (y > 0 && c < dist[m - N]) {
+                dist[m - N] = c
+                put(m - N)
+            }
+            if (y < N - 1 && c < dist[m + N]) {
+                dist[m + N] = c
+                put(m + N)
+            }
+        }
+        cur++
+    }
+    return true
+}
+function aStar(srcs?, tgt?, enter?, hw?, cap?, push?, popMin?, size?) {
+    if (++gen > 2e9) {
+        gen = 1
+        mark.fill(0)
+    }
+    const tx = tgt % N,
+        ty = (tgt / N) | 0
+    for (const s of srcs) {
+        mark[s] = gen
+        dist[s] = 0
+        prev[s] = s
+        push(s, hw * (Math.abs((s % N) - tx) + Math.abs(((s / N) | 0) - ty)))
+    }
+    let open = 0
+    while (size()) {
+        const f = hC[0],
+            m = popMin(),
+            x = m % N,
+            y = (m / N) | 0,
+            g = dist[m]
+        // A stale entry: a cheaper way to this cell was found after it was queued.
+        // The heap holds 32-bit floats, so allow for their rounding. Opening a
+        // cell again does no harm: it uses the best cost found so far.
+        if (f > g + hw * (Math.abs(x - tx) + Math.abs(y - ty)) + 0.01) {
+            continue
+        }
+        if (m === tgt) {
+            return true
+        }
+        if (cap && ++open > cap) {
+            return false
+        }
+        for (let k = 0; k < 4; k++) {
+            const nx = x + +(k === 0) - +(k === 1),
+                ny = y + +(k === 2) - +(k === 3)
+            if (nx < 0 || ny < 0 || nx >= N || ny >= N) {
+                continue
+            }
+            const n = nx + ny * N,
+                c = g + (n === tgt ? 1 : enter(n))
+            if (c === Infinity) {
+                continue
+            }
+            if (mark[n] !== gen || c < dist[n]) {
+                mark[n] = gen
+                dist[n] = c
+                prev[n] = m
+                if (size() < hC.length) {
+                    push(n, c + hw * (Math.abs(nx - tx) + Math.abs(ny - ty)))
+                }
+            }
+        }
+    }
+    return false
 }
 export function trace(s?, t?) {
     const out = []
@@ -273,7 +433,9 @@ export function computeFlow() {
         ],
         -1,
         enemyCost,
-        true
+        true,
+        // The cheapest step of enemyCost is 1.
+        1
     )
     flow.set(dist)
     computeBailey()

@@ -5,8 +5,9 @@
  */
 import { KX, KY, WALLISH } from './config'
 import { toast } from './helpers'
+import { dist, search, siegeCost } from './path'
 import { UNITS } from './people'
-import { regAt, rivById } from './state'
+import { regAt, rivById, tileI } from './state'
 import { GV } from './vars'
 
 export const MAX_BANNERS = 4
@@ -65,6 +66,7 @@ export function plantBanner(x?, y?, moveId?) {
 }
 export function removeBanner(id?) {
     GV.S.banners = GV.S.banners.filter((b?) => b.id !== id)
+    flows.delete(id)
     for (const s of GV.S.sold) {
         if (s.sq === id) {
             s.sq = 0
@@ -140,6 +142,37 @@ export function sizeUp(b?) {
     b.fx = dx / l
     b.fy = dy / l
     return 1 + foes + Math.min(6, bld)
+}
+/*
+ * A flow field for each banner: the cost from every tile to the banner, so a
+ * squad marching there walks downhill instead of each soldier searching the
+ * whole way. Built again when the banner moves, and every few seconds as walls
+ * fall. At most one is built per tick.
+ */
+const FLOW_AGE = 4
+const flows = new Map()
+export function bannerFlow(id?) {
+    const b = bannerById(id)
+    if (!b) {
+        return null
+    }
+    const t = tileI(b.x, b.y)
+    let f = flows.get(id)
+    const stale = !f || f.t !== t || GV.S.t - f.at > FLOW_AGE
+    if (stale && GV.flowTick !== GV.S.t) {
+        GV.flowTick = GV.S.t
+        // The cheapest step of siegeCost is 0.55 (a road).
+        search([t], -1, siegeCost, true, 0.55)
+        if (!f) {
+            f = { d: new Float32Array(dist.length), t, at: 0 }
+            flows.set(id, f)
+        }
+        f.d.set(dist)
+        f.t = t
+        f.at = GV.S.t
+    }
+    // A field for a banner that has moved leads to the wrong place.
+    return f && f.t === t ? f : null
 }
 /* After a siege, the squad goes for what is left within this many tiles. */
 export const MOP_R = 13

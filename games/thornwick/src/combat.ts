@@ -7,9 +7,9 @@ import { toast } from './helpers'
 import { bAt, clampN, inMap, ownedT, reg, terrain } from './state'
 import { GV } from './vars'
 
-/* Fighting units in buckets of 8 by 8 tiles, rebuilt once a tick, so a unit can ask
+/* Fighting units in buckets of 4 by 4 tiles, rebuilt once a tick, so a unit can ask
    who is near without looking at every unit on the map. */
-const BS = 8,
+const BS = 4,
     BW = Math.ceil(N / BS)
 const cells: any[][] = Array.from({ length: BW * BW }, () => [])
 const cellXY = (v?) => Math.min(BW - 1, Math.max(0, (v / BS) | 0))
@@ -47,10 +47,15 @@ export function eachNear(x?, y?, r?, fn?) {
         x1 = cellXY(x + r),
         y0 = cellXY(y - r),
         y1 = cellXY(y + r)
+    const r2 = r * r
     for (let cy = y0; cy <= y1; cy++) {
         for (let cx = x0; cx <= x1; cx++) {
-            for (const o of cells[cx + cy * BW]) {
-                if (!o.dead && Math.hypot(o.x - x, o.y - y) <= r) {
+            const c = cells[cx + cy * BW]
+            for (let k = 0; k < c.length; k++) {
+                const o = c[k],
+                    dx = o.x - x,
+                    dy = o.y - y
+                if (dx * dx + dy * dy <= r2 && !o.dead) {
                     fn(o)
                 }
             }

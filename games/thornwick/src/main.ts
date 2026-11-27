@@ -27,13 +27,14 @@ import {
     addSoldier,
     fireArrows,
     sendScout,
+    spawnVillager,
     train,
     warCry,
 } from './people'
 import { cam, render } from './render'
 import { tick } from './sim'
 import { propSprite, sprite, unitSprite } from './sprites'
-import { bmap, flow, newGame, reg, seenAt, terrain, wx, wy } from './state'
+import { addB, bmap, flow, newGame, reg, seenAt, terrain, wx, wy } from './state'
 import { TALES } from './tales'
 import * as TOOLS from './tools'
 import * as TRAVEL from './travel'
@@ -254,6 +255,8 @@ export async function boot() {
     plantBanner,
     removeBanner,
     addSoldier,
+    addB,
+    spawnVillager,
     assignSquads,
     spawnEnemy,
     weakSide,
