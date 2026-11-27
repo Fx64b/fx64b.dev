@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { generateHole } from '../../../games/fairway/src/course'
 import {
+    CLUB_LENGTH,
     MAX_STROKES,
     createRound,
     defaultAim,
@@ -64,7 +65,11 @@ describe('round rules', () => {
         expect(out.notes).toContain('water')
         expect(out.penalty).toBe(1)
         expect(r.stats.strokes).toBe(2)
-        expect(r.ball.z).toBeLessThanOrEqual(100.5)
+        // One club length back from the edge of the water (z = 100), on
+        // the line to the shot start.
+        expect(r.ball.z).toBeGreaterThan(100 - CLUB_LENGTH - 0.2)
+        expect(r.ball.z).toBeLessThan(100 - CLUB_LENGTH + 0.2)
+        expect(r.ball.x).toBeCloseTo(0, 6)
         expect(r.lie).not.toBe('water')
     })
 

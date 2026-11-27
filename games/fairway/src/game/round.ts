@@ -21,6 +21,12 @@ export const MAX_STROKES = 12
 /** A release below this power is a slip, not a shot. */
 export const MIN_POWER = 0.03
 
+/**
+ * The drop after a water hazard is one club length (a driver, about 45 in)
+ * from where the ball last crossed into the hazard, not nearer the hole.
+ */
+export const CLUB_LENGTH = 1.14
+
 /** One played shot: everything needed to replay it. */
 export interface ShotRecord {
     club: ClubId
@@ -169,7 +175,8 @@ export function simulate(round: Round, shot: ShotRecord): ShotResult {
 
 /**
  * Play one shot and apply the rules:
- * - water: +1 stroke, drop where the ball last crossed into the hazard;
+ * - water: +1 stroke, drop one club length back from where the ball last
+ *   crossed into the hazard (toward the shot start, so not nearer the hole);
  * - out of bounds: +1 stroke, play again from the same spot;
  * - holed: the round is over;
  * - the round also ends at MAX_STROKES.
@@ -191,7 +198,7 @@ export function playShot(round: Round, shot: ShotRecord): ShotOutcome {
     if (result.outcome === 'water' && result.water) {
         penalty = 1
         notes.push('water')
-        next = onGround(round.ground, result.water.drop)
+        next = waterDrop(round, result.water.drop)
     } else if (result.outcome === 'ob') {
         penalty = 1
         notes.push('ob')
@@ -223,6 +230,27 @@ export function playShot(round: Round, shot: ShotRecord): ShotOutcome {
         }
     }
     return { result, next: round.ball, lie: round.lie, penalty, notes }
+}
+
+/**
+ * One club length from the crossing point, back along the line to where the
+ * shot started. If that spot is in water or out of bounds (a narrow bank),
+ * the ball stays at the crossing point.
+ */
+function waterDrop(round: Round, cross: { x: number; z: number }): Vec3 {
+    const dx = round.ball.x - cross.x
+    const dz = round.ball.z - cross.z
+    const len = Math.hypot(dx, dz)
+    if (len > 1e-6) {
+        const step = Math.min(CLUB_LENGTH, len)
+        const x = cross.x + (dx / len) * step
+        const z = cross.z + (dz / len) * step
+        const surface = round.ground.surface(x, z)
+        if (surface !== 'water' && surface !== 'ob') {
+            return onGround(round.ground, { x, z })
+        }
+    }
+    return onGround(round.ground, cross)
 }
 
 function onGround(ground: Ground, p: { x: number; z: number }): Vec3 {

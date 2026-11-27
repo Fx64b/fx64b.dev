@@ -120,15 +120,15 @@ for each club.
 
 ### 5.6 Surfaces and lies
 
-| Surface       | Bounce        | Roll              | Next shot                                   |
-| ------------- | ------------- | ----------------- | ------------------------------------------- |
-| Tee / Fairway | medium        | medium            | normal                                      |
-| First cut     | lower         | slower            | -5% distance                                |
-| Rough         | low           | slow              | -15% distance, less spin                    |
-| Bunker        | almost none   | stops quickly     | fairway bunker -20%, greenside: wedge       |
-| Green         | low to medium | fast (from Stimp) | putter                                      |
-| Water         | -             | -                 | +1 stroke, drop where the ball crossed in   |
-| Out of bounds | -             | -                 | +1 stroke, hit again from the last position |
+| Surface       | Bounce        | Roll              | Next shot                                                           |
+| ------------- | ------------- | ----------------- | ------------------------------------------------------------------- |
+| Tee / Fairway | medium        | medium            | normal                                                              |
+| First cut     | lower         | slower            | -5% distance                                                        |
+| Rough         | low           | slow              | -15% distance, less spin                                            |
+| Bunker        | almost none   | stops quickly     | fairway bunker -20%, greenside: wedge                               |
+| Green         | low to medium | fast (from Stimp) | putter                                                              |
+| Water         | -             | -                 | +1 stroke, drop one club length back from where the ball crossed in |
+| Out of bounds | -             | -                 | +1 stroke, hit again from the last position                         |
 
 All lie effects are fixed values, not random.
 
