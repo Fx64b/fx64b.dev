@@ -61,7 +61,16 @@ export function search(srcs?, tgt?, enter?, rev?, hw?, cap?) {
         return top
     }
     if (tgt >= 0 && !rev) {
-        return aStar(srcs, tgt, enter, hw === undefined ? 0.3 : hw, cap || 0, push, popMin, () => hn)
+        return aStar(
+            srcs,
+            tgt,
+            enter,
+            hw === undefined ? 0.3 : hw,
+            cap || 0,
+            push,
+            popMin,
+            () => hn
+        )
     }
     if (tgt < 0 && rev) {
         return flood(srcs, enter, hw || 0.3, push, popMin, () => hn)

@@ -357,10 +357,18 @@ function flowLead(u?, s?, tx?, ty?) {
             break
         }
         let best = c
-        if (x > 0 && d[c - 1] < d[best]) best = c - 1
-        if (x < N - 1 && d[c + 1] < d[best]) best = c + 1
-        if (y > 0 && d[c - N] < d[best]) best = c - N
-        if (y < N - 1 && d[c + N] < d[best]) best = c + N
+        if (x > 0 && d[c - 1] < d[best]) {
+            best = c - 1
+        }
+        if (x < N - 1 && d[c + 1] < d[best]) {
+            best = c + 1
+        }
+        if (y > 0 && d[c - N] < d[best]) {
+            best = c - N
+        }
+        if (y < N - 1 && d[c + N] < d[best]) {
+            best = c + N
+        }
         if (best === c) {
             break
         }
@@ -1071,8 +1079,7 @@ export function sUpdate(s?, dt?) {
                 ok =
                     d < (s.onWall ? 6 : 4.5) + hi ||
                     (flag
-                        ? Math.hypot(e.x - flag[0], e.y - flag[1]) <
-                          (mopR || 7)
+                        ? Math.hypot(e.x - flag[0], e.y - flag[1]) < (mopR || 7)
                         : !(arch && s.post) &&
                           d < 24 &&
                           (ownedT(clampN(e.x), clampN(e.y)) ||

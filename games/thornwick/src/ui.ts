@@ -74,12 +74,12 @@ import { drawMini } from './minimap'
 import {
     BIG,
     UNITS,
-    unitOpen,
     costText,
     fireArrows,
     huntDown,
     sendScout,
     train,
+    unitOpen,
     warCry,
 } from './people'
 import { chronTick, showBoons } from './realm'

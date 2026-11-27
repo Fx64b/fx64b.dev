@@ -34,7 +34,17 @@ import {
 import { cam, render } from './render'
 import { tick } from './sim'
 import { propSprite, sprite, unitSprite } from './sprites'
-import { addB, bmap, flow, newGame, reg, seenAt, terrain, wx, wy } from './state'
+import {
+    addB,
+    bmap,
+    flow,
+    newGame,
+    reg,
+    seenAt,
+    terrain,
+    wx,
+    wy,
+} from './state'
 import { TALES } from './tales'
 import * as TOOLS from './tools'
 import * as TRAVEL from './travel'
