@@ -112,7 +112,8 @@ for each club.
 - Rolling resistance for each surface, plus gravity along the slope.
 - Green speed from the Stimpmeter value (seed, 9 to 12 ft).
 - Cup capture: the ball drops when it is slow enough near the cup centre.
-  Fast putts can lip out.
+  Fast putts can lip out. The cup is about 1.6 times the real size (170 mm
+  instead of 108 mm), because the game has no fine aim or green reading.
 
 ### 5.6 Surfaces and lies
 

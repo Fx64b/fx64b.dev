@@ -159,10 +159,13 @@ describe('slopes', () => {
 describe('cup', () => {
     const cupEnv = (x = 0) => defaultEnvironment({ cup: { x, z: 3 } })
 
-    it('has a capture speed of about 1.3 m/s for a centred putt', () => {
+    it('has a capture speed of about 2.25 m/s for a centred putt', () => {
+        // A real 108 mm cup gives 1.31 m/s (Holmes 1991).
+        expect(cupCaptureSpeed(0.108)).toBeCloseTo(1.31, 1)
+        // The game cup is larger (CUP_RADIUS).
         const centred = cupCaptureSpeed(2 * CUP_RADIUS)
-        expect(centred).toBeGreaterThan(1.3)
-        expect(centred).toBeLessThan(1.6)
+        expect(centred).toBeGreaterThan(2.1)
+        expect(centred).toBeLessThan(2.4)
         expect(cupCaptureSpeed(CUP_RADIUS)).toBeLessThan(centred)
         expect(cupCaptureSpeed(BALL_RADIUS / 2)).toBe(0)
     })
@@ -192,10 +195,10 @@ describe('cup', () => {
     })
 
     it('captures less speed off centre and turns a lip-out', () => {
-        // 2.2 m/s arrives with about 1.24 m/s: in when centred, out at the
-        // edge, and turned toward the hole side.
+        // 2.2 m/s arrives with about 1.24 m/s: in when centred, out near the
+        // edge (where the chord is short), and turned toward the hole side.
         expect(hit(putt(2.2), GREEN, cupEnv()).holed).toBe(true)
-        const edge = hit(putt(2.2), GREEN, cupEnv(0.04))
+        const edge = hit(putt(2.2), GREEN, cupEnv(CUP_RADIUS * 0.88))
         expect(edge.holed).toBe(false)
         expect(edge.rest.x).toBeGreaterThan(0)
     })

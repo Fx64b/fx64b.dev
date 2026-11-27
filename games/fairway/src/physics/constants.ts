@@ -13,8 +13,12 @@ export const BALL_AREA = (3.141592653589793 * BALL_DIAMETER * BALL_DIAMETER) / 4
 /** Air density at sea level, 15 deg C, in kg/m^3. */
 export const SEA_LEVEL_AIR_DENSITY = 1.225
 
-/** Radius of the cup in m (diameter 4.25 in). */
-export const CUP_RADIUS = 0.054
+/**
+ * Radius of the cup in m. A real cup is 108 mm across (radius 0.054). The
+ * game uses a cup about 1.6 times as large (170 mm), because the player has
+ * no fine aim and no green reading as on a real course.
+ */
+export const CUP_RADIUS = 0.085
 
 /** Release speed of a Stimpmeter in m/s. */
 export const STIMP_RELEASE_SPEED = 1.83

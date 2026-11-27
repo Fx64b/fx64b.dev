@@ -4,6 +4,7 @@
  */
 import * as THREE from 'three'
 
+import { CUP_RADIUS } from '../physics/constants'
 import type { HoleData, Vec3 } from '../shared/hole'
 import type { HeightSampler } from './height'
 import { createDimpleTexture, createSpotTexture } from './textures'
@@ -99,7 +100,7 @@ export function createProps(
 
     // --- Cup.
     const cup = new THREE.Mesh(
-        keep(new THREE.CircleGeometry(0.054, 28)),
+        keep(new THREE.CircleGeometry(CUP_RADIUS, 32)),
         keep(
             new THREE.MeshBasicMaterial({
                 color: 0x0c0d0b,
@@ -113,7 +114,7 @@ export function createProps(
     cup.position.set(hole.pin.x, hole.pin.y + 0.004, hole.pin.z)
     group.add(cup)
     const rim = new THREE.Mesh(
-        keep(new THREE.RingGeometry(0.054, 0.061, 28)),
+        keep(new THREE.RingGeometry(CUP_RADIUS, CUP_RADIUS + 0.008, 32)),
         keep(
             new THREE.MeshBasicMaterial({
                 color: 0xe9e6da,

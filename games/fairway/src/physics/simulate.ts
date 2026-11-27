@@ -171,8 +171,10 @@ const REST_SPEED = 1e-3
 // (L - r) / v until its centre is one ball radius from the far rim. It is
 // captured if it falls at least one ball radius in that time:
 //   v <= (L - r) * sqrt(g / (2 r))
-// For a centred putt L = 0.108 m and the limit is 1.31 m/s. Off centre the
-// chord is shorter and the limit falls, to zero near the edge.
+// For a centred putt on a real cup L = 0.108 m and the limit is 1.31 m/s;
+// with the larger game cup (CUP_RADIUS) L = 0.17 m and the limit is about
+// 2.25 m/s. Off centre the chord is shorter and the limit falls, to zero
+// near the edge.
 //
 // A faster ball lips out: it dips into the hole, hits the far rim, loses
 // speed and is turned toward the hole side. Both effects scale with the
